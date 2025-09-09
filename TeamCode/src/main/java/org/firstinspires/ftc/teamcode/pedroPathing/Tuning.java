@@ -7,7 +7,6 @@ import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.stopRobot;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.telemetryM;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
@@ -35,7 +34,6 @@ import java.util.List;
  * @version 1.0, 6/26/2025
  */
 @Configurable
-@Config
 @TeleOp(name = "Tuning", group = "Pedro Pathing")
 public class Tuning extends SelectableOpMode {
     public static Follower follower;
@@ -80,10 +78,10 @@ public class Tuning extends SelectableOpMode {
     @Override
     public void onSelect() {
         if (follower == null) {
-            follower = ITDConstants.createFollower(hardwareMap);
+            follower = Constants.createFollower(hardwareMap);
             PanelsConfigurables.INSTANCE.refreshClass(this);
         } else {
-            follower = ITDConstants.createFollower(hardwareMap);
+            follower = Constants.createFollower(hardwareMap);
         }
 
         follower.setStartingPose(new Pose());
@@ -126,7 +124,6 @@ public class Tuning extends SelectableOpMode {
  * @author Baron Henderson - 20077 The Indubitables
  * @version 1.0, 5/6/2024
  */
-
 class LocalizationTest extends OpMode {
     @Override
     public void init() {}
