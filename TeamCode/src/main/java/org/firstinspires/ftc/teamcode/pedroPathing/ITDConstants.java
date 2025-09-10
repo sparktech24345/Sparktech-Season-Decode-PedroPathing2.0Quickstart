@@ -14,13 +14,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class ITDConstants {
 
-    public static FollowerConstants followerConstants = new FollowerConstants()
+    public static FollowerConstants ITDfollowerConstants = new FollowerConstants()
             .mass(11.8)
             .forwardZeroPowerAcceleration(-45)
             .lateralZeroPowerAcceleration(-95)
             .centripetalScaling(0.0005);
 
-    public static MecanumConstants driveConstants = new MecanumConstants()
+    public static MecanumConstants ITDdriveConstants = new MecanumConstants()
             .leftFrontMotorName("frontleft")
             .leftRearMotorName("backleft")
             .rightFrontMotorName("frontright")
@@ -32,7 +32,7 @@ public class ITDConstants {
             .xVelocity(0.6 * 78)
             .yVelocity(0.6 * 63);
 
-    public static PinpointConstants localizerConstants = new PinpointConstants()
+    public static PinpointConstants ITDlocalizerConstants = new PinpointConstants()
             .forwardPodY(2.22)
             .strafePodX(5.73)
             .distanceUnit(DistanceUnit.INCH)
@@ -43,7 +43,7 @@ public class ITDConstants {
             )
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
-    public static PathConstraints pathConstraints = new PathConstraints(
+    public static PathConstraints ITDpathConstraints = new PathConstraints(
             0.995,
             0.1,
             0.1,
@@ -54,11 +54,11 @@ public class ITDConstants {
             1
     );
 
-    public static Follower createFollower(HardwareMap hardwareMap) {
-        return new FollowerBuilder(followerConstants, hardwareMap)
-                .mecanumDrivetrain(driveConstants)
-                .pinpointLocalizer(localizerConstants)
-                .pathConstraints(pathConstraints)
+    public static Follower ITDcreateFollower(HardwareMap hardwareMap) {
+        return new FollowerBuilder(ITDfollowerConstants, hardwareMap)
+                .mecanumDrivetrain(ITDdriveConstants)
+                .pinpointLocalizer(ITDlocalizerConstants)
+                .pathConstraints(ITDpathConstraints)
                 .build();
     }
 }
