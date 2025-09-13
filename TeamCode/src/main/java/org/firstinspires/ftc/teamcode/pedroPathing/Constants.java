@@ -13,9 +13,9 @@ public class Constants {
     public static TwoWheelConstants twoWheelConstants = new TwoWheelConstants()
             .forwardEncoder_HardwareMapName("outtakerightmotor")
             .strafeEncoder_HardwareMapName("intakemotor")
-            .IMU_HardwareMapName("pinpoint")
+            .IMU_HardwareMapName("pinpoint");
             //.forwardTicksToInches(13.26291192)
-            .strafeTicksToInches(13.26291192);
+            //.strafeTicksToInches(13.26291192);
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {

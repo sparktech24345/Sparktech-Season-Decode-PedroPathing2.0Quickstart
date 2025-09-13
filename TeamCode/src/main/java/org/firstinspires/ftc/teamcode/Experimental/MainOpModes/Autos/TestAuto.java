@@ -29,7 +29,11 @@ public class TestAuto extends OpMode {
             private void telemetry() {
                 telemetryInstance.addData("x", followerInstance.getInstance().getPose().getX());
                 telemetryInstance.addData("y", followerInstance.getInstance().getPose().getY());
-                telemetryInstance.addData("h", followerInstance.getInstance().getPose().getHeading());
+                telemetryInstance.addData("h", Math.toDegrees(followerInstance.getInstance().getPose().getHeading()));
+                if (followerInstance.getTarget() != null) {
+                    telemetryInstance.addData("target_x", followerInstance.getTarget().getX());
+                    telemetryInstance.addData("target_y", followerInstance.getTarget().getY());
+                }
             }
 
             private void controls() {

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 import static org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants.ITDcreateFollower;
+import static org.firstinspires.ftc.teamcode.pedroPathing.SparkyConstants.SparkycreateFollower;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
@@ -38,7 +39,7 @@ public class ComplexFollower {
 
 
     ComplexFollower(HardwareMap hardwareMap) {
-        this.follower = ITDcreateFollower(hardwareMap);
+        this.follower = SparkycreateFollower(hardwareMap);
         follower.update();
         currentPos = startPose;
         currentX = currentPos.getX();
@@ -59,7 +60,9 @@ public class ComplexFollower {
     }
 
     public Follower getInstance() { return follower; }
-
+    public Pose getTarget() {
+        return currentTargetPos;
+    }
     public boolean done() { return isDone; }
 
     public void update() {

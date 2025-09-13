@@ -67,8 +67,8 @@ public class SparkyTwoWheelLocalizer implements Localizer {
         strafePodX = constants.strafePodX;
         forwardPodY = constants.forwardPodY;
 
-        forwardEncoder = new Encoder(map.get(DcMotorEx.class, constants.forwardEncoder_HardwareMapName));
-        strafeEncoder = new Encoder(map.get(DcMotorEx.class, constants.strafeEncoder_HardwareMapName));
+        forwardEncoder = new Encoder(map.get(DcMotorEx.class, "outakerightmotor"));
+        strafeEncoder = new Encoder(map.get(DcMotorEx.class, "intakemotor"));
 
         forwardEncoder.setDirection(constants.forwardEncoderDirection);
         strafeEncoder.setDirection(constants.strafeEncoderDirection);
