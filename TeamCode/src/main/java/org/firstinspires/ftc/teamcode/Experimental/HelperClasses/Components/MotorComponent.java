@@ -81,8 +81,9 @@ public class MotorComponent extends Component {
         return this;
     }
 
-    public MotorComponent setRange(double r) {
-        range = r;
+    public MotorComponent setRange(double min, double max) {
+        min_range = min;
+        max_range = max;
         return this;
     }
 
@@ -96,8 +97,8 @@ public class MotorComponent extends Component {
         if (usePID) {
             targetPower = PID.calculate(target, mainMotor.getCurrentPosition());
         }
-        if (range > 0) {
-            targetPower = clamp(targetPower, range);
+        if (min_range < 0 && max_range > 0) {
+            target = clamp(target, min_range, max_range);
         }
         for (DcMotor motor : motorMap.values()) {
             motor.setPower(targetPower);

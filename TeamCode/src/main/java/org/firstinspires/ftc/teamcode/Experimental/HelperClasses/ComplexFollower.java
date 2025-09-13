@@ -45,7 +45,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
 
-        poseUpdater = new PoseUpdater(hardwareMap,ITDConstants.class);
+        poseUpdater = new PoseUpdater(hardwareMap, ITDConstants.class);
         dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
         dashboardDrawing = new DashboardDrawing(follower,dashboardPoseTracker);
     }
@@ -65,6 +65,8 @@ public class ComplexFollower {
     public void update() {
         if (currentOpModes == OpModes.Autonomous) {
             follower.update();
+            poseUpdater.update();
+            dashboardDrawing.update();
             dashboardDrawing.update();
             if (follower.isBusy()) {
                 isDone = false;
@@ -95,9 +97,5 @@ public class ComplexFollower {
     }
 
     public void telemetry() {
-        telemetryInstance.addData("Follower X", currentX);
-        telemetryInstance.addData("Follower Y", currentY);
-        telemetryInstance.addData("Follower Heading", currentHeading);
-        telemetryInstance.addData("Follower is busy", follower.isBusy());
     }
 }

@@ -40,8 +40,8 @@ public class ServoComponent extends Component {
     @Override
     public void update() {
         double targetPos = target / resolution;
-        if (range > 0) {
-            targetPos = clamp(targetPos, range);
+        if (min_range < 0 && max_range > 0) {
+            targetPos = clamp(targetPos, min_range, max_range);
         }
         for (Servo motor : motorMap.values()) {
             motor.setPosition(targetPos);
