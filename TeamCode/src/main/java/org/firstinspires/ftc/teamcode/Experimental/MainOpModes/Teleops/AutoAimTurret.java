@@ -28,7 +28,22 @@ import java.lang.Math;
 
 @TeleOp(name = "AutoAimTurret", group = "LinearOpMode")
 public class AutoAimTurret extends LinearOpMode {
-    double turretServoPos;
+    double turretServoPos=0;
+    double angleToTargetDeg(double px, double py, double tx, double ty) {
+        return Math.toDegrees(Math.atan2(ty - py, tx - px));
+    }
+
+    double shortestSignedAngleDeg(double targetAngle, double heading) {
+        double diff = (targetAngle - heading + 180.0) % 360.0 - 180.0;
+        // Java's % can be negative, so fix:
+        if (diff <= -180.0) diff += 360.0;
+        if (diff > 180.0) diff -= 360.0;
+        return diff;
+    }
+
+
+    double targetX = 5;
+    double targetY = 5;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -37,6 +52,8 @@ public class AutoAimTurret extends LinearOpMode {
 
         while (opModeIsActive()) {
             turretServo.setPosition(turretServoPos);
+            follower.update();
+            shortestSignedAngleDeg(angleToTargetDeg(follower.getPose().getX(),follower.getPose().getY(),targetX,targetY),follower.getHeading());
         }
     }
 }
