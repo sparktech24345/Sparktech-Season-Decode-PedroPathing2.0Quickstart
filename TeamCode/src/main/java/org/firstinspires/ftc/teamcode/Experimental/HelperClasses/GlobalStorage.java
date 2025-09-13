@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 public class GlobalStorage {
 
-    public static double clamp(double val, double limit) {
-        return Math.max(-limit, Math.min(limit, val));
+    public static double clamp(double val, double min, double max) {
+        return Math.max(min, Math.min(max, val));
     }
 
     public static double eval(boolean val) {

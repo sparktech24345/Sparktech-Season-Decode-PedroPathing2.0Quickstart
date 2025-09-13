@@ -7,7 +7,8 @@ public abstract class Component {
     protected HashMap<String, Double> states = new HashMap<String, Double>();
     protected double target = 0;
     protected double resolution = 1;
-    protected double range = -1;
+    protected double min_range = 1;
+    protected double max_range = -1;
     protected boolean moveOnInit = false;
 
     public <T extends Component> T addState(String s, double v) {
@@ -21,8 +22,9 @@ public abstract class Component {
         return (T) this;
     }
 
-    public <T extends Component> T setRange(double r) {
-        this.range = r;
+    public <T extends Component> T setRange(double min, double max) {
+        min_range = min;
+        max_range = max;
         return (T) this;
     }
 

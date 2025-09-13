@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import android.util.Pair;
+
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.*;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -31,10 +33,9 @@ public abstract class RobotController implements RobotControllerInterface {
     private Runnable telemetry = () -> {};
     private ArrayList<Pair<BooleanSupplier, Runnable>> callbacks = new ArrayList<>();
     private HashMap<String, Pose> autoPositions = new HashMap<>();
-    private boolean isInAuto = false;
 
     private void init_all() {
-        if(isInAuto) followerInstance = new ComplexFollower(hardwareMapInstance);
+        followerInstance = new ComplexFollower(hardwareMapInstance);
         queuerInstance = new StateQueuer();
         robotControllerInstance = this;
     }
@@ -43,18 +44,17 @@ public abstract class RobotController implements RobotControllerInterface {
         init_all();
     }
 
-    public RobotController(HardwareMap hmap, Telemetry telemetry, ComplexGamepad gamepad) {
+    public RobotController(HardwareMap hmap, MultipleTelemetry telemetry, ComplexGamepad gamepad) {
         hardwareMapInstance = hmap;
         telemetryInstance = telemetry;
         gamepadInstance = gamepad;
         init_all();
     }
 
-    public RobotController(HardwareMap hmap, Telemetry telemetry, Gamepad gpad1, Gamepad gpad2,boolean isInAuto) {
+    public RobotController(HardwareMap hmap, MultipleTelemetry telemetry, Gamepad gpad1, Gamepad gpad2) {
         hardwareMapInstance = hmap;
         telemetryInstance = telemetry;
         gamepadInstance = new ComplexGamepad(gpad1, gpad2);
-        this.isInAuto = isInAuto;
         init_all();
     }
 
@@ -163,6 +163,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     private void runUpdates() {
         gamepadInstance.update();
+        followerInstance.update();
         queuerInstance.update();
         for (Component c : components.values()) {
             c.update();

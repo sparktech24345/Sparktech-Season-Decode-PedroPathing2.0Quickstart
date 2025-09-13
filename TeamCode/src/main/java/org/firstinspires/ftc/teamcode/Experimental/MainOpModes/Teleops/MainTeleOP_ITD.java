@@ -29,7 +29,7 @@ public class MainTeleOP_ITD extends LinearOpMode {
     @Override
     public void runOpMode() {
         // init
-        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2,false) {
+        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override
             public void main_loop() {
                 controls();
@@ -154,7 +154,7 @@ public class MainTeleOP_ITD extends LinearOpMode {
                     .addMotor(intakeExtendName)
                     .useWithPIDController(true)
                     .setPIDconstants(0.009, 0.06691449814126393, 0.000302625)
-                    .setRange(585)
+                    .setRange(0, 585)
                     .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
                     .setDirection(intakeExtendName, DcMotorSimple.Direction.REVERSE)
             )
@@ -165,7 +165,7 @@ public class MainTeleOP_ITD extends LinearOpMode {
             .makeComponent("INTAKE_SPIN", new MotorComponent()
                     .addMotor(intakeSpinName)
                     .useWithPIDController(false)
-                    .setRange(1)
+                    .setRange(-1, 1)
                     .setDirection(intakeSpinName, DcMotorSimple.Direction.REVERSE)
             )
             .makeComponent("OUTTAKE_EXTENSION", new MotorComponent()
@@ -173,7 +173,7 @@ public class MainTeleOP_ITD extends LinearOpMode {
                     .addMotor(outtakeExtendRightName)
                     .useWithPIDController(true)
                     .setPIDconstants(0.0105, 0.06691449814126393, 0.000112875)
-                    .setRange(2100)
+                    .setRange(0, 2100)
                     .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
                     .setDirection(outtakeExtendRightName, DcMotorSimple.Direction.REVERSE)
             )
