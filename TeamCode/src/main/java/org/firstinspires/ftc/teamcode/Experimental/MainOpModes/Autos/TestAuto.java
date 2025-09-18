@@ -8,14 +8,20 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+
+import java.io.IOException;
 
 @Autonomous(name = "Test Auto", group = "Experimental")
 public class TestAuto extends OpMode {
     private RobotController robot;
+    private AutoRecorder recorder;
+    ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -27,13 +33,6 @@ public class TestAuto extends OpMode {
             }
 
             private void telemetry() {
-                telemetryInstance.addData("x", followerInstance.getInstance().getPose().getX());
-                telemetryInstance.addData("y", followerInstance.getInstance().getPose().getY());
-                telemetryInstance.addData("h", Math.toDegrees(followerInstance.getInstance().getPose().getHeading()));
-                if (followerInstance.getTarget() != null) {
-                    telemetryInstance.addData("target_x", followerInstance.getTarget().getX());
-                    telemetryInstance.addData("target_y", followerInstance.getTarget().getY());
-                }
             }
 
             private void controls() {
@@ -47,6 +46,7 @@ public class TestAuto extends OpMode {
         MakeStates();
         MakeAutoStates();
         robot.init(OpModes.Autonomous);
+        recorder = new AutoRecorder(this, true);
     }
 
     @Override
@@ -56,10 +56,21 @@ public class TestAuto extends OpMode {
 
     @Override
     public void start() {
+        this.getRuntime();
+        timer.reset();
+        recorder.setStartMs(timer.milliseconds());
     }
 
     @Override
     public void loop() {
+        recorder.update(timer.milliseconds());
+        if (gamepadInstance.get("Y1").ExecuteOnPress) {
+            try {
+                recorder.save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         robot.loop();
     }
 

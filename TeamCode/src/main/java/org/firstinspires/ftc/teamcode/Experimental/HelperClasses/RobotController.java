@@ -194,6 +194,6 @@ public abstract class RobotController implements RobotControllerInterface {
         if (followerInstance != null) followerInstance.telemetry();
         if (movement != null) movement.telemetry();
         telemetry.run();
-        telemetryInstance.update();
+        //telemetryInstance.update();
     }
 }

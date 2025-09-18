@@ -19,6 +19,8 @@ public class PoseSequence {
         poseSequence.add(copy);
     }
 
+    public int poselen() { return poseSequence.toArray().length; }
+
     public List<PoseData> getPoseSequence() {return poseSequence;}
     public void setPoseSequence(ArrayList<PoseData> poseSequence) {this.poseSequence = poseSequence;}
 }
