@@ -27,5 +27,9 @@ dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
+    //downgrade to the version that worked
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7'
+
+    //implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
 }

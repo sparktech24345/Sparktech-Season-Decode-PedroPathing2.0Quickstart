@@ -19,7 +19,7 @@ public class GeneralAction extends Action {
         return this;
     }
 }
-
+// example
 //        robot.addToQueue(new GeneralAction(true, () -> { execution code })
 //              .setExecutionCondition(() -> {
 //                  return (condition when to start);

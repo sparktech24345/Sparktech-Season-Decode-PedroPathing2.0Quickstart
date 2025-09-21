@@ -4,8 +4,6 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import android.annotation.SuppressLint;
 
-import com.fasterxml.jackson.core.exc.StreamWriteException;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -67,7 +65,7 @@ public class AutoRecorder {
     }
 
     @SuppressLint("SdCardPath")
-    public void save() throws IOException, StreamWriteException, DatabindException {
+    public void save() throws IOException/*, StreamWriteException, DatabindException*/ {
         ObjectMapper mapper = new ObjectMapper();
             mapper.writerWithDefaultPrettyPrinter() // pretty-print
                     .writeValue(new File("/sdcard/FIRST/paths.json"), poses);
