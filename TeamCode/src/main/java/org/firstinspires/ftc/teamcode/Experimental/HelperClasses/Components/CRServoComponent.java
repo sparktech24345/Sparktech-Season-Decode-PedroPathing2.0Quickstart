@@ -6,12 +6,12 @@ import com.qualcomm.robotcore.hardware.CRServo;
 
 import java.util.HashMap;
 
-public class ContinousServoComponent extends Component {
+public class CRServoComponent extends Component {
 
     protected HashMap<String, CRServo> motorMap = new HashMap<>();
     protected CRServo mainServo = null;
 
-    public ContinousServoComponent addMotor(String hardwareMapName) {
+    public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
         if (motorMap.isEmpty()) {
             mainServo = motor;
@@ -19,7 +19,7 @@ public class ContinousServoComponent extends Component {
         motorMap.put(hardwareMapName, motor);
         return this;
     }
-    public ContinousServoComponent addMotor(String hardwareMapName, String customMapName) {
+    public CRServoComponent addMotor(String hardwareMapName, String customMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
         if (motorMap.isEmpty()) {
             mainServo = motor;
@@ -28,12 +28,12 @@ public class ContinousServoComponent extends Component {
         return this;
     }
 
-    public ContinousServoComponent setDirection(String servoName, CRServo.Direction dir) {
+    public CRServoComponent setDirection(String servoName, CRServo.Direction dir) {
         motorMap.get(servoName).setDirection(dir);
         return this;
     }
 
-    public double getPos() {
+    public double getPosition() {
         return mainServo.getPower();
     }
 

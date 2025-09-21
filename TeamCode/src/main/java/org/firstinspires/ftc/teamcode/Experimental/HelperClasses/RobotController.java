@@ -10,10 +10,10 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
-import org.firstinspires.ftc.teamcode.Experimental.StatesAndPositions.ColorSet;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Encoder;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,6 +141,22 @@ public abstract class RobotController implements RobotControllerInterface {
         HashMap<String, String> positions = state.getPositions();
         for (Map.Entry<String, String> entry : positions.entrySet()) {
             components.get(entry.getKey()).loadState(entry.getValue());
+        }
+        return this;
+    }
+
+    public Encoder getComponentEncoder(String componentName) {
+        Component comp = components.get(componentName);
+        if (comp instanceof MotorComponent) {
+            return ((MotorComponent)comp).getEncoderInstance();
+        }
+        return null;
+    }
+
+    public RobotController makeEncoder(String componentName) {
+        Component comp = components.get(componentName);
+        if (comp instanceof MotorComponent) {
+            ((MotorComponent)comp).useWithEncoder(true);
         }
         return this;
     }

@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.Experimental.StatesAndPositions;
+package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeam;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 

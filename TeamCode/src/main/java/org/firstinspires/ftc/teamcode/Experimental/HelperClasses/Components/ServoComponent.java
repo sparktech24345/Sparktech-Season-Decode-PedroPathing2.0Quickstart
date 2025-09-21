@@ -29,7 +29,7 @@ public class ServoComponent extends Component {
         return this;
     }
 
-    public double getPos() {
+    public double getPosition() {
         return mainServo.getPosition();
     }
 

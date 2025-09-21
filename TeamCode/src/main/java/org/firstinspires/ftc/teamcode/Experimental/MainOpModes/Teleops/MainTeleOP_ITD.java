@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Serv
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
-import org.firstinspires.ftc.teamcode.Experimental.StatesAndPositions.ColorSet;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ColorSet;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
@@ -67,7 +67,7 @@ public class MainTeleOP_ITD extends LinearOpMode {
                 }
                 if (robot.getControllerKey("A1").IsToggledOnPress) {
                     if (robot.getControllerKey("RIGHT_BUMPER1").IsHeld) {
-                        if (robot.getComponent("INTAKE_SPIN").getPos() != -0.5) robot.addToQueue(new StateAction(true, "INTAKE_SPIN", "SPIT_OUT"));
+                        if (robot.getComponent("INTAKE_SPIN").getPosition() != -0.5) robot.addToQueue(new StateAction(true, "INTAKE_SPIN", "SPIT_OUT"));
                     }
                     else if (robot.getControllerKey("B1").ExecuteOnPress) {
                         robot.getControllerKey("A1").UnToggle();
@@ -79,11 +79,11 @@ public class MainTeleOP_ITD extends LinearOpMode {
                         robot.addToQueue(new DelayAction(true, 800));
                         robot.addToQueue(new StateAction(true, "SPECIMEN_HANG"));
                     } else {
-                        if (robot.getComponent("INTAKE_SPIN").getPos() != 1) robot.addToQueue(new StateAction(true, "INTAKE_SPIN", "COLLECT"));
+                        if (robot.getComponent("INTAKE_SPIN").getPosition() != 1) robot.addToQueue(new StateAction(true, "INTAKE_SPIN", "COLLECT"));
                     }
                 }
                 else {
-                    if (robot.getComponent("INTAKE_SPIN").getPos() != 0) robot.addToQueue(new StateAction(true, "INTAKE_SPIN", "OFF"));
+                    if (robot.getComponent("INTAKE_SPIN").getPosition() != 0) robot.addToQueue(new StateAction(true, "INTAKE_SPIN", "OFF"));
                 }
 
                 if (robot.getControllerKey("LEFT_TRIGGER1").IsHeld && robot.getControllerKey("RIGHT_TRIGGER1").IsHeld) {
@@ -115,12 +115,12 @@ public class MainTeleOP_ITD extends LinearOpMode {
             }
 
             private void telemetry() {
-                telemetryInstance.addData("INTAKE_EXTENSION", robot.getComponent("INTAKE_EXTENSION").getPos());
-                telemetryInstance.addData("INTAKE_PIVOT", robot.getComponent("INTAKE_PIVOT").getPos());
-                telemetryInstance.addData("INTAKE_SPIN", robot.getComponent("INTAKE_SPIN").getPos());
-                telemetryInstance.addData("OUTTAKE_EXTENSION", robot.getComponent("OUTTAKE_EXTENSION").getPos());
-                telemetryInstance.addData("OUTTAKE_ARM", robot.getComponent("OUTTAKE_ARM").getPos());
-                telemetryInstance.addData("OUTTAKE_CLAW", robot.getComponent("OUTTAKE_CLAW").getPos());
+                telemetryInstance.addData("INTAKE_EXTENSION", robot.getComponent("INTAKE_EXTENSION").getPosition());
+                telemetryInstance.addData("INTAKE_PIVOT", robot.getComponent("INTAKE_PIVOT").getPosition());
+                telemetryInstance.addData("INTAKE_SPIN", robot.getComponent("INTAKE_SPIN").getPosition());
+                telemetryInstance.addData("OUTTAKE_EXTENSION", robot.getComponent("OUTTAKE_EXTENSION").getPosition());
+                telemetryInstance.addData("OUTTAKE_ARM", robot.getComponent("OUTTAKE_ARM").getPosition());
+                telemetryInstance.addData("OUTTAKE_CLAW", robot.getComponent("OUTTAKE_CLAW").getPosition());
                 telemetryInstance.addData("TICK MS", robot.getExecMS());
                 telemetryInstance.addData("QUEUER LENGTH", queuerInstance.getLen());
             }

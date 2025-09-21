@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 import java.util.HashMap;
 
 
-public class MotorComponent extends Component {
+public class MotorComponent extends EncodedComponent {
     protected HashMap<String, DcMotor> motorMap = new HashMap<>();
     protected DcMotor mainMotor = null;
     protected boolean usePID = false;
@@ -27,6 +27,11 @@ public class MotorComponent extends Component {
 
     public MotorComponent loadState(String s) {
         target = states.get(s);
+        return this;
+    }
+
+    public MotorComponent useWithEncoder(boolean useWithEncoder) {
+        if (useWithEncoder) componentEncoder = new Encoder(mainMotor);
         return this;
     }
 
@@ -55,7 +60,7 @@ public class MotorComponent extends Component {
         return this;
     }
 
-    public double getPos() {
+    public double getPosition() {
         return mainMotor.getCurrentPosition();
     }
 
@@ -93,9 +98,10 @@ public class MotorComponent extends Component {
 
     @Override
     public void update() {
+        componentEncoder.update();
         double targetPower = target / resolution;
         if (usePID) {
-            targetPower = PID.calculate(target, mainMotor.getCurrentPosition());
+            targetPower = PID.calculate(target, componentEncoder.getEncoderPosition());
         }
         if (min_range < 0 && max_range > 0) {
             target = clamp(target, min_range, max_range);

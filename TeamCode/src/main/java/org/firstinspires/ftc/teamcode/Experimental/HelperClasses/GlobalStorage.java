@@ -6,7 +6,6 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Experimental.StatesAndPositions.ColorSet;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
@@ -66,7 +65,7 @@ public class GlobalStorage {
     public static String TransferServoExpansionHubName        = "expansionservo";
     public static String PushServoOneName        = "expansionpushservo";
     public static String PushServoTwoName        = "controlpushservo";
-    public static double slowdownConstant=1;
+    public static double slowdownConstant = 1;
 
     // OTHER S(TUFF)
     public static ColorSet currentTeam = ColorSet.Undefined;

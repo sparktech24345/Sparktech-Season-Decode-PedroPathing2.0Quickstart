@@ -33,7 +33,7 @@ public abstract class Component {
         return (T) this;
     }
 
-    public abstract double getPos();
+    public abstract double getPosition();
 
     public <T extends Component> T setResolution(double res) {
         resolution = res;
