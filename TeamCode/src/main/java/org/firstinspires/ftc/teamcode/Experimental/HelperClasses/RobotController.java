@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.EncodedComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Encoder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 
@@ -145,18 +146,26 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
+    public double getCurrentPosition(String componentName) {
+        Component comp = components.get(componentName);
+        if (comp instanceof EncodedComponent) {
+            return ((EncodedComponent)comp).getPosition();
+        }
+        return comp.getPosition();
+    }
+
     public Encoder getComponentEncoder(String componentName) {
         Component comp = components.get(componentName);
-        if (comp instanceof MotorComponent) {
-            return ((MotorComponent)comp).getEncoderInstance();
+        if (comp instanceof EncodedComponent) {
+            return ((EncodedComponent)comp).getEncoderInstance();
         }
         return null;
     }
 
     public RobotController makeEncoder(String componentName) {
         Component comp = components.get(componentName);
-        if (comp instanceof MotorComponent) {
-            ((MotorComponent)comp).useWithEncoder(true);
+        if (comp instanceof EncodedComponent) {
+            ((EncodedComponent)comp).useWithEncoder(true);
         }
         return this;
     }
