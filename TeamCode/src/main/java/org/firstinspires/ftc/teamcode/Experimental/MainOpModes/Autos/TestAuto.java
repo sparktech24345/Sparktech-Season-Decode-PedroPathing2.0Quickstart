@@ -46,7 +46,7 @@ public class TestAuto extends OpMode {
         MakeStates();
         MakeAutoStates();
         robot.init(OpModes.Autonomous);
-        recorder = new AutoRecorder(this, true);
+        recorder = new AutoRecorder(true);
     }
 
     @Override
@@ -56,26 +56,22 @@ public class TestAuto extends OpMode {
 
     @Override
     public void start() {
-        this.getRuntime();
         timer.reset();
-        recorder.setStartMs(timer.milliseconds());
     }
 
     @Override
     public void loop() {
-        recorder.update(timer.milliseconds());
-        if (gamepadInstance.get("Y1").ExecuteOnPress) {
-            try {
-                recorder.save();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        recorder.update();
         robot.loop();
     }
 
     @Override
     public void stop() {
+        try {
+            recorder.save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void MakeAutoStates() {
