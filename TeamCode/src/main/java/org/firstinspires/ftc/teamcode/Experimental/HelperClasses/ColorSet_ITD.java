@@ -4,21 +4,21 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
-public enum ColorSet {
+public enum ColorSet_ITD {
     Undefined,
     Red,
     Blue,
     Yellow;
 
-    public static boolean validateSample(ColorSet current, boolean yellowValid) {
+    public static boolean validateSample(ColorSet_ITD current, boolean yellowValid) {
         if (yellowValid && current == Yellow) return true;
         return current == currentTeam;
     }
 
-    public static ColorSet getColor(NormalizedRGBA colors) {
+    public static ColorSet_ITD getColor(NormalizedRGBA colors) {
         return getColor(colors.red, colors.green, colors.blue);
     }
-    public static ColorSet getColor(double r, double g, double b) {
+    public static ColorSet_ITD getColor(double r, double g, double b) {
         if (r < 0.006 && b < 0.004) return Undefined;
         if (r > g && r > b) return Red;
         if (b > g && b > r) return Blue;

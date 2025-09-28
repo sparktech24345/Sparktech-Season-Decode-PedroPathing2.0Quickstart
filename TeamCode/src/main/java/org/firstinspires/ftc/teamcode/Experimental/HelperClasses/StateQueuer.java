@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 

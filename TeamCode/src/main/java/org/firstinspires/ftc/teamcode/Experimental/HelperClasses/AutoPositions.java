@@ -1,46 +1,54 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import com.pedropathing.geometry.*;
+
 public enum AutoPositions {
     // starting positions
-    startingPositionDown(new Pose(0,0,0)),
-    startingPositionUp(new Pose(0,0,0)),
-
-
+    startingPositionDown(0, 0, 0),
+    startingPositionUp(0, 0, 0),
 
     // ball sets
-    ballSetUpWall(new Pose(0,0,0)),
-    ballSetUpCenter(new Pose(0,0,0)),
+    ballSetUpWall(0, 0, 0),
+    ballSetUpCenter(0, 0, 0),
 
     // ---------------------------------------------- \\
 
-    ballSetMiddleWall(new Pose(0,0,0)),
-    ballSetMiddleCenter(new Pose(0,0,0)),
+    ballSetMiddleWall(0, 0, 0),
+    ballSetMiddleCenter(0, 0, 0),
 
     // ---------------------------------------------- \\
 
-    ballSetDownWall(new Pose(0,0,0)),
-    ballSetDownCenter(new Pose(0,0,0)),
+    ballSetDownWall(0, 0, 0),
+    ballSetDownCenter(0, 0, 0),
 
     // ---------------------------------------------- \\
 
-    ballSetLoadingZoneWall(new Pose(0,0,0)),
-    ballSetLoadingZoneCenter(new Pose(0,0,0)),
-
-
+    ballSetLoadingZoneWall(0, 0, 0),
+    ballSetLoadingZoneCenter(0, 0, 0),
 
     // parks
-    park(new Pose(0,0,0)),
-
+    park(0, 0, 0),
 
     // lever
-    lever(new Pose(0,0,0)),
+    lever(0, 0, 0),
 
     //shooting zones
-    shootingPointUp(new Pose(0,0,0)),
-    shootingPointDown(new Pose(0,0,0));
+    shootingPointUp(0, 0, 0),
+    shootingPointDown(0, 0, 0),
 
-    AutoPositions(Pose pose){
+    z(null);
+
+    AutoPositions(Pose pose) {
+        this.pose = pose;
     }
+
+    AutoPositions(double x, double y, double heading) {
+        this.pose = new Pose(x, y, Math.toRadians(heading));
+    }
+
+    Pose get() {
+        return pose;
+    }
+
     private Pose pose;
 }

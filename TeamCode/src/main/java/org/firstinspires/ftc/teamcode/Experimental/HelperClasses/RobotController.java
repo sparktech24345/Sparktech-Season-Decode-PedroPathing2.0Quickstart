@@ -10,29 +10,36 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.EncodedComponent;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Encoder;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 
 public abstract class RobotController implements RobotControllerInterface {
+
+    public static ComplexFollower followerInstance = null;
+    public static ComplexGamepad gamepadInstance = null;
+    public static HardwareMap hardwareMapInstance = null;
+    public static Telemetry telemetryInstance = null;
+    public static StateQueuer queuerInstance = null;
+    
+    
     private double tickMS = 0;
     private ElapsedTime tickTimer = new ElapsedTime();
-    private ColorSet currentColor = ColorSet.Undefined;
+    private ColorSet_ITD currentColor = ColorSet_ITD.Undefined;
     private HashMap<String, RobotState> states = new HashMap<>();
     private HashMap<String, Component> components = new HashMap<>();
     private boolean useDefaultMovement = false;
     private DriveTrain movement = null;
-    private Runnable controlBehaviour = () -> {};
-    private Runnable telemetry = () -> {};
     private ArrayList<Pair<BooleanSupplier, Runnable>> callbacks = new ArrayList<>();
+    private HashMap<String, Object> telemetryList = new HashMap<>();
     private HashMap<String, Pose> autoPositions = new HashMap<>();
 
     private void init_all() {
@@ -112,16 +119,6 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public RobotController setControls(Runnable controls) {
-        this.controlBehaviour = controls;
-        return this;
-    }
-
-    public RobotController setTelemetry(Runnable tele) {
-        telemetry = tele;
-        return this;
-    }
-
     public RobotController addAutoPosition(String name, double x, double y, double heading) {
         autoPositions.put(name, new Pose(x, y, Math.toRadians(heading)));
         return this;
@@ -143,6 +140,11 @@ public abstract class RobotController implements RobotControllerInterface {
         for (Map.Entry<String, String> entry : positions.entrySet()) {
             components.get(entry.getKey()).loadState(entry.getValue());
         }
+        return this;
+    }
+
+    public RobotController setDriveTrainSlowdown(double slowdown) {
+        if (movement != null) movement.setSlowdown(slowdown);
         return this;
     }
 
@@ -170,12 +172,21 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public RobotController init(OpModes mode) {
-        currentOpModes = mode;
+    public RobotController addTelemetryData(String str, Object obj) {
+        telemetryList.put(str, obj);
         return this;
     }
 
-    public RobotController init_loop() {
+    public RobotController addTelemetryData(String str, Supplier<?> obj) {
+        telemetryList.put(str, obj);
+        return this;
+    }
+
+    public void init(OpModes mode) {
+        currentOpModes = mode;
+    }
+
+    public void init_loop() {
         gamepadInstance.update();
         for (Component c : components.values()) {
             if (c.moveDuringInit()) {
@@ -183,7 +194,6 @@ public abstract class RobotController implements RobotControllerInterface {
             }
         }
         showTelemetry();
-        return this;
     }
 
     private void runUpdates() {
@@ -197,12 +207,11 @@ public abstract class RobotController implements RobotControllerInterface {
         showTelemetry();
     }
 
-    public RobotController loop() {
+    public void loop() {
         tickTimer.reset();
         runUpdates();
         main_loop();
         if (currentOpModes == OpModes.TeleOP) {
-            controlBehaviour.run();
             for (Pair<BooleanSupplier, Runnable> pair : callbacks) {
                 if (pair.first.getAsBoolean()) {
                     pair.second.run();
@@ -210,15 +219,16 @@ public abstract class RobotController implements RobotControllerInterface {
             }
         }
         tickMS = tickTimer.milliseconds();
-        return this;
     }
 
-    public double getExecMS() { return tickMS; };
+    public double getExecMS() { return tickMS; }
 
     private void showTelemetry() {
-        if (followerInstance != null) followerInstance.telemetry();
-        if (movement != null) movement.telemetry();
-        telemetry.run();
-        //telemetryInstance.update();
+        for (Map.Entry<String, Object> entry : telemetryList.entrySet()) {
+            if (entry.getValue() instanceof Supplier<?>)
+                telemetryInstance.addData(entry.getKey(), ((Supplier<?>)entry.getValue()).get());
+            else telemetryInstance.addData(entry.getKey(), entry.getValue());
+        }
+        telemetryInstance.update();
     }
 }
