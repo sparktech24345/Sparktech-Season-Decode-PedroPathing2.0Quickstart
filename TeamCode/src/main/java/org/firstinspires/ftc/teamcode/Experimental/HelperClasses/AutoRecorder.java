@@ -1,16 +1,10 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.followerInstance;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.telemetryInstance;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 
 import android.annotation.SuppressLint;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.utils.autoRecorder.PoseData;
-import org.firstinspires.ftc.teamcode.utils.autoRecorder.PoseSequence;
 import org.firstinspires.ftc.teamcode.utils.autoRecorder.TimedPoseData;
 
 import java.io.File;
@@ -56,7 +50,7 @@ public class AutoRecorder {
     }
 
     @SuppressLint("SdCardPath")
-    public void save() throws IOException/*, StreamWriteException, DatabindException*/ {
+    public void save() throws IOException {
         stopped = true;
         ObjectMapper mapper = new ObjectMapper();
             mapper.writerWithDefaultPrettyPrinter() // pretty-print

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+
 public class PIDcontroller {
     private double kp = 0;
     private double ki = 0;
@@ -38,7 +40,7 @@ public class PIDcontroller {
         double output = (kp * error) /*+ (ki * integral)*/ + (kd * derivative);
 
         // Clamp to motor power limits
-        output = Math.max(-1.0, Math.min(1.0, output));
+        output = clamp(output, -1.0, 1.0);
 
         return output;
     }

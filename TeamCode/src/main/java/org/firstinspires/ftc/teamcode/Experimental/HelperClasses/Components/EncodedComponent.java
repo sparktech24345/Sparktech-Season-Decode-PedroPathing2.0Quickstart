@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
+
 public abstract class EncodedComponent extends Component {
     protected Encoder componentEncoder;
 

@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
@@ -47,16 +49,6 @@ public class MotorComponent extends EncodedComponent {
         }
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorMap.put(hardwareMapName, motor);
-        return this;
-    }
-
-    public MotorComponent addMotor(String hardwareMapName, String customMapName) {
-        DcMotor motor = hardwareMapInstance.get(DcMotor.class, hardwareMapName);
-        if (motorMap.isEmpty()) {
-            mainMotor = motor;
-        }
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorMap.put(customMapName, motor);
         return this;
     }
 

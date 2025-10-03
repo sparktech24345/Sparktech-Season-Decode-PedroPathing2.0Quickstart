@@ -27,7 +27,7 @@ public class MainAuto extends OpMode {
 
     @Override
     public void init() {
-        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
+        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), null, null) {
             @Override
             public void main_loop() {
 
@@ -35,7 +35,7 @@ public class MainAuto extends OpMode {
         };
         MakeComponents();
         MakeStates();
-        robot.init(OpModes.TeleOP);
+        robot.init(OpModes.Autonomous);
     }
 
     @Override
