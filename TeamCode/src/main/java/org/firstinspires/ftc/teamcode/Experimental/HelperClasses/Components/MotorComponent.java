@@ -17,6 +17,7 @@ public class MotorComponent extends EncodedComponent {
     protected DcMotor mainMotor = null;
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
+    protected double overridePower = -1;
 
     public MotorComponent() {
         super();
@@ -68,6 +69,11 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
+    public MotorComponent setPowerOverride(double power) {
+        this.overridePower = power;
+        return this;
+    }
+
     public MotorComponent setPIDconstants(double p, double i, double d) {
         PID.setConstants(p, i, d);
         return this;
@@ -91,13 +97,14 @@ public class MotorComponent extends EncodedComponent {
     @Override
     public void update() {
         componentEncoder.update();
+        if (min_range < 0 && max_range > 0) {
+            target = clamp(target, min_range, max_range);
+        }
         double targetPower = target / resolution;
         if (usePID) {
             targetPower = PID.calculate(target, componentEncoder.getEncoderPosition());
         }
-        if (min_range < 0 && max_range > 0) {
-            target = clamp(target, min_range, max_range);
-        }
+        if (overridePower > -1) targetPower = overridePower;
         for (DcMotor motor : motorMap.values()) {
             motor.setPower(targetPower);
         }

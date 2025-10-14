@@ -5,12 +5,16 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.qualcomm.robotcore.hardware.CRServo;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
+
 import java.util.HashMap;
 
 public class CRServoComponent extends Component {
 
     protected HashMap<String, CRServo> motorMap = new HashMap<>();
     protected CRServo mainServo = null;
+    protected boolean usePID = false;
+    protected PIDcontroller PID = null;
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -34,7 +38,19 @@ public class CRServoComponent extends Component {
         return this;
     }
 
-    public double getPosition() {
+    public CRServoComponent setPIDconstants(double p, double i, double d) {
+        PID.setConstants(p, i, d);
+        return this;
+    }
+
+    public CRServoComponent useWithPIDController(boolean b) {
+        usePID = b;
+        return this;
+    }
+
+    public double getPosition() { return mainServo.getPower(); }
+
+    public double getPower() {
         return mainServo.getPower();
     }
 
