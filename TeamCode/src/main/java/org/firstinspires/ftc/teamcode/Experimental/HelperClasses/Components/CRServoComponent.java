@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
@@ -15,6 +17,11 @@ public class CRServoComponent extends Component {
     protected CRServo mainServo = null;
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
+    protected double overridePower = -2;
+    protected double calculatedServoPosition = 0;
+
+    // Encoder for servo position feedback
+    protected AnalogInput servoEncoder;
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -37,18 +44,38 @@ public class CRServoComponent extends Component {
         motorMap.get(servoName).setDirection(dir);
         return this;
     }
+    public CRServoComponent setEncoder(String analogSensorName) {
+        servoEncoder = hardwareMapInstance.get(AnalogInput.class,analogSensorName);
+        return this;
+    }
 
     public CRServoComponent setPIDconstants(double p, double i, double d) {
+        if(PID == null) PID = new PIDcontroller();
         PID.setConstants(p, i, d);
+        return this;
+    }
+    public CRServoComponent setRange(double min, double max) {
+        min_range = min;
+        max_range = max;
+        return this;
+    }
+
+    public CRServoComponent setPowerOverride(double power) {
+        this.overridePower = power;
         return this;
     }
 
     public CRServoComponent useWithPIDController(boolean b) {
+        if(PID == null) PID = new PIDcontroller();
         usePID = b;
         return this;
     }
 
     public double getPosition() { return mainServo.getPower(); }
+    public double getAnalogPosition(){if (servoEncoder == null) return 0;
+        return (servoEncoder.getVoltage() / 3.3) * 360; //should be the position in degrees, resets under 0 or above 360
+    }
+
 
     public double getPower() {
         return mainServo.getPower();
@@ -60,12 +87,16 @@ public class CRServoComponent extends Component {
 
     @Override
     public void update() {
-        double targetPos = target / resolution;
         if (min_range < 0 && max_range > 0) {
-            targetPos = clamp(targetPos, min_range, max_range);
+            target = clamp(target, min_range, max_range);
         }
-        for (CRServo motor : motorMap.values()) {
-            motor.setPower(targetPos);
+        double targetPower = target / resolution;
+        if (usePID) {
+            targetPower = PID.calculate(target, calculatedServoPosition);
+        }
+        if (overridePower > -2) targetPower = overridePower;
+        for (CRServo servo : motorMap.values()) {
+            servo.setPower(targetPower);
         }
     }
 }

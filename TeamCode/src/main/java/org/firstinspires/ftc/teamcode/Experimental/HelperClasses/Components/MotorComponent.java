@@ -17,7 +17,7 @@ public class MotorComponent extends EncodedComponent {
     protected DcMotor mainMotor = null;
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
-    protected double overridePower = -1;
+    protected double overridePower = -2;
 
     public MotorComponent() {
         super();
@@ -104,7 +104,7 @@ public class MotorComponent extends EncodedComponent {
         if (usePID) {
             targetPower = PID.calculate(target, componentEncoder.getEncoderPosition());
         }
-        if (overridePower > -1) targetPower = overridePower;
+        if (overridePower > -2) targetPower = overridePower;
         for (DcMotor motor : motorMap.values()) {
             motor.setPower(targetPower);
         }
