@@ -12,20 +12,31 @@ public class ServoTesting extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Servo servo1 = hardwareMap.get(Servo.class, "expansionpushservo");
-        Servo servo2 = hardwareMap.get(Servo.class, "controlpushservo");
+        Servo outtakeLeftServo = hardwareMap.get(Servo.class, "turretrotateleft");
+        Servo outtakeRightServo = hardwareMap.get(Servo.class, "turretrotateright");
+
+        Servo turretAngleServo = hardwareMap.get(Servo.class, "turretangle");
+
+        Servo intakeSortServo = hardwareMap.get(Servo.class, "intakeservo");
+
+        Servo purpleGateServo = hardwareMap.get(Servo.class, "purplegate");
+        Servo greenGateServo = hardwareMap.get(Servo.class, "greengate");
+
+        Servo transferServo = hardwareMap.get(Servo.class, "transferservo");
+
+
 
         waitForStart();
 
         if(isStopRequested()) return;
 
         while(opModeIsActive()){
-
-            if(gamepad1.x) intakeServoPower += 0.1;
-            if(gamepad1.b) intakeServoPower -= 0.1;
-
-            servo1.setPosition(intakeServoPower/300);
-            servo2.setPosition(intakeServoPower/300);
+            outtakeLeftServo.setPosition(0);
+            outtakeRightServo.setPosition(0);
+            intakeSortServo.setPosition(0);
+            turretAngleServo.setPosition(0);
+            outtakeLeftServo.setPosition(0);
+            outtakeLeftServo.setPosition(0);
 
             telemetry.addData("servo pos",intakeServoPower);
             telemetry.update();

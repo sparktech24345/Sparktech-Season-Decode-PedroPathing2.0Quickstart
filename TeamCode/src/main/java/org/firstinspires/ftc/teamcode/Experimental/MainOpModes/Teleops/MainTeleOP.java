@@ -63,7 +63,7 @@ public class MainTeleOP extends LinearOpMode {
                 .useWithPIDController(true)
                 .setPIDconstants(0, 0, 0)
                 .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
-                .setRange(-1, 1)
+                .setRange(-270,270) // range for PID
                 .moveDuringInit(true)
         );
 
@@ -110,18 +110,23 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("FULL", 1)
                 .addState("FULL_REVERSE", -1)
                 .addState("SLOW_REVERSE", -0.5);
+
         robot.getComponent("TurretSpinMotor")
                 .addState("OFF", 0, true);
+
         robot.getComponent("PurpleGateServo")
                 .addState("OPEN", 1)
                 .addState("CLOSED", 0, true);
+
         robot.getComponent("GreenGateServo")
                 .addState("OPEN", 1)
                 .addState("CLOSED", 0, true);
+
         robot.getComponent("IntakeSorterServo")
                 .addState("REDIRECT_TO_PURPLE", 0)
                 .addState("NEUTRAL", 0.5, true)
                 .addState("REDIRECT_TO_GREEN", 1);
+
         robot.getComponent("TransferServo")
                 .addState("DOWN", 0, true)
                 .addState("UP", 1);
