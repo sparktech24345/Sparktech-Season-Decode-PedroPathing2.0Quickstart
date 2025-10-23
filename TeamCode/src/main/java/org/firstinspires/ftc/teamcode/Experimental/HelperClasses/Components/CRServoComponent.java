@@ -18,10 +18,11 @@ public class CRServoComponent extends Component {
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
     protected double overridePower = -2;
-    protected double calculatedServoPosition = 0;
 
     // Encoder for servo position feedback
     protected AnalogInput servoEncoder;
+    protected double servoAnalogPosition=-1; //an impossible value
+    protected double servoAnalogTotalPosition=0;
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -75,6 +76,27 @@ public class CRServoComponent extends Component {
     public double getAnalogPosition(){if (servoEncoder == null) return 0;
         return (servoEncoder.getVoltage() / 3.3) * 360; //should be the position in degrees, resets under 0 or above 360
     }
+    public double getServoAnalogTotalPosition(){
+        return servoAnalogTotalPosition;
+    }
+    public void updateAnalogServoPosition(){
+        double lastPosition = servoAnalogPosition;
+        servoAnalogPosition = getAnalogPosition();
+
+        double deltaPosition = servoAnalogPosition - lastPosition;
+        if(lastPosition != -1) { // taking care of the first run / init as it might return something big
+            if (deltaPosition > 180) {
+                deltaPosition -= 360;
+                //arounds--;
+            } else if (deltaPosition < -180) {
+                deltaPosition += 360;
+                //arounds++;
+            }
+        }
+        else deltaPosition--; //taking that -1 back if it is the first run
+
+        servoAnalogTotalPosition += deltaPosition;
+    }
 
 
     public double getPower() {
@@ -92,7 +114,8 @@ public class CRServoComponent extends Component {
         }
         double targetPower = target / resolution;
         if (usePID) {
-            targetPower = PID.calculate(target, calculatedServoPosition);
+            updateAnalogServoPosition();
+            targetPower = PID.calculate(target, servoAnalogTotalPosition);
         }
         if (overridePower > -2) targetPower = overridePower;
         for (CRServo servo : motorMap.values()) {
