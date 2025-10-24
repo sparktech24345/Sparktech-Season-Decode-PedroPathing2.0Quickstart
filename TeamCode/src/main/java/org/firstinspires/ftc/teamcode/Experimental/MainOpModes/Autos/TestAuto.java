@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 
 import java.io.IOException;
 
-@Autonomous(name = "Test Auto", group = "Experimental")
+@Autonomous(name = "Test Auto", group = "Tests")
 public class TestAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;

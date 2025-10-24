@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 @Disabled
-@Autonomous(name = "Main Auto", group = "Experimental")
+@Autonomous(name = "Main Auto", group = "Main")
 public class MainAuto extends OpMode {
     private RobotController robot;
 
