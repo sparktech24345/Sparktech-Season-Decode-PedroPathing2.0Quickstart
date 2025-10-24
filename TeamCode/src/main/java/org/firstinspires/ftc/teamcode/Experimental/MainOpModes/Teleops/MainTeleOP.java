@@ -112,35 +112,35 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.makeComponent("IntakeSorterServo", new MotorComponent()
                 .addMotor("intakeservo")
-                .setResolution(1)
+                .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
 
         robot.makeComponent("PurpleGateServo", new ServoComponent()
                 .addMotor("purplegate")
-                .setResolution(1)
+                .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
 
         robot.makeComponent("GreenGateServo", new ServoComponent()
                 .addMotor("greengate")
-                .setResolution(1)
+                .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
 
         robot.makeComponent("TransferServo", new ServoComponent()
                 .addMotor("transferservo")
-                .setResolution(1)
+                .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
 
         robot.makeComponent("TurretAngle", new ServoComponent()
                 .addMotor("turretangle")
-                .setResolution(1)
+                .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
@@ -158,23 +158,25 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("OFF", 0, true);
 
         robot.getComponent("PurpleGateServo")
-                .addState("OPEN", 1)
-                .addState("CLOSED", 0, true);
+                .addState("OPEN", 35)
+                .addState("CLOSED", 155, true);
 
         robot.getComponent("GreenGateServo")
-                .addState("OPEN", 1)
-                .addState("CLOSED", 0, true);
+                .addState("OPEN", 30)
+                .addState("CLOSED", 256, true);
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_PURPLE", 0)
+                .addState("REDIRECT_TO_PURPLE", 160)
                 .addState("NEUTRAL", 0.5, true)
-                .addState("REDIRECT_TO_GREEN", 1);
+                .addState("REDIRECT_TO_GREEN", 30)
+                .addState("BLOCK", 180);
 
         robot.getComponent("TransferServo")
-                .addState("DOWN", 0, true)
-                .addState("UP", 1);
+                .addState("DOWN", 30, true)
+                .addState("UP", 90);
+
         robot.getComponent("TurretAngle")
-                .addState("DOWN_MAX", 0, true);
+                .addState("DOWN_MAX", 325, true);
 
         robot.addRobotState("TransferGreen", new RobotState(
                 make_pair("GreenGateServo", "OPEN"),
