@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.make_pair;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
@@ -28,15 +30,56 @@ public class MainTeleOP extends LinearOpMode {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override
             public void main_loop() {
+                // all of the code
+                if (robot.getControllerKey("A1").IsToggledOnPress) {
+                    // intaking active -> A
+                    robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+                } else {
+                    // intaking not active -> A
+                    robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
+                } if (robot.getControllerKey("Y1").ExecuteOnPress) {
+                    // robot.togglePowerOff
+                } if (gamepad1.right_bumper) {
+                    // robot.slowdown
+                } if (eval(gamepad1.left_trigger) && eval(gamepad1.right_trigger)) {
+                    // robot.reverseDriveDirection
+                } if (gamepad1.xWasPressed()) {
+                    // shoot
+                } if (gamepad1.right_bumper) {
+                    // output trough intake
+                }
+
+                // ================================= DRIVER 2 ===============================================
+
+                if(robot.getControllerKey("Y2").IsToggledOnPress) {
+                    // Sorting Active
+                } else {
+                    // Sprting False
+                } if (gamepad2.leftBumperWasPressed()){
+                    // odometry false
+                } if (gamepad2.rightBumperWasPressed()) {
+                    // camera targeting false
+                } if (gamepad2.xWasPressed()){
+                    // prepare for shoot
+                } if(gamepad2.aWasPressed()){
+                    // take out a ball trough outtake
+                } if(gamepad2.dpadLeftWasPressed()) {
+                    // overwrite portita mov
+                } if(gamepad2.dpadRightWasPressed()) {
+                    // overwrite portita verde
+                }
             }
         };
 
-        waitForStart();
-        // start
+        robot.UseDefaultMovement();
+
+        while (opModeInInit()) {
+            robot.init_loop();
+        }
 
         while(opModeIsActive()) {
             // loop
-
+            robot.loop();
         }
         // stop
     }
