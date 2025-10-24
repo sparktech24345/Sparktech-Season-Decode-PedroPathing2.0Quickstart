@@ -18,6 +18,9 @@ public class CRServoComponent extends Component {
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
     protected double overridePower = -2;
+    protected double overrideTarget = 0;
+    protected boolean overrideTarget_bool = false;
+    protected boolean overridePower_bool = false;
 
     // Encoder for servo position feedback
     protected AnalogInput servoEncoder;
@@ -63,6 +66,16 @@ public class CRServoComponent extends Component {
 
     public CRServoComponent setPowerOverride(double power) {
         this.overridePower = power;
+        return this;
+    }
+
+    public CRServoComponent setOverride_bool(boolean overrideBool) {
+        this.overrideTarget_bool = overrideBool;
+        return this;
+    }
+
+    public CRServoComponent setTargetOverride(double target) {
+        this.overrideTarget = target;
         return this;
     }
 
@@ -112,12 +125,17 @@ public class CRServoComponent extends Component {
         if (min_range < 0 && max_range > 0) {
             target = clamp(target, min_range, max_range);
         }
+        if (overrideTarget_bool) {
+            target = overrideTarget;
+        }
         double targetPower = target / resolution;
         if (usePID) {
             updateAnalogServoPosition();
             targetPower = PID.calculate(target, servoAnalogTotalPosition);
+        } else {
+            targetPower = target;
         }
-        if (overridePower > -2) targetPower = overridePower;
+        if (overridePower_bool) targetPower = overridePower;
         for (CRServo servo : motorMap.values()) {
             servo.setPower(targetPower);
         }

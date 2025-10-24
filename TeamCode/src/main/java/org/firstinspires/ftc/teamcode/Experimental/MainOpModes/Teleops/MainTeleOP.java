@@ -64,9 +64,9 @@ public class MainTeleOP extends LinearOpMode {
                 } if(gamepad2.aWasPressed()){
                     // take out a ball trough outtake
                 } if(gamepad2.dpadLeftWasPressed()) {
-                    // overwrite portita mov
+                    // override portita mov
                 } if(gamepad2.dpadRightWasPressed()) {
-                    // overwrite portita verde
+                    // override portita verde
                 }
             }
         };
