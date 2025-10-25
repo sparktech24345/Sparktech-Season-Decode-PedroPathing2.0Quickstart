@@ -26,12 +26,12 @@ public class MotorPortTesting extends LinearOpMode {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        DcMotor motorCHubPort1 = hardwareMap.dcMotor.get("port1c");
-        DcMotor motorCHubPort2 = hardwareMap.dcMotor.get("port2c");
-        DcMotor motorCHubPort3 = hardwareMap.dcMotor.get("port3c");
+        DcMotor motorCHubPort1 = hardwareMap.dcMotor.get("backpurple");
+        DcMotor motorCHubPort2 = hardwareMap.dcMotor.get("intakemotor");
+        DcMotor motorCHubPort3 = hardwareMap.dcMotor.get("frontpurple");
 
-        DcMotor motorExHubPort0 = hardwareMap.dcMotor.get("port0ex");
-        DcMotor motorExHubPort1 = hardwareMap.dcMotor.get("port1ex");
+        DcMotor motorExHubPort0 = hardwareMap.dcMotor.get("frontgreen");
+        DcMotor motorExHubPort1 = hardwareMap.dcMotor.get("backgreen");
         DcMotor motorTurretSpin = hardwareMap.dcMotor.get("turretspin");
 
 

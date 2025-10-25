@@ -43,10 +43,10 @@ public class GlobalStorage {
     public static String outtakeExtendRightName = "outakerightmotor";
     public static String outtakeArmName         = "outakeArmServo";
     public static String outtakeClawName        = "outakeSampleServo";
-    public static String frontRightName         = "frontright";
-    public static String frontLeftName          = "frontleft";
-    public static String backRightName          = "backright";
-    public static String backLeftName           = "backleft";
+    public static String frontRightName         = "frontpurple";
+    public static String frontLeftName          = "frontgreen";
+    public static String backRightName          = "backpurple";
+    public static String backLeftName           = "backgreen";
     public static String colorSensorName        = "sensorColor";
 
     // DECODE
