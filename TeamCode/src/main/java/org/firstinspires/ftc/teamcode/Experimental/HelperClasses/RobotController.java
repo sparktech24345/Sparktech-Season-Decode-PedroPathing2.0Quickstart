@@ -12,8 +12,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.EncodedComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -106,6 +109,15 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     public <T extends Component> T getComponent(String componentName) {
+        return (T) components.get(componentName);
+    }
+    public <T extends MotorComponent> T getMotorComponent(String componentName) {
+        return (T) components.get(componentName);
+    }
+    public <T extends ServoComponent> T getServoComponent(String componentName) {
+        return (T) components.get(componentName);
+    }
+    public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
         return (T) components.get(componentName);
     }
 
