@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 @Disabled
 @TeleOp(name = "ServoTesting", group = "Tests")
 public class ServoTesting extends LinearOpMode {
@@ -24,7 +29,7 @@ public class ServoTesting extends LinearOpMode {
 
         Servo transferServo = hardwareMap.get(Servo.class, "transferservo");
 
-
+        Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         waitForStart();
 
@@ -38,8 +43,8 @@ public class ServoTesting extends LinearOpMode {
             outtakeLeftServo.setPosition(0);
             outtakeLeftServo.setPosition(0);
 
-            telemetry.addData("servo pos",intakeServoPower);
-            telemetry.update();
+            tel.addData("servo pos",intakeServoPower);
+            tel.update();
         }
 
     }
