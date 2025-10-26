@@ -10,7 +10,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -23,6 +22,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Moto
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -30,6 +30,7 @@ public class MainTeleOP extends LinearOpMode {
 
     private RobotController robot;
     private boolean sorterChoice = false;
+    private boolean isInSortingPeriod = false;
     public static double servoP =0;
     public static double servoD =0;
 
@@ -50,21 +51,42 @@ public class MainTeleOP extends LinearOpMode {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override
             public void main_loop() {
+                // all of the code
 
                 HandleColors();
 
-                // all of the code
-                if (robot.getControllerKey("A1").IsToggledOnPress) {
-                    robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
-                } else {
-                    robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
-                } if (robot.getControllerKey("Y1").ExecuteOnPress) {
+                // intakeing
+
+                robot.addTelemetryData("tester",robot.getComponent("IntakeMotor").getPosition());
+
+                if(gamepad1.aWasPressed()) {
+                    if (robot.getControllerKey("A1").IsToggledOnPress) {
+                        robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
+
+                        //decide where gate should be opened
+                        if (!isInSortingPeriod) {
+                            robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
+                        } else {
+                            // something will come here
+                        }
+                    } else {
+                        robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+                        robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
+                    }
+                }
+
+                if (robot.getControllerKey("Y1").ExecuteOnPress) {
                     // robot.togglePowerOff
-                } if (gamepad1.right_bumper) {
-                    // robot.slowdown
-                } if (eval(gamepad1.left_trigger) && eval(gamepad1.right_trigger)) {
-                    // robot.reverseDriveDirection
-                } if (gamepad1.xWasPressed()) {
+                }
+                if (robot.getControllerKey("RIGHT_BUMPER1").ExecuteOnPress) {
+                    setDriveTrainSlowdown(0.2);
+                } else setDriveTrainSlowdown(1);
+
+                if (robot.getControllerKey("RIGHT_TRIGGER1").ExecuteOnPress && robot.getControllerKey("LEFT_TRIGGER1").ExecuteOnPress) {
+                    setDirectionFlip(!getDirectionFlip());
+                }
+
+                if (gamepad1.xWasPressed()) {
                     // shoot
                 } if (gamepad1.right_bumper) {
                     // output trough intake
@@ -129,11 +151,11 @@ public class MainTeleOP extends LinearOpMode {
 
                 // ================================= DRIVER 2 ===============================================
 
-                if(robot.getControllerKey("Y2").IsToggledOnPress) {
-                    // Sorting Active
-                } else {
-                    // Sprting False
-                } if (gamepad2.leftBumperWasPressed()){
+                if(gamepad2.yWasPressed()) {
+                    // Sorting toggle
+                    isInSortingPeriod = !isInSortingPeriod;
+                }
+                if (gamepad2.leftBumperWasPressed()){
                     // odometry false
                 } if (gamepad2.rightBumperWasPressed()) {
                     // camera targeting false
@@ -253,10 +275,10 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("CLOSED", 200, true);
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_PURPLE", 160,true)
+                .addState("REDIRECT_TO_PURPLE", 160)
                 .addState("NEUTRAL", 0.5)
                 .addState("REDIRECT_TO_GREEN", 30)
-                .addState("BLOCK", 180);
+                .addState("BLOCK", 180,true);
 
         robot.getComponent("TransferServo")
                 .addState("DOWN", 30, true)
@@ -291,7 +313,10 @@ public class MainTeleOP extends LinearOpMode {
         Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
         Color.colorToHSV(purpleSensorColors.toColor(), hsvValuesPurple);
 
+        greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
+        purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
 
+        /*
         robot.addTelemetryData("G_RED",(double)greenSensorColors.red);
         robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue);
         robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green);
@@ -299,21 +324,14 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("P_RED",(double)purpleSensorColors.red);
         robot.addTelemetryData("P_BLUE",(double)purpleSensorColors.blue);
         robot.addTelemetryData("P_GREEN",(double)purpleSensorColors.green);
-
         // */
 
-        //comparing
+        robot.addTelemetryData("GREEN_SENSOR_BALL",greenSensorBall);
+        robot.addTelemetryData("PURPLE_SENSOR_BALL",purpleSensorBall);
 
-        if(greenSensorColors.blue > 0.001 && greenSensorColors.green > 0.001){ //first check if there is a ball then compare to determine what it is
-            if(greenSensorColors.blue*1.2 > greenSensorColors.green) robot.addTelemetryData("GREEN SENSOR BALL: ","PURPLE");
-            else robot.addTelemetryData("GREEN SENSOR BALL: ","GREEN");
-        }
-        else robot.addTelemetryData("GREEN SENSOR BALL: ","NO BALL");
 
-        if(purpleSensorColors.blue > 0.001 && purpleSensorColors.green > 0.001){ //first check if there is a ball then compare to determine what it is
-            if(purpleSensorColors.blue*1.2 > purpleSensorColors.green) robot.addTelemetryData("PURPLE SENSOR BALL: ","PURPLE");
-            else robot.addTelemetryData("PURPLE SENSOR BALL: ","GREEN");
-        }
-        else robot.addTelemetryData("PURPLE SENSOR BALL: ","NO BALL");
+
+
+
     }
 }

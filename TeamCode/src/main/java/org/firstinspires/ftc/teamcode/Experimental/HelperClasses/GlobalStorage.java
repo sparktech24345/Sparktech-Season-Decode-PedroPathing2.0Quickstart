@@ -4,6 +4,9 @@ import android.util.Pair;
 
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.MotifSequence;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
@@ -18,6 +21,9 @@ public class GlobalStorage {
     }
     public static boolean eval(double val) {
         return val != 0;
+    }
+    public static boolean TriggerEval(double val) {
+        return val > 0.4;
     }
     public static <Tx, Ty> Pair<Tx, Ty> make_pair(Tx arg1, Ty arg2) { return new Pair<>(arg1, arg2); }
 
@@ -48,18 +54,21 @@ public class GlobalStorage {
     public static String backRightName          = "backpurple";
     public static String backLeftName           = "backgreen";
     public static String colorSensorName        = "sensorColor";
+    public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
 
     // DECODE
-
     public static String LaunchMotorOneName     = "launchmotorone";
     public static String LaunchMotorTwoName     = "launchmotortwo";
     public static String ServoControlName       = "controlservo";
     public static String ServoExpansionName     = "expansionservo";
     public static String PushServoOneName       = "expansionpushservo";
     public static String PushServoTwoName       = "controlpushservo";
-    public static double slowdownConstant       = 1;
 
     // OTHER S(TUFF)
-    public static ColorSet_ITD currentTeam = ColorSet_ITD.Undefined;
+    public static double slowdownConstant       = 1;
     public static OpModes currentOpModes = OpModes.TeleOP;
+    public static TeamColor currentTeamColor = TeamColor.TeamNotSet;
+    public static MotifSequence currentMotifSequence = MotifSequence.Undefined;
+    public static BallColorSet_Decode purpleSensorBall = BallColorSet_Decode.NoBall;
+    public static BallColorSet_Decode greenSensorBall = BallColorSet_Decode.NoBall;
 }

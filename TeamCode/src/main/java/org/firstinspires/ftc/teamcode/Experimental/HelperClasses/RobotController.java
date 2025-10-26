@@ -159,6 +159,13 @@ public abstract class RobotController implements RobotControllerInterface {
         if (movement != null) movement.setSlowdown(slowdown);
         return this;
     }
+    public RobotController setDirectionFlip(boolean shouldFlip) {
+        if (movement != null) movement.setDirectionFlip(shouldFlip);
+        return this;
+    }
+    public boolean getDirectionFlip() {
+        return movement.getDirectionFlip();
+    }
 
     public double getCurrentPosition(String componentName) {
         Component comp = components.get(componentName);

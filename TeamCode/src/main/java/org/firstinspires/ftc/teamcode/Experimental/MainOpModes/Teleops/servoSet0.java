@@ -20,7 +20,7 @@ public class servoSet0 extends LinearOpMode {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        Servo servo1 = hardwareMap.get(Servo.class, "transferservo");
+        Servo servo1 = hardwareMap.get(Servo.class, "turretangle");
 
 
 
@@ -33,7 +33,7 @@ public class servoSet0 extends LinearOpMode {
             if(gamepad1.a) servoPos +=0.0002;
             if(gamepad1.b) servoPos -=0.0002;
             if(gamepad1.y) servoPos = 0;
-            if(gamepad1.x) servoPos = 30/360;
+            if(gamepad1.x) servoPos = (double) 30 / 360;
             servo1.setPosition(servoPos);
             tel.addData("position",servoPos);
             tel.addData("position * 360",servoPos*360);
