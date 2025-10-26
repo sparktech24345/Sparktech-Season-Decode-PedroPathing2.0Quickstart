@@ -33,12 +33,17 @@ public class MainTeleOP extends LinearOpMode {
     private boolean isInSortingPeriod = false;
     public static double servoP =0;
     public static double servoD =0;
+    public boolean isTryingToFire = false;
+    public boolean isReadyToFire = false;
+    public static  int purpleCounter = 0;
+    public static int greenCounter = 0;
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
     private NormalizedColorSensor colorSensorPurple;
     private NormalizedRGBA greenSensorColors;
     private NormalizedRGBA purpleSensorColors;
+
 
     final float[] hsvValuesGreen = new float[3];
     final float[] hsvValuesPurple = new float[3];
@@ -67,7 +72,25 @@ public class MainTeleOP extends LinearOpMode {
                         if (!isInSortingPeriod) {
                             robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
                         } else {
-                            // something will come here
+                            if(purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple){
+                                purpleCounter++;
+                                if(purpleCounter>2){
+                                    robot.addToQueue(new StateAction(false,"IntakeMotor" ,"SLOW_REVERSE"));
+                                    purpleCounter--;
+                                    robot.addToQueue(new DelayAction(true,400));
+                                    robot.addToQueue(new StateAction(false,"IntakeMotor" ,"OFF"));
+                                }
+                                sorterChoice = true;
+                            }else {
+                                greenCounter++;
+                                if(greenCounter>1){
+                                    robot.addToQueue(new StateAction(false , "IntakeMotor","SLOW_REVERSE"));
+                                    greenCounter--;
+                                    robot.addToQueue(new DelayAction(true,400));
+                                    robot.addToQueue(new StateAction(false,"IntakeMotor" ,"OFF"));
+                                }
+                                sorterChoice = false;
+                            }
                         }
                     } else {
                         robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
@@ -160,13 +183,18 @@ public class MainTeleOP extends LinearOpMode {
                 } if (gamepad2.rightBumperWasPressed()) {
                     // camera targeting false
                 } if (gamepad2.xWasPressed()){
-                    // prepare for shoot
+                    isTryingToFire = !isTryingToFire;
                 } if(gamepad2.aWasPressed()){
                     // take out a ball trough outtake
                 } if(gamepad2.dpadLeftWasPressed()) {
                     // override portita mov
                 } if(gamepad2.dpadRightWasPressed()) {
                     // override portita verde
+                }
+
+                if(isTryingToFire){
+                    robot.addToQueue(new StateAction(false, "TurretSpinMotor","FULL"));
+                    //puterea calculat,unghiul calculat,rotatia calculata;
                 }
             }
         };
