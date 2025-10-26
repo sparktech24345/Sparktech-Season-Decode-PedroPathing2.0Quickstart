@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Serv
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
 
-@TeleOp(name="Main TeleOP", group="Main")
+@TeleOp(name="Test TeleOP Turela", group="Main")
 public class TestTeleOP_turela extends LinearOpMode {
 
     private RobotController robot;
