@@ -118,9 +118,9 @@ public class MainTeleOP_ITD extends LinearOpMode {
             //init loop
             robot.init_loop();
             if (robot.getControllerKey("LEFT_BUMPER1").IsHeld && robot.getControllerKey("START1").IsHeld)
-                currentTeam = ColorSet_ITD.Blue;
+                currentTeamITD = ColorSet_ITD.Blue;
             else if (robot.getControllerKey("RIGHT_BUMPER1").IsHeld && robot.getControllerKey("START1").IsHeld)
-                currentTeam = ColorSet_ITD.Red;
+                currentTeamITD = ColorSet_ITD.Red;
         }
         //start
 

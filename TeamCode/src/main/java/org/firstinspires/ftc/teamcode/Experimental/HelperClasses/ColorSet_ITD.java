@@ -12,7 +12,7 @@ public enum ColorSet_ITD {
 
     public static boolean validateSample(ColorSet_ITD current, boolean yellowValid) {
         if (yellowValid && current == Yellow) return true;
-        return current == currentTeam;
+        return current == currentTeamITD;
     }
 
     public static ColorSet_ITD getColor(NormalizedRGBA colors) {

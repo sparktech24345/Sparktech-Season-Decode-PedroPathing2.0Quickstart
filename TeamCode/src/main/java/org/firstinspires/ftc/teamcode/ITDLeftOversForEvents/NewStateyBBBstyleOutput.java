@@ -8,6 +8,7 @@ import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,6 +23,7 @@ import org.firstinspires.ftc.teamcode.ITDLeftOversForEvents.PIDStorageAndUse.New
 
 @com.acmerobotics.dashboard.config.Config
 @TeleOp(name = "Main Teleop", group = "Linear OpMode")
+@Disabled
 public class NewStateyBBBstyleOutput extends LinearOpMode {
 
     final float[] hsvValues = new float[3];

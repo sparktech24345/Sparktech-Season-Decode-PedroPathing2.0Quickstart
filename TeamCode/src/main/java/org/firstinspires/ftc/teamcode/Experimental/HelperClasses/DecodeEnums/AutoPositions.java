@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
+package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums;
 
 import com.pedropathing.geometry.*;
 

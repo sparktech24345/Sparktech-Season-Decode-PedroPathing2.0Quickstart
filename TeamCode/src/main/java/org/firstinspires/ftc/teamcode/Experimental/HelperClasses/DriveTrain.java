@@ -46,6 +46,8 @@ public class DriveTrain {
     public void setSlowdown(double slowdownMultiplier) {
         this.slowdownMultiplier = slowdownMultiplier;
     }
+    public void setDirectionFlip(boolean shouldFlip){this.directionFlip = shouldFlip;}
+    public boolean getDirectionFlip(){return this.directionFlip;}
 
     public void init() {
         if (currentOpModes == OpModes.TeleOP) {
@@ -71,6 +73,11 @@ public class DriveTrain {
         double vertical     =  gamepadInstance.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
         double horizontal   =  gamepadInstance.get("LEFT_STICK_X1").raw();
         double pivot        = -gamepadInstance.get("RIGHT_STICK_X1").raw();
+
+        if(directionFlip){
+            horizontal = - horizontal;
+            vertical = - vertical;
+        }
 
         double FrontRightPow = vertical + horizontal - pivot;
         double BackRightPow  = vertical - horizontal - pivot;

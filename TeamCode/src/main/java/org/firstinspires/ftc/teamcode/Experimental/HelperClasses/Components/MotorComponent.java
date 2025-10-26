@@ -96,7 +96,9 @@ public class MotorComponent extends EncodedComponent {
 
     @Override
     public void update() {
-        componentEncoder.update();
+        if (componentEncoder != null) {
+            componentEncoder.update();
+        }
         if (min_range < 0 && max_range > 0) {
             target = clamp(target, min_range, max_range);
         }

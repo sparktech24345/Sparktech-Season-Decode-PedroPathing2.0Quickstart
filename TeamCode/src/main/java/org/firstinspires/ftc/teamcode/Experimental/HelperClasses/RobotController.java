@@ -12,8 +12,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.EncodedComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +46,7 @@ public abstract class RobotController implements RobotControllerInterface {
     private HashMap<String, Pose> autoPositions = new HashMap<>();
 
     private void init_all() {
-        followerInstance = new ComplexFollower(hardwareMapInstance);
+//        followerInstance = new ComplexFollower(hardwareMapInstance);
         queuerInstance = new StateQueuer();
         robotControllerInstance = this;
     }
@@ -108,6 +111,15 @@ public abstract class RobotController implements RobotControllerInterface {
     public <T extends Component> T getComponent(String componentName) {
         return (T) components.get(componentName);
     }
+    public <T extends MotorComponent> T getMotorComponent(String componentName) {
+        return (T) components.get(componentName);
+    }
+    public <T extends ServoComponent> T getServoComponent(String componentName) {
+        return (T) components.get(componentName);
+    }
+    public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
+        return (T) components.get(componentName);
+    }
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         movement = new DriveTrain(frontLeftName, frontRightName, backLeftName, backLeftName);
@@ -146,6 +158,13 @@ public abstract class RobotController implements RobotControllerInterface {
     public RobotController setDriveTrainSlowdown(double slowdown) {
         if (movement != null) movement.setSlowdown(slowdown);
         return this;
+    }
+    public RobotController setDirectionFlip(boolean shouldFlip) {
+        if (movement != null) movement.setDirectionFlip(shouldFlip);
+        return this;
+    }
+    public boolean getDirectionFlip() {
+        return movement.getDirectionFlip();
     }
 
     public double getCurrentPosition(String componentName) {
@@ -198,7 +217,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     private void runUpdates() {
         gamepadInstance.update();
-        followerInstance.update();
+//        followerInstance.update();
         queuerInstance.update();
         for (Component c : components.values()) {
             c.update();
