@@ -39,10 +39,10 @@ public class test_voltaj_motor_PE_ITD extends LinearOpMode {
 
     private boolean override= false;
 
-    private final double maxrpm = 312;
+    private double maxrpm = 6000;
 
     private double calculate_power() {
-        return target_rpm/maxrpm;
+        return target_rpm / maxrpm;
 //        double error = target_rpm - current_rpm;
 //        double p = kp * error;
 //        double d =  kd * (error - last_error);
@@ -69,52 +69,45 @@ public class test_voltaj_motor_PE_ITD extends LinearOpMode {
         while (opModeInInit()) {
             robot.init_loop();
         }
-        while (opModeIsActive()) {
-
-            robot.loop();
         pos_timer.reset();
-            if (gamepad1.yWasPressed()) switch (idx) {
-                case 0: target_rpm += inc_res; break;
-                case 1: kp += inc_res; break;
-                case 2: kd += inc_res; break;
-            }
-            if (gamepad1.aWasPressed()) switch (idx) {
-                case 0: target_rpm -= inc_res; break;
-                case 1: kp -= inc_res; break;
-                case 2: kd -= inc_res; break;
-            }
+        while (opModeIsActive()) {
+            robot.loop();
+            if (gamepad1.yWasPressed()) target_rpm += inc_res;
+            if (gamepad1.aWasPressed()) target_rpm -= inc_res;
             if (gamepad1.xWasPressed()) inc_res *= 10;
             if (gamepad1.bWasPressed()) inc_res /= 10;
-            if (gamepad1.dpadUpWasPressed()) idx = (idx + 1) % 3;
-            if (gamepad1.dpadDownWasPressed()) if (idx > 0) --idx;
             if (gamepad1.dpadLeftWasPressed()) override = !override;
-
-            current_pos = encoder.getCurrentPosition();
-            current_s = pos_timer.seconds();
-            current_rpm = ((current_pos - last_pos) / current_s)*60/537.7;
+            if (gamepad1.dpadUpWasPressed()) maxrpm += inc_res;
+            if (gamepad1.dpadDownWasPressed()) maxrpm -= inc_res;
 
             double power = calculate_power();
-            if (override) power= 1;
+            if (override) power = 1;
             target_motor.setPower(power);
 
+            // switch(idx) {
+            //     case 0: tele.addData("current", "target_rpm"); break;
+            //     case 1: tele.addData("current", "kp"); break;
+            //     case 2: tele.addData("current", "kd");break;
+            // }
 
-                switch(idx) {
-                    case 0: tele.addData("current", "target_rpm") ; break;
-                    case 1: tele.addData("current","kp") ;break;
-                    case 2: tele.addData("current", "kd");break;
-                }
-
-                tele.addData("power", power);
+            // tele.addData("power", power);
             tele.addData("target_rpm", target_rpm);
             tele.addData("increment_res", inc_res);
-            tele.addData("kp", kp);
-            tele.addData("kd", kd);
+            // tele.addData("kp", kp);
+            // tele.addData("kd", kd);
             tele.addData("rpm", current_rpm);
-            tele.addData("pos", current_pos);
-            tele.addData("ms",current_s);
+            // tele.addData("pos", current_pos);
+            tele.addData("ms", current_s);
             tele.update();
-            last_pos = current_pos;
-
+            if (pos_timer.milliseconds() >= 100) {
+                current_pos = encoder.getCurrentPosition();
+                double diff = current_pos - last_pos;
+                diff /= 28;
+                current_s = pos_timer.seconds();
+                current_rpm = diff * 600;
+                last_pos = current_pos;
+                pos_timer.reset();
+            }
         }
     }
 }

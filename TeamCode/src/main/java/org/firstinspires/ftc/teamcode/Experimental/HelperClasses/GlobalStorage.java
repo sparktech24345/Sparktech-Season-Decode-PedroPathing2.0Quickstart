@@ -56,6 +56,11 @@ public class GlobalStorage {
     public static String colorSensorName        = "sensorColor";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
 
+    public static String __frontLeftName        = "frontleft";
+    public static String __frontRightName       = "frontright";
+    public static String __backLeftName         = "backleft";
+    public static String __backRightName        = "backright";
+
     // DECODE
     public static String LaunchMotorOneName     = "launchmotorone";
     public static String LaunchMotorTwoName     = "launchmotortwo";

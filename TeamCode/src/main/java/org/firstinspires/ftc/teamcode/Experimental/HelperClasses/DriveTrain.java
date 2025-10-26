@@ -25,10 +25,10 @@ public class DriveTrain {
     private DcMotor RBDrive;
     private DcMotor LBDrive;
     private boolean directionFlip = false;
-    private String frontLeft = frontLeftName;
-    private String frontRight = frontRightName;
-    private String backLeft = backLeftName;
-    private String backRight = backRightName;
+    private String frontLeft  = __frontLeftName;
+    private String frontRight = __frontRightName;
+    private String backLeft   = __backLeftName;
+    private String backRight  = __backRightName;
     private double slowdownMultiplier = 1;
 
     public DriveTrain() {
