@@ -71,6 +71,8 @@ public class MainTeleOP extends LinearOpMode {
                         //decide where gate should be opened
                         if (!isInSortingPeriod) {
                             robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
+                            robot.addToQueue(new StateAction(false, "GreenGateServo", "CLOSED"));
+                            robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
                         } else {
                             if(purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple){
                                 purpleCounter++;
@@ -111,7 +113,12 @@ public class MainTeleOP extends LinearOpMode {
 
                 if (gamepad1.xWasPressed()) {
                     // shoot
-                } if (gamepad1.right_bumper) {
+                    robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
+                    robot.addToQueue(new DelayAction(true, 600));
+                    robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
+                }
+
+                if (gamepad1.right_bumper) {
                     // output trough intake
                 } if (gamepad1.leftBumperWasPressed()){
 
@@ -178,23 +185,43 @@ public class MainTeleOP extends LinearOpMode {
                     // Sorting toggle
                     isInSortingPeriod = !isInSortingPeriod;
                 }
+
                 if (gamepad2.leftBumperWasPressed()){
                     // odometry false
-                } if (gamepad2.rightBumperWasPressed()) {
+                }
+
+                if (gamepad2.rightBumperWasPressed()) {
                     // camera targeting false
-                } if (gamepad2.xWasPressed()){
+                }
+
+                if (gamepad2.xWasPressed() || gamepad1.yWasPressed()){
                     isTryingToFire = !isTryingToFire;
-                } if(gamepad2.aWasPressed()){
+                }
+
+                if(gamepad2.aWasPressed()){
                     // take out a ball trough outtake
-                } if(gamepad2.dpadLeftWasPressed()) {
+                }
+
+                if(gamepad2.dpadLeftWasPressed()) {
                     // override portita mov
-                } if(gamepad2.dpadRightWasPressed()) {
+                    if(robot.getComponent("GreenGateServo").hasStateOfName("CLOSED"))
+                        robot.addToQueue(new StateAction(false, "GreenGateServo", "OPEN"));
+                    else robot.addToQueue(new StateAction(false, "GreenGateServo", "CLOSED"));
+                }
+
+                if(gamepad2.dpadRightWasPressed()) {
                     // override portita verde
+                    if(robot.getComponent("PurpleGateServo").hasStateOfName("CLOSED"))
+                        robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
+                    else robot.addToQueue(new StateAction(false, "PurpleGateServo", "CLOSED"));
                 }
 
                 if(isTryingToFire){
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","FULL"));
                     //puterea calculat,unghiul calculat,rotatia calculata;
+                }
+                else{
+                    robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
                 }
             }
         };
