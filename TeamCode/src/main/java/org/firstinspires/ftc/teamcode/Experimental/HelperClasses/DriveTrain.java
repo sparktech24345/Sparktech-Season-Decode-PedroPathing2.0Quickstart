@@ -24,11 +24,11 @@ public class DriveTrain {
     private DcMotor LFDrive;
     private DcMotor RBDrive;
     private DcMotor LBDrive;
-    private boolean directionFlip = false;
-    private String frontLeft  = __frontLeftName;
-    private String frontRight = __frontRightName;
-    private String backLeft   = __backLeftName;
-    private String backRight  = __backRightName;
+    private boolean directionFlip = false; //configured for Decode
+    private String frontLeft  = frontLeftName;
+    private String frontRight = frontRightName;
+    private String backLeft   = backLeftName;
+    private String backRight  = backRightName;
     private double slowdownMultiplier = 1;
 
     public DriveTrain() {

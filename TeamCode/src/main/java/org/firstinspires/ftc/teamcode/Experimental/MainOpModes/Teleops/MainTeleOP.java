@@ -123,56 +123,60 @@ public class MainTeleOP extends LinearOpMode {
                 } if (gamepad1.leftBumperWasPressed()){
 
 
-                    //false is green true is purple
-                    if(sorterChoice){
-                        robot.addToQueue(new StateAction(false, "TurretSpinMotor", "FULL"));
-                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
-                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
-                        robot.addToQueue(new DelayAction(true, 2000));
-                        robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
-                        robot.addToQueue(new DelayAction(true, 1400));
-                        //robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
-                        robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
-                        robot.addToQueue(new DelayAction(true, 600));
-                        robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
-                        robot.addToQueue(new DelayAction(true, 600));
-                        robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
-                        robot.addToQueue(new StateAction(true, "TurretSpinMotor", "OFF"));
-                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
-                    }
-                    else{
-
-                        robot.addToQueue(new StateAction(false, "TurretSpinMotor", "FULL"));
-                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
-                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
-                        robot.addToQueue(new DelayAction(true, 2000));
-                        robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
-                        robot.addToQueue(new DelayAction(true, 1400));
-                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
-                        robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
-                        robot.addToQueue(new DelayAction(true, 600));
-                        robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
-                        robot.addToQueue(new DelayAction(true, 600));
-                        robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
-                        robot.addToQueue(new StateAction(true, "TurretSpinMotor", "OFF"));
-                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
-                    }
+//
+//                    //false is green true is purple
+//                    if(sorterChoice){
+//                        robot.addToQueue(new StateAction(false, "TurretSpinMotor", "FULL"));
+//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
+//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
+//                        robot.addToQueue(new DelayAction(true, 2000));
+//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+//                        robot.addToQueue(new DelayAction(true, 1400));
+//                        //robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
+//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
+//                        robot.addToQueue(new DelayAction(true, 600));
+//                        robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
+//                        robot.addToQueue(new DelayAction(true, 600));
+//                        robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
+//                        robot.addToQueue(new StateAction(true, "TurretSpinMotor", "OFF"));
+//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
+//                    }
+//                    else{
+//
+//                        robot.addToQueue(new StateAction(false, "TurretSpinMotor", "FULL"));
+//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
+//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
+//                        robot.addToQueue(new DelayAction(true, 2000));
+//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+//                        robot.addToQueue(new DelayAction(true, 1400));
+//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
+//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
+//                        robot.addToQueue(new DelayAction(true, 600));
+//                        robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
+//                        robot.addToQueue(new DelayAction(true, 600));
+//                        robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
+//                        robot.addToQueue(new StateAction(true, "TurretSpinMotor", "OFF"));
+//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
+//                    }
 
                 }
                 if(gamepad1.rightBumperWasPressed()){
-                    sorterChoice = !sorterChoice;
-
-                    if(sorterChoice){
-                        //is now purple
-                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
-                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
-                    }
-                    else{
-                        //is now green
-                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
-                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
-                    }
+//                    sorterChoice = !sorterChoice;
+//
+//                    if(sorterChoice){
+//                        //is now purple
+//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
+//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
+//                    }
+//                    else{
+//                        //is now green
+//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
+//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
+//                    }
                 }
+
+
+
                 robot.addTelemetryData("turret power",robot.getCRServoComponent("TurretRotate").getPower());
                 robot.addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition());
                 robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());

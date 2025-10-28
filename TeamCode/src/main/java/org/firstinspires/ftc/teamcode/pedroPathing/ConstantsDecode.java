@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
 
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(20) // ????
+            .mass(12.5) // ????
             .forwardZeroPowerAcceleration(-25.9346931313679598) // copiate direct din exemplul Pedro, de verificat / corectat
             .lateralZeroPowerAcceleration(-67.342491844080064) // copiate direct din exemplul Pedro, de verificat / corectat
             .centripetalScaling(0.0005); // copiate direct din exemplul Pedro, de verificat / corectat
