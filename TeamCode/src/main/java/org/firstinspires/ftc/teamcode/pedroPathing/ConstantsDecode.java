@@ -49,7 +49,7 @@ public class ConstantsDecode {
             1
     );
 
-    public static Follower createFollower(HardwareMap hardwareMap) {
+    public static Follower createFollowerDecode(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(mecanumConstants)
                 .pinpointLocalizer(pinpointConstants)

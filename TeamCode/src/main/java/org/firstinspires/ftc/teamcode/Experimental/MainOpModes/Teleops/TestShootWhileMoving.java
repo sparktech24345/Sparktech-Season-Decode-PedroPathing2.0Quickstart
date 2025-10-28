@@ -27,7 +27,7 @@ public class TestShootWhileMoving extends LinearOpMode {
     @Override
     public void runOpMode() {
         //init
-        follower = ConstantsDecode.createFollower(hardwareMap);
+        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
 
         while (opModeInInit()) {
             //init loop

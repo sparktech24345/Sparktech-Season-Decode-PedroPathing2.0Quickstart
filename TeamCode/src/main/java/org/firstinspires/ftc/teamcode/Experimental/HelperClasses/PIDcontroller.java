@@ -37,7 +37,7 @@ public class PIDcontroller {
         lastError = error;
 
         // PID output
-        double output = (kp * error) /*+ (ki * integral)*/ + (kd * derivative);
+        double output = (kp * error) + (ki * integral) + (kd * derivative);
 
         // Clamp to motor power limits
         //output = clamp(output, -1.0, 1.0); //Not needed and detrimental for tests

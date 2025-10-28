@@ -32,8 +32,10 @@ public class MainTeleOP extends LinearOpMode {
     private RobotController robot;
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
-    public static double servoP =0;
+    public static double servoP =0.006;
+    public static double servoI =0;
     public static double servoD =0;
+    public static double targetTurret =0;
     public boolean isTryingToFire = false;
     public boolean isReadyToFire = false;
     public static  int purpleCounter = 0;
@@ -216,8 +218,12 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition());
                 robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
                 robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
+                robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
+                robot.addTelemetryData("robot rotation",Math.toDegrees(robot.getCurrentPose().getHeading()));
 
-                robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,0,servoD);
+                robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,servoI,servoD);
+                robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
+                robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
 
                 // ================================= DRIVER 2 ===============================================
 
@@ -422,10 +428,5 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.addTelemetryData("GREEN_SENSOR_BALL",greenSensorBall);
         robot.addTelemetryData("PURPLE_SENSOR_BALL",purpleSensorBall);
-
-
-
-
-
     }
 }

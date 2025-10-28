@@ -46,7 +46,7 @@ public abstract class RobotController implements RobotControllerInterface {
     private HashMap<String, Pose> autoPositions = new HashMap<>();
 
     private void init_all() {
-//        followerInstance = new ComplexFollower(hardwareMapInstance);
+       followerInstance = new ComplexFollower(hardwareMapInstance);
         queuerInstance = new StateQueuer();
         robotControllerInstance = this;
     }
@@ -120,6 +120,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
         return (T) components.get(componentName);
     }
+    public Pose getCurrentPose(){return followerInstance.getInstance().getPose();}
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         movement = new DriveTrain(frontLeftName, frontRightName, backLeftName, backLeftName);
@@ -217,7 +218,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     private void runUpdates() {
         gamepadInstance.update();
-//        followerInstance.update();
+        followerInstance.update();
         queuerInstance.update();
         for (Component c : components.values()) {
             c.update();

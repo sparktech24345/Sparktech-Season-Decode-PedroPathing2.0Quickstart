@@ -70,7 +70,7 @@ public class CRServoComponent extends Component {
         return this;
     }
 
-    public CRServoComponent setOverride_bool(boolean overrideBool) {
+    public CRServoComponent setOverrideBool(boolean overrideBool) {
         this.overrideTarget_bool = overrideBool;
         return this;
     }
@@ -107,7 +107,7 @@ public class CRServoComponent extends Component {
                 //arounds++;
             }
         }
-        else deltaPosition -= 100*(1/0.74); //taking that -1 back if it is the first run and of the 99 0
+        else deltaPosition -= (1 + 24)*(1/0.74); //taking that -1 back if it is the first run and of the 99 0
 
         servoAnalogTotalPosition += deltaPosition*0.74;
     }
@@ -136,6 +136,9 @@ public class CRServoComponent extends Component {
         if (usePID) {
             updateAnalogServoPosition();
             targetPower = PID.calculate(target, servoAnalogTotalPosition);
+            if(Math.abs(target - servoAnalogTotalPosition) < 25) targetPower *= 1.5;
+            if(Math.abs(target - servoAnalogTotalPosition) < 10) targetPower *= 5;
+            if(Math.abs(target - servoAnalogTotalPosition) < 4) targetPower = 0;
         } else {
             targetPower = target;
         }

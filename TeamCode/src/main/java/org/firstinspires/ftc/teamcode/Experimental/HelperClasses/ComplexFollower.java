@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode.createFollowerDecode;
 import static org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants.ITDcreateFollower;
 import static org.firstinspires.ftc.teamcode.pedroPathing.SparkyConstants.SparkycreateFollower;
 
@@ -39,7 +40,7 @@ public class ComplexFollower {
 
 
     ComplexFollower(HardwareMap hardwareMap) {
-        this.follower = SparkycreateFollower(hardwareMap);
+        this.follower = createFollowerDecode(hardwareMap);
         follower.update();
         currentPos = startPose;
         currentX = currentPos.getX();
