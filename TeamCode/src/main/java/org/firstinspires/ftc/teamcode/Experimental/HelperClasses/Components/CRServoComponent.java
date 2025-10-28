@@ -30,7 +30,7 @@ public class CRServoComponent extends Component {
     protected double servoAnalogPosition=-1; //an impossible value
     protected double servoAnalogTotalPosition=0;
     // i want aprox 400 degrees per sec even tho axon can push 493,333 degrees per sec, with basically instant acceleration
-    protected MotionProfiler profiler = new MotionProfiler(400, 1000); // deg/sec, deg/sec^2 ( accel )
+    protected MotionProfiler profiler = new MotionProfiler(400, 1000,5); // deg/sec, deg/sec^2 ( accel )
     protected ElapsedTime timer = new ElapsedTime();
     protected double lastTime = timer.seconds();
 
