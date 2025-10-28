@@ -23,6 +23,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Serv
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
+import java.util.Timer;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -38,6 +39,9 @@ public class MainTeleOP extends LinearOpMode {
     public static  int purpleCounter = 0;
     public static int greenCounter = 0;
 
+    public static int ballCounter = 0;
+    private long timerForIntake = 0;
+
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
     private NormalizedColorSensor colorSensorPurple;
@@ -52,6 +56,7 @@ public class MainTeleOP extends LinearOpMode {
     @Override
     public void runOpMode() {
         // init
+        ballCounter = 0;
 
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override
@@ -64,41 +69,71 @@ public class MainTeleOP extends LinearOpMode {
 
                 robot.addTelemetryData("tester",robot.getComponent("IntakeMotor").getPosition());
 
-                if(gamepad1.aWasPressed()) {
-                    if (robot.getControllerKey("A1").IsToggledOnPress) {
-                        robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
-
-                        //decide where gate should be opened
-                        if (!isInSortingPeriod) {
-                            robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
-                            robot.addToQueue(new StateAction(false, "GreenGateServo", "CLOSED"));
-                            robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
-                        } else {
-                            if(purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple){
-                                purpleCounter++;
-                                if(purpleCounter>2){
-                                    robot.addToQueue(new StateAction(false,"IntakeMotor" ,"SLOW_REVERSE"));
-                                    purpleCounter--;
-                                    robot.addToQueue(new DelayAction(true,400));
-                                    robot.addToQueue(new StateAction(false,"IntakeMotor" ,"OFF"));
-                                }
-                                sorterChoice = true;
-                            }else {
-                                greenCounter++;
-                                if(greenCounter>1){
-                                    robot.addToQueue(new StateAction(false , "IntakeMotor","SLOW_REVERSE"));
-                                    greenCounter--;
-                                    robot.addToQueue(new DelayAction(true,400));
-                                    robot.addToQueue(new StateAction(false,"IntakeMotor" ,"OFF"));
-                                }
-                                sorterChoice = false;
-                            }
-                        }
-                    } else {
-                        robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
-                        robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
+                if(purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green){
+                    if(ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1){ //dont infinite stack comands if full reversing already
+                        robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
+                        robot.addToQueue(new DelayAction(true, 400));
+                        robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
+                        robot.addTelemetryData("reversing",true);
+                        ballCounter--;
                     }
                 }
+                if(ballCounter >= 3  && timerForIntake + 600 < System.currentTimeMillis()){
+                    robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
+                    robot.addTelemetryData("blocking",true);
+                }else if(timerForIntake + 600 < System.currentTimeMillis()){
+                    robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
+                    robot.addTelemetryData("redirecting",true);
+                }
+
+                if (robot.getControllerKey("A1").IsToggledOnPress) {
+                    robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
+                    if (
+                            (purpleSensorBall == BallColorSet_Decode.Purple
+                            || greenSensorBall == BallColorSet_Decode.Purple
+                            || purpleSensorBall == BallColorSet_Decode.Green
+                            || greenSensorBall == BallColorSet_Decode.Green)
+                            && timerForIntake + 1000 < System.currentTimeMillis()
+                    ){
+                        ballCounter++;
+                        timerForIntake = System.currentTimeMillis();
+                    }
+
+
+
+                    //decide where gate should be opened
+                    if (!isInSortingPeriod) {
+                        //robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
+                        robot.addToQueue(new StateAction(false, "GreenGateServo", "CLOSED"));
+                        robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
+                    } else {
+                        if(purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple){
+                            purpleCounter++;
+                            if(purpleCounter>2){
+                                robot.addToQueue(new StateAction(false,"IntakeMotor" ,"SLOW_REVERSE"));
+                                purpleCounter--;
+                                robot.addToQueue(new DelayAction(true,400));
+                                robot.addToQueue(new StateAction(false,"IntakeMotor" ,"OFF"));
+                            }
+                            sorterChoice = true;
+                        }else {
+                            greenCounter++;
+                            if(greenCounter>1){
+                                robot.addToQueue(new StateAction(false , "IntakeMotor","SLOW_REVERSE"));
+                                greenCounter--;
+                                robot.addToQueue(new DelayAction(true,400));
+                                robot.addToQueue(new StateAction(false,"IntakeMotor" ,"OFF"));
+                            }
+                            sorterChoice = false;
+                        }
+                    }
+                } else {
+                    robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+                    robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
+                }
+
+                robot.addTelemetryData("ball counter",ballCounter);
+
 
                 if (robot.getControllerKey("Y1").ExecuteOnPress) {
                     // robot.togglePowerOff
@@ -335,10 +370,9 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("CLOSED", 200, true);
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_PURPLE", 160)
-                .addState("NEUTRAL", 0.5)
+                .addState("REDIRECT_TO_PURPLE", 161.64)
                 .addState("REDIRECT_TO_GREEN", 30)
-                .addState("BLOCK", 180,true);
+                .addState("BLOCK", 93.816,true);
 
         robot.getComponent("TransferServo")
                 .addState("DOWN", 30, true)
