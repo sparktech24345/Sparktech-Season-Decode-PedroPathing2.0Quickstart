@@ -6,7 +6,9 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.MotionProfiler;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
@@ -27,6 +29,10 @@ public class CRServoComponent extends Component {
     protected AnalogInput servoEncoder;
     protected double servoAnalogPosition=-1; //an impossible value
     protected double servoAnalogTotalPosition=0;
+    // i want aprox 400 degrees per sec even tho axon can push 493,333 degrees per sec, with basically instant acceleration
+    protected MotionProfiler profiler = new MotionProfiler(400, 1000); // deg/sec, deg/sec^2 ( accel )
+    protected ElapsedTime timer = new ElapsedTime();
+    protected double lastTime = timer.seconds();
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -126,6 +132,9 @@ public class CRServoComponent extends Component {
 
     @Override
     public void update() {
+        double dt = timer.seconds() - lastTime; //timer in seconds for motion profiler cuz physics
+        lastTime = timer.seconds();
+
         if (min_range < 0 && max_range > 0) {
             target = clamp(target, min_range, max_range);
         }
@@ -134,11 +143,12 @@ public class CRServoComponent extends Component {
         }
         double targetPower = target / resolution;
         if (usePID) {
+            double smoothTarget = profiler.update(servoAnalogTotalPosition, target, dt);  //motion profiling i think
             updateAnalogServoPosition();
-            targetPower = PID.calculate(target, servoAnalogTotalPosition);
-            if(Math.abs(target - servoAnalogTotalPosition) < 25) targetPower *= 1.5;
-            if(Math.abs(target - servoAnalogTotalPosition) < 10) targetPower *= 5;
-            if(Math.abs(target - servoAnalogTotalPosition) < 4) targetPower = 0;
+            targetPower = PID.calculate(smoothTarget, servoAnalogTotalPosition);
+            if(Math.abs(smoothTarget - servoAnalogTotalPosition) < 25) targetPower *= 1.5;
+            if(Math.abs(smoothTarget - servoAnalogTotalPosition) < 10) targetPower *= 5;
+            if(Math.abs(smoothTarget - servoAnalogTotalPosition) < 2) targetPower = 0;
         } else {
             targetPower = target;
         }
