@@ -19,6 +19,7 @@ public class CRServoComponent extends Component {
     protected PIDcontroller PID = null;
     protected double overridePower = -2;
     protected double overrideTarget = 0;
+    protected double lastPower = 0;
     protected boolean overrideTarget_bool = false;
     protected boolean overridePower_bool = false;
 
@@ -106,14 +107,17 @@ public class CRServoComponent extends Component {
                 //arounds++;
             }
         }
-        else deltaPosition--; //taking that -1 back if it is the first run
+        else deltaPosition -= 100*(1/0.74); //taking that -1 back if it is the first run and of the 99 0
 
-        servoAnalogTotalPosition += deltaPosition;
+        servoAnalogTotalPosition += deltaPosition*0.74;
     }
 
 
     public double getPower() {
         return mainServo.getPower();
+    }
+    public double getCalculatedPower() {
+        return lastPower;
     }
 
     public CRServo get(String name) {
@@ -138,6 +142,7 @@ public class CRServoComponent extends Component {
         if (overridePower_bool) targetPower = overridePower;
         for (CRServo servo : motorMap.values()) {
             servo.setPower(targetPower);
+            lastPower = targetPower;
         }
     }
 }

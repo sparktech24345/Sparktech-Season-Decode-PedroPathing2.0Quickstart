@@ -33,7 +33,7 @@ public class ConstantsDecode {
             .yVelocity(61.494551922189565); // copiate direct din exemplul Pedro, de verificat / corectat
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()
-            .forwardPodY(6.686102362)
+            .forwardPodY(6.76102362)
             .strafePodX(0.236240157)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);

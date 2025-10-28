@@ -180,6 +180,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("turret power",robot.getCRServoComponent("TurretRotate").getPower());
                 robot.addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition());
                 robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
+                robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
 
                 robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,0,servoD);
 
