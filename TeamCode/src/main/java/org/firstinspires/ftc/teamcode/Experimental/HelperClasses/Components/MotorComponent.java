@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
@@ -18,6 +19,9 @@ public class MotorComponent extends EncodedComponent {
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
     protected double overridePower = -2;
+    protected boolean andreiOverride = false;
+    protected double targetRpm = 0;
+    protected boolean rpmOverride = false;
 
     public MotorComponent() {
         super();
@@ -69,6 +73,18 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
+    public MotorComponent targetOverride(boolean rpmOverride){
+        this.rpmOverride = rpmOverride;
+        return this;
+    }
+    public MotorComponent setOverride (boolean andreiOverride){
+        this.andreiOverride = andreiOverride;
+        return this;
+    }
+    public MotorComponent setTargetOverride(double targetRpm){
+        this.targetRpm = targetRpm;
+        return this;
+    }
     public MotorComponent setPowerOverride(double power) {
         this.overridePower = power;
         return this;
@@ -90,6 +106,25 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
+    public double CalculatePower(double target_rpm){
+        double error;
+        double current_rpm = 0;
+        ElapsedTime pos_timer = new ElapsedTime();
+        double current_pos;
+        double last_pos = 0;
+
+        if (pos_timer.milliseconds() >= 100) {
+            current_pos = mainMotor.getCurrentPosition();
+            double diff = current_pos - last_pos;
+            diff /= 28;
+            current_rpm = diff * 600;
+            last_pos = current_pos;
+            pos_timer.reset();
+        }
+        error = target_rpm - current_rpm;
+        return (target_rpm + error)/3500;
+    }
+
     public DcMotor get(String name) {
         return motorMap.get(name);
     }
@@ -106,7 +141,8 @@ public class MotorComponent extends EncodedComponent {
         if (usePID) {
             targetPower = PID.calculate(target, componentEncoder.getEncoderPosition());
         }
-        if (overridePower > -2) targetPower = overridePower;
+        if (andreiOverride) targetPower = overridePower;
+        if(rpmOverride) targetPower = CalculatePower(targetRpm);
         for (DcMotor motor : motorMap.values()) {
             motor.setPower(targetPower);
         }

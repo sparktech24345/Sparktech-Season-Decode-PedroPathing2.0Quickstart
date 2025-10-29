@@ -42,6 +42,9 @@ public class MainTeleOP extends LinearOpMode {
 
     public static int ballCounter = 0;
     private long timerForIntake = 0;
+    public boolean rpmOverride = false;
+    public double targetRpm = 0;
+
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
@@ -224,6 +227,11 @@ public class MainTeleOP extends LinearOpMode {
                 robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
                 robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
 
+
+                robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetRpm);
+
+
+
                 // ================================= DRIVER 2 ===============================================
 
                 if(gamepad2.yWasPressed()) {
@@ -263,10 +271,14 @@ public class MainTeleOP extends LinearOpMode {
 
                 if(isTryingToFire){
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","FULL"));
-                    //puterea calculat,unghiul calculat,rotatia calculata;
+                    rpmOverride = true;
+                    targetRpm = 1200; //de decis valoare
+                    //puterea calculata,unghiul calculat,rotatia calculata;
                 }
                 else{
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
+                    rpmOverride = false;
+                    targetRpm = 0;
                 }
             }
         };
@@ -302,6 +314,8 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
+                .setOverride(true)
+                .targetOverride(rpmOverride)
                 .useWithPIDController(false)
                 .useWithEncoder(false)
                 .setRange(-1, 1)
@@ -428,4 +442,6 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("GREEN_SENSOR_BALL",greenSensorBall);
         robot.addTelemetryData("PURPLE_SENSOR_BALL",purpleSensorBall);
     }
+
+
 }
