@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.MotionProfiler;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
@@ -29,10 +28,12 @@ public class CRServoComponent extends Component {
     protected AnalogInput servoEncoder;
     protected double servoAnalogPosition=-1; //an impossible value
     protected double servoAnalogTotalPosition=0;
-    // i want aprox 400 degrees per sec even tho axon can push 493,333 degrees per sec, with basically instant acceleration
-    protected MotionProfiler profiler = new MotionProfiler(400, 1000,5); // deg/sec, deg/sec^2 ( accel )
     protected ElapsedTime timer = new ElapsedTime();
     protected double lastTime = timer.seconds();
+    protected double curentPos=0;
+    protected double lastCurentPos=0;
+    protected double lastLastCurentPos=0;
+    protected double lastLastLastCurentPos=0;
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -99,6 +100,9 @@ public class CRServoComponent extends Component {
     public double getServoAnalogTotalPosition(){
         return servoAnalogTotalPosition;
     }
+    public double getServoAvrgPosition(){
+        return averagePosition();
+    }
     public void updateAnalogServoPosition(){
         double lastPosition = servoAnalogPosition;
         servoAnalogPosition = getAnalogPosition();
@@ -116,6 +120,14 @@ public class CRServoComponent extends Component {
         else deltaPosition -= (1 + 24)*(1/0.74); //taking that -1 back if it is the first run and of the 99 0
 
         servoAnalogTotalPosition += deltaPosition*0.74;
+    }
+
+    public double averagePosition(){
+        curentPos = servoAnalogTotalPosition;
+        lastCurentPos = curentPos;
+        lastLastCurentPos = lastCurentPos;
+        lastLastLastCurentPos = lastLastCurentPos;
+        return (curentPos+lastCurentPos+lastLastCurentPos+lastLastLastCurentPos)/4;
     }
 
 
@@ -143,12 +155,12 @@ public class CRServoComponent extends Component {
         }
         double targetPower = target / resolution;
         if (usePID) {
-            double smoothTarget = profiler.update(servoAnalogTotalPosition, target, dt);  //motion profiling i think
             updateAnalogServoPosition();
-            targetPower = PID.calculate(smoothTarget, servoAnalogTotalPosition);
-            if(Math.abs(smoothTarget - servoAnalogTotalPosition) < 25) targetPower *= 1.5;
-            if(Math.abs(smoothTarget - servoAnalogTotalPosition) < 10) targetPower *= 5;
-            if(Math.abs(smoothTarget - servoAnalogTotalPosition) < 2) targetPower = 0;
+            targetPower = PID.calculate(target, averagePosition());
+            if(Math.abs(target - averagePosition()) < 25) targetPower *= 1.2;
+            if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
+            if(Math.abs(target - averagePosition()) < 13) targetPower *= 5;
+            if(Math.abs(target - averagePosition()) <= 4) targetPower = 0;
         } else {
             targetPower = target;
         }
@@ -158,4 +170,65 @@ public class CRServoComponent extends Component {
             lastPower = targetPower;
         }
     }
+     //*/
+
+    /*@Override
+    public void update() {
+        double dt = timer.seconds() - lastTime;
+        lastTime = timer.seconds();
+        updateAnalogServoPosition();
+
+        double targetPower;
+
+
+        if (overrideTarget_bool) {
+            target = overrideTarget;
+        }
+
+        if (min_range < 0 && max_range > 0) {
+            target = clamp(target, min_range, max_range);
+        }
+
+        if (usePID) {
+            double rawPower = PID.calculate(target, averagePosition());
+
+            double error = target - averagePosition();
+            double dir = Math.signum(error);
+            final double MIN_POWER = 0.15;
+
+            final double STOP_ZONE = 3.8;
+
+
+            if (Math.abs(error) > STOP_ZONE) {
+                if (Math.abs(rawPower) < MIN_POWER) {
+                    targetPower = dir * MIN_POWER;
+                } else {
+                    targetPower = rawPower;
+                }
+            } else {
+                targetPower = 0.0; // in stop zone
+            }
+
+            if(Math.abs(error) > STOP_ZONE) {
+                if(Math.abs(error) < 25) targetPower *= 1.2;
+                if(Math.abs(error) < 20) targetPower *= 1.5;
+                if(Math.abs(error) < 13) targetPower *= 2.0;
+
+                if(Math.abs(error) < 30) targetPower = clamp(targetPower, -0.7, 0.7);
+            } else {
+                targetPower = 0;
+            }
+
+        } else {
+            targetPower = target;
+        }
+        if (overridePower_bool) targetPower = overridePower;
+
+        for (CRServo servo : motorMap.values()) {
+            servo.setPower(targetPower);
+            lastPower = targetPower;
+        }
+    }
+
+     */
 }

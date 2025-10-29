@@ -23,7 +23,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Serv
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
-import java.util.Timer;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -218,7 +217,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition());
                 robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
                 robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
-                robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
+                robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
                 robot.addTelemetryData("robot rotation",Math.toDegrees(robot.getCurrentPose().getHeading()));
 
                 robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,servoI,servoD);
