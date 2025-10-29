@@ -41,6 +41,7 @@ public class test_voltaj_motor_PE_ITD extends LinearOpMode {
 
     private double maxrpm = 6000;
 
+
     private double calculate_power() {
         return target_rpm / maxrpm;
 //        double error = target_rpm - current_rpm;
@@ -56,8 +57,7 @@ public class test_voltaj_motor_PE_ITD extends LinearOpMode {
         robot = new RobotController(hardwareMap, tele , gamepad1, gamepad2) {
             @Override
             public void main_loop() {}
-        };
-        robot.init(OpModes.TeleOP);
+        };    robot.init(OpModes.TeleOP);
         robot.UseDefaultMovement();
 
         target_motor = hardwareMap.get(DcMotor.class, "intakespin");
