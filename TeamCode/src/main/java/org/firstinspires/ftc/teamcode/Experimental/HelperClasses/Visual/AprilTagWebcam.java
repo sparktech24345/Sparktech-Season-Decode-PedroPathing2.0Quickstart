@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -11,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.openftc.easyopencv.OpenCvCamera;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +27,7 @@ public class AprilTagWebcam {
 
 
     public void init(HardwareMap hwMap, Telemetry telemetry){
-        this.telemetry = telemetry;
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setDrawTagID(true)
@@ -38,8 +41,12 @@ public class AprilTagWebcam {
         builder.setCamera(hwMap.get(WebcamName.class, "Webcam 1"));
         builder.setCameraResolution(new Size(640, 480));
         builder.addProcessor(aprilTagProcessor);
+        builder.setShowStatsOverlay(false);
+        telemetry.setMsTransmissionInterval(50);
 
         visionPortal = builder.build();
+
+        FtcDashboard.getInstance().startCameraStream(visionPortal, 30);
     }
 
     public void update() {

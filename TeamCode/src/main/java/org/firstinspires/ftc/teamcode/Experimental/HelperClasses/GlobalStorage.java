@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.MotifSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 
 public class GlobalStorage {
@@ -35,7 +35,7 @@ public class GlobalStorage {
 
     //public static Class<?> F_Constants = FConstants.class;
     //public static Class<?> L_Constants = LConstants.class;
-    public static Class<?> Constants = Constants.class;
+    public static Class<?> Constants = ConstantsDecode.class;
 
     public static Pose startPose = new Pose(0,0,0);
 

@@ -11,6 +11,7 @@ import com.pedropathing.geometry.*;
 import com.pedropathing.paths.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.Drawing.DashboardDrawing;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.PoseUpdater;
 import org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants;
@@ -47,7 +48,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
 
-        poseUpdater = new PoseUpdater(hardwareMap, ITDConstants.class);
+        poseUpdater = new PoseUpdater(hardwareMap, ConstantsDecode.class);
         dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
         dashboardDrawing = new DashboardDrawing(follower,dashboardPoseTracker);
     }
@@ -67,7 +68,7 @@ public class ComplexFollower {
     public boolean done() { return isDone; }
 
     public void update() {
-        if (currentOpModes == OpModes.Autonomous) {
+        if (/*currentOpModes == OpModes.Autonomous*/ true) {
             follower.update();
             poseUpdater.update();
             dashboardDrawing.update();

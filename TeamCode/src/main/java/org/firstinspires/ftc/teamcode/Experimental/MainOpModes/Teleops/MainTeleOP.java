@@ -8,6 +8,7 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,6 +16,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
@@ -29,6 +33,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 public class MainTeleOP extends LinearOpMode {
 
     private RobotController robot;
+    GoBildaPinpointDriver pinpoint;
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double servoP =0.006;
@@ -42,6 +47,8 @@ public class MainTeleOP extends LinearOpMode {
 
     public static int ballCounter = 0;
     private long timerForIntake = 0;
+    private double targetRpm = 0;
+    private double targetAngle = 0;
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
@@ -60,6 +67,7 @@ public class MainTeleOP extends LinearOpMode {
         ballCounter = 0;
 
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
+
             @Override
             public void main_loop() {
                 // all of the code
@@ -219,10 +227,21 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
                 robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
                 robot.addTelemetryData("robot rotation",Math.toDegrees(robot.getCurrentPose().getHeading()));
+                robot.addTelemetryData("robot y",robot.getCurrentPose().getY());
+                robot.addTelemetryData("robot x",robot.getCurrentPose().getX());
 
                 robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,servoI,servoD);
                 robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
-                robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
+                robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret - Math.toDegrees(robot.getCurrentPose().getHeading()));
+
+//                pinpoint.update();
+//                Pose2D pose2D = pinpoint.getPosition();
+//
+//                robot.addTelemetryData("new pinpoint",pose2D.getHeading(AngleUnit.DEGREES));
+
+//                telemetry.addData("Heading angle (DEGREES)", pose2D.getHeading(AngleUnit.DEGREES));
+
+
 
                 // ================================= DRIVER 2 ===============================================
 
@@ -277,6 +296,14 @@ public class MainTeleOP extends LinearOpMode {
 
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensenzor");
         colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesenzor");
+
+//        pinpoint = hardwareMap.get(GoBildaPinpointDriver .class, "pinpoint2");
+//
+//        pinpoint.setOffsets(-84.0, -168.0, DistanceUnit.MM);
+//        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+//        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
+//                GoBildaPinpointDriver.EncoderDirection.FORWARD);
+//        pinpoint.resetPosAndIMU();
 
         robot.UseDefaultMovement();
 
@@ -427,5 +454,16 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.addTelemetryData("GREEN_SENSOR_BALL",greenSensorBall);
         robot.addTelemetryData("PURPLE_SENSOR_BALL",purpleSensorBall);
+    }
+
+    private void calculatePowerAndAngleForTurret(double distance /*in meters pls*/){ //i want the ball to come into the hoop right over 1.1m
+        double calculatedRPM=0;
+        double calculatedAngle=0;
+
+        // sin^2 α = 2ghmax/vi^2 , unde vi = (RPM * 2πr)/60
+
+
+        targetRpm = calculatedRPM;
+        targetAngle = calculatedAngle;
     }
 }

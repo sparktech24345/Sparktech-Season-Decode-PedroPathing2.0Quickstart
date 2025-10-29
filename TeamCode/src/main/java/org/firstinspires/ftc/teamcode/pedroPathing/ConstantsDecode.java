@@ -11,6 +11,7 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
 
 public class ConstantsDecode {
@@ -33,6 +34,8 @@ public class ConstantsDecode {
             .yVelocity(61.494551922189565); // copiate direct din exemplul Pedro, de verificat / corectat
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()
+            .hardwareMapName("pinpoint")
+            .distanceUnit(DistanceUnit.METER) //might be changed later
             .forwardPodY(6.76102362)
             .strafePodX(0.236240157)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
