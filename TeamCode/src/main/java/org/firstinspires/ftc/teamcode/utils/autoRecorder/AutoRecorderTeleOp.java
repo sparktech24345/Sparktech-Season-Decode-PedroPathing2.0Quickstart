@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class AutoRecorderTeleOp extends LinearOpMode {
 
         MultipleTelemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        follower = ITDConstants.ITDcreateFollower(hardwareMap);
+        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
 
         waitForStart();
 

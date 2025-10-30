@@ -47,6 +47,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     private void init_all() {
        followerInstance = new ComplexFollower(hardwareMapInstance);
+       followerInstance.update();
         queuerInstance = new StateQueuer();
         robotControllerInstance = this;
     }
@@ -121,6 +122,7 @@ public abstract class RobotController implements RobotControllerInterface {
         return (T) components.get(componentName);
     }
     public Pose getCurrentPose(){return followerInstance.getInstance().getPose();}
+    public ComplexFollower getFollowerInstance(){return followerInstance;}
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         movement = new DriveTrain(frontLeftName, frontRightName, backLeftName, backLeftName);
@@ -208,6 +210,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void init_loop() {
         gamepadInstance.update();
+        followerInstance.update();
         for (Component c : components.values()) {
             if (c.moveDuringInit()) {
                 c.update();

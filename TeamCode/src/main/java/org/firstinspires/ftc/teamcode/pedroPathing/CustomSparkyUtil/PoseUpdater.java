@@ -12,7 +12,7 @@ import com.pedropathing.math.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 public class PoseUpdater {
     private HardwareMap hardwareMap;
@@ -99,7 +99,7 @@ public class PoseUpdater {
         }
 
          */
-        return new PinpointLocalizer(hardwareMap,ITDConstants.ITDlocalizerConstants);
+        return new PinpointLocalizer(hardwareMap, ConstantsDecode.pinpointConstants);
     }
 
     public void update() {

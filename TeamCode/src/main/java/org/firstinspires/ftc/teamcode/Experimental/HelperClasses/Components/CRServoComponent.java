@@ -117,7 +117,7 @@ public class CRServoComponent extends Component {
                 //arounds++;
             }
         }
-        else deltaPosition -= (1 + 24)*(1/0.74); //taking that -1 back if it is the first run and of the 99 0
+        else deltaPosition -= (1 + 24 + 189)*(1/0.74); //taking that -1 back if it is the first run and of the 99 0
 
         servoAnalogTotalPosition += deltaPosition*0.74;
     }

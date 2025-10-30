@@ -8,6 +8,8 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,23 +19,28 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.TrajectoryCalculator;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
 public class MainTeleOP extends LinearOpMode {
 
     private RobotController robot;
+    private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double servoP =0.006;
     public static double servoI =0;
     public static double servoD =0;
+    public static double motorRpm =0;
     public static double targetTurret =0;
     public boolean isTryingToFire = false;
     public boolean isReadyToFire = false;
@@ -42,6 +49,7 @@ public class MainTeleOP extends LinearOpMode {
 
     public static int ballCounter = 0;
     private long timerForIntake = 0;
+    public static Pose targetPose = new Pose(125,40,0);
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
@@ -70,7 +78,7 @@ public class MainTeleOP extends LinearOpMode {
 
                 robot.addTelemetryData("tester",robot.getComponent("IntakeMotor").getPosition());
 
-                if(purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green){
+                if(false && purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green){
                     if(ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1){ //dont infinite stack comands if full reversing already
                         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
                         robot.addToQueue(new DelayAction(true, 400));
@@ -79,7 +87,7 @@ public class MainTeleOP extends LinearOpMode {
                         ballCounter--;
                     }
                 }
-                if(ballCounter >= 3  && timerForIntake + 600 < System.currentTimeMillis()){
+                if(ballCounter >= 3  && timerForIntake + 600 < System.currentTimeMillis() && false){
                     robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
                     robot.addTelemetryData("blocking",true);
                 }else if(timerForIntake + 600 < System.currentTimeMillis()){
@@ -149,7 +157,7 @@ public class MainTeleOP extends LinearOpMode {
 
                 if (gamepad1.xWasPressed()) {
                     // shoot
-                    robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
+                    robot.addToQueue(new StateAction(false, "TransferServo", "UP"));
                     robot.addToQueue(new DelayAction(true, 600));
                     robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
                 }
@@ -211,19 +219,6 @@ public class MainTeleOP extends LinearOpMode {
 //                    }
                 }
 
-
-
-                robot.addTelemetryData("turret power",robot.getCRServoComponent("TurretRotate").getPower());
-                robot.addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition());
-                robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
-                robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
-                robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
-                robot.addTelemetryData("robot rotation",Math.toDegrees(robot.getCurrentPose().getHeading()));
-
-                robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,servoI,servoD);
-                robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
-                robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
-
                 // ================================= DRIVER 2 ===============================================
 
                 if(gamepad2.yWasPressed()) {
@@ -260,14 +255,47 @@ public class MainTeleOP extends LinearOpMode {
                         robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
                     else robot.addToQueue(new StateAction(false, "PurpleGateServo", "CLOSED"));
                 }
+                ///  ================== Telemetry and Overrides ======================
 
+                robot.addTelemetryData("turret power",robot.getCRServoComponent("TurretRotate").getPower());
+                robot.addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition());
+                robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
+                robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
+                robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
+                robot.addTelemetryData("robot rotation",robot.getCurrentPose().getHeading());
+                robot.addTelemetryData("robot Y",robot.getCurrentPose().getY());
+                robot.addTelemetryData("robot X",robot.getCurrentPose().getX());
+
+
+
+
+                robot.addTelemetryData("turret angle estimation",trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getOptimalAngleDegrees());
+                robot.addTelemetryData("turret rotation estimation",calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
+
+                robot.addTelemetryData("SPEEDD",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()));
+                robot.addTelemetryData("RPMMM",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * 4244);
+
+                robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,servoI,servoD);
+                robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
+                robot.getCRServoComponent("TurretRotate").setTargetOverride(calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
+
+
+                robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
+                robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getOptimalAngleDegrees()));
+
+
+
+                robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
+                robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
                 if(isTryingToFire){
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","FULL"));
                     //puterea calculat,unghiul calculat,rotatia calculata;
+                    motorRpm = 3500;
                 }
                 else{
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
                 }
+
             }
         };
 
@@ -348,6 +376,7 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.makeComponent("TurretAngle", new ServoComponent()
                 .addMotor("turretangle")
+                .setOverrideTarget_bool(false) //go to init pos
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -384,8 +413,8 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("UP", 230);
 
         robot.getComponent("TurretAngle")
-//                .addState("DOWN_MAX", 325, true);
-                .addState("DOWN_MAX", 200, true);
+                .addState("DOWN_MAX", 350, false) // 77 degrees looky
+                .addState("UP_MAX", 192, true); // 50 degrees looky
 
 
         robot.addRobotState("TransferGreen", new RobotState(
@@ -427,5 +456,44 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.addTelemetryData("GREEN_SENSOR_BALL",greenSensorBall);
         robot.addTelemetryData("PURPLE_SENSOR_BALL",purpleSensorBall);
+    }
+    public double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
+        // Current robot position
+        double x = robotPose.getX();
+        double y = robotPose.getY(); // don't invert Y unless your coordinate system specifically requires it
+
+        // Vector from robot to target
+        double dx = targetX - x;
+        double dy = targetY - y;
+
+        // Angle from robot to target (in radians → degrees)
+        double targetAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
+
+        // Normalize to [0, 360)
+        if (targetAngleDeg < 0) targetAngleDeg += 360;
+
+        // Robot heading in degrees
+        // Assuming robotPose.getHeading() is in radians, 0° = facing +X, increases counterclockwise
+        double robotHeadingDeg = Math.toDegrees(robotPose.getHeading());
+
+        // Normalize to [0, 360)
+        if (robotHeadingDeg < 0) robotHeadingDeg += 360;
+
+        // Calculate smallest signed angle difference: [-180, 180]
+        double angleDiff = targetAngleDeg - robotHeadingDeg;
+        angleDiff = ((angleDiff + 540) % 360) - 180;  // neat trick for wrapping to [-180, 180]
+
+        // Positive = target to the robot's right (clockwise turn), negative = to the left
+        robot.addTelemetryData("CALCUL Robot heading", robotHeadingDeg);
+        robot.addTelemetryData("CALCUL Target angle", targetAngleDeg);
+        robot.addTelemetryData("CALCUL Heading adjustment", angleDiff);
+
+        return angleDiff;
+    }
+
+    public static double degreesToOuttakeTurretServo(double degrees) {
+        double m = 0.1709;
+        double b = 17.19;
+        return (degrees - b) / m;
     }
 }

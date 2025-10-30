@@ -77,7 +77,7 @@ public class MotorComponent extends EncodedComponent {
         this.rpmOverride = rpmOverride;
         return this;
     }
-    public MotorComponent setOverride (boolean andreiOverride){
+    public MotorComponent setOverrideCondition (boolean andreiOverride){
         this.andreiOverride = andreiOverride;
         return this;
     }

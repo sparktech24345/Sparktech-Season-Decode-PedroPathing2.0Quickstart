@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 import java.lang.Math;
 
@@ -43,7 +43,7 @@ public class AutoAimTurret extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Servo turretServo = hardwareMap.get(Servo.class, "turretServo");
-        follower = ITDConstants.ITDcreateFollower(hardwareMap);
+        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
 
         while (opModeIsActive()) {
             follower.update();

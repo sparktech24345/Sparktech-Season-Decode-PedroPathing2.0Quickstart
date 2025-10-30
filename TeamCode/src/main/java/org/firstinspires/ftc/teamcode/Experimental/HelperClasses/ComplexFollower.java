@@ -1,12 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode.createFollowerDecode;
-import static org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants.ITDcreateFollower;
-import static org.firstinspires.ftc.teamcode.pedroPathing.SparkyConstants.SparkycreateFollower;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.pedropathing.geometry.*;
 import com.pedropathing.paths.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -14,7 +10,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.Drawing.DashboardDrawing;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.PoseUpdater;
-import org.firstinspires.ftc.teamcode.pedroPathing.ITDConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.DashboardPoseTracker;
 
 import java.util.ArrayDeque;
@@ -40,8 +35,8 @@ public class ComplexFollower {
     private final Queue<Pose> poseQueue = new ArrayDeque<>();
 
 
-    ComplexFollower(HardwareMap hardwareMap) {
-        this.follower = createFollowerDecode(hardwareMap);
+    public ComplexFollower(HardwareMap hardwareMap) {
+        this.follower = ConstantsDecode.createFollowerDecode(hardwareMap);
         follower.update();
         currentPos = startPose;
         currentX = currentPos.getX();
