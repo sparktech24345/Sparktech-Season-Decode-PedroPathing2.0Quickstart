@@ -43,19 +43,23 @@ public class MainTeleOP extends LinearOpMode {
     private GoBildaPinpointDriver pinpointTurret;
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
-    public static double servoP =0.006;
+    public static double servoP =0.01;
     public static double servoI =0;
-    public static double servoD =0;
+    public static double servoD =0.001;
+    public static double servoVel = 5000;
+    public static double servoAcel = 10000;
+    public static double servoTime =1;
     public static double motorRpm =0;
+    public static double rpmMultiplier =0;
     public static double targetTurret =0;
-    public boolean isTryingToFire = false;
+    public static boolean isTryingToFire = false;
     public boolean isReadyToFire = false;
     public static  int purpleCounter = 0;
     public static int greenCounter = 0;
 
     public static int ballCounter = 0;
     private long timerForIntake = 0;
-    public static Pose targetPose = new Pose(125,40,0);
+    public static Pose targetPose = new Pose(122,46,0);
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
@@ -95,8 +99,8 @@ public class MainTeleOP extends LinearOpMode {
                     }
                 }
                 if(ballCounter >= 3  && timerForIntake + 600 < System.currentTimeMillis() && false){
-                    robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
-                    robot.addTelemetryData("blocking",true);
+                    //robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
+                    //robot.addTelemetryData("blocking",true);
                 }else if(timerForIntake + 600 < System.currentTimeMillis()){
                     robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
                     robot.addTelemetryData("redirecting",true);
@@ -162,7 +166,7 @@ public class MainTeleOP extends LinearOpMode {
                     setDirectionFlip(!getDirectionFlip());
                 }
 
-                if (gamepad1.xWasPressed()) {
+                if (gamepad1.xWasReleased()) {
                     // shoot
                     robot.addToQueue(new StateAction(false, "TransferServo", "UP"));
                     robot.addToQueue(new DelayAction(true, 600));
@@ -241,7 +245,7 @@ public class MainTeleOP extends LinearOpMode {
                     // camera targeting false
                 }
 
-                if (gamepad2.xWasPressed() || gamepad1.yWasPressed()){
+                if (gamepad2.xWasPressed() || gamepad1.yWasReleased()){
                     isTryingToFire = !isTryingToFire;
                 }
 
@@ -278,31 +282,38 @@ public class MainTeleOP extends LinearOpMode {
 
                 robot.addTelemetryData("turret angle estimation",trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getOptimalAngleDegrees());
                 robot.addTelemetryData("turret rotation estimation",calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
+                //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
-                robot.addTelemetryData("SPEEDD with RPM",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()));
+                robot.addTelemetryData("SPEEDD with RPM",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier);
+                robot.addTelemetryData("SPEEDD",robot.getMotorComponent("TurretSpinMotor").getPower());
+
+                robot.addTelemetryData("distance to wall",trajectoryCalculator.calculateDistance(robot.getCurrentPose(),targetPose,true));
 
 
                 robot.addTelemetryData("Pinpoint actual pos",pinpointTurret.getHeading(AngleUnit.DEGREES));
                 robot.addTelemetryData("Pinpoint calculated pos",robot.getCRServoComponent("TurretRotate").getpinpointTotalPosition());
 
                 robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,servoI,servoD);
+                robot.getCRServoComponent("TurretRotate").setMotionconstants(servoVel,servoAcel,servoTime);
                 robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
-                robot.getCRServoComponent("TurretRotate").setTargetOverride(calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
+                targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()) + gamepad1.right_stick_x * 30;
+                robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
 
 
                 robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
                 robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getOptimalAngleDegrees()));
+                //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
 
 
 
-                robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-                robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
                 if(isTryingToFire){
-                    robot.addToQueue(new StateAction(false, "TurretSpinMotor","FULL"));
                     //puterea calculat,unghiul calculat,rotatia calculata;
-                    motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity());
+                    motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
+                    robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
+                    robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
                 }
                 else{
+                    robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
                     motorRpm = 0;
                 }
@@ -513,7 +524,8 @@ public class MainTeleOP extends LinearOpMode {
     public static double degreesToOuttakeTurretServo(double degrees) {
         double m = 0.1709;
         double b = 17.19;
-        return (degrees - b) / m;
+        double result = (degrees - b) / m;
+        return clamp(result,100,359);
     }
     public void getPinpointTurretPosition(){
         pinpointTurret.update();

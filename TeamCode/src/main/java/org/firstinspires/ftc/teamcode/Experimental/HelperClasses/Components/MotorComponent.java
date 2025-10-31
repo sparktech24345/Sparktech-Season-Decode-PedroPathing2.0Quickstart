@@ -60,7 +60,9 @@ public class MotorComponent extends EncodedComponent {
     public double getPosition() {
         return mainMotor.getCurrentPosition();
     }
-
+    public double getPower() {
+        return mainMotor.getPower();
+    }
     public MotorComponent setBehaviour(DcMotor.ZeroPowerBehavior zeroPower) {
         for (DcMotor motor : motorMap.values()) {
             motor.setZeroPowerBehavior(zeroPower);
@@ -106,12 +108,13 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
+    double current_pos;
+    double last_pos = 0;
+    ElapsedTime pos_timer = new ElapsedTime();
     public double CalculatePower(double target_rpm){
         double error;
         double current_rpm = 0;
-        ElapsedTime pos_timer = new ElapsedTime();
-        double current_pos;
-        double last_pos = 0;
+
 
         if (pos_timer.milliseconds() >= 100) {
             current_pos = mainMotor.getCurrentPosition();
