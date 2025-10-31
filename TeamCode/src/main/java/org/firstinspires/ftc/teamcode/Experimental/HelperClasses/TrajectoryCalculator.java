@@ -30,30 +30,21 @@ public class TrajectoryCalculator {
     }
 
     // --- CONSTANTS (All in METERS and M/S^2) ---
-    // G_ACCELERATION should be POSITIVE for the formula as written,
-    // since the 'minus' sign is already in the projectile formula's rearrangement.
-    // The value 9.81 m/s^2 is correct for Earth's gravity.
-    private static double G_ACCELERATION = 9.81;
-
-    // Initial height of the projectile launch point (e.g., turret height)
-    private static double Y0_INITIAL_HEIGHT = 0.310; // 310 mm -> 0.31 m
-
-    // Height of the obstacle (e.g., wall)
-    private static double H_WALL_HEIGHT = 1.00; // 1.00 m
-
-    // Required safe clearance above the wall
-    private static double C_CLEARANCE_MARGIN = 0.15; // 15 cm -> 0.15 m
-
-    // The target height the projectile must reach at the distance 'x'
+    private static double G_ACCELERATION = 9.81; // Gravity magnitude (m/s^2)
+    private static double Y0_INITIAL_HEIGHT = 0.310; // Initial height (m)
+    private static double H_WALL_HEIGHT = 1.00; // Wall height (m)
+    private static double C_CLEARANCE_MARGIN = 0.15; // Clearance (m)
     private static double Y_TARGET = H_WALL_HEIGHT + C_CLEARANCE_MARGIN; // 1.15 m
+    private static double Y_DIFFERENCE = Y_TARGET - Y0_INITIAL_HEIGHT; // 0.84 m
+    final double RPM_CONVERSION_FACTOR = (60 / (2 * Math.PI * 0.036)) * (34.0 / 22.0) / 6;
 
-    // The difference (y - y0) from the formula, which is the required height gain
-    private static double Y_DIFFERENCE = Y_TARGET - Y0_INITIAL_HEIGHT; // 1.15 - 0.31 = 0.84 m
+    // !!! NEW CONSTANT for MOTOR SCALING !!!
+    // Set this based on your mechanism's maximum experimental launch speed (m/s).
+    // This example uses a placeholder of 15 m/s, you MUST tune this.
+    public static double MAX_LAUNCH_VELOCITY_MS = 15.0;
 
-    // Angle search range
     private static double minAngleDeg = 55;
     private static double maxAngleDeg = 70;
-
     public double calculateDistance(Pose pose1, Pose pose2, boolean convertToMeters) {
 
         double dx = pose2.getX() - pose1.getX();
@@ -114,7 +105,8 @@ public class TrajectoryCalculator {
 
         // Return the best result found
         if (optimalAngle != -1.0) {
-            return new TrajectoryResult(minV0, optimalAngle);
+            double requiredMotorRPM = minV0 * RPM_CONVERSION_FACTOR;
+            return new TrajectoryResult(requiredMotorRPM, optimalAngle);
         } else {
             // no trajectory found given speed and angle
             return new TrajectoryResult(0.0, 0.0);

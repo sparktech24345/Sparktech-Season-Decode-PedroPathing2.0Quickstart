@@ -27,13 +27,17 @@ public class CRServoComponent extends Component {
     // Encoder for servo position feedback
     protected AnalogInput servoEncoder;
     protected double servoAnalogPosition=-1; //an impossible value
+    protected double pinpointPosition = 0; // a passer value
+    protected double pinpointMathPosition = -1; //an impossible value
     protected double servoAnalogTotalPosition=0;
+    protected double pinpointTotalPosition=0;
     protected ElapsedTime timer = new ElapsedTime();
     protected double lastTime = timer.seconds();
     protected double curentPos=0;
     protected double lastCurentPos=0;
     protected double lastLastCurentPos=0;
     protected double lastLastLastCurentPos=0;
+    protected long lastMonitorTime =0;
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -103,6 +107,33 @@ public class CRServoComponent extends Component {
     public double getServoAvrgPosition(){
         return averagePosition();
     }
+    public double getpinpointTotalPosition(){
+        return pinpointTotalPosition;
+    }
+    public void setPinpointPosition(double pinpointPosition){
+        this.pinpointPosition = pinpointPosition;
+    }
+    public void updatePinpointPosition(){
+        double lastPosition = pinpointMathPosition;
+        pinpointMathPosition = pinpointPosition;
+
+        double deltaPosition = pinpointMathPosition - lastPosition;
+        if(lastPosition != -1) { // taking care of the first run / init as it might return something big
+            if (deltaPosition > 180) {
+                deltaPosition -= 360;
+                //arounds--;
+            } else if (deltaPosition < -180) {
+                deltaPosition += 360;
+                //arounds++;
+            }
+        }
+        else{
+            updateAnalogServoPosition();
+            deltaPosition += -1 + getServoAnalogTotalPosition();
+        }  //taking that -1 back and the initial value
+
+        pinpointTotalPosition += deltaPosition;
+    }
     public void updateAnalogServoPosition(){
         double lastPosition = servoAnalogPosition;
         servoAnalogPosition = getAnalogPosition();
@@ -123,7 +154,7 @@ public class CRServoComponent extends Component {
     }
 
     public double averagePosition(){
-        curentPos = servoAnalogTotalPosition;
+        curentPos = pinpointPosition;
         lastCurentPos = curentPos;
         lastLastCurentPos = lastCurentPos;
         lastLastLastCurentPos = lastLastCurentPos;
@@ -155,13 +186,15 @@ public class CRServoComponent extends Component {
         }
         double targetPower = target / resolution;
         if (usePID) {
+            double avrg =  averagePosition();
             updateAnalogServoPosition();
-            targetPower = PID.calculate(target, averagePosition());
-            if(Math.abs(target - averagePosition()) < 25) targetPower *= 1.2;
-            if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
-            if(Math.abs(target - averagePosition()) < 13) targetPower *= 5;
-            if(Math.abs(target - averagePosition()) <= 4) targetPower = 0;
+            updatePinpointPosition();
+            targetPower = PID.calculate(target, avrg);
+            if(Math.abs(target - avrg) < 25) targetPower *= 1.3;
+            if(Math.abs(target - avrg) < 13) targetPower *= 3;
+            if(Math.abs(target - avrg) <= 3) targetPower = 0;
         } else {
+            if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
             targetPower = target;
         }
         if (overridePower_bool) targetPower = overridePower;

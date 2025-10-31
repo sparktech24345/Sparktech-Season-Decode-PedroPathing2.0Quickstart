@@ -9,7 +9,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,6 +19,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
@@ -35,6 +40,7 @@ public class MainTeleOP extends LinearOpMode {
 
     private RobotController robot;
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
+    private GoBildaPinpointDriver pinpointTurret;
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double servoP =0.006;
@@ -73,6 +79,7 @@ public class MainTeleOP extends LinearOpMode {
                 // all of the code
 
                 HandleColors();
+                getPinpointTurretPosition();
 
                 // intakeing
 
@@ -272,8 +279,11 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("turret angle estimation",trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getOptimalAngleDegrees());
                 robot.addTelemetryData("turret rotation estimation",calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
 
-                robot.addTelemetryData("SPEEDD",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()));
-                robot.addTelemetryData("RPMMM",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * 4244);
+                robot.addTelemetryData("SPEEDD with RPM",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()));
+
+
+                robot.addTelemetryData("Pinpoint actual pos",pinpointTurret.getHeading(AngleUnit.DEGREES));
+                robot.addTelemetryData("Pinpoint calculated pos",robot.getCRServoComponent("TurretRotate").getpinpointTotalPosition());
 
                 robot.getCRServoComponent("TurretRotate").setPIDconstants(servoP,servoI,servoD);
                 robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
@@ -290,10 +300,11 @@ public class MainTeleOP extends LinearOpMode {
                 if(isTryingToFire){
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","FULL"));
                     //puterea calculat,unghiul calculat,rotatia calculata;
-                    motorRpm = 3500;
+                    motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity());
                 }
                 else{
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
+                    motorRpm = 0;
                 }
 
             }
@@ -303,8 +314,12 @@ public class MainTeleOP extends LinearOpMode {
         MakeComponents();
         MakeStates();
 
-        colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensenzor");
-        colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesenzor");
+        //colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensenzor");
+        //colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesenzor");
+
+        pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
+        pinpointTurret.resetPosAndIMU();
+        pinpointTurret.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
 
         robot.UseDefaultMovement();
 
@@ -435,6 +450,7 @@ public class MainTeleOP extends LinearOpMode {
         ));
     }
     private void HandleColors(){
+        /*
         greenSensorColors =colorSensorGreen.getNormalizedColors();
         purpleSensorColors =colorSensorPurple.getNormalizedColors();
 
@@ -453,6 +469,9 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("P_BLUE",(double)purpleSensorColors.blue);
         robot.addTelemetryData("P_GREEN",(double)purpleSensorColors.green);
         // */
+
+        greenSensorBall = BallColorSet_Decode.NoBall;
+        purpleSensorBall = BallColorSet_Decode.NoBall;
 
         robot.addTelemetryData("GREEN_SENSOR_BALL",greenSensorBall);
         robot.addTelemetryData("PURPLE_SENSOR_BALL",purpleSensorBall);
@@ -495,5 +514,13 @@ public class MainTeleOP extends LinearOpMode {
         double m = 0.1709;
         double b = 17.19;
         return (degrees - b) / m;
+    }
+    public void getPinpointTurretPosition(){
+        pinpointTurret.update();
+        if(pinpointTurret != null){
+            double diffAngleFromDriveTrain = pinpointTurret.getHeading(AngleUnit.DEGREES) - Math.toDegrees(robot.getCurrentPose().getHeading());
+            robot.getCRServoComponent("TurretRotate").setPinpointPosition(diffAngleFromDriveTrain);
+        }
+        else robot.getCRServoComponent("TurretRotate").setPinpointPosition(0);
     }
 }
