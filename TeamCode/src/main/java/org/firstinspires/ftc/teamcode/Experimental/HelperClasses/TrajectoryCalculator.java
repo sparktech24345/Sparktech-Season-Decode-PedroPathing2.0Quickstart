@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 
@@ -11,6 +13,11 @@ import com.pedropathing.geometry.Pose;
  */
 @Config
 public class TrajectoryCalculator {
+
+    public static double trajA = 0.1;
+    public static double trajB = 0;
+    public static double wallHeigt = 1.0;
+
     public class TrajectoryResult {
         public TrajectoryResult(double minInitialVelocity, double optimalAngleDegrees) {
             this.minInitialVelocity = minInitialVelocity;
@@ -57,7 +64,28 @@ public class TrajectoryCalculator {
             distance *= 0.0254; // inches to meters
         }
 
+        if(distance == 0) return  0.001;
+
         return distance;
+    }
+
+    public double calcAngle(double distanceToWall, double wheelSpeed){
+        double a = trajA;
+        double b = trajB;
+
+        double v = a * wheelSpeed - b;
+
+        double tanget = Math.pow(v, 2) - Math.sqrt(
+                Math.pow(v, 4) - 9.81 * (9.81 * distanceToWall * distanceToWall + 2 * wallHeigt * v * v)
+        );
+
+        tanget = tanget / 9.81 / distanceToWall;
+
+        return clamp(Math.toDegrees(Math.atan(tanget)), 55, 77);
+
+    }
+    public double calcAngle(Pose pose1, Pose pose2, boolean convertToMeters,double wheelSpeed){
+        return calcAngle(calculateDistance(pose1,pose2,convertToMeters),wheelSpeed);
     }
 
     public TrajectoryResult findLowestSafeTrajectory(double distanceToWall) {

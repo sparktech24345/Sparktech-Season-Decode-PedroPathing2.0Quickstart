@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.MotionProfiling.getTrapezoidPosition;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
@@ -38,6 +39,9 @@ public class CRServoComponent extends Component {
     protected double lastLastCurentPos=0;
     protected double lastLastLastCurentPos=0;
     protected long lastMonitorTime =0;
+    protected double maxAccel=10000;
+    protected double maxVel=4000;
+    protected double motionTime=0.5;
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -68,6 +72,13 @@ public class CRServoComponent extends Component {
     public CRServoComponent setPIDconstants(double p, double i, double d) {
         if(PID == null) PID = new PIDcontroller();
         PID.setConstants(p, i, d);
+        return this;
+    }
+
+    public CRServoComponent setMotionconstants(double maxVel, double maxAccel, double motionTime) {
+        this.maxAccel = maxAccel;
+        this.maxVel = maxVel;
+        this.motionTime = motionTime;
         return this;
     }
     public CRServoComponent setRange(double min, double max) {
@@ -173,6 +184,7 @@ public class CRServoComponent extends Component {
         return motorMap.get(name);
     }
 
+
     @Override
     public void update() {
         double dt = timer.seconds() - lastTime; //timer in seconds for motion profiler cuz physics
@@ -186,12 +198,12 @@ public class CRServoComponent extends Component {
         }
         double targetPower = target / resolution;
         if (usePID) {
-            double avrg =  averagePosition();
+            double avrg =  pinpointTotalPosition;
             updateAnalogServoPosition();
             updatePinpointPosition();
-            targetPower = PID.calculate(target, avrg);
-            if(Math.abs(target - avrg) < 25) targetPower *= 1.3;
-            if(Math.abs(target - avrg) < 13) targetPower *= 3;
+            targetPower = PID.calculate(getTrapezoidPosition(target,maxVel,maxAccel,motionTime), avrg);
+            if(Math.abs(target - avrg) < 25) targetPower *= 1.4;
+            if(Math.abs(target - avrg) < 13) targetPower *= 1.2;
             if(Math.abs(target - avrg) <= 3) targetPower = 0;
         } else {
             if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
