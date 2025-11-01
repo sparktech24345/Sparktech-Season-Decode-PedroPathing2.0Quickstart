@@ -3,13 +3,9 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 
-import android.graphics.Color;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,13 +14,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
@@ -32,7 +28,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.TrajectoryCalculator;
-import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -41,6 +36,7 @@ public class MainTeleOP extends LinearOpMode {
     private RobotController robot;
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     private GoBildaPinpointDriver pinpointTurret;
+    private VoltageSensor controlHubVoltageSensor;
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double servoP =0.01;
@@ -50,7 +46,11 @@ public class MainTeleOP extends LinearOpMode {
     public static double servoAcel = 10000;
     public static double servoTime =1;
     public static double motorRpm =0;
-    public static double rpmMultiplier =0;
+    public static double rpmMultiplier =150;
+    public static double rpmDefault = 1500;
+    public static double rpmExponent = 1.8;
+    public static double rpmkp = 2;
+    public static double rpmkd = 1;
     public static double targetTurret =0;
     public static boolean isTryingToFire = false;
     public boolean isReadyToFire = false;
@@ -59,7 +59,7 @@ public class MainTeleOP extends LinearOpMode {
 
     public static int ballCounter = 0;
     private long timerForIntake = 0;
-    public static Pose targetPose = new Pose(122,46,0);
+    public static Pose targetPose = new Pose(125,46,0);
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
@@ -284,8 +284,11 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("turret rotation estimation",calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
                 //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
-                robot.addTelemetryData("SPEEDD with RPM",degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier);
+                robot.addTelemetryData("target RPM",motorRpm);
+                robot.addTelemetryData("actual RPM",robot.getMotorComponent("TurretSpinMotor").getMeasuredRPM());
                 robot.addTelemetryData("SPEEDD",robot.getMotorComponent("TurretSpinMotor").getPower());
+
+                robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0,rpmkd);
 
                 robot.addTelemetryData("distance to wall",trajectoryCalculator.calculateDistance(robot.getCurrentPose(),targetPose,true));
 
@@ -308,7 +311,8 @@ public class MainTeleOP extends LinearOpMode {
 
                 if(isTryingToFire){
                     //puterea calculat,unghiul calculat,rotatia calculata;
-                    motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
+                    //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
+                    motorRpm = rpmDefault + Math.pow(trajectoryCalculator.calculateDistance(robot.getCurrentPose(),targetPose,true),rpmExponent)* rpmMultiplier;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
                 }
@@ -329,6 +333,9 @@ public class MainTeleOP extends LinearOpMode {
         //colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesenzor");
 
         pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
+
+        controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+
         pinpointTurret.resetPosAndIMU();
         pinpointTurret.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
 
@@ -356,6 +363,7 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
+                .setVoltage(controlHubVoltageSensor.getVoltage())
                 .useWithPIDController(false)
                 .useWithEncoder(false)
                 .setRange(-1, 1)
