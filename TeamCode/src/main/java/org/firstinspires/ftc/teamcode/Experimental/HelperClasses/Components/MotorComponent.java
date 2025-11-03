@@ -169,6 +169,26 @@ public class MotorComponent extends EncodedComponent {
         //return (target_rpm*errMultiplier + error*errMultiplier)/3500;
     }
 
+    public double CalculatePowerV2(double target_rpm){
+        double ks = 0;//TODO:de schimbat valori
+        double kV = 0;
+        double kp = 0;
+        double error = 0;
+        double current_rpm = 0;
+        if(pos_timer.milliseconds()>=100){
+         current_pos = mainMotor.getCurrentPosition();
+         double delta_pos = current_pos - last_pos;
+         delta_pos/=28;
+         last_pos = current_pos;
+         current_rpm = delta_pos*600;
+         pos_timer.reset();
+        }
+        error = target_rpm - current_rpm;
+        double power = ks + kV * current_rpm + kp * error;
+        return power;
+
+    }
+
     public DcMotor get(String name) {
         return motorMap.get(name);
     }
@@ -186,7 +206,8 @@ public class MotorComponent extends EncodedComponent {
             targetPower = PID.calculate(target, componentEncoder.getEncoderPosition());
         }
         if (andreiOverride) targetPower = overridePower;
-        if(rpmOverride){MeasureRPM(); targetPower = CalculatePower(targetRpm);}
+        //if(rpmOverride){MeasureRPM(); targetPower = CalculatePower(targetRpm);}
+        if(rpmOverride) targetPower = CalculatePowerV2(targetRpm);
         for (DcMotor motor : motorMap.values()) {
             motor.setPower(targetPower);
         }
