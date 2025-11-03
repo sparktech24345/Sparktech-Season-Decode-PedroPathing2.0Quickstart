@@ -43,12 +43,12 @@ public class test_voltaj_motor_PE_ITD extends LinearOpMode {
 
 
     private double calculate_power() {
-        return target_rpm / maxrpm;
-//        double error = target_rpm - current_rpm;
+       return target_rpm / maxrpm;
+//      double error = target_rpm - current_rpm;
 //        double p = kp * error;
-//        double d =  kd * (error - last_error);
+//       double d =  kd * (error - last_error);
 //        last_error = error;
-//        return clamp(p + d, -1, 1);
+ //       return clamp(p + d, -1, 1);
     }
 
     @Override
