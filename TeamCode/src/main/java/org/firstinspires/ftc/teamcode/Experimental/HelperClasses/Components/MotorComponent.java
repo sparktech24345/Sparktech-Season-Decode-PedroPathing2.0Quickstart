@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -17,7 +18,7 @@ import java.util.HashMap;
 public class MotorComponent extends EncodedComponent {
     public static double voltageMultiplier = 1;
     protected HashMap<String, DcMotor> motorMap = new HashMap<>();
-    protected DcMotor mainMotor = null;
+    protected DcMotorEx mainMotor = null;
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
     protected PIDcontroller PIDForRPM = null;
@@ -25,6 +26,9 @@ public class MotorComponent extends EncodedComponent {
     protected boolean andreiOverride = false;
     protected double targetRpm = 0;
     protected boolean rpmOverride = false;
+    public static double ksRPM = 0;
+    public static double kvRPM = 0.00055;
+    public static double kpRPM = 0.0009;
 
     public MotorComponent setVoltage(double voltage) {
         this.voltage = voltage;
@@ -58,7 +62,7 @@ public class MotorComponent extends EncodedComponent {
     }
 
     public MotorComponent addMotor(String hardwareMapName) {
-        DcMotor motor = hardwareMapInstance.get(DcMotor.class, hardwareMapName);
+        DcMotorEx motor = hardwareMapInstance.get(DcMotorEx.class, hardwareMapName);
         if (motorMap.isEmpty()) {
             mainMotor = motor;
         }
@@ -136,7 +140,7 @@ public class MotorComponent extends EncodedComponent {
     private static long[] time_history = new long[BUFFER_SIZE];
     private static int history_idx = 0;
     private static double measuredRPM = 0.0;
-    public void MeasureRPM() {
+    public double MeasureRPM() {
         double current_pos = mainMotor.getCurrentPosition();
 
         // 1. Store the new measurement at the current index
@@ -161,6 +165,7 @@ public class MotorComponent extends EncodedComponent {
         }
 
         history_idx = (history_idx + 1) % BUFFER_SIZE;
+        return measuredRPM;
     }
 
     public double getMeasuredRPM(){return measuredRPM;}
@@ -169,11 +174,14 @@ public class MotorComponent extends EncodedComponent {
         //return (target_rpm*errMultiplier + error*errMultiplier)/3500;
     }
 
+    public MotorComponent setRPM_PIDCoefficients(double kpRPM, double kvRPM, double ksRPM){
+        this.kvRPM = kvRPM;
+        this.ksRPM = ksRPM;
+        this.kpRPM = kpRPM;
+        return this;
+    }
     public double CalculatePowerV2(double target_rpm){
-        double ks = 0;//TODO:de schimbat valori
-        double kV = 0;
-        double kp = 0;
-        double error = 0;
+        double error = 0;//TODO:de schimbat valori
         double current_rpm = 0;
         if(pos_timer.milliseconds()>=100){
          current_pos = mainMotor.getCurrentPosition();
@@ -184,9 +192,8 @@ public class MotorComponent extends EncodedComponent {
          pos_timer.reset();
         }
         error = target_rpm - current_rpm;
-        double power = ks + kV * current_rpm + kp * error;
+        double power = ksRPM + kvRPM * mainMotor.getVelocity() + kpRPM * error;
         return power;
-
     }
 
     public DcMotor get(String name) {

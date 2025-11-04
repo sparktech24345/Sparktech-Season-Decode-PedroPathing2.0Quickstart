@@ -224,14 +224,14 @@ public class CRServoComponent extends Component {
         }
         double targetPower = target / resolution;
         if (usePID) {
-            double avrg =  pinpointTotalPosition;
             updateAnalogServoPosition();
             updatePinpointPosition();
-            double clampedTarget = clampPositionTarget(avrg,target,-270,270);
-            targetPower = PID.calculate(getTrapezoidPosition(target,maxVel,maxAccel,motionTime), clampedTarget);
-            if(Math.abs(target - clampedTarget) < 25) targetPower *= 1.4;
-            if(Math.abs(target - clampedTarget) < 13) targetPower *= 1.2;
-            if(Math.abs(target - clampedTarget) <= 3) targetPower = 0;
+            double avrg =  pinpointTotalPosition;
+            //double clampedTarget = clampPositionTarget(avrg,target,-200,200);
+            targetPower = PID.calculate(getTrapezoidPosition(target,maxVel,maxAccel,motionTime), avrg);
+            if(Math.abs(target - avrg) < 25) targetPower *= 1.4;
+            if(Math.abs(target - avrg) < 13) targetPower *= 1.2;
+            if(Math.abs(target - avrg) <= 3) targetPower = 0;
         } else {
             if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
             targetPower = target;

@@ -49,6 +49,7 @@ public class MainTeleOP extends LinearOpMode {
     public static double servoVel = 5000;
     public static double servoAcel = 10000;
     public static double servoTime =1;
+    public static double cameraError = 0;
     public static double motorRpm =0;
     public static double rpmMultiplier =150;
     public static double rpmDefault = 1500;
@@ -297,7 +298,7 @@ public class MainTeleOP extends LinearOpMode {
                 //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
                 robot.addTelemetryData("target RPM",motorRpm);
-                robot.addTelemetryData("actual RPM",robot.getMotorComponent("TurretSpinMotor").getMeasuredRPM());
+                robot.addTelemetryData("actual RPM",robot.getMotorComponent("TurretSpinMotor").MeasureRPM());
                 robot.addTelemetryData("SPEEDD",robot.getMotorComponent("TurretSpinMotor").getPower());
 
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0,rpmkd);
@@ -324,7 +325,8 @@ public class MainTeleOP extends LinearOpMode {
                 if(isTryingToFire){
                     //puterea calculat,unghiul calculat,rotatia calculata;
                     //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
-                    motorRpm = rpmDefault + Math.pow(trajectoryCalculator.calculateDistance(robot.getCurrentPose(),targetPose,true),rpmExponent)* rpmMultiplier;
+                    double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(),targetPose,true);
+                    motorRpm = rpmDefault + distance * rpmMultiplier + distance * distance * rpmExponent;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
                 }
@@ -346,7 +348,7 @@ public class MainTeleOP extends LinearOpMode {
 
         pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
-        controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
 
@@ -377,8 +379,9 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
-                .setVoltage(controlHubVoltageSensor.getVoltage())
                 .useWithPIDController(false)
+                .setRPM_PIDCoefficients(0.0009,0.00055,0.1)
+                .setTargetOverride(0)
                 .useWithEncoder(false)
                 .setRange(-1, 1)
         );
@@ -561,7 +564,9 @@ public class MainTeleOP extends LinearOpMode {
         aprilTagWebcam.update();
         AprilTagDetection id20 = aprilTagWebcam.getTagBySpecificId(20);
         aprilTagWebcam.displayDetectionTelemetry(id20);
-        double cameraError =id20.ftcPose.roll; //might be the wrong thing
+
+        if(id20 != null) cameraError =id20.ftcPose.bearing; //might be the wrong thing
+
         // telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detectedId.ftcPose.pitch, detectedId.ftcPose.roll, detectedId.ftcPose.yaw));
         double actualError = cameraError - existingError;
 
