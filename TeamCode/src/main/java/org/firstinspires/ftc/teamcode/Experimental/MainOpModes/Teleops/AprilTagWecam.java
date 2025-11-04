@@ -16,8 +16,8 @@ public class AprilTagWecam extends OpMode {
 
     @Override
     public void init() {
-        aprilTagWebcam.init(hardwareMap, telemetry);
         tel = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        aprilTagWebcam.init(hardwareMap, tel,"Webcam 1");
     }
 
     @Override

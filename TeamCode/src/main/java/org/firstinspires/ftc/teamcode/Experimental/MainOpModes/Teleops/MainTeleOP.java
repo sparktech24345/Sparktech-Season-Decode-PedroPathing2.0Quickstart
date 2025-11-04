@@ -28,6 +28,9 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.TrajectoryCalculator;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.AprilTagWebcam;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -37,6 +40,7 @@ public class MainTeleOP extends LinearOpMode {
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     private GoBildaPinpointDriver pinpointTurret;
     private VoltageSensor controlHubVoltageSensor;
+    private AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double servoP =0.01;
@@ -59,6 +63,8 @@ public class MainTeleOP extends LinearOpMode {
 
     public static int ballCounter = 0;
     private long timerForIntake = 0;
+    private long lastTimeNano =0;
+    private double nonCorrectedCameraError=0;
     public static Pose targetPose = new Pose(125,46,0);
 
     /// ----------------- Color Sensor Stuff ------------------
@@ -82,6 +88,8 @@ public class MainTeleOP extends LinearOpMode {
             public void main_loop() {
                 // all of the code
 
+                robot.addTelemetryData("loop time Nano",calculateTimeDiff());
+                robot.addTelemetryData("loop time Milis",calculateTimeDiff() / 1000);
                 HandleColors();
                 getPinpointTurretPosition();
 
@@ -273,6 +281,10 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
                 robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
                 robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
+
+                double cameraCorrectionError = calculateCameraError(targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
+                robot.addTelemetryData("Camera Error correction",cameraCorrectionError);
+
                 robot.addTelemetryData("robot rotation",robot.getCurrentPose().getHeading());
                 robot.addTelemetryData("robot Y",robot.getCurrentPose().getY());
                 robot.addTelemetryData("robot X",robot.getCurrentPose().getX());
@@ -335,6 +347,8 @@ public class MainTeleOP extends LinearOpMode {
         pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+
+        aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
 
         pinpointTurret.resetPosAndIMU();
         pinpointTurret.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
@@ -542,5 +556,23 @@ public class MainTeleOP extends LinearOpMode {
             robot.getCRServoComponent("TurretRotate").setPinpointPosition(diffAngleFromDriveTrain);
         }
         else robot.getCRServoComponent("TurretRotate").setPinpointPosition(0);
+    }
+    public double calculateCameraError(double existingError){
+        aprilTagWebcam.update();
+        AprilTagDetection id20 = aprilTagWebcam.getTagBySpecificId(20);
+        aprilTagWebcam.displayDetectionTelemetry(id20);
+        double cameraError =id20.ftcPose.roll; //might be the wrong thing
+        // telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detectedId.ftcPose.pitch, detectedId.ftcPose.roll, detectedId.ftcPose.yaw));
+        double actualError = cameraError - existingError;
+
+        nonCorrectedCameraError = cameraError;
+
+        return actualError;
+    }
+    public long calculateTimeDiff(){
+        long current = System.nanoTime();
+        long laster = lastTimeNano;
+        lastTimeNano = current;
+        return current - lastTimeNano;
     }
 }

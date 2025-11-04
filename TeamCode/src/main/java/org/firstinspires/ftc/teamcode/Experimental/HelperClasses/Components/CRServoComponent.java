@@ -171,6 +171,32 @@ public class CRServoComponent extends Component {
         lastLastLastCurentPos = lastLastCurentPos;
         return (curentPos+lastCurentPos+lastLastCurentPos+lastLastLastCurentPos)/4;
     }
+    public double clampPositionTarget(double currentPos, double targetPos, double minPos, double maxPos) {
+        double clampedPosition;
+
+        double range = maxPos - minPos;
+        if (range <= 0) {
+            return 0; //max pos must be greater then min pos
+        }
+
+        //normalize to within one full revolution i think hopey
+        double normalizedTarget = ((targetPos - minPos) % range + range) % range + minPos;
+
+        //determine shortest path (turnaround logic) i think
+        double diff = normalizedTarget - currentPos;
+
+        //if the difference is more than half the range, wrap around the other way
+        if (diff > range / 2) {
+            normalizedTarget -= range;
+        } else if (diff < -range / 2) {
+            normalizedTarget += range;
+        }
+
+        //clamping to be sure
+        clampedPosition = Math.max(minPos, Math.min(normalizedTarget, maxPos));
+
+        return clampedPosition;
+    }
 
 
     public double getPower() {
@@ -201,10 +227,11 @@ public class CRServoComponent extends Component {
             double avrg =  pinpointTotalPosition;
             updateAnalogServoPosition();
             updatePinpointPosition();
-            targetPower = PID.calculate(getTrapezoidPosition(target,maxVel,maxAccel,motionTime), avrg);
-            if(Math.abs(target - avrg) < 25) targetPower *= 1.4;
-            if(Math.abs(target - avrg) < 13) targetPower *= 1.2;
-            if(Math.abs(target - avrg) <= 3) targetPower = 0;
+            double clampedTarget = clampPositionTarget(avrg,target,-270,270);
+            targetPower = PID.calculate(getTrapezoidPosition(target,maxVel,maxAccel,motionTime), clampedTarget);
+            if(Math.abs(target - clampedTarget) < 25) targetPower *= 1.4;
+            if(Math.abs(target - clampedTarget) < 13) targetPower *= 1.2;
+            if(Math.abs(target - clampedTarget) <= 3) targetPower = 0;
         } else {
             if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
             targetPower = target;
@@ -215,65 +242,4 @@ public class CRServoComponent extends Component {
             lastPower = targetPower;
         }
     }
-     //*/
-
-    /*@Override
-    public void update() {
-        double dt = timer.seconds() - lastTime;
-        lastTime = timer.seconds();
-        updateAnalogServoPosition();
-
-        double targetPower;
-
-
-        if (overrideTarget_bool) {
-            target = overrideTarget;
-        }
-
-        if (min_range < 0 && max_range > 0) {
-            target = clamp(target, min_range, max_range);
-        }
-
-        if (usePID) {
-            double rawPower = PID.calculate(target, averagePosition());
-
-            double error = target - averagePosition();
-            double dir = Math.signum(error);
-            final double MIN_POWER = 0.15;
-
-            final double STOP_ZONE = 3.8;
-
-
-            if (Math.abs(error) > STOP_ZONE) {
-                if (Math.abs(rawPower) < MIN_POWER) {
-                    targetPower = dir * MIN_POWER;
-                } else {
-                    targetPower = rawPower;
-                }
-            } else {
-                targetPower = 0.0; // in stop zone
-            }
-
-            if(Math.abs(error) > STOP_ZONE) {
-                if(Math.abs(error) < 25) targetPower *= 1.2;
-                if(Math.abs(error) < 20) targetPower *= 1.5;
-                if(Math.abs(error) < 13) targetPower *= 2.0;
-
-                if(Math.abs(error) < 30) targetPower = clamp(targetPower, -0.7, 0.7);
-            } else {
-                targetPower = 0;
-            }
-
-        } else {
-            targetPower = target;
-        }
-        if (overridePower_bool) targetPower = overridePower;
-
-        for (CRServo servo : motorMap.values()) {
-            servo.setPower(targetPower);
-            lastPower = targetPower;
-        }
-    }
-
-     */
 }

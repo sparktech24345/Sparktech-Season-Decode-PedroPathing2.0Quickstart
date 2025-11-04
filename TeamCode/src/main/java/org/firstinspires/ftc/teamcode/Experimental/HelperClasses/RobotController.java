@@ -30,7 +30,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public static ComplexFollower followerInstance = null;
     public static ComplexGamepad gamepadInstance = null;
     public static HardwareMap hardwareMapInstance = null;
-    public static Telemetry telemetryInstance = null;
+    public static MultipleTelemetry telemetryInstance = null;
     public static StateQueuer queuerInstance = null;
     
     
@@ -177,6 +177,7 @@ public abstract class RobotController implements RobotControllerInterface {
         }
         return comp.getPosition();
     }
+    public MultipleTelemetry getTelemetryInstance(){return telemetryInstance;}
 
     public Encoder getComponentEncoder(String componentName) {
         Component comp = components.get(componentName);

@@ -23,11 +23,12 @@ public class AprilTagWebcam {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
     private List<AprilTagDetection> detectedTags = new ArrayList<>();
-    private Telemetry telemetry;
+    private MultipleTelemetry telemetry;
 
 
-    public void init(HardwareMap hwMap, Telemetry telemetry){
-        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+    public void init(HardwareMap hwMap, MultipleTelemetry telemetry,String hardwareName){
+        //this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        this.telemetry = telemetry;
 
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setDrawTagID(true)
@@ -38,7 +39,7 @@ public class AprilTagWebcam {
                 .build();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
-        builder.setCamera(hwMap.get(WebcamName.class, "Webcam 1"));
+        builder.setCamera(hwMap.get(WebcamName.class, hardwareName));
         builder.setCameraResolution(new Size(640, 480));
         builder.addProcessor(aprilTagProcessor);
         builder.setShowStatsOverlay(false);
