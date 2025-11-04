@@ -38,7 +38,7 @@ public class Test_VPID extends LinearOpMode {
     @Override
     public void runOpMode(){
         MultipleTelemetry tele= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        turretspin1= hardwareMap.get(DcMotorEx.class, "turretspin1");
+        turretspin1= hardwareMap.get(DcMotorEx.class, "turretspin");
         turretspin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //double rpm = ticksPerSecond * 60 / TICKS_PER_REV;
 
@@ -61,6 +61,7 @@ public class Test_VPID extends LinearOpMode {
             tele.addData("targetrpm", target_rpm);
             tele.addData("currentrpm", current_rpm);
             tele.addData("power", power);
+            tele.addData("measured velocity", turretspin1.getVelocity());
             tele.addData("error", error);
             tele.addData("ks",ks);
             tele.addData("kV",kV);
