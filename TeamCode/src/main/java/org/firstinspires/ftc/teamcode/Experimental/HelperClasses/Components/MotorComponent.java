@@ -28,7 +28,8 @@ public class MotorComponent extends EncodedComponent {
     protected boolean rpmOverride = false;
     public static double ksRPM = 0;
     public static double kvRPM = 0.00055;
-    public static double kpRPM = 0.0009;
+    public static double kpRPM = 0.005;
+    protected double velocity = 0;
 
     public MotorComponent setVoltage(double voltage) {
         this.voltage = voltage;
@@ -180,28 +181,22 @@ public class MotorComponent extends EncodedComponent {
         this.kpRPM = kpRPM;
         return this;
     }
-    public double CalculatePowerV2(double target_rpm){
-        double error = 0;//TODO:de schimbat valori
-        double current_rpm = 0;
-        if(pos_timer.milliseconds()>=100){
-         current_pos = mainMotor.getCurrentPosition();
-         double delta_pos = current_pos - last_pos;
-         delta_pos/=28;
-         last_pos = current_pos;
-         current_rpm = delta_pos*600;
-         pos_timer.reset();
-        }
-        error = target_rpm - current_rpm;
-        double power = ksRPM + kvRPM * mainMotor.getVelocity() + kpRPM * error;
+    public double CalculatePowerV2(double targetVelocity){
+        double error =0;
+        error = targetVelocity - velocity;
+        double power = ksRPM + kvRPM * velocity + kpRPM * error;
+        if(targetVelocity == 0) return 0;
         return power;
     }
 
     public DcMotor get(String name) {
         return motorMap.get(name);
     }
+    public double getVelocity(){return velocity;}
 
     @Override
     public void update() {
+        velocity = mainMotor.getVelocity();
         if (componentEncoder != null) {
             componentEncoder.update();
         }

@@ -30,7 +30,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.TrajectoryCalculator;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.AprilTagWebcam;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -50,10 +49,10 @@ public class MainTeleOP extends LinearOpMode {
     public static double servoAcel = 10000;
     public static double servoTime =1;
     public static double cameraError = 0;
-    public static double motorRpm =0;
-    public static double rpmMultiplier =150;
+    public static double targetVelocity =0;
+    public static double rpmMultiplier =0;
     public static double rpmDefault = 1500;
-    public static double rpmExponent = 1.8;
+    public static double rpmExponent = 0;
     public static double rpmkp = 2;
     public static double rpmkd = 1;
     public static double targetTurret =0;
@@ -175,7 +174,7 @@ public class MainTeleOP extends LinearOpMode {
                     setDirectionFlip(!getDirectionFlip());
                 }
 
-                if (gamepad1.xWasReleased()) {
+                if (robot.getControllerKey("X1").ExecuteAfterPress) {
                     // shoot
                     robot.addToQueue(new StateAction(false, "TransferServo", "UP"));
                     robot.addToQueue(new DelayAction(true, 600));
@@ -254,7 +253,7 @@ public class MainTeleOP extends LinearOpMode {
                     // camera targeting false
                 }
 
-                if (gamepad2.xWasPressed() || gamepad1.yWasReleased()){
+                if (gamepad2.xWasPressed() || robot.getControllerKey("Y1").ExecuteAfterPress){
                     isTryingToFire = !isTryingToFire;
                 }
 
@@ -297,8 +296,8 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("turret rotation estimation",calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
                 //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
-                robot.addTelemetryData("target RPM",motorRpm);
-                robot.addTelemetryData("actual RPM",robot.getMotorComponent("TurretSpinMotor").MeasureRPM());
+                robot.addTelemetryData("target velocity", targetVelocity);
+                robot.addTelemetryData("actual Velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
                 robot.addTelemetryData("SPEEDD",robot.getMotorComponent("TurretSpinMotor").getPower());
 
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0,rpmkd);
@@ -313,6 +312,9 @@ public class MainTeleOP extends LinearOpMode {
                 robot.getCRServoComponent("TurretRotate").setMotionconstants(servoVel,servoAcel,servoTime);
                 robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
                 targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()) + gamepad1.right_stick_x * 30;
+
+                targetTurret += cameraCorrectionError;
+
                 robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
 
 
@@ -326,14 +328,15 @@ public class MainTeleOP extends LinearOpMode {
                     //puterea calculat,unghiul calculat,rotatia calculata;
                     //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
                     double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(),targetPose,true);
-                    motorRpm = rpmDefault + distance * rpmMultiplier + distance * distance * rpmExponent;
+                    distance *= 100; //in cm
+                    targetVelocity = 795 + distance * -0.956127 + distance * distance *  0.047080 + Math.pow(distance,3) * -0.000300 + Math.pow(distance,4) * 0.000001;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-                    robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
+                    robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
                 }
                 else{
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
-                    motorRpm = 0;
+                    targetVelocity = 0;
                 }
 
             }
@@ -380,7 +383,7 @@ public class MainTeleOP extends LinearOpMode {
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
                 .useWithPIDController(false)
-                .setRPM_PIDCoefficients(0.0009,0.00055,0.1)
+                .setRPM_PIDCoefficients(0.005,0.00055,0)
                 .setTargetOverride(0)
                 .useWithEncoder(false)
                 .setRange(-1, 1)
@@ -566,13 +569,14 @@ public class MainTeleOP extends LinearOpMode {
         aprilTagWebcam.displayDetectionTelemetry(id20);
 
         if(id20 != null) cameraError =id20.ftcPose.bearing; //might be the wrong thing
+        else cameraError = 0;
 
         // telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detectedId.ftcPose.pitch, detectedId.ftcPose.roll, detectedId.ftcPose.yaw));
         double actualError = cameraError - existingError;
 
         nonCorrectedCameraError = cameraError;
 
-        return actualError;
+        return clamp(actualError*0.8,-15,15);
     }
     public long calculateTimeDiff(){
         long current = System.nanoTime();

@@ -229,8 +229,8 @@ public class CRServoComponent extends Component {
             double avrg =  pinpointTotalPosition;
             //double clampedTarget = clampPositionTarget(avrg,target,-200,200);
             targetPower = PID.calculate(getTrapezoidPosition(target,maxVel,maxAccel,motionTime), avrg);
-            if(Math.abs(target - avrg) < 25) targetPower *= 1.4;
-            if(Math.abs(target - avrg) < 13) targetPower *= 1.2;
+            if(Math.abs(target - avrg) < 25) targetPower *= 1.3;
+            if(Math.abs(target - avrg) < 13) targetPower *= 1.1;
             if(Math.abs(target - avrg) <= 3) targetPower = 0;
         } else {
             if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
