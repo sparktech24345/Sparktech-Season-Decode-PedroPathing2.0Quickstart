@@ -280,9 +280,9 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition());
                 robot.addTelemetryData("total analog position",robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition());
                 robot.addTelemetryData("estimated calculated power",robot.getCRServoComponent("TurretRotate").getCalculatedPower());
-                robot.addTelemetryData("estimated error",targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
+                robot.addTelemetryData("estimated error",targetTurret - robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
 
-                double cameraCorrectionError = calculateCameraError(targetTurret-robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
+                double cameraCorrectionError = calculateCameraError(targetTurret - robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
                 robot.addTelemetryData("Camera Error correction",cameraCorrectionError);
 
                 robot.addTelemetryData("robot rotation",robot.getCurrentPose().getHeading());
@@ -329,7 +329,7 @@ public class MainTeleOP extends LinearOpMode {
                     //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
                     double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(),targetPose,true);
                     distance *= 100; //in cm
-                    targetVelocity = 795 + distance * -0.956127 + distance * distance *  0.047080 + Math.pow(distance,3) * -0.000300 + Math.pow(distance,4) * 0.000001;
+                    targetVelocity = 665.276311 + distance * 3.37452358 + distance * distance * -0.0064362671 + Math.pow(distance,3) * 0.0000058014683;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
                 }
