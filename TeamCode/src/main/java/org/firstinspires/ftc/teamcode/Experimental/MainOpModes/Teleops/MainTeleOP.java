@@ -56,6 +56,7 @@ public class MainTeleOP extends LinearOpMode {
     public static double rpmkp = 2;
     public static double rpmkd = 1;
     public static double targetTurret =0;
+    public static double degreSubtract = 2;
     public static boolean isTryingToFire = false;
     public boolean isReadyToFire = false;
     public static  int purpleCounter = 0;
@@ -65,7 +66,7 @@ public class MainTeleOP extends LinearOpMode {
     private long timerForIntake = 0;
     private long lastTimeNano =0;
     private double nonCorrectedCameraError=0;
-    public static Pose targetPose = new Pose(125,46,0);
+    public static Pose targetPose = new Pose(130,42.8,0);
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
@@ -176,9 +177,12 @@ public class MainTeleOP extends LinearOpMode {
 
                 if (robot.getControllerKey("X1").ExecuteAfterPress) {
                     // shoot
+                    robot.addToQueue(new StateAction(false, "PurpleGateServo", "CLOSED"));
+                    robot.addToQueue(new DelayAction(true, 600));
                     robot.addToQueue(new StateAction(false, "TransferServo", "UP"));
                     robot.addToQueue(new DelayAction(true, 600));
                     robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
+                    robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
                 }
 
                 if (gamepad1.right_bumper) {
@@ -292,7 +296,7 @@ public class MainTeleOP extends LinearOpMode {
 
 
 
-                robot.addTelemetryData("turret angle estimation",trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getOptimalAngleDegrees());
+                robot.addTelemetryData("turret angle estimation",trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getOptimalAngleDegrees()-degreSubtract);
                 robot.addTelemetryData("turret rotation estimation",calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()));
                 //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
@@ -313,7 +317,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.getCRServoComponent("TurretRotate").setOverrideBool(true);
                 targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()) + gamepad1.right_stick_x * 30;
 
-                targetTurret += cameraCorrectionError;
+                //targetTurret += cameraCorrectionError;
 
                 robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
 
@@ -450,8 +454,8 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("FULL", 1);
 
         robot.getComponent("PurpleGateServo")
-                .addState("OPEN", 35, true)
-                .addState("CLOSED", 155);
+                .addState("OPEN", 15, true)
+                .addState("CLOSED", 122);
 
         robot.getComponent("GreenGateServo")
                 .addState("OPEN", 30)
@@ -566,17 +570,17 @@ public class MainTeleOP extends LinearOpMode {
     public double calculateCameraError(double existingError){
         aprilTagWebcam.update();
         AprilTagDetection id20 = aprilTagWebcam.getTagBySpecificId(20);
-        aprilTagWebcam.displayDetectionTelemetry(id20);
+        if(id20 != null) aprilTagWebcam.displayDetectionTelemetry(id20);
 
-        if(id20 != null) cameraError =id20.ftcPose.bearing; //might be the wrong thing
-        else cameraError = 0;
+        if(id20 != null) cameraError =id20.ftcPose.x; //might be the wrong thing
+        else cameraError = existingError;
 
         // telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detectedId.ftcPose.pitch, detectedId.ftcPose.roll, detectedId.ftcPose.yaw));
         double actualError = cameraError - existingError;
 
         nonCorrectedCameraError = cameraError;
 
-        return clamp(actualError*0.8,-15,15);
+        return clamp(actualError,-20,20);
     }
     public long calculateTimeDiff(){
         long current = System.nanoTime();
