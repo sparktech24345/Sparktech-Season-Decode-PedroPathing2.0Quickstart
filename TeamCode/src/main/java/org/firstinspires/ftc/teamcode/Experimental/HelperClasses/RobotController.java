@@ -96,6 +96,12 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
+    public RobotController addToQueue(Action... actions) {
+        for (Action action : actions)
+            queuerInstance.addAction(action);
+        return this;
+    }
+
     public Button getControllerKey(String name) {
         return gamepadInstance.get(name);
     }

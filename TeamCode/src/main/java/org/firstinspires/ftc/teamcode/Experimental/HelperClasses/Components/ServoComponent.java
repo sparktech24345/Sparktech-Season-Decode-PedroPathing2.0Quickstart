@@ -31,7 +31,7 @@ public class ServoComponent extends Component {
         motorMap.put(customMapName, motor);
         return this;
     }
-    public ServoComponent setOverrideTarget_bool(boolean shoulOverride){
+    public ServoComponent setOverrideTarget_bool(boolean shoulOverride) {
         this.overrideTarget_bool = shoulOverride;
         return this;
     }

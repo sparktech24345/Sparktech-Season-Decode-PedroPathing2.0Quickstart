@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.MotionPr
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
 
+@Config
 public class CRServoComponent extends Component {
 
     protected HashMap<String, CRServo> motorMap = new HashMap<>();
@@ -70,7 +72,7 @@ public class CRServoComponent extends Component {
     }
 
     public CRServoComponent setPIDconstants(double p, double i, double d) {
-        if(PID == null) PID = new PIDcontroller();
+        if (PID == null) PID = new PIDcontroller();
         PID.setConstants(p, i, d);
         return this;
     }
@@ -103,33 +105,34 @@ public class CRServoComponent extends Component {
     }
 
     public CRServoComponent useWithPIDController(boolean b) {
-        if(PID == null) PID = new PIDcontroller();
+        if (PID == null) PID = new PIDcontroller();
         usePID = b;
         return this;
     }
 
     public double getPosition() { return mainServo.getPower(); }
-    public double getAnalogPosition(){if (servoEncoder == null) return 0;
+    public double getAnalogPosition() {
+        if (servoEncoder == null) return 0;
         return (servoEncoder.getVoltage() / 3.3) * 360; //should be the position in degrees, resets under 0 or above 360
     }
-    public double getServoAnalogTotalPosition(){
+    public double getServoAnalogTotalPosition() {
         return servoAnalogTotalPosition;
     }
-    public double getServoAvrgPosition(){
+    public double getServoAvrgPosition() {
         return averagePosition();
     }
-    public double getpinpointTotalPosition(){
+    public double getpinpointTotalPosition() {
         return pinpointTotalPosition;
     }
-    public void setPinpointPosition(double pinpointPosition){
+    public void setPinpointPosition(double pinpointPosition) {
         this.pinpointPosition = pinpointPosition;
     }
-    public void updatePinpointPosition(){
+    public void updatePinpointPosition() {
         double lastPosition = pinpointMathPosition;
         pinpointMathPosition = pinpointPosition;
 
         double deltaPosition = pinpointMathPosition - lastPosition;
-        if(lastPosition != -1) { // taking care of the first run / init as it might return something big
+        if (lastPosition != -1) { // taking care of the first run / init as it might return something big
             if (deltaPosition > 180) {
                 deltaPosition -= 360;
                 //arounds--;
@@ -138,19 +141,19 @@ public class CRServoComponent extends Component {
                 //arounds++;
             }
         }
-        else{
+        else {
             updateAnalogServoPosition();
             deltaPosition += -1 + getServoAnalogTotalPosition();
         }  //taking that -1 back and the initial value
 
         pinpointTotalPosition += deltaPosition;
     }
-    public void updateAnalogServoPosition(){
+    public void updateAnalogServoPosition() {
         double lastPosition = servoAnalogPosition;
         servoAnalogPosition = getAnalogPosition();
 
         double deltaPosition = servoAnalogPosition - lastPosition;
-        if(lastPosition != -1) { // taking care of the first run / init as it might return something big
+        if (lastPosition != -1) { // taking care of the first run / init as it might return something big
             if (deltaPosition > 180) {
                 deltaPosition -= 360;
                 //arounds--;
@@ -159,12 +162,12 @@ public class CRServoComponent extends Component {
                 //arounds++;
             }
         }
-        else deltaPosition -= (1 + 24 + 189)*(1/0.74); //taking that -1 back if it is the first run and of the 99 0
+        else deltaPosition -= (1 + 24 + 189) * (1 / 0.74); //taking that -1 back if it is the first run and of the 99 0
 
-        servoAnalogTotalPosition += deltaPosition*0.74;
+        servoAnalogTotalPosition += deltaPosition * 0.74;
     }
 
-    public double averagePosition(){
+    public double averagePosition() {
         curentPos = pinpointPosition;
         lastCurentPos = curentPos;
         lastLastCurentPos = lastCurentPos;
@@ -213,8 +216,8 @@ public class CRServoComponent extends Component {
 
     @Override
     public void update() {
-        double dt = timer.seconds() - lastTime; //timer in seconds for motion profiler cuz physics
-        lastTime = timer.seconds();
+        // double dt = timer.seconds() - lastTime; //timer in seconds for motion profiler cuz physics
+        // lastTime = timer.seconds();
 
         if (min_range < 0 && max_range > 0) {
             target = clamp(target, min_range, max_range);
@@ -226,14 +229,13 @@ public class CRServoComponent extends Component {
         if (usePID) {
             updateAnalogServoPosition();
             updatePinpointPosition();
-            double avrg =  pinpointTotalPosition;
+            double avrg = pinpointTotalPosition;
             //double clampedTarget = clampPositionTarget(avrg,target,-200,200);
-            targetPower = PID.calculate(getTrapezoidPosition(target,maxVel,maxAccel,motionTime), avrg);
-            if(Math.abs(target - avrg) < 25) targetPower *= 1.3;
-            if(Math.abs(target - avrg) < 13) targetPower *= 1.1;
-            if(Math.abs(target - avrg) <= 3) targetPower = 0;
+            targetPower = PID.calculate(getTrapezoidPosition(target, maxVel, maxAccel, motionTime), avrg);
+            //if (Math.abs(target - avrg) < 25) targetPower *= 1.3;
+            //if (Math.abs(target - avrg) < 13) targetPower *= 1.1;
+             if (Math.abs(target - avrg) <= 1) targetPower *= 0.2;
         } else {
-            if(Math.abs(target - averagePosition()) < 20) targetPower *= 1.5;
             targetPower = target;
         }
         if (overridePower_bool) targetPower = overridePower;
