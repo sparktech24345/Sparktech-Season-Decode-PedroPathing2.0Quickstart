@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 public enum BallColorSet_Decode {
@@ -18,4 +19,17 @@ public enum BallColorSet_Decode {
         else return NoBall;
 
     }
+
+    public static BallColorSet_Decode getCameraColor(LLResult llResult) {
+        if (llResult != null) {
+            double[] pythonOutputs = llResult.getPythonOutput();
+            if (pythonOutputs != null) {
+                if (pythonOutputs[2] <= pythonOutputs[6]) {
+                    return Purple;
+                } else return Green;
+            }
+            else return NoBall;
+        } else return NoBall;
+    }
+
 }
