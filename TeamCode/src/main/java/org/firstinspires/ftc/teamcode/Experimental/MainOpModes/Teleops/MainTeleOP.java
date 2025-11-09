@@ -15,6 +15,10 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -24,6 +28,7 @@ public class MainTeleOP extends LinearOpMode {
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     private GoBildaPinpointDriver pinpointTurret;
     private VoltageSensor controlHubVoltageSensor;
+    private Limelight3A limelight3A;
     private AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
@@ -285,19 +290,21 @@ public class MainTeleOP extends LinearOpMode {
                 robot.getCRServoComponent("TurretRotate")
                         .setPIDconstants(servoP, servoI, servoD)
                         .setMotionconstants(servoVel, servoAcel, servoTime)
-                        .setOverrideBool(true)
-                        .setTargetOverride(targetTurret);
+                        .setOverrideBool(true);
+
 
                 double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), targetPose,true);
                 if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
                 else degreeSubtract = 0;
                 robot.addTelemetryData("degreesSubtract", degreeSubtract);
 
+
                 robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
                 double turretRotateVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), targetPose, true).getOptimalAngleDegrees() - degreeSubtract;
                 robot.addTelemetryData("turret angle estimation", turretRotateVal);
                 robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretRotateVal));
                 //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
+
 
                 if (isTryingToFire) {
                     //puterea calculat,unghiul calculat,rotatia calculata;
@@ -307,28 +314,21 @@ public class MainTeleOP extends LinearOpMode {
                     targetVelocity = 665.276311 + dist * 3.37452358 + dist * dist * -0.0064362671 + Math.pow(dist, 3) * 0.0000058014683;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
+
+                    robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
                 }
                 else {
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
                     targetVelocity = 0;
+                    robot.getCRServoComponent("TurretRotate").setTargetOverride(0);
                 }
             }
         };
 
         MakeComponents();
         MakeStates();
-
-        //colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensenzor");
-        //colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesenzor");
-        pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
-
-        //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
-        aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
-
-        pinpointTurret.resetPosAndIMU();
-        pinpointTurret.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
-
+        InitOtherStuff();
         robot.UseDefaultMovement();
 
         while (opModeInInit()) {
@@ -340,6 +340,22 @@ public class MainTeleOP extends LinearOpMode {
             robot.loop();
         }
         // stop
+    }
+    public void InitOtherStuff(){
+        //colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensenzor");
+        //colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesenzor");
+        pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
+
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(0);
+        limelight3A.start();
+
+        //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
+
+        pinpointTurret.resetPosAndIMU();
+        pinpointTurret.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
+
     }
 
     private void MakeComponents() {
@@ -430,7 +446,7 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.getComponent("IntakeSorterServo")
                 .addState("REDIRECT_TO_PURPLE", 161.64)
-                .addState("REDIRECT_TO_GREEN", 30)
+                .addState("REDIRECT_TO_GREEN", 35)
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")

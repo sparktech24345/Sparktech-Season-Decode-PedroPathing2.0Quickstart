@@ -21,6 +21,7 @@ public class servoSpin extends LinearOpMode {
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         CRServo servo1 = hardwareMap.get(CRServo.class, "turretrotateleft");
+        CRServo servo2 = hardwareMap.get(CRServo.class, "turretrotateright");
 
 
 
@@ -29,14 +30,11 @@ public class servoSpin extends LinearOpMode {
 
 
         while (opModeIsActive()) {
+            servo1.setPower(gamepad1.left_stick_y);
+            servo2.setPower(gamepad1.right_stick_y);
 
-            if(gamepad1.a) servoPos +=0.0002;
-            if(gamepad1.b) servoPos -=0.0002;
-            if(gamepad1.y) servoPos = 0;
-            if(gamepad1.x) servoPos = (double) 30 / 360;
-            servo1.setPower(servoPos);
-            tel.addData("position",servoPos);
-            tel.addData("position * 360",servoPos*360);
+            tel.addData("servo 1 powe",servo1.getPower());
+            tel.addData("servo 2 powe",servo2.getPower());
 
             tel.update();
         }
