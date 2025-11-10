@@ -31,5 +31,7 @@ dependencies {
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7'
 
+    implementation 'org.ftclib.ftclib:core:2.1.1' //lib of libs
+
     //implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
 }

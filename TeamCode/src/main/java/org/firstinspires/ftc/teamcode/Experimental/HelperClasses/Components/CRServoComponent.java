@@ -5,11 +5,11 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotCon
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
@@ -22,6 +22,7 @@ public class CRServoComponent extends Component {
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
     protected double overridePower = -2;
+    public static double kf =0;
     protected double overrideTarget = 0;
     protected double lastPower = 0;
     protected boolean overrideTarget_bool = false;
@@ -232,6 +233,8 @@ public class CRServoComponent extends Component {
             double avrg = pinpointTotalPosition;
             //double clampedTarget = clampPositionTarget(avrg,target,-200,200);
             targetPower = PID.calculate(getTrapezoidPosition(target, maxVel, maxAccel, motionTime), avrg);
+            double feedForward = Math.cos(Math.toRadians(target)) * kf;
+            targetPower += feedForward; // for now leave 0 but could pay with it
             //if (Math.abs(target - avrg) < 25) targetPower *= 1.3;
             //if (Math.abs(target - avrg) < 13) targetPower *= 1.1;
              if (Math.abs(target - avrg) <= 1) targetPower *= 0.2;

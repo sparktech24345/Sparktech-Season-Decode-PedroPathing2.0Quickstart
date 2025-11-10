@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @TeleOp(name = "servoSpin", group = "Linear OpMode")
 public class servoSpin extends LinearOpMode {
     public static double servoPos = 30/360;
+    public static double pow = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -30,8 +31,9 @@ public class servoSpin extends LinearOpMode {
 
 
         while (opModeIsActive()) {
-            servo1.setPower(gamepad1.left_stick_y);
-            servo2.setPower(gamepad1.right_stick_y);
+            servo1.setPower(gamepad1.left_stick_x + pow);
+            servo2.setPower(gamepad1.left_stick_x + pow);
+            //servo2.setPower(gamepad1.right_stick_x);
 
             tel.addData("servo 1 powe",servo1.getPower());
             tel.addData("servo 2 powe",servo2.getPower());

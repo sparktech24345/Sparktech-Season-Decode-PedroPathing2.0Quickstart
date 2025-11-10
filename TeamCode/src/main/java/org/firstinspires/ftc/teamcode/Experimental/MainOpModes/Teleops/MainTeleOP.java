@@ -32,6 +32,7 @@ public class MainTeleOP extends LinearOpMode {
     private AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
+    public static double adderTurretRotateForTests = 0;
     public static double servoP = 0.0135;
     public static double servoI = 0;
     public static double servoD = 0.001;
@@ -286,7 +287,7 @@ public class MainTeleOP extends LinearOpMode {
 
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
 
-                targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()) + gamepad1.right_stick_x * 30;
+                targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
                 robot.getCRServoComponent("TurretRotate")
                         .setPIDconstants(servoP, servoI, servoD)
                         .setMotionconstants(servoVel, servoAcel, servoTime)
@@ -321,7 +322,7 @@ public class MainTeleOP extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
                     targetVelocity = 0;
-                    robot.getCRServoComponent("TurretRotate").setTargetOverride(0);
+                    robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret); //TODO to set this to 0
                 }
             }
         };
@@ -379,10 +380,11 @@ public class MainTeleOP extends LinearOpMode {
         robot.makeComponent("TurretRotate", new CRServoComponent()
                 .addMotor("turretrotateleft")
                 .setEncoder("leftturretreader")
-//                .addMotor("turretrotateright")
+                .addMotor("turretrotateright")
                 .useWithPIDController(true)
                 .setPIDconstants(0, 0, 0)
                 .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
+                .setDirection("turretrotateright", DcMotorSimple.Direction.REVERSE)
                 .setRange(-270, 270) // range for PID
                 .moveDuringInit(true)
         );

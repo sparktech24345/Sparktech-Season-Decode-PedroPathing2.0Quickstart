@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class LimelightTest extends OpMode {
 
     private Limelight3A limelight3A;
+    private double old_pos_y_pruple = 0;
+    private double ball_counter = 0;
 
     @Override
     public void init() {
@@ -43,6 +45,17 @@ public class LimelightTest extends OpMode {
             double[] pythonOutputs = llResult.getPythonOutput();
             if (pythonOutputs != null) {
                 telemetry.addLine("Python Output:");
+
+                double pos_y = pythonOutputs[1];
+                telemetry.addData("y_pos: ", pos_y);
+                telemetry.addData("y_old_pos: ", old_pos_y_pruple);
+                if(old_pos_y_pruple > 170 && pos_y - old_pos_y_pruple > 50){
+                    ball_counter += 1;
+                }
+                old_pos_y_pruple = pos_y;
+
+                telemetry.addData("ball counter: ", ball_counter);
+
                 for (int i = 0; i < 8; i++) {
                     telemetry.addData("Value " + i, pythonOutputs[i]);
                 }
