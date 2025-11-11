@@ -1,12 +1,21 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall;
+
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 
 @TeleOp(name = "Limelight Test", group = "Tests")
 public class LimelightTest extends OpMode {
@@ -20,6 +29,18 @@ public class LimelightTest extends OpMode {
     ElapsedTime timp = new ElapsedTime();
 
     private long timeLime = 0;
+
+
+    /// ----------------- Color Sensor Stuff ------------------
+    private NormalizedColorSensor colorSensorGreen;
+    private NormalizedColorSensor colorSensorPurple;
+    private NormalizedRGBA greenSensorColors;
+    private NormalizedRGBA purpleSensorColors;
+
+
+    final float[] hsvValuesGreen = new float[3];
+    final float[] hsvValuesPurple = new float[3];
+    /// --------------------------------------------------------
 
     @Override
     public void init() {
@@ -35,11 +56,15 @@ public class LimelightTest extends OpMode {
         telemetry.addLine("Limelight initialized and streaming...");
         telemetry.update();
 
+        colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
+        colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
+
         timeLime = System.currentTimeMillis();
     }
 
     @Override
     public void loop() {
+        HandleColors();
         LLResult llResult = limelight3A.getLatestResult();
 
         if(!limelight3A.isRunning()) limelight3A.start();
@@ -88,6 +113,35 @@ public class LimelightTest extends OpMode {
             telemetry.addLine("No Limelight data yet...");
         }
         telemetry.update();
+    }
+
+    private void HandleColors() {
+
+
+        greenSensorColors =colorSensorGreen.getNormalizedColors();
+        purpleSensorColors =colorSensorPurple.getNormalizedColors();
+
+        Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
+        Color.colorToHSV(purpleSensorColors.toColor(), hsvValuesPurple);
+
+        greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
+        purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
+
+
+        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
+        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+
+        telemetry.addData("P_RED",(double)purpleSensorColors.red * 10000.0);
+        telemetry.addData("P_BLUE",(double)purpleSensorColors.blue * 10000.0);
+        telemetry.addData("P_GREEN",(double)purpleSensorColors.green * 10000.0);
+
+
+        greenSensorBall = BallColorSet_Decode.NoBall;
+        purpleSensorBall = BallColorSet_Decode.NoBall;
+
+        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
+        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
     }
 
 }

@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -343,8 +346,8 @@ public class MainTeleOP extends LinearOpMode {
         // stop
     }
     public void InitOtherStuff(){
-        //colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensenzor");
-        //colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesenzor");
+        colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
+        colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
         pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
@@ -475,9 +478,9 @@ public class MainTeleOP extends LinearOpMode {
                 make_pair("GreenGateServo", "CLOSED"),
                 make_pair("TransferServo", "UP")
         ));
-    }
-    private void HandleColors() {
-        /*
+    } private void HandleColors() {
+
+
         greenSensorColors =colorSensorGreen.getNormalizedColors();
         purpleSensorColors =colorSensorPurple.getNormalizedColors();
 
@@ -487,7 +490,7 @@ public class MainTeleOP extends LinearOpMode {
         greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
         purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
 
-        /*
+
         robot.addTelemetryData("G_RED",(double)greenSensorColors.red);
         robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue);
         robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green);
@@ -495,7 +498,7 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("P_RED",(double)purpleSensorColors.red);
         robot.addTelemetryData("P_BLUE",(double)purpleSensorColors.blue);
         robot.addTelemetryData("P_GREEN",(double)purpleSensorColors.green);
-        // */
+
 
         greenSensorBall = BallColorSet_Decode.NoBall;
         purpleSensorBall = BallColorSet_Decode.NoBall;
