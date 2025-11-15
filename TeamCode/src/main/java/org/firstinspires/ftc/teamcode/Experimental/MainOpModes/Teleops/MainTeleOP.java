@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -63,6 +64,11 @@ public class MainTeleOP extends LinearOpMode {
     private double nonCorrectedCameraError = 0;
     private long tick_ns = 0;
     public static Pose targetPose = new Pose(125,42.8,0);
+    private double old_pos_y_purple = 0;
+    private long timeLime = 0;
+    LLResult llResult = limelight3A.getLatestResult();
+    double[] pythonOutputs = llResult.getPythonOutput();
+    double pos_y = pythonOutputs[1];
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
@@ -360,6 +366,43 @@ public class MainTeleOP extends LinearOpMode {
         pinpointTurret.resetPosAndIMU();
         pinpointTurret.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
 
+    }
+    private double GreenBall = 0;
+    private double PurpleBall = 0;
+    private double CountBall = 0;
+
+    private void portitaMoving (){
+        if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600 && robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK") ){
+            old_pos_y_purple = pos_y;
+            timeLime = System.currentTimeMillis();
+            CountBall = PurpleBall + GreenBall;
+
+            robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+            robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
+            GreenBall += 1;
+            telemetry.addData("green balls:", GreenBall);
+            telemetry.update();
+            if (GreenBall == 1){
+                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE");
+                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+            }
+            if (robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE")){
+                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+                PurpleBall +=1;
+                telemetry.addData("purple balls:" , PurpleBall);
+                telemetry.update();
+            }
+            if (PurpleBall == 2){
+                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
+            }
+            if (CountBall == 3){
+                robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK");
+                robot.getComponent("IntakeMotor").hasStateOfName("FULL_REVERSE");
+            }
+        }
+        telemetry.addData("balls" , CountBall);
+        telemetry.update();
     }
 
     private void MakeComponents() {

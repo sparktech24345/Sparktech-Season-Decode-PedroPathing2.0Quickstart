@@ -60,15 +60,6 @@ public class AprilTagWecam extends OpMode {
             }
         }
 
-
-//        if(detectTime.milliseconds()<= 100){
-//            double currentDetect = id20.ftcPose.x;
-//            detectTime.reset();
-//            if (lastDetect == currentDetect){
-//
-//            }
-//        }
-
         tel.addData("diff", (double)System.currentTimeMillis() - lastTime);
         lastTime = System.currentTimeMillis();
         tel.update();
