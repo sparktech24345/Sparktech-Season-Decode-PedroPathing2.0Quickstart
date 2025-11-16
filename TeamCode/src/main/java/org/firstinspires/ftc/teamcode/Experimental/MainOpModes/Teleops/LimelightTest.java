@@ -21,8 +21,9 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 @TeleOp(name = "Limelight Test", group = "Tests")
 public class LimelightTest extends OpMode {
 
+
     private Limelight3A limelight3A;
-    private double old_pos_y_pruple = 0;
+    private double old_pos_y_purple = 0;
     private double ball_counter = 0;
     private double old_Ty = 0;
     private double old_Tx = 0;
@@ -89,7 +90,7 @@ public class LimelightTest extends OpMode {
 
             if(old_Tx == llResult.getTx() && llResult.getTy() == old_Ty){
                 limelight3A.stop();
-                if (timp.milliseconds()<100) {
+                if (timp.milliseconds()>=100) {
                     limelight3A.start();
                 }
             }
@@ -101,12 +102,12 @@ public class LimelightTest extends OpMode {
 
                 double pos_y = pythonOutputs[1];
                 telemetry.addData("y_pos: ", pos_y);
-                telemetry.addData("y_old_pos: ", old_pos_y_pruple);
-                if(old_pos_y_pruple > 190 && old_pos_y_pruple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600){
+                telemetry.addData("y_old_pos: ", old_pos_y_purple);
+                if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600){
                     ball_counter += 1;
                     timeLime = System.currentTimeMillis();
                 }
-                old_pos_y_pruple = pos_y;
+                old_pos_y_purple = pos_y;
 
                 telemetry.addData("ball counter: ", ball_counter);
 

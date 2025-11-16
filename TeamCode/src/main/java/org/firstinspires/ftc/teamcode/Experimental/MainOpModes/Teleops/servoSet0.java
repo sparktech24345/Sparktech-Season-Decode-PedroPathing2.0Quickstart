@@ -22,8 +22,6 @@ public class servoSet0 extends LinearOpMode {
 
         Servo servo1 = hardwareMap.get(Servo.class, "turretangle");
 
-
-
         waitForStart();
         if (isStopRequested()) return;
 
