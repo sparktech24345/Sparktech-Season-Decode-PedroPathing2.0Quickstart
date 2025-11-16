@@ -20,7 +20,7 @@ public class servoSet0 extends LinearOpMode {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        Servo servo1 = hardwareMap.get(Servo.class, "purplegate");
+        Servo servo1 = hardwareMap.get(Servo.class, "turretangle");
 
 
 

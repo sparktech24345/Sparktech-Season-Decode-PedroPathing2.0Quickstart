@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyThreeW
 
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(12.5) // ????
+            .mass(14) // ????
             .forwardZeroPowerAcceleration(-25.9346931313679598) // copiate direct din exemplul Pedro, de verificat / corectat
             .lateralZeroPowerAcceleration(-67.342491844080064) // copiate direct din exemplul Pedro, de verificat / corectat
             .centripetalScaling(0.0005); // copiate direct din exemplul Pedro, de verificat / corectat
@@ -40,8 +40,8 @@ public class ConstantsDecode {
     public static PinpointConstants pinpointConstants = new PinpointConstants()
             .hardwareMapName("pinpoint")
             .distanceUnit(DistanceUnit.METER) //might be changed later
-            .forwardPodY(-0.172)
-            .strafePodX(0.006)
+            .forwardPodY(-0.177563) //-0.172
+            .strafePodX(-0.09647796) //0.006
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 

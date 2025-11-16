@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
@@ -22,26 +23,26 @@ public class CRServoComponent extends Component {
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
     protected double overridePower = -2;
-    public static double kf =0;
     protected double overrideTarget = 0;
     protected double lastPower = 0;
     protected boolean overrideTarget_bool = false;
     protected boolean overridePower_bool = false;
 
     // Encoder for servo position feedback
-    protected AnalogInput servoEncoder;
+    protected AnalogInput servoEncoder = null;
+    protected DcMotorEx externalEncoder = null;
     protected double servoAnalogPosition=-1; //an impossible value
+    protected double externalEncoderPosition=0;
     protected double pinpointPosition = 0; // a passer value
     protected double pinpointMathPosition = -1; //an impossible value
     protected double servoAnalogTotalPosition=0;
     protected double pinpointTotalPosition=0;
+    protected double externalEncoderAbsolutePosition=0;
     protected ElapsedTime timer = new ElapsedTime();
-    protected double lastTime = timer.seconds();
     protected double curentPos=0;
     protected double lastCurentPos=0;
     protected double lastLastCurentPos=0;
     protected double lastLastLastCurentPos=0;
-    protected long lastMonitorTime =0;
     protected double maxAccel=10000;
     protected double maxVel=4000;
     protected double motionTime=0.5;
@@ -69,6 +70,11 @@ public class CRServoComponent extends Component {
     }
     public CRServoComponent setEncoder(String analogSensorName) {
         servoEncoder = hardwareMapInstance.get(AnalogInput.class,analogSensorName);
+        return this;
+    }
+
+    public CRServoComponent setExternalEncoder(String motorName) {
+        externalEncoder = hardwareMapInstance.get(DcMotorEx.class,motorName);
         return this;
     }
 
@@ -128,6 +134,22 @@ public class CRServoComponent extends Component {
     public void setPinpointPosition(double pinpointPosition) {
         this.pinpointPosition = pinpointPosition;
     }
+    public void initExternalEncoderPosition(double adder){
+        externalEncoderAbsolutePosition += adder;
+    }
+    public void updateExternalEncoderPosition(){
+        double lastPosition = externalEncoderPosition;
+        externalEncoderPosition = getAnalogPosition();
+
+        double deltaPosition = externalEncoderPosition - lastPosition;
+        if (deltaPosition > 180) {
+            deltaPosition -= 360;
+        } else if (deltaPosition < -180) {
+            deltaPosition += 360;
+        }
+
+        externalEncoderAbsolutePosition += deltaPosition;
+    }
     public void updatePinpointPosition() {
         double lastPosition = pinpointMathPosition;
         pinpointMathPosition = pinpointPosition;
@@ -163,7 +185,7 @@ public class CRServoComponent extends Component {
                 //arounds++;
             }
         }
-        else deltaPosition -= (1 + 24 + 189) * (1 / 0.74); //taking that -1 back if it is the first run and of the 99 0
+        else deltaPosition -= (1 + 47) * (1 / 0.74); //taking that -1 back if it is the first run and of the 99 0
 
         servoAnalogTotalPosition += deltaPosition * 0.74;
     }
@@ -230,18 +252,33 @@ public class CRServoComponent extends Component {
         if (usePID) {
             updateAnalogServoPosition();
             updatePinpointPosition();
-            double avrg = pinpointTotalPosition;
-            //double clampedTarget = clampPositionTarget(avrg,target,-200,200);
-            targetPower = PID.calculate(getTrapezoidPosition(target, maxVel, maxAccel, motionTime), avrg);
-            double feedForward = Math.cos(Math.toRadians(target)) * kf;
-            targetPower += feedForward; // for now leave 0 but could pay with it
-            //if (Math.abs(target - avrg) < 25) targetPower *= 1.3;
-            //if (Math.abs(target - avrg) < 13) targetPower *= 1.1;
-             if (Math.abs(target - avrg) <= 1) targetPower *= 0.2;
+
+            /*   Fancy stuff
+            //targetPower = PID.calculate(getTrapezoidPosition(target, maxVel, maxAccel, motionTime), avrg);
+            //targetPower = PID.calculateSpecial(target, pinpointTotalPosition,kv,minimumPowerAdder);
+            targetPower = PID.calculate(target, pinpointTotalPosition);
+            if (Math.abs(target - pinpointTotalPosition) <= 2) targetPower *= 0;
+//            if (Math.abs(target - pinpointTotalPosition) <= 2) {
+//                targetPower += minimumPowerAdder * Math.signum(targetPower);
+//            }
+             */
+            double error = target - pinpointTotalPosition;
+            if(Math.abs(error) > 80 ) targetPower = 1 * Math.signum(error);  // >80
+            else if(Math.abs(error) > 50 ) targetPower = 0.85 * Math.signum(error); // 50 - 80
+            else if(Math.abs(error) > 30 ) targetPower = 0.65 * Math.signum(error); // 30 - 50
+            else if(Math.abs(error) > 10 ) targetPower = 0.12 * Math.signum(error); // 10 - 30
+            else if(Math.abs(error) > 5 ) targetPower = 0.09 * Math.signum(error);  // 5 - 10
+            else targetPower = 0; // 0 -5
+
+            targetPower = 0;
         } else {
             targetPower = target;
         }
         if (overridePower_bool) targetPower = overridePower;
+
+
+
+        if (Double.isNaN(targetPower)) targetPower = 0;
         for (CRServo servo : motorMap.values()) {
             servo.setPower(targetPower);
             lastPower = targetPower;

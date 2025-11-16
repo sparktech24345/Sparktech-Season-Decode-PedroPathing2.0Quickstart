@@ -11,6 +11,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -36,6 +37,7 @@ public class LimelightTest extends OpMode {
     private NormalizedColorSensor colorSensorPurple;
     private NormalizedRGBA greenSensorColors;
     private NormalizedRGBA purpleSensorColors;
+    private DcMotorEx intakeMotor;
 
 
     final float[] hsvValuesGreen = new float[3];
@@ -59,6 +61,9 @@ public class LimelightTest extends OpMode {
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
 
+        intakeMotor = hardwareMap.get(DcMotorEx.class,"intakemotor");
+
+
         timeLime = System.currentTimeMillis();
     }
 
@@ -66,6 +71,8 @@ public class LimelightTest extends OpMode {
     public void loop() {
         HandleColors();
         LLResult llResult = limelight3A.getLatestResult();
+
+        intakeMotor.setPower(gamepad1.left_stick_y);
 
         if(!limelight3A.isRunning()) limelight3A.start();
         if (llResult != null) {

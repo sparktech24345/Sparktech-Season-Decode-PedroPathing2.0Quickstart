@@ -76,4 +76,12 @@ public class GlobalStorage {
     public static MotifSequence currentMotifSequence = MotifSequence.Undefined;
     public static BallColorSet_Decode purpleSensorBall = BallColorSet_Decode.NoBall;
     public static BallColorSet_Decode greenSensorBall = BallColorSet_Decode.NoBall;
+
+
+    //function for firing stuff
+
+    public static double grade0 = 665.276311;
+    public static double grade1 = 3.37452358;
+    public static double grade2 = -0.0064362671;
+    public static double grade3 = 0.0000058014683;
 }

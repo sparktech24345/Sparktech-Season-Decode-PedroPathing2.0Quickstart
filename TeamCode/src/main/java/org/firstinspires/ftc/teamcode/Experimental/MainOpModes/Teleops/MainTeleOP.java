@@ -30,15 +30,16 @@ public class MainTeleOP extends LinearOpMode {
     private RobotController robot;
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     private GoBildaPinpointDriver pinpointTurret;
+    private  DcMotorEx turretEncoder;
     private VoltageSensor controlHubVoltageSensor;
     private Limelight3A limelight3A;
     private AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double adderTurretRotateForTests = 0;
-    public static double servoP = 0.0135;
+    public static double servoP = 0.005 ; //0.0135
     public static double servoI = 0;
-    public static double servoD = 0.001;
+    public static double servoD = 0.00085; //0.001
     public static double servoVel = 5000;
     public static double servoAcel = 10000;
     public static double servoTime = 1;
@@ -51,6 +52,7 @@ public class MainTeleOP extends LinearOpMode {
     public static double rpmkd = 1;
     public static double targetTurret = 0;
     public static double degreeSubtract = 2;
+    public static double degreeSubtractAdder = -5;
     public static double degreeSubtractMulti = 1;
     public static boolean isTryingToFire = false;
     public boolean isReadyToFire = false;
@@ -84,12 +86,14 @@ public class MainTeleOP extends LinearOpMode {
             @Override
             public void main_loop() {
                 // all of the code
+                long startTime = System.currentTimeMillis();
                 tick_ns = calculateTimeDiff();
                 robot.addTelemetryData("loop time Nano", tick_ns);
-                robot.addTelemetryData("loop time Milis",tick_ns / 1000.0);
-                HandleColors();
+                robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
+                //HandleColors();
                 getPinpointTurretPosition();
 
+                robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
                 // intakeing
 
                 robot.addTelemetryData("tester",robot.getComponent("IntakeMotor").getPosition());
@@ -158,9 +162,13 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("ball counter",ballCounter);
 
 
-                if (robot.getControllerKey("Y1").ExecuteOnPress) {
-                    // robot.togglePowerOff
+                if (robot.getControllerKey("B1").IsToggledOnPress) {
+                    robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
+                    robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
                 }
+                else if(robot.getMotorComponent("IntakeMotor").getPower() == -1)
+                    robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+
                 if (robot.getControllerKey("RIGHT_BUMPER1").ExecuteOnPress) {
                     setDriveTrainSlowdown(0.2);
                 } else setDriveTrainSlowdown(1);
@@ -267,6 +275,9 @@ public class MainTeleOP extends LinearOpMode {
                         robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
                     else robot.addToQueue(new StateAction(false, "PurpleGateServo", "CLOSED"));
                 }
+
+                robot.addTelemetryData("Checkpint After logic", System.currentTimeMillis() - startTime);
+
                 ///  ================== Telemetry and Overrides ======================
 
                 double cameraCorrectionError = calculateCameraError(targetTurret - robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
@@ -300,13 +311,14 @@ public class MainTeleOP extends LinearOpMode {
                 double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), targetPose,true);
                 if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
                 else degreeSubtract = 0;
+                degreeSubtract += degreeSubtractAdder;
                 robot.addTelemetryData("degreesSubtract", degreeSubtract);
 
 
                 robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-                double turretRotateVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), targetPose, true).getOptimalAngleDegrees() - degreeSubtract;
-                robot.addTelemetryData("turret angle estimation", turretRotateVal);
-                robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretRotateVal));
+                double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), targetPose, true).getOptimalAngleDegrees() - degreeSubtract;
+                robot.addTelemetryData("turret angle estimation", turretAngleVal);
+                robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
                 //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
 
 
@@ -315,7 +327,7 @@ public class MainTeleOP extends LinearOpMode {
                     //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
                     robot.addTelemetryData("distance to wall", distance);
                     double dist = distance * 100; //in cm
-                    targetVelocity = 665.276311 + dist * 3.37452358 + dist * dist * -0.0064362671 + Math.pow(dist, 3) * 0.0000058014683;
+                    targetVelocity = grade0 + dist * grade1 + dist * dist * grade2 + Math.pow(dist, 3) * grade3;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
 
@@ -327,6 +339,8 @@ public class MainTeleOP extends LinearOpMode {
                     targetVelocity = 0;
                     robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret); //TODO to set this to 0
                 }
+
+                robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
             }
         };
 
@@ -389,7 +403,7 @@ public class MainTeleOP extends LinearOpMode {
                 .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
                 .setDirection("turretrotateright", DcMotorSimple.Direction.REVERSE)
                 .setRange(-270, 270) // range for PID
-                .moveDuringInit(true)
+                .moveDuringInit(false)
         );
 
         robot.makeComponent("IntakeSorterServo", new ServoComponent()

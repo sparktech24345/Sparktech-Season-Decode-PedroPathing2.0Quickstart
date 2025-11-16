@@ -33,5 +33,9 @@ dependencies {
 
     implementation 'org.ftclib.ftclib:core:2.1.1' //lib of libs
 
+    //road runner stuff
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'com.acmerobotics.roadrunner:core:0.5.6'
+
     //implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
 }
