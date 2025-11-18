@@ -68,8 +68,8 @@ public class MainTeleOP extends LinearOpMode {
     public static Pose targetPose = new Pose(125,42.8,0);
     private double old_pos_y_purple = 0;
     private long timeLime = 0;
-    LLResult llResult = limelight3A.getLatestResult();
-    double[] pythonOutputs = llResult.getPythonOutput();
+    LLResult llResult = null;
+    double[] pythonOutputs = {1, 2};
     double pos_y = pythonOutputs[1];
 
     /// ----------------- Color Sensor Stuff ------------------
@@ -193,6 +193,9 @@ public class MainTeleOP extends LinearOpMode {
                             new StateAction(true, "TransferServo", "DOWN"),
                             new StateAction(false, "PurpleGateServo", "OPEN")
                     );
+                }
+                if (robot.getControllerKey("LEFT_BUMPER1").IsToggledOnPress){
+                    robot.setDriveTrainSlowdown(0.3);
                 }
 
                 if (gamepad1.right_bumper) {
@@ -369,10 +372,10 @@ public class MainTeleOP extends LinearOpMode {
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
         pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
-
-        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(0);
-        limelight3A.start();
+//
+//        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+//        limelight3A.pipelineSwitch(0);
+//        limelight3A.start();
 
         //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
@@ -386,33 +389,44 @@ public class MainTeleOP extends LinearOpMode {
     private double CountBall = 0;
 
     private void portitaMoving (){
+        robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
+        robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
         if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600 && robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK") ){
             old_pos_y_purple = pos_y;
             timeLime = System.currentTimeMillis();
             CountBall = PurpleBall + GreenBall;
 
-            robot.getComponent("IntakeMotor").hasStateOfName("FULL");
-            robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
+            robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+//            robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+            robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
+//            robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
             GreenBall += 1;
             telemetry.addData("green balls:", GreenBall);
             telemetry.update();
             if (GreenBall == 1){
-                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE");
-                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
+//                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE");
+                robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+//                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
             }
             if (robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE")){
-                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+                robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+//                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
                 PurpleBall +=1;
                 telemetry.addData("purple balls:" , PurpleBall);
                 telemetry.update();
             }
             if (PurpleBall == 2){
-                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
-                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
+                robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+//                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
+                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
+//                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
             }
             if (CountBall == 3){
-                robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK");
-                robot.getComponent("IntakeMotor").hasStateOfName("FULL_REVERSE");
+                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "BLOCK"));
+//                robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK");
+                robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"));
+//                robot.getComponent("IntakeMotor").hasStateOfName("FULL_REVERSE");
             }
         }
         telemetry.addData("balls" , CountBall);

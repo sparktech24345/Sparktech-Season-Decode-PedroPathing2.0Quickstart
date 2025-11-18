@@ -36,7 +36,7 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
-    protected double voltage=12;
+    protected double voltage = 12;
 
     public MotorComponent() {
         super();
@@ -90,15 +90,15 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
-    public MotorComponent targetOverride(boolean rpmOverride){
+    public MotorComponent targetOverride(boolean rpmOverride) {
         this.rpmOverride = rpmOverride;
         return this;
     }
-    public MotorComponent setOverrideCondition (boolean andreiOverride){
+    public MotorComponent setOverrideCondition (boolean andreiOverride) {
         this.andreiOverride = andreiOverride;
         return this;
     }
-    public MotorComponent setTargetOverride(double targetRpm){
+    public MotorComponent setTargetOverride(double targetRpm) {
         this.targetRpm = targetRpm;
         return this;
     }
@@ -181,18 +181,20 @@ public class MotorComponent extends EncodedComponent {
         this.kpRPM = kpRPM;
         return this;
     }
-    public double CalculatePowerV2(double targetVelocity){
-        double error =0;
-        error = targetVelocity - velocity;
+    public double CalculatePowerV2(double targetVelocity) {
+        double error = targetVelocity - velocity;
         double power = ksRPM + kvRPM * velocity + kpRPM * error;
-        if(targetVelocity == 0) return 0;
+        if (targetVelocity == 0) return 0;
         return power;
     }
 
     public DcMotor get(String name) {
         return motorMap.get(name);
     }
-    public double getVelocity(){return velocity;}
+    public double getVelocity() {
+        if (componentEncoder != null) return componentEncoder.getEncoderPosition();
+        return mainMotor.getVelocity();
+    }
 
     @Override
     public void update() {
@@ -209,7 +211,7 @@ public class MotorComponent extends EncodedComponent {
         }
         if (andreiOverride) targetPower = overridePower;
         //if(rpmOverride){MeasureRPM(); targetPower = CalculatePower(targetRpm);}
-        if(rpmOverride) targetPower = CalculatePowerV2(targetRpm);
+        if (rpmOverride) targetPower = CalculatePowerV2(targetRpm);
         for (DcMotor motor : motorMap.values()) {
             motor.setPower(targetPower);
         }
