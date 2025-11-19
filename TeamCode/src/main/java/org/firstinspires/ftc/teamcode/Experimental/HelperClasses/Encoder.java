@@ -14,6 +14,8 @@ public class Encoder {
     public <T> Encoder(T instance) {
         if (instance instanceof DcMotorSimple) {
             this.motorInstance = (DcMotor) instance;
+            motorInstance.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorInstance.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
         if (instance instanceof Servo) {
             this.servoInstance = (Servo) instance;

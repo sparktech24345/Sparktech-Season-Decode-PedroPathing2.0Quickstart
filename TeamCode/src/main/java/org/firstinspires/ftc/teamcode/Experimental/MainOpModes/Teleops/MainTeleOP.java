@@ -305,7 +305,7 @@ public class MainTeleOP extends LinearOpMode {
                         .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
                         .addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
                         .addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
-                        .addTelemetryData("Pinpoint calculated pos", robot.getCRServoComponent("TurretRotate").getpinpointTotalPosition());
+                        .addTelemetryData("Turret encoder read", robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted());
                 //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
@@ -372,7 +372,7 @@ public class MainTeleOP extends LinearOpMode {
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
         pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
-//
+
 //        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
 //        limelight3A.pipelineSwitch(0);
 //        limelight3A.start();
@@ -386,7 +386,7 @@ public class MainTeleOP extends LinearOpMode {
     }
     private double GreenBall = 0;
     private double PurpleBall = 0;
-    private double CountBall = 0;
+    private double CountBall = PurpleBall + GreenBall;
 
     private void portitaMoving (){
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
@@ -394,15 +394,12 @@ public class MainTeleOP extends LinearOpMode {
         if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600 && robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK") ){
             old_pos_y_purple = pos_y;
             timeLime = System.currentTimeMillis();
-            CountBall = PurpleBall + GreenBall;
 
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 //            robot.getComponent("IntakeMotor").hasStateOfName("FULL");
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
 //            robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
             GreenBall += 1;
-            telemetry.addData("green balls:", GreenBall);
-            telemetry.update();
             if (GreenBall == 1){
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
 //                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE");
@@ -413,10 +410,8 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
                 PurpleBall +=1;
-                telemetry.addData("purple balls:" , PurpleBall);
-                telemetry.update();
             }
-            if (PurpleBall == 2){
+            if (PurpleBall == 1){
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
@@ -429,8 +424,9 @@ public class MainTeleOP extends LinearOpMode {
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL_REVERSE");
             }
         }
-        telemetry.addData("balls" , CountBall);
-        telemetry.update();
+        robot.addTelemetryData("purple balls:" , PurpleBall);
+        robot.addTelemetryData("green balls:", GreenBall);
+        robot.addTelemetryData("balls" , CountBall);
     }
 
     private void MakeComponents() {
@@ -453,7 +449,7 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.makeComponent("TurretRotate", new CRServoComponent()
                 .addMotor("turretrotateleft")
-                .setEncoder("leftturretreader")
+                .setEncoder(new Encoder(hardwareMap.get(DcMotor.class, "backpurple")))
                 .addMotor("turretrotateright")
                 .useWithPIDController(true)
                 .setPIDconstants(0, 0, 0)
@@ -521,8 +517,8 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("CLOSED", 200, true);
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_PURPLE", 161.64)
-                .addState("REDIRECT_TO_GREEN", 35)
+                .addState("REDIRECT_TO_PURPLE", 184.536 )//161.64
+                .addState("REDIRECT_TO_GREEN", 21.888) //35
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")

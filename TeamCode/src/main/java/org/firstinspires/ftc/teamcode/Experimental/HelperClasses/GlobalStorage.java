@@ -16,6 +16,12 @@ public class GlobalStorage {
         return Math.max(min, Math.min(max, val));
     }
 
+    public static double angle_clamp(double val, double min, double max) {
+        while (val < min) val += Math.abs(min);
+        while (val > max) val -= Math.abs(max);
+        return val;
+    }
+
     public static double eval(boolean val) {
         return (val ? 1 : 0);
     }
