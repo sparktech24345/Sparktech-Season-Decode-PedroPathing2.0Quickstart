@@ -11,14 +11,12 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
 
 @Config
-public class CRServoComponent extends EncodedComponent {
+public class CRServoComponent extends Component {
 
     protected HashMap<String, CRServo> motorMap = new HashMap<>();
     protected CRServo mainServo = null;
@@ -33,14 +31,9 @@ public class CRServoComponent extends EncodedComponent {
     // Encoder for servo position feedback
     protected AnalogInput servoEncoder = null;
     protected DcMotorEx externalEncoder = null;
-    protected double servoAnalogPosition = -1; //an impossible value
-    protected double externalEncoderPosition = 0;
+    protected double externalEncoderPosition=0;
     protected double pinpointPosition = 0; // a passer value
-    protected double pinpointMathPosition = -1; //an impossible value
-    protected double servoAnalogTotalPosition = 0;
-    protected double pinpointTotalPosition = 0;
-    protected double externalEncoderAbsolutePosition = 0;
-    protected ElapsedTime timer = new ElapsedTime();
+    protected double externalEncoderAbsolutePosition=0;
     protected double curentPos = 0;
     protected double lastCurentPos = 0;
     protected double lastLastCurentPos = 0;
@@ -121,34 +114,22 @@ public class CRServoComponent extends EncodedComponent {
         return this;
     }
 
-    @Override
-    public <T extends EncodedComponent> T useWithEncoder(boolean useWithEncoder) {
-        return (T)this;
-    }
 
     public double getPosition() { return mainServo.getPower(); }
     public double getAnalogPosition() {
         if (servoEncoder == null) return 0;
         return (servoEncoder.getVoltage() / 3.3) * 360; //should be the position in degrees, resets under 0 or above 360
     }
-    public double getServoAnalogTotalPosition() {
-        return servoAnalogTotalPosition;
-    }
-    public double getServoAvrgPosition() {
-        return averagePosition();
-    }
-    public double getpinpointTotalPosition() {
-        return pinpointTotalPosition;
-    }
     public void setPinpointPosition(double pinpointPosition) {
         this.pinpointPosition = pinpointPosition;
     }
-    public void initExternalEncoderPosition(double adder){
-        externalEncoderAbsolutePosition += adder;
+    public CRServoComponent initExternalEncoderPosition(double adder){
+        externalEncoderAbsolutePosition += adder + getAnalogPosition();
+        return this;
     }
     public void updateExternalEncoderPosition(){
         double lastPosition = externalEncoderPosition;
-        externalEncoderPosition = getAnalogPosition();
+        externalEncoderPosition = getEncoderReadingFormatted();
 
         double deltaPosition = externalEncoderPosition - lastPosition;
         if (deltaPosition > 180) {
@@ -159,44 +140,8 @@ public class CRServoComponent extends EncodedComponent {
 
         externalEncoderAbsolutePosition += deltaPosition;
     }
-    public void updatePinpointPosition() {
-        double lastPosition = pinpointMathPosition;
-        pinpointMathPosition = pinpointPosition;
-
-        double deltaPosition = pinpointMathPosition - lastPosition;
-        if (lastPosition != -1) { // taking care of the first run / init as it might return something big
-            if (deltaPosition > 180) {
-                deltaPosition -= 360;
-                //arounds--;
-            } else if (deltaPosition < -180) {
-                deltaPosition += 360;
-                //arounds++;
-            }
-        }
-        else {
-            updateAnalogServoPosition();
-            deltaPosition += -1 + getServoAnalogTotalPosition();
-        }  //taking that -1 back and the initial value
-
-        pinpointTotalPosition += deltaPosition;
-    }
-    public void updateAnalogServoPosition() {
-        double lastPosition = servoAnalogPosition;
-        servoAnalogPosition = getAnalogPosition();
-
-        double deltaPosition = servoAnalogPosition - lastPosition;
-        if (lastPosition != -1) { // taking care of the first run / init as it might return something big
-            if (deltaPosition > 180) {
-                deltaPosition -= 360;
-                //arounds--;
-            } else if (deltaPosition < -180) {
-                deltaPosition += 360;
-                //arounds++;
-            }
-        }
-        else deltaPosition -= (1 + 47) * (1 / 0.74); //taking that -1 back if it is the first run and of the 99 0
-
-        servoAnalogTotalPosition += deltaPosition * 0.74;
+    public double getExternalEncoderPosition(){
+        return externalEncoderPosition;
     }
 
     public double averagePosition() {
@@ -205,32 +150,6 @@ public class CRServoComponent extends EncodedComponent {
         lastLastCurentPos = lastCurentPos;
         lastLastLastCurentPos = lastLastCurentPos;
         return (curentPos+lastCurentPos+lastLastCurentPos+lastLastLastCurentPos)/4;
-    }
-    public double clampPositionTarget(double currentPos, double targetPos, double minPos, double maxPos) {
-        double clampedPosition;
-
-        double range = maxPos - minPos;
-        if (range <= 0) {
-            return 0; //max pos must be greater then min pos
-        }
-
-        //normalize to within one full revolution i think hopey
-        double normalizedTarget = ((targetPos - minPos) % range + range) % range + minPos;
-
-        //determine shortest path (turnaround logic) i think
-        double diff = normalizedTarget - currentPos;
-
-        //if the difference is more than half the range, wrap around the other way
-        if (diff > range / 2) {
-            normalizedTarget -= range;
-        } else if (diff < -range / 2) {
-            normalizedTarget += range;
-        }
-
-        //clamping to be sure
-        clampedPosition = Math.max(minPos, Math.min(normalizedTarget, maxPos));
-
-        return clampedPosition;
     }
 
 
@@ -244,39 +163,12 @@ public class CRServoComponent extends EncodedComponent {
     public CRServo get(String name) {
         return motorMap.get(name);
     }
-
-    public CRServoComponent setEncoder(Encoder encoder) {
-        componentEncoder = encoder;
-        return this;
-    }
     public double getEncoderReadingFormatted() {
-        if (componentEncoder == null) return 0;
-        double reading = componentEncoder.getEncoderPosition() * encoderDirectionMulti / encoderUnitConstant;
-        while (reading < -180) reading += 360;
-        while (reading > 180) reading -= 360;
+        if (externalEncoder == null) return 0;
+        double reading = externalEncoder.getCurrentPosition() * encoderDirectionMulti / encoderUnitConstant;
+//        while (reading < -180) reading += 360;
+//        while (reading > 180) reading -= 360;
         return reading;
-    }
-
-    public double PIDturela() {
-        double targetPower;
-        double encoderPosition = getEncoderReadingFormatted();
-
-            //   Fancy stuff
-            //targetPower = PID.calculate(getTrapezoidPosition(target, maxVel, maxAccel, motionTime), avrg);
-            //targetPower = PID.calculateSpecial(target, pinpointTotalPosition,kv,minimumPowerAdder);
-            targetPower = PID.calculate(target, encoderPosition);
-//            if (Math.abs(target - pinpointTotalPosition) <= 2) {
-//                targetPower += minimumPowerAdder * Math.signum(targetPower);
-//            }
-        double error = target - encoderPosition;
-        if (Math.abs(error) > 80) targetPower = 1 * Math.signum(error);  // > 80
-        else if (Math.abs(error) > 50) targetPower = 0.85 * Math.signum(error); // 50 - 80
-        else if (Math.abs(error) > 30) targetPower = 0.65 * Math.signum(error); // 30 - 50
-        else if (Math.abs(error) > 10) targetPower = 0.12 * Math.signum(error); // 10 - 30
-        else if (Math.abs(error) > 5) targetPower = 0.09 * Math.signum(error);  // 5 - 10
-        else targetPower = 0; // 0 - 5
-
-        return targetPower;
     }
 
     @Override
@@ -290,15 +182,35 @@ public class CRServoComponent extends EncodedComponent {
         if (overrideTarget_bool) {
             target = overrideTarget;
         }
-        double targetPower;
-        if (usePID)
-            targetPower = PIDturela();
-        else
+        double targetPower = target / resolution;
+        if (usePID) {
+            updateExternalEncoderPosition();
+            /*   Fancy stuff
+            //targetPower = PID.calculate(getTrapezoidPosition(target, maxVel, maxAccel, motionTime), avrg);
+            //targetPower = PID.calculateSpecial(target, pinpointTotalPosition,kv,minimumPowerAdder);
+            targetPower = PID.calculate(target, pinpointTotalPosition);
+            if (Math.abs(target - pinpointTotalPosition) <= 2) targetPower *= 0;
+//            if (Math.abs(target - pinpointTotalPosition) <= 2) {
+//                targetPower += minimumPowerAdder * Math.signum(targetPower);
+//            }
+             */
+            double error = target - externalEncoderAbsolutePosition;
+            if(Math.abs(error) > 80 ) targetPower = 1 * Math.signum(error);  // >80
+            else if(Math.abs(error) > 50 ) targetPower = 0.85 * Math.signum(error); // 50 - 80
+            else if(Math.abs(error) > 30 ) targetPower = 0.65 * Math.signum(error); // 30 - 50
+            else if(Math.abs(error) > 10 ) targetPower = 0.12 * Math.signum(error); // 10 - 30
+            else if(Math.abs(error) > 5 ) targetPower = 0.09 * Math.signum(error);  // 5 - 10
+            else targetPower = 0; // 0 -5
+
+            targetPower = 0;
+        } else {
             targetPower = target / resolution;
+        }
         if (overridePower_bool) targetPower = overridePower;
 
-        if (Double.isNaN(targetPower)) targetPower = 0;
 
+
+        if (Double.isNaN(targetPower)) targetPower = 0;
         for (CRServo servo : motorMap.values()) {
             servo.setPower(targetPower);
             lastPower = targetPower;

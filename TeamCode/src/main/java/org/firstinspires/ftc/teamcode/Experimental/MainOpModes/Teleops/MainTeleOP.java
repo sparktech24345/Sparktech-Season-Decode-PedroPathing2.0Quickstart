@@ -30,8 +30,6 @@ public class MainTeleOP extends LinearOpMode {
 
     private RobotController robot;
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
-    private GoBildaPinpointDriver pinpointTurret;
-    private  DcMotorEx turretEncoder;
     private VoltageSensor controlHubVoltageSensor;
     private Limelight3A limelight3A;
     private AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
@@ -97,7 +95,6 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("loop time Nano", tick_ns);
                 robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
                 //HandleColors();
-                getPinpointTurretPosition();
 
                 robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
                 // intakeing
@@ -289,24 +286,18 @@ public class MainTeleOP extends LinearOpMode {
 
                 ///  ================== Telemetry and Overrides ======================
 
-                double cameraCorrectionError = calculateCameraError(targetTurret - robot.getCRServoComponent("TurretRotate").getServoAvrgPosition());
                 robot
                         .addTelemetryData("turret power", robot.getCRServoComponent("TurretRotate").getPower())
-                        .addTelemetryData("analog position", robot.getCRServoComponent("TurretRotate").getAnalogPosition())
-                        .addTelemetryData("total analog position", robot.getCRServoComponent("TurretRotate").getServoAnalogTotalPosition())
                         .addTelemetryData("estimated calculated power", robot.getCRServoComponent("TurretRotate").getCalculatedPower())
-                        .addTelemetryData("estimated error",targetTurret - robot.getCRServoComponent("TurretRotate").getServoAvrgPosition())
-                        .addTelemetryData("Camera Error correction",cameraCorrectionError)
                         .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
                         .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                         .addTelemetryData("robot X", robot.getCurrentPose().getX())
                         .addTelemetryData("turret rotation estimation", calculateHeadingAdjustment(robot.getCurrentPose(), targetPose.getX(), targetPose.getY()))
                         .addTelemetryData("target velocity", targetVelocity)
                         .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
-                        .addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
-                        .addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
-                        .addTelemetryData("Turret encoder read", robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted());
-                //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
+                        .addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower());
+                        //.addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
+                 //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
 
@@ -371,7 +362,7 @@ public class MainTeleOP extends LinearOpMode {
     public void InitOtherStuff(){
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
-        pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
+        //pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
 //        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
 //        limelight3A.pipelineSwitch(0);
@@ -379,9 +370,6 @@ public class MainTeleOP extends LinearOpMode {
 
         //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
-
-        pinpointTurret.resetPosAndIMU();
-        pinpointTurret.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
 
     }
     private double GreenBall = 0;
@@ -449,8 +437,9 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.makeComponent("TurretRotate", new CRServoComponent()
                 .addMotor("turretrotateleft")
-                .setEncoder(new Encoder(hardwareMap.get(DcMotor.class, "backpurple")))
+                .setExternalEncoder("backpurple")
                 .addMotor("turretrotateright")
+                .initExternalEncoderPosition(0) // an initial offset so that the robots "0" is towards the intake
                 .useWithPIDController(true)
                 .setPIDconstants(0, 0, 0)
                 .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
@@ -517,8 +506,8 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("CLOSED", 200, true);
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_PURPLE", 166.176)//161.64
-                .addState("REDIRECT_TO_GREEN", 27.792) //35
+                .addState("REDIRECT_TO_PURPLE", 161.64)
+                .addState("REDIRECT_TO_GREEN", 35)
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")
@@ -612,15 +601,6 @@ public class MainTeleOP extends LinearOpMode {
         double b = 17.19;
         double result = (degrees - b) / m;
         return clamp(result, 100, 359);
-    }
-
-    public void getPinpointTurretPosition() {
-        pinpointTurret.update();
-        if (pinpointTurret != null) {
-            double diffAngleFromDriveTrain = pinpointTurret.getHeading(AngleUnit.DEGREES) - Math.toDegrees(robot.getCurrentPose().getHeading());
-            robot.getCRServoComponent("TurretRotate").setPinpointPosition(diffAngleFromDriveTrain);
-        }
-        else robot.getCRServoComponent("TurretRotate").setPinpointPosition(0);
     }
 
     public double calculateCameraError(double existingError) {
