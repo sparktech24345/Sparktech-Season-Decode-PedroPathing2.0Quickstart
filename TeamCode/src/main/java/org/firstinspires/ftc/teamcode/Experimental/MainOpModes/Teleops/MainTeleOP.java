@@ -391,7 +391,7 @@ public class MainTeleOP extends LinearOpMode {
     private void portitaMoving (){
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
         robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
-        if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600 && robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK") ){
+        if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600 ){
             old_pos_y_purple = pos_y;
             timeLime = System.currentTimeMillis();
 
@@ -411,7 +411,7 @@ public class MainTeleOP extends LinearOpMode {
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
                 PurpleBall +=1;
             }
-            if (PurpleBall == 1){
+            if (PurpleBall == 2){
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
@@ -517,8 +517,8 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("CLOSED", 200, true);
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_PURPLE", 184.536 )//161.64
-                .addState("REDIRECT_TO_GREEN", 21.888) //35
+                .addState("REDIRECT_TO_PURPLE", 166.176)//161.64
+                .addState("REDIRECT_TO_GREEN", 27.792) //35
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")
