@@ -227,14 +227,14 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     private void runUpdates() {
-        gamepadInstance.update();
-        followerInstance.update();
-        queuerInstance.update();
+        gamepadInstance.update(); // up to here about 0.5 milis
+        followerInstance.update(); // up to here about 20 milis
+        queuerInstance.update(); // up to here also 20 milis
         for (Component c : components.values()) {
             c.update();
-        }
+        } // aprox 40 milisec tends to 45 / 50
         if (movement != null) movement.loop();
-        showTelemetry();
+        showTelemetry(); // up to here about 60 milis
     }
 
     public void loop() {
@@ -248,7 +248,6 @@ public abstract class RobotController implements RobotControllerInterface {
                 }
             }
         }
-        tickMS = tickTimer.milliseconds();
     }
 
     public double getExecMS() { return tickMS; }

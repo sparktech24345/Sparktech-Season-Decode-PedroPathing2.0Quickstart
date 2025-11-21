@@ -36,9 +36,9 @@ public class MainTeleOP extends LinearOpMode {
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double adderTurretRotateForTests = 0;
-    public static double servoP = 0.005 ; //0.0135
+    public static double servoP = 0.015 ; //0.0135
     public static double servoI = 0;
-    public static double servoD = 0.00085; //0.001
+    public static double servoD = 0; //0.001
     public static double servoVel = 5000;
     public static double servoAcel = 10000;
     public static double servoTime = 1;
@@ -63,7 +63,8 @@ public class MainTeleOP extends LinearOpMode {
     private long lastTimeNano = 0;
     private double nonCorrectedCameraError = 0;
     private long tick_ns = 0;
-    public static Pose targetPose = new Pose(125,42.8,0);
+    public static double targetX = 125;
+    public static double targetY = 46;
     private double old_pos_y_purple = 0;
     private long timeLime = 0;
     LLResult llResult = null;
@@ -292,23 +293,25 @@ public class MainTeleOP extends LinearOpMode {
                         .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
                         .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                         .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                        .addTelemetryData("turret rotation estimation", calculateHeadingAdjustment(robot.getCurrentPose(), targetPose.getX(), targetPose.getY()))
+                        .addTelemetryData("turret rotation estimation", calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY))
                         .addTelemetryData("target velocity", targetVelocity)
                         .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
                         .addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower());
                         //.addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
                  //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
+                robot.addTelemetryData("TICK MS", () -> robot.getExecMS());
+
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
 
-                targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetPose.getX(),targetPose.getY()) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
+                targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetX,targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
                 robot.getCRServoComponent("TurretRotate")
                         .setPIDconstants(servoP, servoI, servoD)
                         .setMotionconstants(servoVel, servoAcel, servoTime)
                         .setOverrideBool(true);
 
 
-                double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), targetPose,true);
+                double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(),new Pose(targetX,targetY,0),true);
                 if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
                 else degreeSubtract = 0;
                 degreeSubtract += degreeSubtractAdder;
@@ -316,7 +319,7 @@ public class MainTeleOP extends LinearOpMode {
 
 
                 robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-                double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), targetPose, true).getOptimalAngleDegrees() - degreeSubtract;
+                double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
                 robot.addTelemetryData("turret angle estimation", turretAngleVal);
                 robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
                 //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
@@ -511,7 +514,7 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")
-                .addState("DOWN", 30, true)
+                .addState("DOWN", 32, true)
                 .addState("UP", 230);
 
         robot.getComponent("TurretAngle")

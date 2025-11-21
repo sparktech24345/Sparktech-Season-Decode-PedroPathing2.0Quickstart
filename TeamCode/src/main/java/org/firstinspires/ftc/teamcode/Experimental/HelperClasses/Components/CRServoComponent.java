@@ -127,19 +127,21 @@ public class CRServoComponent extends Component {
         externalEncoderAbsolutePosition += adder + getAnalogPosition();
         return this;
     }
-    public void updateExternalEncoderPosition(){
-        double lastPosition = externalEncoderPosition;
-        externalEncoderPosition = getEncoderReadingFormatted();
+    // No need for turn around logic due to encoder not having a limit
 
-        double deltaPosition = externalEncoderPosition - lastPosition;
-        if (deltaPosition > 180) {
-            deltaPosition -= 360;
-        } else if (deltaPosition < -180) {
-            deltaPosition += 360;
-        }
-
-        externalEncoderAbsolutePosition += deltaPosition;
-    }
+//    public void updateExternalEncoderPosition(){
+//        double lastPosition = externalEncoderPosition;
+//        externalEncoderPosition = getEncoderReadingFormatted();
+//
+//        double deltaPosition = externalEncoderPosition - lastPosition;
+//        if (deltaPosition > 180) {
+//            deltaPosition -= 360;
+//        } else if (deltaPosition < -180) {
+//            deltaPosition += 360;
+//        }
+//
+//        externalEncoderAbsolutePosition += deltaPosition;
+//    }
     public double getExternalEncoderPosition(){
         return externalEncoderPosition;
     }
@@ -184,7 +186,7 @@ public class CRServoComponent extends Component {
         }
         double targetPower = target / resolution;
         if (usePID) {
-            updateExternalEncoderPosition();
+            //updateExternalEncoderPosition();
             /*   Fancy stuff
             //targetPower = PID.calculate(getTrapezoidPosition(target, maxVel, maxAccel, motionTime), avrg);
             //targetPower = PID.calculateSpecial(target, pinpointTotalPosition,kv,minimumPowerAdder);
@@ -194,15 +196,17 @@ public class CRServoComponent extends Component {
 //                targetPower += minimumPowerAdder * Math.signum(targetPower);
 //            }
              */
-            double error = target - externalEncoderAbsolutePosition;
-            if(Math.abs(error) > 80 ) targetPower = 1 * Math.signum(error);  // >80
-            else if(Math.abs(error) > 50 ) targetPower = 0.85 * Math.signum(error); // 50 - 80
-            else if(Math.abs(error) > 30 ) targetPower = 0.65 * Math.signum(error); // 30 - 50
-            else if(Math.abs(error) > 10 ) targetPower = 0.12 * Math.signum(error); // 10 - 30
-            else if(Math.abs(error) > 5 ) targetPower = 0.09 * Math.signum(error);  // 5 - 10
-            else targetPower = 0; // 0 -5
+//            double error = target - getEncoderReadingFormatted();
+//            if(Math.abs(error) > 80 ) targetPower = 1 * Math.signum(error);  // >80
+//            else if(Math.abs(error) > 50 ) targetPower = 0.85 * Math.signum(error); // 50 - 80
+//            else if(Math.abs(error) > 30 ) targetPower = 0.65 * Math.signum(error); // 30 - 50
+//            else if(Math.abs(error) > 10 ) targetPower = 0.12 * Math.signum(error); // 10 - 30
+//            else if(Math.abs(error) > 5 ) targetPower = 0.09 * Math.signum(error);  // 5 - 10
+//            else targetPower = 0; // 0 -5
 
-            targetPower = 0;
+            targetPower = PID.calculate(target,getEncoderReadingFormatted());
+            if (Math.abs(target - getEncoderReadingFormatted()  ) <= 1) targetPower *= 0;
+            if(Math.abs((target - curentPos)) > 1 && Math.abs(externalEncoder.getVelocity()) < 1) targetPower *= 3;
         } else {
             targetPower = target / resolution;
         }
