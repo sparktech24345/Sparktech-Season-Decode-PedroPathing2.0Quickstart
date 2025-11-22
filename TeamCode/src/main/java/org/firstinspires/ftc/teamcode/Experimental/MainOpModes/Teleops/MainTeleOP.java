@@ -95,7 +95,7 @@ public class MainTeleOP extends LinearOpMode {
                 tick_ns = calculateTimeDiff();
                 robot.addTelemetryData("loop time Nano", tick_ns);
                 robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
-                //HandleColors();
+                HandleColors();
 
                 robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
                 // intakeing

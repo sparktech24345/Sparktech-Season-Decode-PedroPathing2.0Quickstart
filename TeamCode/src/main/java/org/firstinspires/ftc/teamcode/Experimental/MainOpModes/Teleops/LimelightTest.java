@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.launchSensorBall;
 
 import android.graphics.Color;
 
@@ -22,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 public class LimelightTest extends OpMode {
 
 
-    private Limelight3A limelight3A;
+//    private Limelight3A limelight3A;
     private double old_pos_y_purple = 0;
     private double ball_counter = 0;
     private double old_Ty = 0;
@@ -36,31 +37,36 @@ public class LimelightTest extends OpMode {
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
     private NormalizedColorSensor colorSensorPurple;
+    private NormalizedColorSensor colorSensorLaunch;
     private NormalizedRGBA greenSensorColors;
     private NormalizedRGBA purpleSensorColors;
+    private NormalizedRGBA launchSensorColors;
     private DcMotorEx intakeMotor;
 
 
     final float[] hsvValuesGreen = new float[3];
     final float[] hsvValuesPurple = new float[3];
+
+    final float[] hsvValuesLaunch = new float[3];
     /// --------------------------------------------------------
 
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(1);
-        limelight3A.pipelineSwitch(0);
-        limelight3A.reloadPipeline();
-        limelight3A.setPollRateHz(100); // poll 100 times per second
-        limelight3A.start();
+//        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+//        limelight3A.pipelineSwitch(1);
+//        limelight3A.pipelineSwitch(0);
+//        limelight3A.reloadPipeline();
+//        limelight3A.setPollRateHz(100); // poll 100 times per second
+//        limelight3A.start();
 
         telemetry.addLine("Limelight initialized and streaming...");
         telemetry.update();
 
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
+        colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
 
         intakeMotor = hardwareMap.get(DcMotorEx.class,"intakemotor");
 
@@ -71,55 +77,55 @@ public class LimelightTest extends OpMode {
     @Override
     public void loop() {
         HandleColors();
-        LLResult llResult = limelight3A.getLatestResult();
+        //LLResult llResult = limelight3A.getLatestResult();
 
         intakeMotor.setPower(gamepad1.left_stick_y);
 
-        if(!limelight3A.isRunning()) limelight3A.start();
-        if (llResult != null) {
-            // Basic vision data
-            telemetry.addData("X offset", llResult.getTx());
-            telemetry.addData("Y offset", llResult.getTy());
-            telemetry.addData("Target area", llResult.getTa());
-
-            if(doOnce){
-                old_Tx = llResult.getTx();
-                old_Ty = llResult.getTy();
-                doOnce = false;
-            }
-
-            if(old_Tx == llResult.getTx() && llResult.getTy() == old_Ty){
-                limelight3A.stop();
-                if (timp.milliseconds()>=100) {
-                    limelight3A.start();
-                }
-            }
-
-            // Optional: Python pipeline data
-            double[] pythonOutputs = llResult.getPythonOutput();
-            if (pythonOutputs != null) {
-                telemetry.addLine("Python Output:");
-
-                double pos_y = pythonOutputs[1];
-                telemetry.addData("y_pos: ", pos_y);
-                telemetry.addData("y_old_pos: ", old_pos_y_purple);
-                if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600){
-                    ball_counter += 1;
-                    timeLime = System.currentTimeMillis();
-                }
-                old_pos_y_purple = pos_y;
-
-                telemetry.addData("ball counter: ", ball_counter);
-
-                for (int i = 0; i < 8; i++) {
-                    telemetry.addData("Value " + i, pythonOutputs[i]);
-                }
-            } else {
-                telemetry.addLine("No Python output received.");
-            }
-        } else {
-            telemetry.addLine("No Limelight data yet...");
-        }
+//        if(!limelight3A.isRunning()) limelight3A.start();
+//        if (llResult != null) {
+//            // Basic vision data
+//            telemetry.addData("X offset", llResult.getTx());
+//            telemetry.addData("Y offset", llResult.getTy());
+//            telemetry.addData("Target area", llResult.getTa());
+//
+//            if(doOnce){
+//                old_Tx = llResult.getTx();
+//                old_Ty = llResult.getTy();
+//                doOnce = false;
+//            }
+//
+//            if(old_Tx == llResult.getTx() && llResult.getTy() == old_Ty){
+//                limelight3A.stop();
+//                if (timp.milliseconds()>=100) {
+//                    limelight3A.start();
+//                }
+//            }
+//
+//            // Optional: Python pipeline data
+//            double[] pythonOutputs = llResult.getPythonOutput();
+//            if (pythonOutputs != null) {
+//                telemetry.addLine("Python Output:");
+//
+//                double pos_y = pythonOutputs[1];
+//                telemetry.addData("y_pos: ", pos_y);
+//                telemetry.addData("y_old_pos: ", old_pos_y_purple);
+//                if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600){
+//                    ball_counter += 1;
+//                    timeLime = System.currentTimeMillis();
+//                }
+//                old_pos_y_purple = pos_y;
+//
+//                telemetry.addData("ball counter: ", ball_counter);
+//
+//                for (int i = 0; i < 8; i++) {
+//                    telemetry.addData("Value " + i, pythonOutputs[i]);
+//                }
+//            } else {
+//                telemetry.addLine("No Python output received.");
+//            }
+//        } else {
+//            telemetry.addLine("No Limelight data yet...");
+//        }
         telemetry.update();
     }
 
@@ -128,28 +134,38 @@ public class LimelightTest extends OpMode {
 
         greenSensorColors =colorSensorGreen.getNormalizedColors();
         purpleSensorColors =colorSensorPurple.getNormalizedColors();
+        launchSensorColors = colorSensorLaunch.getNormalizedColors();
 
         Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
         Color.colorToHSV(purpleSensorColors.toColor(), hsvValuesPurple);
+        Color.colorToHSV(launchSensorColors.toColor(), hsvValuesLaunch);
+
 
         greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
         purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
+        launchSensorBall = BallColorSet_Decode.getColor(launchSensorColors);
 
 
-        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
-        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
-        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+//        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
+//        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+//        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+//
+//        telemetry.addData("P_RED",(double)purpleSensorColors.red * 10000.0);
+//        telemetry.addData("P_BLUE",(double)purpleSensorColors.blue * 10000.0);
+//        telemetry.addData("P_GREEN",(double)purpleSensorColors.green * 10000.0);
 
-        telemetry.addData("P_RED",(double)purpleSensorColors.red * 10000.0);
-        telemetry.addData("P_BLUE",(double)purpleSensorColors.blue * 10000.0);
-        telemetry.addData("P_GREEN",(double)purpleSensorColors.green * 10000.0);
+        telemetry.addData("G_RED",(double)launchSensorColors.red * 10000.0);
+        telemetry.addData("G_BLUE",(double)launchSensorColors.blue * 10000.0);
+        telemetry.addData("G_GREEN",(double)launchSensorColors.green * 10000.0);
 
 
-        greenSensorBall = BallColorSet_Decode.NoBall;
-        purpleSensorBall = BallColorSet_Decode.NoBall;
+//        greenSensorBall = BallColorSet_Decode.NoBall;
+//        purpleSensorBall = BallColorSet_Decode.NoBall;
+        launchSensorBall = BallColorSet_Decode.NoBall;
 
-        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
-        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
+//        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
+//        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
+        telemetry.addData("LAUNCH_SENSOR_BALL", launchSensorBall);
     }
 
 }
