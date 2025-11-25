@@ -9,7 +9,7 @@ public class ActionSequence extends Action {
 
     protected StateQueuer queue = new StateQueuer();
 
-    ActionSequence(boolean wait, Action... actions) {
+    public ActionSequence(boolean wait, Action... actions) {
         for (Action action : actions) {
             queue.addAction(action);
         }

@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 public class LimelightTest extends OpMode {
 
 
-//    private Limelight3A limelight3A;
+    private Limelight3A limelight3A;
     private double old_pos_y_purple = 0;
     private double ball_counter = 0;
     private double old_Ty = 0;
@@ -54,12 +54,12 @@ public class LimelightTest extends OpMode {
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-//        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-//        limelight3A.pipelineSwitch(1);
-//        limelight3A.pipelineSwitch(0);
-//        limelight3A.reloadPipeline();
-//        limelight3A.setPollRateHz(100); // poll 100 times per second
-//        limelight3A.start();
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(1);
+        limelight3A.pipelineSwitch(0);
+        limelight3A.reloadPipeline();
+        limelight3A.setPollRateHz(100); // poll 100 times per second
+        limelight3A.start();
 
         telemetry.addLine("Limelight initialized and streaming...");
         telemetry.update();
@@ -77,7 +77,7 @@ public class LimelightTest extends OpMode {
     @Override
     public void loop() {
         HandleColors();
-        //LLResult llResult = limelight3A.getLatestResult();
+        LLResult llResult = limelight3A.getLatestResult();
 
         intakeMotor.setPower(gamepad1.left_stick_y);
 
@@ -126,6 +126,11 @@ public class LimelightTest extends OpMode {
 //        } else {
 //            telemetry.addLine("No Limelight data yet...");
 //        }
+        double tx = llResult.getTx();
+
+        telemetry.addData("tx", tx);
+
+
         telemetry.update();
     }
 
@@ -141,30 +146,30 @@ public class LimelightTest extends OpMode {
         Color.colorToHSV(launchSensorColors.toColor(), hsvValuesLaunch);
 
 
-        greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
-        purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
-        launchSensorBall = BallColorSet_Decode.getColor(launchSensorColors);
+        greenSensorBall = BallColorSet_Decode.getColorForTurret(greenSensorColors);
+        purpleSensorBall = BallColorSet_Decode.getColorForTurret(purpleSensorColors);
+        launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
 
-//        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
-//        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
-//        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
-//
-//        telemetry.addData("P_RED",(double)purpleSensorColors.red * 10000.0);
-//        telemetry.addData("P_BLUE",(double)purpleSensorColors.blue * 10000.0);
-//        telemetry.addData("P_GREEN",(double)purpleSensorColors.green * 10000.0);
+        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
+        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
 
-        telemetry.addData("G_RED",(double)launchSensorColors.red * 10000.0);
-        telemetry.addData("G_BLUE",(double)launchSensorColors.blue * 10000.0);
-        telemetry.addData("G_GREEN",(double)launchSensorColors.green * 10000.0);
+        telemetry.addData("P_RED",(double)purpleSensorColors.red * 10000.0);
+        telemetry.addData("P_BLUE",(double)purpleSensorColors.blue * 10000.0);
+        telemetry.addData("P_GREEN",(double)purpleSensorColors.green * 10000.0);
+
+        telemetry.addData("LAUNCH_RED",(double)launchSensorColors.red * 10000.0);
+        telemetry.addData("LAUNCH_BLUE",(double)launchSensorColors.blue * 10000.0);
+        telemetry.addData("LAUNCH_GREEN",(double)launchSensorColors.green * 10000.0);
 
 
-//        greenSensorBall = BallColorSet_Decode.NoBall;
-//        purpleSensorBall = BallColorSet_Decode.NoBall;
+        greenSensorBall = BallColorSet_Decode.NoBall;
+        purpleSensorBall = BallColorSet_Decode.NoBall;
         launchSensorBall = BallColorSet_Decode.NoBall;
 
-//        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
-//        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
+        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
+        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
         telemetry.addData("LAUNCH_SENSOR_BALL", launchSensorBall);
     }
 

@@ -124,7 +124,7 @@ public class CRServoComponent extends Component {
         this.pinpointPosition = pinpointPosition;
     }
     public CRServoComponent initExternalEncoderPosition(double adder){
-        externalEncoderAbsolutePosition += adder + getAnalogPosition();
+        externalEncoderAbsolutePosition += adder; //+ getAnalogPosition();
         return this;
     }
     // No need for turn around logic due to encoder not having a limit

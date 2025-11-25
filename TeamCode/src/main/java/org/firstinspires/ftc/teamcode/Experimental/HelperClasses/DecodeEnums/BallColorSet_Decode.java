@@ -19,6 +19,15 @@ public enum BallColorSet_Decode {
         else return NoBall;
 
     }
+    public static BallColorSet_Decode getColorForTurret(NormalizedRGBA colors) {
+        return getColorForTurret(colors.red * 10000.0, colors.green * 10000.0, colors.blue * 10000.0);
+    }
+    public static BallColorSet_Decode getColorForTurret(double r, double g, double b) {
+        if(g < 9.5) return NoBall;
+        else
+            if(b > g) return Purple;
+        else return Green;
+    }
 
     public static BallColorSet_Decode getCameraColor(LLResult llResult) {
         if (llResult != null) {

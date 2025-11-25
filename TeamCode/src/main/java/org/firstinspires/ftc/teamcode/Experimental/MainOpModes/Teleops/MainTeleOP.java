@@ -23,6 +23,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -54,6 +55,8 @@ public class MainTeleOP extends LinearOpMode {
     public static double degreeSubtractAdder = -5;
     public static double degreeSubtractMulti = 1;
     public static boolean isTryingToFire = false;
+    private ElapsedTime isReadyToFireTimer=new ElapsedTime();
+    private ElapsedTime isFiringTimer=new ElapsedTime();
     public boolean isReadyToFire = false;
     public static  int purpleCounter = 0;
     public static int greenCounter = 0;
@@ -74,12 +77,17 @@ public class MainTeleOP extends LinearOpMode {
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
     private NormalizedColorSensor colorSensorPurple;
+    private NormalizedColorSensor colorSensorLaunch;
     private NormalizedRGBA greenSensorColors;
     private NormalizedRGBA purpleSensorColors;
+    private NormalizedRGBA launchSensorColors;
+    private DcMotorEx intakeMotor;
 
 
     final float[] hsvValuesGreen = new float[3];
     final float[] hsvValuesPurple = new float[3];
+
+    final float[] hsvValuesLaunch = new float[3];
     /// --------------------------------------------------------
 
     @Override
@@ -96,6 +104,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("loop time Nano", tick_ns);
                 robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
                 HandleColors();
+                firingSequence(launchSensorBall != BallColorSet_Decode.NoBall);
 
                 robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
                 // intakeing
@@ -185,11 +194,11 @@ public class MainTeleOP extends LinearOpMode {
                     // shoot
                     robot.addToQueue(
                             new StateAction(false, "PurpleGateServo", "CLOSED"),
-                            new DelayAction(true, 600),
-                            new StateAction(false, "TransferServo", "UP"),
+                            new DelayAction(true, 300),
+                            new StateAction(true, "TransferServo", "UP"),
                             new DelayAction(true, 600),
                             new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(false, "PurpleGateServo", "OPEN")
+                            new StateAction(true, "PurpleGateServo", "OPEN")
                     );
                 }
                 if (robot.getControllerKey("LEFT_BUMPER1").IsToggledOnPress){
@@ -263,7 +272,9 @@ public class MainTeleOP extends LinearOpMode {
 
                 if (gamepad2.xWasPressed() || robot.getControllerKey("Y1").ExecuteAfterPress) {
                     isTryingToFire = !isTryingToFire;
+                    isReadyToFireTimer.reset();
                 }
+                isReadyToFire = (isReadyToFireTimer.milliseconds() > 1500 && isTryingToFire);
 
                 if (gamepad2.aWasPressed()) {
                     // take out a ball trough outtake
@@ -293,7 +304,7 @@ public class MainTeleOP extends LinearOpMode {
                         .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
                         .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                         .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                        .addTelemetryData("turret rotation estimation", calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY))
+                        .addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted())
                         .addTelemetryData("target velocity", targetVelocity)
                         .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
                         .addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower());
@@ -305,6 +316,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
 
                 targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetX,targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
+                targetTurret += calculateCameraError();
                 robot.getCRServoComponent("TurretRotate")
                         .setPIDconstants(servoP, servoI, servoD)
                         .setMotionconstants(servoVel, servoAcel, servoTime)
@@ -335,6 +347,8 @@ public class MainTeleOP extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
 
                     robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
+
+                    robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
                 }
                 else {
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
@@ -363,8 +377,19 @@ public class MainTeleOP extends LinearOpMode {
         // stop
     }
     public void InitOtherStuff(){
+        //limelight stuff
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(1);
+        limelight3A.pipelineSwitch(0);
+        limelight3A.reloadPipeline();
+        limelight3A.setPollRateHz(100); // poll 100 times per second
+        limelight3A.start();
+
+        //other stuff like color sensor
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
+        colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
+
         //pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
 //        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
@@ -378,6 +403,21 @@ public class MainTeleOP extends LinearOpMode {
     private double GreenBall = 0;
     private double PurpleBall = 0;
     private double CountBall = PurpleBall + GreenBall;
+    private void firingSequence(boolean turretHasBall){
+
+        if(turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 1000){
+            isFiringTimer.reset();
+            robot.addToQueue(
+                    new StateAction(false, "PurpleGateServo", "CLOSED"),
+                    new StateAction(true, "TransferServo", "MIDDLE"),
+                    new DelayAction(true, 400),
+                    new StateAction(true, "TransferServo", "UP"),
+                    new DelayAction(true, 350),
+                    new StateAction(true, "TransferServo", "DOWN"),
+                    new StateAction(true, "PurpleGateServo", "OPEN")
+            );
+        }
+    }
 
     private void portitaMoving (){
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
@@ -514,7 +554,8 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")
-                .addState("DOWN", 32, true)
+                .addState("DOWN", 27, true)
+                .addState("MIDDLE", 45)
                 .addState("UP", 230);
 
         robot.getComponent("TurretAngle")
@@ -540,30 +581,40 @@ public class MainTeleOP extends LinearOpMode {
     } private void HandleColors() {
 
 
-        greenSensorColors =colorSensorGreen.getNormalizedColors();
-        purpleSensorColors =colorSensorPurple.getNormalizedColors();
+        //greenSensorColors =colorSensorGreen.getNormalizedColors();
+        //purpleSensorColors =colorSensorPurple.getNormalizedColors();
+        launchSensorColors = colorSensorLaunch.getNormalizedColors();
 
-        Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
-        Color.colorToHSV(purpleSensorColors.toColor(), hsvValuesPurple);
-
-        greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
-        purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
-
-
-        robot.addTelemetryData("G_RED",(double)greenSensorColors.red);
-        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue);
-        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green);
-
-        robot.addTelemetryData("P_RED",(double)purpleSensorColors.red);
-        robot.addTelemetryData("P_BLUE",(double)purpleSensorColors.blue);
-        robot.addTelemetryData("P_GREEN",(double)purpleSensorColors.green);
+        //Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
+        //Color.colorToHSV(purpleSensorColors.toColor(), hsvValuesPurple);
+        Color.colorToHSV(launchSensorColors.toColor(), hsvValuesLaunch);
 
 
-        greenSensorBall = BallColorSet_Decode.NoBall;
-        purpleSensorBall = BallColorSet_Decode.NoBall;
+        //greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
+        //purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
+        launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
-        robot.addTelemetryData("GREEN_SENSOR_BALL", greenSensorBall);
-        robot.addTelemetryData("PURPLE_SENSOR_BALL", purpleSensorBall);
+
+//        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
+//        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+//        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+//
+//        telemetry.addData("P_RED",(double)purpleSensorColors.red * 10000.0);
+//        telemetry.addData("P_BLUE",(double)purpleSensorColors.blue * 10000.0);
+//        telemetry.addData("P_GREEN",(double)purpleSensorColors.green * 10000.0);
+
+        robot.addTelemetryData("G_RED",(double)launchSensorColors.red * 10000.0);
+        robot.addTelemetryData("G_BLUE",(double)launchSensorColors.blue * 10000.0);
+        robot.addTelemetryData("G_GREEN",(double)launchSensorColors.green * 10000.0);
+
+
+//        greenSensorBall = BallColorSet_Decode.NoBall;
+//        purpleSensorBall = BallColorSet_Decode.NoBall;
+//        launchSensorBall = BallColorSet_Decode.NoBall;
+
+//        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
+//        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
+        robot.addTelemetryData("LAUNCH_SENSOR_BALL", launchSensorBall);
     }
     public double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position
@@ -606,19 +657,22 @@ public class MainTeleOP extends LinearOpMode {
         return clamp(result, 100, 359);
     }
 
-    public double calculateCameraError(double existingError) {
-        aprilTagWebcam.update();
-        AprilTagDetection id20 = aprilTagWebcam.getTagBySpecificId(20);
-        if (id20 != null) aprilTagWebcam.displayDetectionTelemetry(id20);
-
-        if (id20 != null) cameraError = id20.ftcPose.x; //might be the wrong thing
-        else cameraError = existingError;
-
-        // telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detectedId.ftcPose.pitch, detectedId.ftcPose.roll, detectedId.ftcPose.yaw));
-        double actualError = cameraError - existingError;
-
-        nonCorrectedCameraError = cameraError;
-        return clamp(actualError, -20, 20);
+    public double calculateCameraError(){
+        // Logitech code
+//        aprilTagWebcam.update();
+//        AprilTagDetection id20 = aprilTagWebcam.getTagBySpecificId(20);
+//        if (id20 != null) aprilTagWebcam.displayDetectionTelemetry(id20);
+//
+//        if (id20 != null) cameraError = id20.ftcPose.x; //might be the wrong thing
+//        else cameraError = existingError;
+//
+//        // telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detectedId.ftcPose.pitch, detectedId.ftcPose.roll, detectedId.ftcPose.yaw));
+//        double actualError = cameraError - existingError;
+//
+//        nonCorrectedCameraError = cameraError;
+//        return clamp(actualError, -20, 20);
+        LLResult llResult = limelight3A.getLatestResult();
+        return llResult.getTx();
     }
     public long calculateTimeDiff() {
         long current = System.nanoTime();

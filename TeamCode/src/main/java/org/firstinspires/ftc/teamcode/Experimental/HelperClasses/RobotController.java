@@ -248,6 +248,7 @@ public abstract class RobotController implements RobotControllerInterface {
                 }
             }
         }
+        tickMS = tickTimer.milliseconds();
     }
 
     public double getExecMS() { return tickMS; }

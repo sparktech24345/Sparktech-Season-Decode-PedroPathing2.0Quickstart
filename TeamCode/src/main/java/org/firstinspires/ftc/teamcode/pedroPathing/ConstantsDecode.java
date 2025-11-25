@@ -41,7 +41,7 @@ public class ConstantsDecode {
             .hardwareMapName("pinpoint")
             .distanceUnit(DistanceUnit.METER) //might be changed later
             .forwardPodY(-0.177563) //-0.172
-            .strafePodX(-0.09647796) //0.006
+            .strafePodX(0.09647796) //0.006
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 

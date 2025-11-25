@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import android.util.Pair;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
@@ -9,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Mot
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
-
+@Config
 public class GlobalStorage {
 
     public static double clamp(double val, double min, double max) {
@@ -87,7 +88,7 @@ public class GlobalStorage {
 
     //function for firing stuff
 
-    public static double grade0 = 665.276311;
+    public static double grade0 = 605.276311;
     public static double grade1 = 3.37452358;
     public static double grade2 = -0.0064362671;
     public static double grade3 = 0.0000058014683;
