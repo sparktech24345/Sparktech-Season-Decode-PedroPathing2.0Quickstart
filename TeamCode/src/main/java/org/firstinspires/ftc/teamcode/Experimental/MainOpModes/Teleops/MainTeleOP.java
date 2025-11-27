@@ -37,6 +37,9 @@ public class MainTeleOP extends LinearOpMode {
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double adderTurretRotateForTests = 0;
+    public static double cameraP = 0.0055;
+    public static double cameraI = 0.005;
+    public static double cameraD = 0.001;
     public static double servoP = 0.015 ; //0.0135
     public static double servoI = 0;
     public static double servoD = 0; //0.001
@@ -55,8 +58,8 @@ public class MainTeleOP extends LinearOpMode {
     public static double degreeSubtractAdder = -5;
     public static double degreeSubtractMulti = 1;
     public static boolean isTryingToFire = false;
-    private ElapsedTime isReadyToFireTimer=new ElapsedTime();
-    private ElapsedTime isFiringTimer=new ElapsedTime();
+    private ElapsedTime isReadyToFireTimer = new ElapsedTime();
+    private ElapsedTime isFiringTimer = new ElapsedTime();
     public boolean isReadyToFire = false;
     public static  int purpleCounter = 0;
     public static int greenCounter = 0;
@@ -314,13 +317,15 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("TICK MS", () -> robot.getExecMS());
 
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
-
+                double camera_error = calculateCameraError();
                 targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetX,targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
-                targetTurret += calculateCameraError();
                 robot.getCRServoComponent("TurretRotate")
+                        .setCameraPIDconstants(cameraP, cameraI, cameraD)
+                        .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
                         .setPIDconstants(servoP, servoI, servoD)
                         .setMotionconstants(servoVel, servoAcel, servoTime)
-                        .setOverrideBool(true);
+                        .setOverrideBool(true)
+                        .setTargetOverride(targetTurret);
 
 
                 double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(),new Pose(targetX,targetY,0),true);
@@ -346,7 +351,7 @@ public class MainTeleOP extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
 
-                    robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
+                    // robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
 
                     robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
                 }
@@ -354,7 +359,7 @@ public class MainTeleOP extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
                     targetVelocity = 0;
-                    robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret); //TODO to set this to 0
+                    // robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret); //TODO to set this to 0
                 }
 
                 robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
@@ -419,10 +424,10 @@ public class MainTeleOP extends LinearOpMode {
         }
     }
 
-    private void portitaMoving (){
+    private void portitaMoving() {
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
         robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
-        if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600 ){
+        if(old_pos_y_purple > 190 && old_pos_y_purple - pos_y > 50 && System.currentTimeMillis() - timeLime > 600 ) {
             old_pos_y_purple = pos_y;
             timeLime = System.currentTimeMillis();
 
@@ -431,24 +436,24 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
 //            robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
             GreenBall += 1;
-            if (GreenBall == 1){
+            if (GreenBall == 1) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
 //                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE");
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
             }
-            if (robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE")){
+            if (robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_PURPLE")) {
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
-                PurpleBall +=1;
+                PurpleBall += 1;
             }
-            if (PurpleBall == 2){
+            if (PurpleBall == 2) {
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 //                robot.getComponent("IntakeMotor").hasStateOfName("FULL");
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
 //                robot.getComponent("IntakeSorterServo").hasStateOfName("REDIRECT_TO_GREEN");
             }
-            if (CountBall == 3){
+            if (CountBall == 3) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "BLOCK"));
 //                robot.getComponent("IntakeSorterServo").hasStateOfName("BLOCK");
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"));

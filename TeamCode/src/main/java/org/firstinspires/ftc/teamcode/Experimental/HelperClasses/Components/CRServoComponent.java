@@ -1,16 +1,12 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.MotionProfiling.getTrapezoidPosition;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
@@ -22,6 +18,7 @@ public class CRServoComponent extends Component {
     protected CRServo mainServo = null;
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
+    protected PIDcontroller PIDcamera = null;
     protected double overridePower = -2;
     protected double overrideTarget = 0;
     protected double lastPower = 0;
@@ -43,6 +40,12 @@ public class CRServoComponent extends Component {
     protected double motionTime = 0.5;
     public static double encoderDirectionMulti = -1;
     protected final double encoderUnitConstant = 123.37;
+    protected boolean overridePIDerror = false;
+    protected double errorOverride = 0;
+    public static double MinErrorThreshold = 1.2;
+    public static double ErrorThresholdMulti = 0;
+    public static double MinVelocityThreshold = 0.1;
+    public static double VelocityThresholdMulti = 4.5;
 
     public CRServoComponent addMotor(String hardwareMapName) {
         CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
@@ -165,12 +168,45 @@ public class CRServoComponent extends Component {
     public CRServo get(String name) {
         return motorMap.get(name);
     }
+
     public double getEncoderReadingFormatted() {
         if (externalEncoder == null) return 0;
         double reading = externalEncoder.getCurrentPosition() * encoderDirectionMulti / encoderUnitConstant;
 //        while (reading < -180) reading += 360;
 //        while (reading > 180) reading -= 360;
         return reading;
+    }
+
+    public double getEncoderVelocity() {
+        if (externalEncoder == null) return 0;
+        return externalEncoder.getVelocity();
+    }
+
+    public CRServoComponent overridePIDerror(double val, boolean condition) {
+        errorOverride = val;
+        overridePIDerror = condition;
+        return this;
+    }
+
+    public CRServoComponent setCameraPIDconstants(double p, double i, double d) {
+        if (PIDcamera == null) PIDcamera = new PIDcontroller();
+        PIDcamera.setConstants(p, i, d);
+        return this;
+    }
+
+    private double PID_camera() {
+        double targetPower = PIDcamera.calculate(0, errorOverride);
+        if (Math.abs(errorOverride) <= MinErrorThreshold) targetPower *= ErrorThresholdMulti;
+        if (Math.abs(getEncoderVelocity()) < MinVelocityThreshold) targetPower *= VelocityThresholdMulti;
+        return targetPower;
+    }
+
+    private double PID() {
+        double pos = getEncoderReadingFormatted();
+        double targetPower = PID.calculate(target, pos);
+        if (Math.abs(target - pos) <= 1) targetPower *= 0;
+        else if (Math.abs(target - curentPos) > 1 && Math.abs(getEncoderVelocity()) == 0) targetPower *= 3;
+        return targetPower;
     }
 
     @Override
@@ -184,7 +220,7 @@ public class CRServoComponent extends Component {
         if (overrideTarget_bool) {
             target = overrideTarget;
         }
-        double targetPower = target / resolution;
+        double targetPower;
         if (usePID) {
             //updateExternalEncoderPosition();
             /*   Fancy stuff
@@ -194,7 +230,7 @@ public class CRServoComponent extends Component {
             if (Math.abs(target - pinpointTotalPosition) <= 2) targetPower *= 0;
 //            if (Math.abs(target - pinpointTotalPosition) <= 2) {
 //                targetPower += minimumPowerAdder * Math.signum(targetPower);
-//            }
+//            }o
              */
 //            double error = target - getEncoderReadingFormatted();
 //            if(Math.abs(error) > 80 ) targetPower = 1 * Math.signum(error);  // >80
@@ -203,10 +239,7 @@ public class CRServoComponent extends Component {
 //            else if(Math.abs(error) > 10 ) targetPower = 0.12 * Math.signum(error); // 10 - 30
 //            else if(Math.abs(error) > 5 ) targetPower = 0.09 * Math.signum(error);  // 5 - 10
 //            else targetPower = 0; // 0 -5
-
-            targetPower = PID.calculate(target,getEncoderReadingFormatted());
-            if (Math.abs(target - getEncoderReadingFormatted()  ) <= 1) targetPower *= 0;
-            if(Math.abs((target - curentPos)) > 1 && Math.abs(externalEncoder.getVelocity()) < 1) targetPower *= 3;
+            targetPower = (overridePIDerror ? PID_camera() : PID());
         } else {
             targetPower = target / resolution;
         }
