@@ -6,7 +6,7 @@ public enum MotifSequence {
     Purple_Purple_Green,
     Purple_Green_Purple;
 
-    public static MotifSequence getNextSequence(MotifSequence inputSec){
+    public static MotifSequence getNextSequece(MotifSequence inputSec){
         if(inputSec == Green_Purple_Purple) return Purple_Purple_Green;
         else if(inputSec == Purple_Purple_Green) return Purple_Green_Purple;
         else if(inputSec == Purple_Green_Purple) return Green_Purple_Purple;
