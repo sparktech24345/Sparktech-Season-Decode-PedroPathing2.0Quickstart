@@ -7,21 +7,17 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
-import org.firstinspires.ftc.robotcore.external.navigation.*;
+
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -79,10 +75,12 @@ public class MainTeleOP extends LinearOpMode {
 
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
-    private NormalizedColorSensor colorSensorPurple;
+    private NormalizedColorSensor colorSensorPurple1;
+    private NormalizedColorSensor colorSensorPurple2;
     private NormalizedColorSensor colorSensorLaunch;
     private NormalizedRGBA greenSensorColors;
-    private NormalizedRGBA purpleSensorColors;
+    private NormalizedRGBA purpleSensorColors1;
+    private NormalizedRGBA purpleSensorColors2;
     private NormalizedRGBA launchSensorColors;
     private DcMotorEx intakeMotor;
 
@@ -114,7 +112,7 @@ public class MainTeleOP extends LinearOpMode {
 
                 robot.addTelemetryData("tester",robot.getComponent("IntakeMotor").getPosition());
 
-                if (false && (purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green)) {
+                if (false && (purpleSensorBall1 == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall1 == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green)) {
                     if (ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1) { //dont infinite stack comands if full reversing already
                         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
                         robot.addToQueue(new DelayAction(true, 400));
@@ -131,12 +129,21 @@ public class MainTeleOP extends LinearOpMode {
                     robot.addTelemetryData("redirecting",true);
                 }
 
+                if(robot.getControllerKey("DPAD_LEFT").ExecuteAfterPress){
+                    firePurple();
+                }
+
+                if(robot.getControllerKey("DPAD_RIGHT").ExecuteAfterPress){
+                    fireGreen();
+                }
+
+
                 if (robot.getControllerKey("A1").IsToggledOnPress) {
                     robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
                     if (
-                            (purpleSensorBall == BallColorSet_Decode.Purple
+                            (purpleSensorBall1 == BallColorSet_Decode.Purple
                             || greenSensorBall == BallColorSet_Decode.Purple
-                            || purpleSensorBall == BallColorSet_Decode.Green
+                            || purpleSensorBall1 == BallColorSet_Decode.Green
                             || greenSensorBall == BallColorSet_Decode.Green)
                             && timerForIntake + 1000 < System.currentTimeMillis()
                     ) {
@@ -150,7 +157,7 @@ public class MainTeleOP extends LinearOpMode {
                         robot.addToQueue(new StateAction(false, "GreenGateServo", "CLOSED"));
                         robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
                     } else {
-                        if (purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple) {
+                        if (purpleSensorBall1 == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple) {
                             purpleCounter++;
                             if (purpleCounter>2) {
                                 robot.addToQueue(new StateAction(false,"IntakeMotor" ,"SLOW_REVERSE"));
@@ -392,7 +399,9 @@ public class MainTeleOP extends LinearOpMode {
 
         //other stuff like color sensor
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
-        colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
+        colorSensorPurple1 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor1");
+        colorSensorPurple2 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor2");
+
         colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
 
         //pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
@@ -422,6 +431,69 @@ public class MainTeleOP extends LinearOpMode {
                     new StateAction(true, "PurpleGateServo", "OPEN")
             );
         }
+    }
+    
+    private void fireGreen(){
+        if (purpleSensorBall2 == BallColorSet_Decode.Green){
+            robot.addToQueue(
+                    new StateAction(true, "PurpleGateServo", "OPEN"),
+                    new StateAction(true, "IntakeMotor", "FULL"),
+                    new DelayAction(true, 1000),
+                    new StateAction(true, "PurpleGateServo", "CLOSED")
+                    );
+            if (isTryingToFire) {
+                robot.addToQueue(
+                        new StateAction(true, "TransferServo", "UP"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "DOWN"));
+            }
+        } else if (greenSensorBall == BallColorSet_Decode.Green){
+            robot.addToQueue(
+                    new StateAction(true, "GreenGateServo", "OPEN"),
+                    new StateAction(true, "IntakeMotor", "FULL"),
+                    new DelayAction(true, 1000),
+                    new StateAction(true, "GreenGateServo", "CLOSED")
+            );
+            if (isTryingToFire) {
+                robot.addToQueue(
+                        new StateAction(true, "TransferServo", "UP"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "DOWN")
+                );
+            }
+        }
+
+    }
+    private void firePurple(){
+        if (purpleSensorBall2 == BallColorSet_Decode.Purple){
+            robot.addToQueue(
+                    new StateAction(true, "PurpleGateServo", "OPEN"),
+                    new StateAction(true, "IntakeMotor", "FULL"),
+                    new DelayAction(true, 1000),
+                    new StateAction(true, "PurpleGateServo", "CLOSED")
+            );
+            if (isTryingToFire) {
+                robot.addToQueue(
+                        new StateAction(true, "TransferServo", "UP"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "DOWN"));
+            }
+        } else if (greenSensorBall == BallColorSet_Decode.Purple){
+            robot.addToQueue(
+                    new StateAction(true, "GreenGateServo", "OPEN"),
+                    new StateAction(true, "IntakeMotor", "FULL"),
+                    new DelayAction(true, 1000),
+                    new StateAction(true, "GreenGateServo", "CLOSED")
+            );
+            if (isTryingToFire) {
+                robot.addToQueue(
+                        new StateAction(true, "TransferServo", "UP"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "DOWN")
+                );
+            }
+        }
+
     }
 
     private void portitaMoving() {
@@ -586,27 +658,35 @@ public class MainTeleOP extends LinearOpMode {
     } private void HandleColors() {
 
 
-        //greenSensorColors =colorSensorGreen.getNormalizedColors();
-        //purpleSensorColors =colorSensorPurple.getNormalizedColors();
+        greenSensorColors =colorSensorGreen.getNormalizedColors();
+        purpleSensorColors1 =colorSensorPurple1.getNormalizedColors();
+        purpleSensorColors2 =colorSensorPurple2.getNormalizedColors();
+
         launchSensorColors = colorSensorLaunch.getNormalizedColors();
 
-        //Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
-        //Color.colorToHSV(purpleSensorColors.toColor(), hsvValuesPurple);
+        Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
+        Color.colorToHSV(purpleSensorColors1.toColor(), hsvValuesPurple);
+        Color.colorToHSV(purpleSensorColors2.toColor(), hsvValuesPurple);
         Color.colorToHSV(launchSensorColors.toColor(), hsvValuesLaunch);
 
 
-        //greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
-        //purpleSensorBall = BallColorSet_Decode.getColor(purpleSensorColors);
+        greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
+        purpleSensorBall1 = BallColorSet_Decode.getColor(purpleSensorColors1);
+        purpleSensorBall2 = BallColorSet_Decode.getColor(purpleSensorColors2);
         launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
 
-//        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
-//        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
-//        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
-//
-//        telemetry.addData("P_RED",(double)purpleSensorColors.red * 10000.0);
-//        telemetry.addData("P_BLUE",(double)purpleSensorColors.blue * 10000.0);
-//        telemetry.addData("P_GREEN",(double)purpleSensorColors.green * 10000.0);
+        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
+        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+
+        telemetry.addData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
+        telemetry.addData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
+        telemetry.addData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
+
+        telemetry.addData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
+        telemetry.addData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
+        telemetry.addData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
 
         robot.addTelemetryData("G_RED",(double)launchSensorColors.red * 10000.0);
         robot.addTelemetryData("G_BLUE",(double)launchSensorColors.blue * 10000.0);
@@ -614,11 +694,11 @@ public class MainTeleOP extends LinearOpMode {
 
 
 //        greenSensorBall = BallColorSet_Decode.NoBall;
-//        purpleSensorBall = BallColorSet_Decode.NoBall;
+//        purpleSensorBall1 = BallColorSet_Decode.NoBall;
 //        launchSensorBall = BallColorSet_Decode.NoBall;
 
 //        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
-//        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
+//        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall1);
         robot.addTelemetryData("LAUNCH_SENSOR_BALL", launchSensorBall);
     }
     public double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
