@@ -29,6 +29,17 @@ public enum BallColorSet_Decode {
         else return Green;
     }
 
+
+    public static BallColorSet_Decode getColorForStorage(NormalizedRGBA colors) {
+        return getColorForStorage(colors.red * 10000.0, colors.green * 10000.0, colors.blue * 10000.0);
+    }
+    public static BallColorSet_Decode getColorForStorage(double r, double g, double b) {
+        if(g < 15) return NoBall;
+        else
+        if(b > g) return Purple;
+        else return Green;
+    }
+
     public static BallColorSet_Decode getCameraColor(LLResult llResult) {
         if (llResult != null) {
             double[] pythonOutputs = llResult.getPythonOutput();

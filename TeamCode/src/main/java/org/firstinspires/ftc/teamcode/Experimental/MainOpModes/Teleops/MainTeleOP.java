@@ -24,7 +24,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
 public class MainTeleOP extends LinearOpMode {
-
     private RobotController robot;
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     private VoltageSensor controlHubVoltageSensor;
@@ -134,11 +133,11 @@ public class MainTeleOP extends LinearOpMode {
                     robot.addTelemetryData("redirecting",true);
                 }
 
-                if(robot.getControllerKey("DPAD_LEFT").ExecuteAfterPress){
+                if(robot.getControllerKey("DPAD_LEFT1").ExecuteAfterPress) {
                     firePurple();
                 }
 
-                if(robot.getControllerKey("DPAD_RIGHT").ExecuteAfterPress){
+                if(robot.getControllerKey("DPAD_RIGHT1").ExecuteAfterPress) {
                     fireGreen();
                 }
 
@@ -623,10 +622,9 @@ public class MainTeleOP extends LinearOpMode {
     } private void HandleColors() {
 
 
-        greenSensorColors =colorSensorGreen.getNormalizedColors();
-        purpleSensorColors1 =colorSensorPurple1.getNormalizedColors();
-        purpleSensorColors2 =colorSensorPurple2.getNormalizedColors();
-
+        greenSensorColors = colorSensorGreen.getNormalizedColors();
+        purpleSensorColors1 = colorSensorPurple1.getNormalizedColors();
+        purpleSensorColors2 = colorSensorPurple2.getNormalizedColors();
         launchSensorColors = colorSensorLaunch.getNormalizedColors();
 
         Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
@@ -641,21 +639,25 @@ public class MainTeleOP extends LinearOpMode {
         launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
 
-        telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
-        telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
-        telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
+        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green * 10000.0);
 
-        telemetry.addData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
-        telemetry.addData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
-        telemetry.addData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
+        robot.addTelemetryData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
+        robot.addTelemetryData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
+        robot.addTelemetryData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
 
-        telemetry.addData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
-        telemetry.addData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
-        telemetry.addData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
+        robot.addTelemetryData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
+        robot.addTelemetryData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
+        robot.addTelemetryData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
 
-        robot.addTelemetryData("G_RED",(double)launchSensorColors.red * 10000.0);
-        robot.addTelemetryData("G_BLUE",(double)launchSensorColors.blue * 10000.0);
-        robot.addTelemetryData("G_GREEN",(double)launchSensorColors.green * 10000.0);
+        robot.addTelemetryData("L_RED",(double)launchSensorColors.red * 10000.0);
+        robot.addTelemetryData("L_BLUE",(double)launchSensorColors.blue * 10000.0);
+        robot.addTelemetryData("L_GREEN",(double)launchSensorColors.green * 10000.0);
+
+        robot.addTelemetryData("P1 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors1));
+        robot.addTelemetryData("G Sensed Color", BallColorSet_Decode.getColorForStorage(greenSensorColors.red, greenSensorColors.green * 1.5, greenSensorColors.blue));
+        robot.addTelemetryData("P2 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors2));
 
 
 //        greenSensorBall = BallColorSet_Decode.NoBall;
