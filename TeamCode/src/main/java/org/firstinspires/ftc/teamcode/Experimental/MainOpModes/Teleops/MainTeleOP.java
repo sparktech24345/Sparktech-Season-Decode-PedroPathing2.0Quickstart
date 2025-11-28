@@ -501,6 +501,15 @@ public class MainTeleOP extends LinearOpMode {
 
     }
 
+    private void sort() {   /// de verificat /////////////////////////////////////////////////////////////////////////////////////////
+        if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
+            robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
+        }
+        else {
+            robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
+        }
+    }
+
     private void MakeComponents() {
         robot.makeComponent("IntakeMotor", new MotorComponent()
                 .addMotor("intakemotor")
