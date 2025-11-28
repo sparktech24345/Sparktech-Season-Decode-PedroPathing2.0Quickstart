@@ -126,7 +126,7 @@ public class CRServoComponent extends Component {
     public void setPinpointPosition(double pinpointPosition) {
         this.pinpointPosition = pinpointPosition;
     }
-    public CRServoComponent initExternalEncoderPosition(double adder){
+    public CRServoComponent initExternalEncoderPosition(double adder) {
         externalEncoderAbsolutePosition += adder; //+ getAnalogPosition();
         return this;
     }
@@ -154,7 +154,7 @@ public class CRServoComponent extends Component {
         lastCurentPos = curentPos;
         lastLastCurentPos = lastCurentPos;
         lastLastLastCurentPos = lastLastCurentPos;
-        return (curentPos+lastCurentPos+lastLastCurentPos+lastLastLastCurentPos)/4;
+        return (curentPos + lastCurentPos + lastLastCurentPos + lastLastLastCurentPos) / 4;
     }
 
 
@@ -177,6 +177,12 @@ public class CRServoComponent extends Component {
         return reading;
     }
 
+    public static double cameraTarget = 0;
+    public CRServoComponent setCameraTarget(double target) {
+        cameraTarget = target;
+        return this;
+    }
+
     public double getEncoderVelocity() {
         if (externalEncoder == null) return 0;
         return externalEncoder.getVelocity();
@@ -195,7 +201,8 @@ public class CRServoComponent extends Component {
     }
 
     private double PID_camera() {
-        double targetPower = PIDcamera.calculate(0, errorOverride);
+        if (PIDcamera == null) PIDcamera = new PIDcontroller();
+        double targetPower = PIDcamera.calculate(cameraTarget, errorOverride);
         if (Math.abs(errorOverride) <= MinErrorThreshold) targetPower *= ErrorThresholdMulti;
         if (Math.abs(getEncoderVelocity()) < MinVelocityThreshold) targetPower *= VelocityThresholdMulti;
         return targetPower;
@@ -239,6 +246,12 @@ public class CRServoComponent extends Component {
 //            else if(Math.abs(error) > 10 ) targetPower = 0.12 * Math.signum(error); // 10 - 30
 //            else if(Math.abs(error) > 5 ) targetPower = 0.09 * Math.signum(error);  // 5 - 10
 //            else targetPower = 0; // 0 -5
+            if (PIDcamera == null) PIDcamera = new PIDcontroller();
+            if (!overridePIDerror) PIDcamera.setIntegralSum(0);
+            else {
+                double clamp_val = 1 / PIDcamera.getKi();
+                PIDcamera.setIntegralSum(clamp(PIDcamera.getIntegralSum(), -clamp_val, clamp_val));
+            }
             targetPower = (overridePIDerror ? PID_camera() : PID());
         } else {
             targetPower = target / resolution;

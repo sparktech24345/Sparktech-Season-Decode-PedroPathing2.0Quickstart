@@ -37,10 +37,10 @@ public class MainTeleOP extends LinearOpMode {
     private boolean sorterChoice = false;
     private boolean isInSortingPeriod = false;
     public static double adderTurretRotateForTests = 0;
-    public static double cameraP = 0.0055;
-    public static double cameraI = 0.005;
+    public static double cameraP = 0.005;
+    public static double cameraI = 0.013;
     public static double cameraD = 0.001;
-    public static double servoP = 0.015 ; //0.0135
+    public static double servoP = 0.01; //0.013a5a
     public static double servoI = 0;
     public static double servoD = 0; //0.001
     public static double servoVel = 5000;
@@ -63,6 +63,7 @@ public class MainTeleOP extends LinearOpMode {
     public boolean isReadyToFire = false;
     public static  int purpleCounter = 0;
     public static int greenCounter = 0;
+    public static boolean canFire = false;
 
     public static int ballCounter = 0;
     private long timerForIntake = 0;
@@ -107,12 +108,16 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("loop time Nano", tick_ns);
                 robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
                 HandleColors();
-                firingSequence(launchSensorBall != BallColorSet_Decode.NoBall);
+                double camera_error = calculateCameraError();
+                canFire = Math.abs(camera_error) <= 2 && camera_error != 0;
+                firingSequence(launchSensorBall != BallColorSet_Decode.NoBall && canFire);
+
+                double turretAimOffsetD2 = gamepad2.right_stick_x * 3;
 
                 robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
                 // intakeing
 
-                robot.addTelemetryData("tester",robot.getComponent("IntakeMotor").getPosition());
+                robot.addTelemetryData("tester", robot.getComponent("IntakeMotor").getPosition());
 
                 if (false && (purpleSensorBall == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green)) {
                     if (ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1) { //dont infinite stack comands if full reversing already
@@ -185,9 +190,6 @@ public class MainTeleOP extends LinearOpMode {
                 else if(robot.getMotorComponent("IntakeMotor").getPower() == -1)
                     robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
 
-                if (robot.getControllerKey("RIGHT_BUMPER1").ExecuteOnPress) {
-                    setDriveTrainSlowdown(0.2);
-                } else setDriveTrainSlowdown(1);
 
                 if (robot.getControllerKey("RIGHT_TRIGGER1").ExecuteOnPress && robot.getControllerKey("LEFT_TRIGGER1").ExecuteOnPress) {
                     setDirectionFlip(!getDirectionFlip());
@@ -204,9 +206,9 @@ public class MainTeleOP extends LinearOpMode {
                             new StateAction(true, "PurpleGateServo", "OPEN")
                     );
                 }
-                if (robot.getControllerKey("LEFT_BUMPER1").IsToggledOnPress){
+                if (robot.getControllerKey("LEFT_BUMPER1").IsToggledOnPress) {
                     robot.setDriveTrainSlowdown(0.3);
-                }
+                } else setDriveTrainSlowdown(1);
 
                 if (gamepad1.right_bumper) {
                     // output trough intake
@@ -317,18 +319,9 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addTelemetryData("TICK MS", () -> robot.getExecMS());
 
                 robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
-                double camera_error = calculateCameraError();
-                targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(),targetX,targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
-                robot.getCRServoComponent("TurretRotate")
-                        .setCameraPIDconstants(cameraP, cameraI, cameraD)
-                        .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
-                        .setPIDconstants(servoP, servoI, servoD)
-                        .setMotionconstants(servoVel, servoAcel, servoTime)
-                        .setOverrideBool(true)
-                        .setTargetOverride(targetTurret);
 
 
-                double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(),new Pose(targetX,targetY,0),true);
+                double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), new Pose(targetX, targetY, 0), true);
                 if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
                 else degreeSubtract = 0;
                 degreeSubtract += degreeSubtractAdder;
@@ -351,7 +344,15 @@ public class MainTeleOP extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
                     robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
 
-                    // robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret);
+                    targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
+                    robot.getCRServoComponent("TurretRotate")
+                            .setCameraPIDconstants(cameraP, cameraI, cameraD)
+                            .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
+                            .setCameraTarget(turretAimOffsetD2)
+                            .setPIDconstants(servoP, servoI, servoD)
+                            .setMotionconstants(servoVel, servoAcel, servoTime)
+                            .setOverrideBool(true)
+                            .setTargetOverride(targetTurret + turretAimOffsetD2);
 
                     robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
                 }
@@ -359,7 +360,10 @@ public class MainTeleOP extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
                     robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
                     targetVelocity = 0;
-                    // robot.getCRServoComponent("TurretRotate").setTargetOverride(targetTurret); //TODO to set this to 0
+                    robot.getCRServoComponent("TurretRotate")
+                            .overridePIDerror(0, false)
+                            .setTargetOverride(0)
+                    ; //TODO to set this to 0
                 }
 
                 robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
@@ -381,7 +385,7 @@ public class MainTeleOP extends LinearOpMode {
         }
         // stop
     }
-    public void InitOtherStuff(){
+    public void InitOtherStuff() {
         //limelight stuff
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(1);
@@ -408,9 +412,10 @@ public class MainTeleOP extends LinearOpMode {
     private double GreenBall = 0;
     private double PurpleBall = 0;
     private double CountBall = PurpleBall + GreenBall;
-    private void firingSequence(boolean turretHasBall){
 
-        if(turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 1000){
+    private void firingSequence(boolean turretHasBall) {
+
+        if (turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 1000) {
             isFiringTimer.reset();
             robot.addToQueue(
                     new StateAction(false, "PurpleGateServo", "CLOSED"),
@@ -662,7 +667,7 @@ public class MainTeleOP extends LinearOpMode {
         return clamp(result, 100, 359);
     }
 
-    public double calculateCameraError(){
+    public double calculateCameraError() {
         // Logitech code
 //        aprilTagWebcam.update();
 //        AprilTagDetection id20 = aprilTagWebcam.getTagBySpecificId(20);

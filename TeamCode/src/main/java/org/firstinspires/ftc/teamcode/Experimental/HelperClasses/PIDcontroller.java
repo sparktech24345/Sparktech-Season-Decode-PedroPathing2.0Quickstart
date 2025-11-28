@@ -24,12 +24,32 @@ public class PIDcontroller {
         kd = d;
     }
 
+    public double getIntegralSum() {
+        return integral;
+    }
+
+    public void setIntegralSum(double sum) {
+        integral = sum;
+    }
+
+    public double getKi() {
+        return ki;
+    }
+    public double getKp() {
+        return kp;
+    }
+    public double getKd() {
+        return kd;
+    }
+
     public double calculate(double target, double current) {
         long now = System.currentTimeMillis();
         double deltaTime = (now - lastTime) / 1000.0;  // in seconds
         lastTime = now;
 
         double error = target - current;
+
+        // if (Math.signum(error) != Math.signum(integral)) integral = 0;
 
         // Integral term (accumulated error)
         integral += error * deltaTime;
