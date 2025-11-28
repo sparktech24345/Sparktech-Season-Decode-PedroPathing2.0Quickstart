@@ -462,7 +462,6 @@ public class MainTeleOP extends LinearOpMode {
                 );
             }
         }
-
     }
     private void firePurple(){
         if (purpleSensorBall2 == BallColorSet_Decode.Purple){
@@ -495,7 +494,6 @@ public class MainTeleOP extends LinearOpMode {
         }
 
     }
-
 
     private void MakeComponents() {
         robot.makeComponent("IntakeMotor", new MotorComponent()
