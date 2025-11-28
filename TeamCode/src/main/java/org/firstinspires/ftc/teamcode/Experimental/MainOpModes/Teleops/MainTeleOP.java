@@ -454,8 +454,10 @@ public class MainTeleOP extends LinearOpMode {
         } else if (greenSensorBall == BallColorSet_Decode.Green){
             robot.addToQueue(
                     new StateAction(true, "GreenGateServo", "OPEN"),
+                    new StateAction(true, "IntakeSorterServo", "PUSH_TO_GREEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
                     new DelayAction(true, 1000),
+                    new StateAction(true, "IntakeSorterServo", "BLOCK"),
                     new StateAction(true, "GreenGateServo", "CLOSED")
             );
             if (isTryingToFire) {
@@ -588,6 +590,7 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("CLOSED", 200, true);
 
         robot.getComponent("IntakeSorterServo")
+                .addState("PUSH_TO_GREEN", 250) // push to green
                 .addState("REDIRECT_TO_PURPLE", 161.64)
                 .addState("REDIRECT_TO_GREEN", 35)
                 .addState("BLOCK", 93.816, true);

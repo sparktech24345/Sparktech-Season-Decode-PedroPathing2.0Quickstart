@@ -6,6 +6,6 @@ public enum MotifInRobot {
     PGP,
     Null;
     public static MotifInRobot getCase(){
-
+        return null;
     }
 }
