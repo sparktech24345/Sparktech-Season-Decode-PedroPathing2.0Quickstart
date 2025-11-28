@@ -81,7 +81,8 @@ public class GlobalStorage {
     public static OpModes currentOpModes = OpModes.TeleOP;
     public static TeamColor currentTeamColor = TeamColor.TeamNotSet;
     public static MotifSequence currentMotifSequence = MotifSequence.Undefined;
-    public static BallColorSet_Decode purpleSensorBall = BallColorSet_Decode.NoBall;
+    public static BallColorSet_Decode purpleSensorBall1 = BallColorSet_Decode.NoBall;
+    public static BallColorSet_Decode purpleSensorBall2 = BallColorSet_Decode.NoBall;
     public static BallColorSet_Decode greenSensorBall = BallColorSet_Decode.NoBall;
     public static BallColorSet_Decode launchSensorBall = BallColorSet_Decode.NoBall;
 

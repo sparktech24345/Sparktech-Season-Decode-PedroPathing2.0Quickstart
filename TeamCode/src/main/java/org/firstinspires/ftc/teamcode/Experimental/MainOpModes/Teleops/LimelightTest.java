@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.launchSensorBall;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import android.graphics.Color;
 
@@ -147,7 +145,7 @@ public class LimelightTest extends OpMode {
 
 
         greenSensorBall = BallColorSet_Decode.getColorForTurret(greenSensorColors);
-        purpleSensorBall = BallColorSet_Decode.getColorForTurret(purpleSensorColors);
+        purpleSensorBall1 = BallColorSet_Decode.getColorForTurret(purpleSensorColors);
         launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
 
@@ -165,11 +163,11 @@ public class LimelightTest extends OpMode {
 
 
         greenSensorBall = BallColorSet_Decode.NoBall;
-        purpleSensorBall = BallColorSet_Decode.NoBall;
+        purpleSensorBall1 = BallColorSet_Decode.NoBall;
         launchSensorBall = BallColorSet_Decode.NoBall;
 
         telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
-        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall);
+        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall1);
         telemetry.addData("LAUNCH_SENSOR_BALL", launchSensorBall);
     }
 
