@@ -1066,7 +1066,7 @@ class CentripetalTuner extends OpMode {
 
     /**
      * This runs the OpMode, updating the Follower as well as printing out the debug statements to
-     * the Telemetry, as well as the Panels.
+     * the Telemetry, as well as the Panels..
      */
     @Override
     public void loop() {
