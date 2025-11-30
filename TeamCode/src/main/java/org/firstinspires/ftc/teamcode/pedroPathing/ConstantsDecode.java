@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -23,7 +24,9 @@ public class ConstantsDecode {
             .mass(14) // ????
             .forwardZeroPowerAcceleration(-25.9346931313679598) // copiate direct din exemplul Pedro, de verificat / corectat
             .lateralZeroPowerAcceleration(-67.342491844080064) // copiate direct din exemplul Pedro, de verificat / corectat
-            .centripetalScaling(0.0005); // copiate direct din exemplul Pedro, de verificat / corectat
+            .centripetalScaling(0.0005) // copiate direct din exemplul Pedro, de verificat / corectat
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.67, 0, 0.45, 0.023))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.65, 0, 0.37, 0.023));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
             .leftFrontMotorName(GlobalStorage.frontLeftName)
@@ -34,7 +37,7 @@ public class ConstantsDecode {
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(78.261926752421046666666666666667) // copiate direct din exemplul Pedro, de verificat / corectat
+            .xVelocity(-78.261926752421046666666666666667) // copiate direct din exemplul Pedro, de verificat / corectat
             .yVelocity(61.494551922189565); // copiate direct din exemplul Pedro, de verificat / corectat
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()

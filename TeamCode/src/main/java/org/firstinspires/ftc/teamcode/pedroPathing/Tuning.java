@@ -7,6 +7,8 @@ import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.stopRobot;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.telemetryM;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
@@ -23,6 +25,8 @@ import com.pedropathing.telemetry.SelectableOpMode;
 import com.pedropathing.util.*;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,8 +93,8 @@ public class Tuning extends SelectableOpMode {
 
         poseHistory = follower.getPoseHistory();
 
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-
+       telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+       //Telemetry telemetryM = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         Drawing.init();
     }
 
@@ -1003,7 +1007,7 @@ class Line extends OpMode {
                 follower.followPath(forwards);
             }
         }
-
+        telemetryM.addData("pos" ,follower.getPose());
         telemetryM.debug("Driving Forward?: " + forward);
         telemetryM.update(telemetry);
     }
