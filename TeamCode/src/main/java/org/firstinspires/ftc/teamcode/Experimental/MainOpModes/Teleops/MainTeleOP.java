@@ -30,6 +30,9 @@ public class MainTeleOP extends LinearOpMode {
     private Limelight3A limelight3A;
     private AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     private boolean sorterChoice = false;
+    private boolean G_P_P = false;
+    private boolean P_G_P = false;
+    private boolean P_P_G = false;
     private boolean isInSortingPeriod = false;
     public static double adderTurretRotateForTests = 0;
     public static double cameraP = 0.005;
@@ -501,12 +504,199 @@ public class MainTeleOP extends LinearOpMode {
 
     }
 
-    private void sort() {   /// de verificat /////////////////////////////////////////////////////////////////////////////////////////
+    private void sort() {   /// de verificat
         if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
         }
         else {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
+        }
+    }
+    private void fireByMotif(){
+        if(G_P_P){
+           robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
+            if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.Green) {
+                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
+            }//else schema TODO
+            if(isTryingToFire) {
+                if (purpleSensorBall1 == BallColorSet_Decode.Green && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
+                    robot.addToQueue(
+                    new StateAction(true, "PurpleGateServo", "OPEN"),
+                    new StateAction(true, "IntakeMotor", "FULL"),
+                    new DelayAction(true, 1000),
+                    new StateAction(true, "TransferServo", "UP"),
+                    new DelayAction(true, 350),
+                    new StateAction(true, "TransferServo", "DOWN"),
+                    new DelayAction(true,350),
+                    new StateAction(true, "TransferServo", "UP"),
+                    new DelayAction(true, 350),
+                    new StateAction(true, "TransferServo", "DOWN"),
+                    new StateAction(true,"PurpleGateServo","CLOSED"),
+                    new StateAction(true,"GreenGateServo","OPEN"),
+                    new DelayAction(true, 350),
+                    new StateAction(true, "TransferServo", "UP"),
+                    new DelayAction(true, 350),
+                    new StateAction(true, "TransferServo", "DOWN"),
+                    new StateAction(true,"GreenGateServo","CLOSED"),
+                    new StateAction(true, "IntakeMotor", "OFF")
+                    );
+                }
+                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green) {
+                    robot.addToQueue(
+                            new StateAction(true,"GreenGateServo","OPEN"),
+                            new StateAction(true, "IntakeMotor", "FULL"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"GreenGateServo","CLOSED"),
+                            new StateAction(true, "PurpleGateServo", "OPEN"),
+                            new DelayAction(true, 1000),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new DelayAction(true,350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"PurpleGateServo","CLOSED"),
+                            new StateAction(true, "IntakeMotor", "OFF")
+                    );
+                }
+            }
+
+        }
+
+        if(P_G_P){
+            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
+            if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
+                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
+            }
+            if(isTryingToFire) {
+                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Green && greenSensorBall == BallColorSet_Decode.Purple) {
+                    robot.addToQueue(
+                            new StateAction(true, "PurpleGateServo", "OPEN"),
+                            new StateAction(true, "IntakeMotor", "FULL"),
+                            new DelayAction(true, 1000),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new DelayAction(true,350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"PurpleGateServo","CLOSED"),
+                            new StateAction(true,"GreenGateServo","OPEN"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"GreenGateServo","CLOSED"),
+                            new StateAction(true, "IntakeMotor", "OFF")
+                    );
+                }
+                if (purpleSensorBall1 == BallColorSet_Decode.Green && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
+                    robot.addToQueue(
+                            new StateAction(true,"GreenGateServo","OPEN"),
+                            new StateAction(true, "IntakeMotor", "FULL"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"GreenGateServo","CLOSED"),
+                            new StateAction(true, "PurpleGateServo", "OPEN"),
+                            new DelayAction(true, 1000),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new DelayAction(true,350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"PurpleGateServo","CLOSED"),
+                            new StateAction(true, "IntakeMotor", "OFF")
+                    );
+                }
+                if(purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green){
+                    robot.addToQueue(
+                            new StateAction(true, "PurpleGateServo", "OPEN"),
+                            new StateAction(true, "IntakeMotor", "FULL"),
+                            new DelayAction(true, 1000),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"PurpleGateServo","CLOSED"),
+                            new StateAction(true,"GreenGateServo","OPEN"),
+                            new DelayAction(true,350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"GreenGateServo","CLOSED"),
+                            new StateAction(true, "PurpleGateServo", "OPEN"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true, "PurpleGateServo", "CLOSED"),
+                            new StateAction(true, "IntakeMotor", "OFF")
+                    );
+                }
+            }
+
+        }
+
+        if(P_P_G){
+            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
+            if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 !=BallColorSet_Decode.Purple) {
+                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
+            }//else schema TODO
+            if(isTryingToFire) {
+                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green) {
+                    robot.addToQueue(
+                            new StateAction(true, "PurpleGateServo", "OPEN"),
+                            new StateAction(true, "IntakeMotor", "FULL"),
+                            new DelayAction(true, 1000),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new DelayAction(true,350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"PurpleGateServo","CLOSED"),
+                            new StateAction(true,"GreenGateServo","OPEN"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "UP"),
+                            new DelayAction(true, 350),
+                            new StateAction(true, "TransferServo", "DOWN"),
+                            new StateAction(true,"GreenGateServo","CLOSED"),
+                            new StateAction(true, "IntakeMotor", "OFF")
+                    );
+                }
+            }
+            if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Green  && greenSensorBall == BallColorSet_Decode.Purple) {
+                robot.addToQueue(
+                        new StateAction(true,"GreenGateServo","OPEN"),
+                        new StateAction(true, "IntakeMotor", "FULL"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "UP"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "DOWN"),
+                        new StateAction(true,"GreenGateServo","CLOSED"),
+                        new StateAction(true, "PurpleGateServo", "OPEN"),
+                        new DelayAction(true, 1000),
+                        new StateAction(true, "TransferServo", "UP"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "DOWN"),
+                        new DelayAction(true,350),
+                        new StateAction(true, "TransferServo", "UP"),
+                        new DelayAction(true, 350),
+                        new StateAction(true, "TransferServo", "DOWN"),
+                        new StateAction(true,"PurpleGateServo","CLOSED"),
+                        new StateAction(true, "IntakeMotor", "OFF")
+                );
+            }
+
         }
     }
 
