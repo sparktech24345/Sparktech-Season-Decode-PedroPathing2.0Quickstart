@@ -143,6 +143,9 @@ public class MainTeleOP extends LinearOpMode {
                 if(robot.getControllerKey("DPAD_RIGHT1").ExecuteAfterPress) {
                     fireGreen();
                 }
+                if(robot.getControllerKey("DPAD_UP1").ExecuteAfterPress) {
+                    fireByMotif();
+                }
 
 
                 if (robot.getControllerKey("A1").IsToggledOnPress) {
@@ -439,7 +442,6 @@ public class MainTeleOP extends LinearOpMode {
             );
         }
     }
-    
     private void fireGreen(){
         if (purpleSensorBall2 == BallColorSet_Decode.Green){
             robot.addToQueue(
@@ -512,12 +514,12 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
         }
     }
-    private void fireByMotif(){ //lipsesc cazurile naspa
+    private void fireByMotif(){
         if(G_P_P){
            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.Green) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-            }else if(purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 == BallColorSet_Decode.Green){
+            }else if(purpleSensorBall1 != BallColorSet_Decode.NoBall &&  purpleSensorBall2 == BallColorSet_Decode.Green){
                 robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
@@ -672,7 +674,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 !=BallColorSet_Decode.Purple) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-            }else if(purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 == BallColorSet_Decode.Purple){
+            }else if(purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 == BallColorSet_Decode.Purple){
                 robot.addToQueue(
                         new StateAction(true, "PurpleGateServo", "OPEN"),
                         new StateAction(true, "IntakeMotor", "FULL"),
