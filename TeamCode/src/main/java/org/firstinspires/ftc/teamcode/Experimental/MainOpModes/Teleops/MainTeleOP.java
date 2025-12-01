@@ -519,7 +519,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
             }//else schema TODO
             if(isTryingToFire) {
-                if (purpleSensorBall1 == BallColorSet_Decode.Green && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
+                if (purpleSensorBall2 == BallColorSet_Decode.Green && purpleSensorBall1 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
                     robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
@@ -573,7 +573,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
             }
             if(isTryingToFire) {
-                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Green && greenSensorBall == BallColorSet_Decode.Purple) {
+                if (purpleSensorBall2 == BallColorSet_Decode.Purple && purpleSensorBall1 == BallColorSet_Decode.Green && greenSensorBall == BallColorSet_Decode.Purple) {
                     robot.addToQueue(
                             new StateAction(true, "PurpleGateServo", "OPEN"),
                             new StateAction(true, "IntakeMotor", "FULL"),
@@ -595,7 +595,7 @@ public class MainTeleOP extends LinearOpMode {
                             new StateAction(true, "IntakeMotor", "OFF")
                     );
                 }
-                if (purpleSensorBall1 == BallColorSet_Decode.Green && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
+                if (purpleSensorBall2 == BallColorSet_Decode.Green && purpleSensorBall1 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
                     robot.addToQueue(
                             new StateAction(true,"GreenGateServo","OPEN"),
                             new StateAction(true, "IntakeMotor", "FULL"),
@@ -674,7 +674,7 @@ public class MainTeleOP extends LinearOpMode {
                     );
                 }
             }
-            if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Green  && greenSensorBall == BallColorSet_Decode.Purple) {
+            if (purpleSensorBall2 == BallColorSet_Decode.Purple && purpleSensorBall1 == BallColorSet_Decode.Green  && greenSensorBall == BallColorSet_Decode.Purple) {
                 robot.addToQueue(
                         new StateAction(true,"GreenGateServo","OPEN"),
                         new StateAction(true, "IntakeMotor", "FULL"),
