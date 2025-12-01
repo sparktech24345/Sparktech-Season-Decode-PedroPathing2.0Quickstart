@@ -127,7 +127,11 @@ public abstract class RobotController implements RobotControllerInterface {
     public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
         return (T) components.get(componentName);
     }
-    public Pose getCurrentPose(){return followerInstance.getInstance().getPose();}
+    public Pose getCurrentPose(){
+        return new Pose (- followerInstance.getInstance().getPose().getX(),
+                followerInstance.getInstance().getPose().getY(),
+                followerInstance.getInstance().getPose().getHeading());
+    }
     public ComplexFollower getFollowerInstance(){return followerInstance;}
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {

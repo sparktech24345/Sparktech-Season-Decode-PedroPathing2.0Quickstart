@@ -36,9 +36,9 @@ public class MainTeleOP extends LinearOpMode {
     private boolean isInSortingPeriod = false;
     public static double adderTurretRotateForTests = 0;
     public static double cameraP = 0.005;
-    public static double cameraI = 0.013;
-    public static double cameraD = 0.001;
-    public static double servoP = 0.01; //0.013a5a
+    public static double cameraI = 0;
+    public static double cameraD = 0;
+    public static double servoP = 0.013; //0.013a5a
     public static double servoI = 0;
     public static double servoD = 0; //0.001
     public static double servoVel = 5000;
@@ -118,6 +118,7 @@ public class MainTeleOP extends LinearOpMode {
                 // intakeing
 
                 robot.addTelemetryData("tester", robot.getComponent("IntakeMotor").getPosition());
+                robot.addTelemetryData("CAMERA ERROR", camera_error);
 
                 if (false && (purpleSensorBall1 == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall1 == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green)) {
                     if (ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1) { //dont infinite stack comands if full reversing already
@@ -365,6 +366,7 @@ public class MainTeleOP extends LinearOpMode {
                             .setMotionconstants(servoVel, servoAcel, servoTime)
                             .setOverrideBool(true)
                             .setTargetOverride(targetTurret + turretAimOffsetD2);
+                            //.setTargetOverride(0);
 
                     robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
                 }

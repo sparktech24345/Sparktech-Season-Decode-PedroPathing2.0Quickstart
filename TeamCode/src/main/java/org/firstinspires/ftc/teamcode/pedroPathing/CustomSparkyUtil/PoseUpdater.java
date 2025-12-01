@@ -99,7 +99,8 @@ public class PoseUpdater {
         }
 
          */
-        return new PinpointLocalizer(hardwareMap, ConstantsDecode.pinpointConstants);
+        //return new PinpointLocalizer(hardwareMap, ConstantsDecode.pinpointConstants);
+        return new SparkyPinpointLocalizer(hardwareMap, ConstantsDecode.sparkyPinpointConstants);
     }
 
     public void update() {

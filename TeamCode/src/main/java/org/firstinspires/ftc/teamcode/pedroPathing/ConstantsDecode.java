@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
@@ -16,6 +17,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
+import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyPinpointConstants;
+import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyPinpointDriver;
+import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyPinpointLocalizer;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyThreeWheelIMUConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyThreeWheelIMULocalizer;
 
@@ -25,36 +29,47 @@ public class ConstantsDecode {
             .forwardZeroPowerAcceleration(-25.9346931313679598) // copiate direct din exemplul Pedro, de verificat / corectat
             .lateralZeroPowerAcceleration(-67.342491844080064) // copiate direct din exemplul Pedro, de verificat / corectat
             .centripetalScaling(0.0005) // copiate direct din exemplul Pedro, de verificat / corectat
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.67, 0, 0.45, 0.023))
-            .headingPIDFCoefficients(new PIDFCoefficients(0.65, 0, 0.37, 0.023));
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.4, 0, 0.03, 0))//(0.67, 0, 0.45, 0.023))
+            .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.04, 0))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.00002, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
             .leftFrontMotorName(GlobalStorage.frontLeftName)
             .rightFrontMotorName(GlobalStorage.frontRightName)
             .leftRearMotorName(GlobalStorage.backLeftName)
             .rightRearMotorName(GlobalStorage.backRightName)
+
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(-78.261926752421046666666666666667) // copiate direct din exemplul Pedro, de verificat / corectat
+
+            .xVelocity(78.261926752421046666666666666667) // copiate direct din exemplul Pedro, de verificat / corectat
             .yVelocity(61.494551922189565); // copiate direct din exemplul Pedro, de verificat / corectat
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()
             .hardwareMapName("pinpoint")
             .distanceUnit(DistanceUnit.METER) //might be changed later
-            .forwardPodY(-0.177563) //-0.172
-            .strafePodX(0.09647796) //0.006
+            .forwardPodY(-0.177563) //-0.172 // -0.177563
+            .strafePodX(0.09647796) //0.006 //0.09647796
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+
+    public static SparkyPinpointConstants sparkyPinpointConstants = new SparkyPinpointConstants()
+            .hardwareMapName("pinpoint")
+            .distanceUnit(DistanceUnit.METER) //might be changed later
+            .forwardPodY(-0.177563) //-0.172 // -0.177563
+            .strafePodX(0.09647796) //0.006 //0.09647796
+            .forwardEncoderDirection(SparkyPinpointDriver.EncoderDirection.FORWARD)
+            .strafeEncoderDirection(SparkyPinpointDriver.EncoderDirection.FORWARD);
 
     public static SparkyThreeWheelIMUConstants SparkyLocalizerConstants = new SparkyThreeWheelIMUConstants()
             .forwardTicksToInches(.001989436789)
             .strafeTicksToInches(.001989436789)
             .turnTicksToInches(.001989436789)
-            .leftPodY(6.76484252)
-            .rightPodY(-6.76484252)
-            .strafePodX(0.23622)
+            .leftPodY(6.299213)
+            .rightPodY(-6.299213)
+            .strafePodX(-0.09647796)
             .leftEncoder_HardwareMapName("leftFront")
             .rightEncoder_HardwareMapName("frontpurple")
             .strafeEncoder_HardwareMapName("rightFront")
@@ -77,8 +92,9 @@ public class ConstantsDecode {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(mecanumConstants)
                 .pathConstraints(pathConstraints)
-                .pinpointLocalizer(pinpointConstants)
+                //.pinpointLocalizer(pinpointConstants)
                 //.setLocalizer(new SparkyThreeWheelIMULocalizer(hardwareMap,SparkyLocalizerConstants))
+                .setLocalizer(new SparkyPinpointLocalizer(hardwareMap,sparkyPinpointConstants))
                 .build();
     }
 }

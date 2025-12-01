@@ -44,7 +44,7 @@ public class CRServoComponent extends Component {
     protected double errorOverride = 0;
     public static double MinErrorThreshold = 1.2;
     public static double ErrorThresholdMulti = 0;
-    public static double MinVelocityThreshold = 0.1;
+    public static double MinVelocityThreshold = 0.13;
     public static double VelocityThresholdMulti = 4.5;
 
     public CRServoComponent addMotor(String hardwareMapName) {
