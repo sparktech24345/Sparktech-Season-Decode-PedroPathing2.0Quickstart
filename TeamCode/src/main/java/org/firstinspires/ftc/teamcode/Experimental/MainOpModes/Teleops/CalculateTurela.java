@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetX;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetY;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -23,16 +25,23 @@ public class CalculateTurela extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
+            @Override
+            public void main_loop() {
+                double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), new Pose(targetX, targetY, 0), true);
+
+                double angleDeg = calculateLaunchAngle(distance,
+                        LAUNCH_VELOCITY,
+                        BASKET_HEIGHT - SHOOTER_HEIGHT);
+
+                robot.addTelemetryData("angle: ", angleDeg);
+            }
+        };
+
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {
-            double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), new Pose(targetX, targetY, 0), true);
-
-            double angleDeg = calculateLaunchAngle(distance,
-                    LAUNCH_VELOCITY,
-                    BASKET_HEIGHT - SHOOTER_HEIGHT);
-
-            robot.addTelemetryData("angle: ", angleDeg);
+            robot.loop();
         }
     }
 
