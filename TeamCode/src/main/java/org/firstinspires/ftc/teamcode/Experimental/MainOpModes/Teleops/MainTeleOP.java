@@ -436,7 +436,7 @@ public class MainTeleOP extends LinearOpMode {
     }
     private void firingSequence(boolean turretHasBall) {
 
-        if (turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 1000) {
+        if (turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 750){
             isFiringTimer.reset();
             robot.addToQueue(
                     new StateAction(false, "PurpleGateServo", "CLOSED"),
@@ -454,7 +454,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 1000),
+                    new DelayAction(true, 750),
                     new StateAction(true, "PurpleGateServo", "CLOSED")
                     );
             if (isTryingToFire) {
@@ -486,7 +486,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 1000),
+                    new DelayAction(true, 750),
                     new StateAction(true, "PurpleGateServo", "CLOSED")
             );
             if (isTryingToFire) {
@@ -499,7 +499,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(
                     new StateAction(true, "GreenGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 1000),
+                    new DelayAction(true, 750),
                     new StateAction(true, "GreenGateServo", "CLOSED")
             );
             if (isTryingToFire) {
@@ -636,6 +636,7 @@ public class MainTeleOP extends LinearOpMode {
         }
     }
     private void fireByMotif(){
+        // cazuri favorabile in care am putea scora puncte
         //think on how to do the motif receiving message and how to implement it
         if(G_P_P){
            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
@@ -1034,8 +1035,7 @@ public class MainTeleOP extends LinearOpMode {
     public double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position
         double x = robotPose.getX();
-        double y = robotPose.getY(); // don't invert Y unless your coordinate system specifically requires it
-
+        double y = robotPose.getY(); // don'// invert Y unless your coordinate system specifically requires it
         // Vector from robot to target
         double dx = targetX - x;
         double dy = targetY - y;
