@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.TrajectoryCalcu
 
 @TeleOp(name = "CalculateTurela", group = "Tests")
 public class CalculateTurela extends LinearOpMode {
-    private RobotController robot;
+    public RobotController robot;
     private TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
 
     // Constants
