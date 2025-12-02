@@ -627,7 +627,7 @@ public class MainTeleOP extends LinearOpMode {
     }
 
     private void sort() {
-        //modificat putin logica, s-a putea ca intakeSorterServo sa nu se poata misca ca e blocat de bila...(dar treb testata ipoteza asta)
+        // de modificat putin logica, s-a putea ca intakeSorterServo sa nu se poata misca ca e blocat de bila...(dar treb testata ipoteza asta)
         if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
         }
