@@ -38,6 +38,7 @@ public class MainTeleOP extends LinearOpMode {
     private Limelight3A limelight3A;
     private AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     private boolean sorterChoice = false;
+    private boolean isSort = true;
     private boolean G_P_P = false;
     private boolean P_G_P = false;
     private boolean P_P_G = false;
@@ -554,6 +555,7 @@ public class MainTeleOP extends LinearOpMode {
     //pt cazurile naspa
     private void NoSorting() {//prob treb implementat si altfel, dar asa m-am gandit acm
         //nu depinde de motif
+        isSort = false;
         if (purpleSensorBall1 == BallColorSet_Decode.Green
                 && purpleSensorBall2 == BallColorSet_Decode.Green
                 && greenSensorBall == BallColorSet_Decode.Green){
@@ -649,6 +651,7 @@ public class MainTeleOP extends LinearOpMode {
     }
 
     private void sort() {
+        isSort = true;
         // de modificat putin logica, s-a putea ca intakeSorterServo sa nu se poata misca ca e blocat de bila...(dar treb testata ipoteza asta)
         if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
@@ -660,7 +663,8 @@ public class MainTeleOP extends LinearOpMode {
     private void fireByMotif(){
         // cazuri favorabile in care am putea scora puncte
         //think on how to do the motif receiving message and how to implement it
-        if(G_P_P){
+        isSort = true;
+        if(id == 21){
            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.Green) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
@@ -731,7 +735,7 @@ public class MainTeleOP extends LinearOpMode {
 
         }
 
-        if(P_G_P){
+        if(id == 22){
             robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
@@ -815,7 +819,7 @@ public class MainTeleOP extends LinearOpMode {
 
         }
 
-        if(P_P_G){
+        if(id == 23){
             robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 !=BallColorSet_Decode.Purple) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
