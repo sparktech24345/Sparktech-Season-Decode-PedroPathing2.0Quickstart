@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
@@ -20,6 +21,13 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+
+import java.util.List;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -72,6 +80,7 @@ public class MainTeleOP extends LinearOpMode {
     public static double targetY = 46;
     private double old_pos_y_purple = 0;
     private long timeLime = 0;
+    private double id = 0;
     LLResult llResult = null;
     double[] pythonOutputs = {1, 2};
     double pos_y = pythonOutputs[1];
@@ -106,6 +115,7 @@ public class MainTeleOP extends LinearOpMode {
             @Override
             public void main_loop() {
                 // all of the code
+                robot.addTelemetryData("id", getMotifID());
                 long startTime = System.currentTimeMillis();
                 tick_ns = calculateTimeDiff();
                 robot.addTelemetryData("loop time Nano", tick_ns);
@@ -113,7 +123,7 @@ public class MainTeleOP extends LinearOpMode {
                 HandleColors();
                 double camera_error = calculateCameraError();
                 canFire = Math.abs(camera_error) <= 2 && camera_error != 0;
-                firingSequence(launchSensorBall != BallColorSet_Decode.NoBall && canFire);
+                firingSequence(false && launchSensorBall != BallColorSet_Decode.NoBall && canFire);
 
                 double turretAimOffsetD2 = gamepad2.right_stick_x * 3;
 
@@ -364,10 +374,10 @@ public class MainTeleOP extends LinearOpMode {
                     //puterea calculat,unghiul calculat,rotatia calculata;
                     //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
                     robot.addTelemetryData("distance to wall", distance);
-                    double dist = distance * 100; //in cm
-                    targetVelocity = grade0 + dist * grade1 + dist * dist * grade2 + Math.pow(dist, 3) * grade3;
+                    // double dist = distance * 100; //in cm
+                    // targetVelocity = grade0 + dist * grade1 + dist * dist * grade2 + Math.pow(dist, 3) * grade3;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-                    robot.getMotorComponent("TurretSpinMotor").setTargetOverride(turretVelocityOverride < 0 ? targetVelocity : turretVelocityOverride);
+                    robot.getMotorComponent("TurretSpinMotor").setTargetOverride(turretVelocityOverride);
 
                     targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
                     robot.getCRServoComponent("TurretRotate")
@@ -436,6 +446,15 @@ public class MainTeleOP extends LinearOpMode {
         //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
 
+    }
+    private double getMotifID() {
+        limelight3A.pipelineSwitch(2);
+        LLResult result = limelight3A.getLatestResult();
+        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        for (LLResultTypes.FiducialResult fiducial : fiducials) {
+            id = fiducial.getFiducialId(); // The ID number of the fiducial
+        }
+        return id;
     }
     private void firingSequence(boolean turretHasBall) {
 
