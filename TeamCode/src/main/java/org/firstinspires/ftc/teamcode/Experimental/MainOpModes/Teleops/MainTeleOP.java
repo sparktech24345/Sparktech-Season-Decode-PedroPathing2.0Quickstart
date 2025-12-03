@@ -76,6 +76,9 @@ public class MainTeleOP extends LinearOpMode {
     double[] pythonOutputs = {1, 2};
     double pos_y = pythonOutputs[1];
 
+    public static double turretVelocityOverride = 0;
+    public static double turretAngleOverride = 0;
+
     /// ----------------- Color Sensor Stuff ------------------
     private NormalizedColorSensor colorSensorGreen;
     private NormalizedColorSensor colorSensorPurple1;
@@ -353,7 +356,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
                 double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
                 robot.addTelemetryData("turret angle estimation", turretAngleVal);
-                robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
+                robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleOverride));
                 //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
 
 
@@ -364,7 +367,7 @@ public class MainTeleOP extends LinearOpMode {
                     double dist = distance * 100; //in cm
                     targetVelocity = grade0 + dist * grade1 + dist * dist * grade2 + Math.pow(dist, 3) * grade3;
                     robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-                    robot.getMotorComponent("TurretSpinMotor").setTargetOverride(targetVelocity);
+                    robot.getMotorComponent("TurretSpinMotor").setTargetOverride(turretVelocityOverride < 0 ? targetVelocity : turretVelocityOverride);
 
                     targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
                     robot.getCRServoComponent("TurretRotate")
@@ -954,7 +957,7 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.getComponent("IntakeSorterServo")
                 .addState("PUSH_TO_GREEN", 250) // push to green
-                .addState("REDIRECT_TO_PURPLE", 161.64)
+                .addState("REDIRECT_TO_PURPLE", 146.64)
                 .addState("REDIRECT_TO_GREEN", 35)
                 .addState("BLOCK", 93.816, true);
 
