@@ -108,7 +108,7 @@ public class MainTeleOP extends LinearOpMode {
 
     protected void robotMainLoop() {
         // all of the code
-        robot.addTelemetryData("id", getMotifID());
+        // robot.addTelemetryData("id", getMotifID());
         long startTime = System.currentTimeMillis();
         tick_ns = calculateTimeDiff();
         robot.addTelemetryData("loop time Nano", tick_ns);
@@ -367,10 +367,11 @@ public class MainTeleOP extends LinearOpMode {
             //puterea calculat,unghiul calculat,rotatia calculata;
             //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
             robot.addTelemetryData("distance to wall", distance);
-            // double dist = distance * 100; //in cm
-            // targetVelocity = grade0 + dist * grade1 + dist * dist * grade2 + Math.pow(dist, 3) * grade3;
+            double dist = distance * 100; //in cm
+            if (distance > 2.8) targetVelocity = grade0Far + distance * grade1Far;
+            else targetVelocity = 0;
             robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-            robot.getMotorComponent("TurretSpinMotor").setTargetOverride(turretVelocityOverride);
+            robot.getMotorComponent("TurretSpinMotor").setTargetOverride((dist > 280 ? targetVelocity : turretVelocityOverride));
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
             robot.getCRServoComponent("TurretRotate")
