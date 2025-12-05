@@ -26,7 +26,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,7 +36,7 @@ public class MainTeleOP extends LinearOpMode {
     protected RobotController robot;
     protected TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     protected VoltageSensor controlHubVoltageSensor;
-    protected AtomicReference<Limelight3A> limelight3A;
+    protected Limelight3A limelight3A = null;
     protected AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     protected boolean sorterChoice = false;
     protected boolean G_P_P = false;
@@ -72,8 +71,6 @@ public class MainTeleOP extends LinearOpMode {
     public static  int purpleCounter = 0;
     public static int greenCounter = 0;
     public static boolean canFire = false;
-    public static AtomicReference<Pose> currentPos = new AtomicReference<>(new Pose(0, 0));
-    public static AtomicReference<Double> distToWall = new AtomicReference<>(0.0);
 
     public static int ballCounter = 0;
     protected long timerForIntake = 0;
@@ -114,7 +111,6 @@ public class MainTeleOP extends LinearOpMode {
         // all of the code
 
         // robot.addTelemetryData("id", getMotifID());
-        distToWall.set(trajectoryCalculator.calculateDistance(currentPos.get(), new Pose(targetX, targetY, 0), true));
         long startTime = System.currentTimeMillis();
         tick_ns = calculateTimeDiff();
         robot.addTelemetryData("loop time Nano", tick_ns);
@@ -338,12 +334,12 @@ public class MainTeleOP extends LinearOpMode {
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
         robot
-                //.addTelemetryData("turret power", robot.getCRServoComponent("TurretRotate").getPower())
-                //.addTelemetryData("estimated calculated power", robot.getCRServoComponent("TurretRotate").getCalculatedPower())
-                .addTelemetryData("robot rotation", currentPos.get().getHeading())
-                .addTelemetryData("robot Y", currentPos.get().getY())
-                .addTelemetryData("robot X", currentPos.get().getX())
-                //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted())
+                //.addTelemetryData("turret power", robot.getCRServoComponent().getPower())
+                //.addTelemetryData("estimated calculated power", robot.getCRServoComponent().getCalculatedPower())
+                .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
+                .addTelemetryData("robot Y", robot.getCurrentPose().getY())
+                .addTelemetryData("robot X", robot.getCurrentPose().getX())
+                //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent().getEncoderReadingFormatted())
                 .addTelemetryData("target velocity", targetVelocity)
                 //.addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
                 //.addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
@@ -355,35 +351,63 @@ public class MainTeleOP extends LinearOpMode {
 
 
 
-
-        if (distToWall.get() <= 1) degreeSubtract = degreeSubtractMulti * (distToWall.get() != 0 ? 1 / (distToWall.get() - 0.1) : 0);
+        double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), new Pose(targetX, targetY, 0), true);
+        if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
         else degreeSubtract = 0;
         degreeSubtract += degreeSubtractAdder;
         robot.addTelemetryData("degreesSubtract", degreeSubtract);
 
 
         robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-        double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(currentPos.get(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
+        double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
         robot.addTelemetryData("turret angle estimation", turretAngleVal);
         robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleOverride));
         //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
 
 
         if (isTryingToFire) {
-            robot.addTelemetryData("distance to wall", distToWall.get());
+            //puterea calculat,unghiul calculat,rotatia calculata;
+            //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
+            robot.addTelemetryData("distance to wall", distance);
+            double dist = distance * 100; //in cm
+            if (distance > 2.8) targetVelocity = grade0Far + distance * grade1Far;
+            else targetVelocity = 0;
+            TeleOPasyncUpdates.turretTargetVelocityOverride.set(true);
+            TeleOPasyncUpdates.turretTargetVelocity.set((dist > 280 ? targetVelocity : turretVelocityOverride));
+
+            targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
+//            robot.getCRServoComponent()
+//                    .setCameraPIDconstants(cameraP, cameraI, cameraD)
+//                    .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
+//                    .setCameraTarget(turretAimOffsetD2)
+//                    .setPIDconstants(servoP, servoI, servoD)
+//                    .setMotionconstants(servoVel, servoAcel, servoTime)
+//                    .setOverrideBool(true)
+//                    .setTargetOverride(targetTurret + turretAimOffsetD2);
+            //.setTargetOverride(0);
+            robot.getServoComponent("TurretRotateServo")
+                    .setOverrideTarget_bool(true)
+                    .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
         else {
-            robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
+            TeleOPasyncUpdates.turretTargetVelocityOverride.set(false);
+            targetVelocity = 0;
+            robot.getServoComponent("TurretRotateServo")
+                    .setOverrideTarget_bool(true)
+                    .setOverrideTargetPos(normalizeTurretRotationForServo(0));
+            ; //TODO to set this to 0
         }
 
         robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
-        robot.addTelemetryData("Thread #2 loop time:", TeleOPasyncUpdates.loop_time.get());
     }
+
+    public static boolean isActive = false;
 
     @Override
     public void runOpMode() {
         // init
+        isActive = true;
         ballCounter = 0;
         currentTeamColor = TeamColor.Blue;
 
@@ -404,21 +428,22 @@ public class MainTeleOP extends LinearOpMode {
             robot.init_loop();
         }
         // start async execution
-        TeleOPasyncUpdates.init_all(limelight3A);
+        // TeleOPasyncUpdates.init_all(limelight3A);
 
         while (opModeIsActive()) {
             // loop
             robot.loop();
         }
         // stop
+        isActive = false;
     }
     public void InitOtherStuff() {
         //limelight stuff
-        limelight3A.set(hardwareMap.get(Limelight3A.class, "limelight"));
-        limelight3A.get().pipelineSwitch(0);
-        limelight3A.get().reloadPipeline();
-        limelight3A.get().setPollRateHz(100); // poll 100 times per second
-        limelight3A.get().start();
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(0);
+        limelight3A.reloadPipeline();
+        limelight3A.setPollRateHz(100); // poll 100 times per second
+        limelight3A.start();
 
         //other stuff like color sensor
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
@@ -438,8 +463,8 @@ public class MainTeleOP extends LinearOpMode {
 
     }
     protected double getMotifID() {
-        limelight3A.get().pipelineSwitch(2);
-        LLResult result = limelight3A.get().getLatestResult();
+        limelight3A.pipelineSwitch(2);
+        LLResult result = limelight3A.getLatestResult();
         List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
             id = fiducial.getFiducialId(); // The ID number of the fiducial
@@ -925,7 +950,7 @@ public class MainTeleOP extends LinearOpMode {
 //        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall1);
         robot.addTelemetryData("LAUNCH_SENSOR_BALL", launchSensorBall);
     }
-    public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
+    public double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position
         double x = robotPose.getX();
         double y = robotPose.getY(); // don'// invert Y unless your coordinate system specifically requires it
@@ -951,22 +976,11 @@ public class MainTeleOP extends LinearOpMode {
         angleDiff = ((angleDiff + 540) % 360) - 180;  // neat trick for wrapping to [-180, 180]
 
         // Positive = target to the robot's right (clockwise turn), negative = to the left
-        // robot.addTelemetryData("CALCUL Robot heading", robotHeadingDeg);
-        // robot.addTelemetryData("CALCUL Target angle", targetAngleDeg);
-        // robot.addTelemetryData("CALCUL Heading adjustment", angleDiff);
+        robot.addTelemetryData("CALCUL Robot heading", robotHeadingDeg);
+        robot.addTelemetryData("CALCUL Target angle", targetAngleDeg);
+        robot.addTelemetryData("CALCUL Heading adjustment", angleDiff);
 
         return angleDiff;
-    }
-
-    public static Pose getCurrentPosition() {
-        return currentPos.get();
-    }
-
-    public static double degreesToOuttakeTurretServo(double degrees) {
-        double m = 0.1709;
-        double b = 17.19;
-        double result = (degrees - b) / m;
-        return clamp(result, 100, 359);
     }
 
     public double calculateCameraError() {
@@ -983,7 +997,7 @@ public class MainTeleOP extends LinearOpMode {
 //
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
-        LLResult llResult = limelight3A.get().getLatestResult();
+        LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
     public long calculateTimeDiff() {
