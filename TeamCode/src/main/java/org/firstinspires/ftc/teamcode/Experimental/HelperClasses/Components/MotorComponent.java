@@ -111,9 +111,10 @@ public class MotorComponent extends EncodedComponent {
         PID.setConstants(p, i, d);
         return this;
     }
-    public void setRPMPIDconstants(double p, double i, double d) {
+    public MotorComponent setRPMPIDconstants(double p, double i, double d) {
         if(PIDForRPM == null) PIDForRPM = new PIDcontroller();
         PIDForRPM.setConstants(p, i, d);
+        return this;
     }
 
     public MotorComponent useWithPIDController(boolean b) {

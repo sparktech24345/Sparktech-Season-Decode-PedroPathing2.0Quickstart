@@ -28,6 +28,7 @@ import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -35,7 +36,7 @@ public class MainTeleOP extends LinearOpMode {
     protected RobotController robot;
     protected TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     protected VoltageSensor controlHubVoltageSensor;
-    protected Limelight3A limelight3A;
+    protected AtomicReference<Limelight3A> limelight3A;
     protected AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     protected boolean sorterChoice = false;
     protected boolean G_P_P = false;
@@ -108,6 +109,7 @@ public class MainTeleOP extends LinearOpMode {
 
     protected void robotMainLoop() {
         // all of the code
+        
         // robot.addTelemetryData("id", getMotifID());
         long startTime = System.currentTimeMillis();
         tick_ns = calculateTimeDiff();
@@ -118,7 +120,7 @@ public class MainTeleOP extends LinearOpMode {
         canFire = Math.abs(camera_error) <= 2 && camera_error != 0;
         firingSequence(false && launchSensorBall != BallColorSet_Decode.NoBall && canFire);
 
-        double turretAimOffsetD2 = gamepad2.right_stick_x * 3;
+        double turretAimOffsetD2 = gamepad2.right_stick_x * 30;
 
         robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
         // intakeing
@@ -143,22 +145,22 @@ public class MainTeleOP extends LinearOpMode {
             robot.addTelemetryData("redirecting",true);
         }
 
-        if(robot.getControllerKey("DPAD_LEFT1").ExecuteAfterPress) {
+        if (robot.getControllerKey("DPAD_LEFT1").ExecuteAfterPress) {
             NoSorting();
         }
-        if(robot.getControllerKey("DPAD_RIGHT1").ExecuteAfterPress) {
+        if (robot.getControllerKey("DPAD_RIGHT1").ExecuteAfterPress) {
             CountingBalls();
         }
-        if(robot.getControllerKey("DPAD_UP1").ExecuteAfterPress) {
-            fireByMotif();
+        if (robot.getControllerKey("DPAD_UP1").ExecuteAfterPress) {
+            fireByMotif ();
         }
-        if(robot.getControllerKey("DPAD_DOWN1").ExecuteAfterPress) {
+        if (robot.getControllerKey("DPAD_DOWN1").ExecuteAfterPress) {
             sort();
         }
-        if(robot.getControllerKey("DPAD_LEFT2").ExecuteAfterPress) {
+        if (robot.getControllerKey("DPAD_LEFT2").ExecuteAfterPress) {
             firePurple();
         }
-        if(robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
+        if (robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
             fireGreen();
         }
 
@@ -215,7 +217,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
             robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
         }
-        else if(robot.getMotorComponent("IntakeMotor").getPower() == -1)
+        else if (robot.getMotorComponent("IntakeMotor").getPower() == -1)
             robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
 
 
@@ -288,7 +290,7 @@ public class MainTeleOP extends LinearOpMode {
 //                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
 //                    }
 //                }
-        // ================================= DRIVER 2 ===============================================
+        // ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == =DRIVER 2 ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == =
 
         if (gamepad2.yWasPressed()) {
             // Sorting toggle
@@ -329,24 +331,24 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.addTelemetryData("Checkpint After logic", System.currentTimeMillis() - startTime);
 
-        ///  ================== Telemetry and Overrides ======================
+        ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == 
 
         robot
-                .addTelemetryData("turret power", robot.getCRServoComponent("TurretRotate").getPower())
-                .addTelemetryData("estimated calculated power", robot.getCRServoComponent("TurretRotate").getCalculatedPower())
+                //.addTelemetryData("turret power", robot.getCRServoComponent("TurretRotate").getPower())
+                //.addTelemetryData("estimated calculated power", robot.getCRServoComponent("TurretRotate").getCalculatedPower())
                 .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
                 .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                 .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                .addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted())
+                //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted())
                 .addTelemetryData("target velocity", targetVelocity)
-                .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
-                .addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower());
+                //.addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
+                //.addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
+        ;
         //.addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
         //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
         robot.addTelemetryData("TICK MS", () -> robot.getExecMS());
 
-        robot.getMotorComponent("TurretSpinMotor").setRPMPIDconstants(rpmkp,0, rpmkd);
 
 
         double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), new Pose(targetX, targetY, 0), true);
@@ -370,10 +372,10 @@ public class MainTeleOP extends LinearOpMode {
             double dist = distance * 100; //in cm
             if (distance > 2.8) targetVelocity = grade0Far + distance * grade1Far;
             else targetVelocity = 0;
-            robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-            robot.getMotorComponent("TurretSpinMotor").setTargetOverride((dist > 280 ? targetVelocity : turretVelocityOverride));
+            TeleOPasyncUpdates.turretTargetVelocityOverride.set(true);
+            TeleOPasyncUpdates.turretTargetVelocity.set((dist > 280 ? targetVelocity : turretVelocityOverride));
 
-            targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY) + gamepad1.right_stick_x * 30 + adderTurretRotateForTests;
+            targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
             robot.getCRServoComponent("TurretRotate")
                     .setCameraPIDconstants(cameraP, cameraI, cameraD)
                     .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
@@ -387,8 +389,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
         else {
-            robot.getMotorComponent("TurretSpinMotor").targetOverride(false);
-            robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
+            TeleOPasyncUpdates.turretTargetVelocityOverride.set(false);
             targetVelocity = 0;
             robot.getCRServoComponent("TurretRotate")
                     .overridePIDerror(0, false)
@@ -421,6 +422,8 @@ public class MainTeleOP extends LinearOpMode {
         while (opModeInInit()) {
             robot.init_loop();
         }
+        // start async execution
+        TeleOPasyncUpdates.init_all(limelight3A);
 
         while (opModeIsActive()) {
             // loop
@@ -430,12 +433,11 @@ public class MainTeleOP extends LinearOpMode {
     }
     public void InitOtherStuff() {
         //limelight stuff
-        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(1);
-        limelight3A.pipelineSwitch(0);
-        limelight3A.reloadPipeline();
-        limelight3A.setPollRateHz(100); // poll 100 times per second
-        limelight3A.start();
+        limelight3A.set(hardwareMap.get(Limelight3A.class, "limelight"));
+        limelight3A.get().pipelineSwitch(0);
+        limelight3A.get().reloadPipeline();
+        limelight3A.get().setPollRateHz(100); // poll 100 times per second
+        limelight3A.get().start();
 
         //other stuff like color sensor
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
@@ -455,8 +457,8 @@ public class MainTeleOP extends LinearOpMode {
 
     }
     protected double getMotifID() {
-        limelight3A.pipelineSwitch(2);
-        LLResult result = limelight3A.getLatestResult();
+        limelight3A.get().pipelineSwitch(2);
+        LLResult result = limelight3A.get().getLatestResult();
         List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
             id = fiducial.getFiducialId(); // The ID number of the fiducial
@@ -465,7 +467,7 @@ public class MainTeleOP extends LinearOpMode {
     }
     protected void firingSequence(boolean turretHasBall) {
 
-        if (turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 750){
+        if (turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 750) {
             isFiringTimer.reset();
             robot.addToQueue(
                     new StateAction(false, "PurpleGateServo", "CLOSED"),
@@ -478,8 +480,8 @@ public class MainTeleOP extends LinearOpMode {
             );
         }
     }
-    protected void fireGreen(){
-        if (purpleSensorBall2 == BallColorSet_Decode.Green){
+    protected void fireGreen() {
+        if (purpleSensorBall2 == BallColorSet_Decode.Green) {
             robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
@@ -492,7 +494,7 @@ public class MainTeleOP extends LinearOpMode {
                         new DelayAction(true, 350),
                         new StateAction(true, "TransferServo", "DOWN"));
             }
-        } else if (greenSensorBall == BallColorSet_Decode.Green){
+        } else if (greenSensorBall == BallColorSet_Decode.Green) {
             robot.addToQueue(
                     new StateAction(true, "GreenGateServo", "OPEN"),
                     new StateAction(true, "IntakeSorterServo", "PUSH_TO_GREEN"),
@@ -510,8 +512,8 @@ public class MainTeleOP extends LinearOpMode {
             }
         }
     }
-    protected void firePurple(){
-        if (purpleSensorBall2 == BallColorSet_Decode.Purple){
+    protected void firePurple() {
+        if (purpleSensorBall2 == BallColorSet_Decode.Purple) {
             robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
@@ -524,7 +526,7 @@ public class MainTeleOP extends LinearOpMode {
                         new DelayAction(true, 350),
                         new StateAction(true, "TransferServo", "DOWN"));
             }
-        } else if (greenSensorBall == BallColorSet_Decode.Purple){
+        } else if (greenSensorBall == BallColorSet_Decode.Purple) {
             robot.addToQueue(
                     new StateAction(true, "GreenGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
@@ -543,18 +545,18 @@ public class MainTeleOP extends LinearOpMode {
     public double PurpleDetect = 0;
     public double GreenDetect = 0;
     public double  CountBall= PurpleDetect + GreenDetect;
-    public void CountingBalls(){
-        if(purpleSensorBall1 != BallColorSet_Decode.NoBall){
+    public void CountingBalls() {
+        if (purpleSensorBall1 != BallColorSet_Decode.NoBall) {
             PurpleDetect ++;
         }
-        if (greenSensorBall != BallColorSet_Decode.NoBall){
+        if (greenSensorBall != BallColorSet_Decode.NoBall) {
             GreenDetect ++;
         }
         CountBall = PurpleDetect + GreenDetect;
         //in cazul in care ar vrea o a 4a bila sa intre atunci cand sunt 3 deja inauntru
-        if (CountBall >=3){
+        if (CountBall >=3) {
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"));
-        }else if(CountBall < 3){
+        }else if (CountBall<3) {
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
     }
@@ -563,7 +565,7 @@ public class MainTeleOP extends LinearOpMode {
         //nu depinde de motif
         if (purpleSensorBall1 == BallColorSet_Decode.Green
                 && purpleSensorBall2 == BallColorSet_Decode.Green
-                && greenSensorBall == BallColorSet_Decode.Green){
+                && greenSensorBall == BallColorSet_Decode.Green) {
             robot.addToQueue(
                     new StateAction(true, "IntakeMotor", "FULL"),
                     new StateAction(true, "PurpleGateServo", "OPEN"),
@@ -586,7 +588,7 @@ public class MainTeleOP extends LinearOpMode {
         }
         if (purpleSensorBall1 == BallColorSet_Decode.Purple
                 && purpleSensorBall2 == BallColorSet_Decode.Purple
-                && greenSensorBall == BallColorSet_Decode.Purple){
+                && greenSensorBall == BallColorSet_Decode.Purple) {
             robot.addToQueue(
                     new StateAction(true, "IntakeMotor", "FULL"),
                     new StateAction(true, "PurpleGateServo", "OPEN"),
@@ -609,7 +611,7 @@ public class MainTeleOP extends LinearOpMode {
         }
         if (purpleSensorBall1 == BallColorSet_Decode.Green
                 && purpleSensorBall2 == BallColorSet_Decode.Purple
-                && greenSensorBall == BallColorSet_Decode.Green){
+                && greenSensorBall == BallColorSet_Decode.Green) {
             robot.addToQueue(
                     new StateAction(true, "IntakeMotor", "FULL"),
                     new StateAction(true, "PurpleGateServo", "OPEN"),
@@ -632,7 +634,7 @@ public class MainTeleOP extends LinearOpMode {
         }
         if (purpleSensorBall1 == BallColorSet_Decode.Purple
                 && purpleSensorBall2 == BallColorSet_Decode.Green
-                && greenSensorBall == BallColorSet_Decode.Green){
+                && greenSensorBall == BallColorSet_Decode.Green) {
             robot.addToQueue(
                     new StateAction(true, "IntakeMotor", "FULL"),
                     new StateAction(true, "PurpleGateServo", "OPEN"),
@@ -664,14 +666,14 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
         }
     }
-    protected void fireByMotif(){
+    protected void fireByMotif () {
         // cazuri favorabile in care am putea scora puncte
         //think on how to do the motif receiving message and how to implement it
-        if(G_P_P){
+        if (G_P_P) {
            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.Green) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-            }else if(purpleSensorBall1 != BallColorSet_Decode.NoBall &&  purpleSensorBall2 == BallColorSet_Decode.Green){
+            }else if (purpleSensorBall1 != BallColorSet_Decode.NoBall &&  purpleSensorBall2 == BallColorSet_Decode.Green) {
                 robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
                     new StateAction(true, "IntakeMotor", "FULL"),
@@ -684,7 +686,7 @@ public class MainTeleOP extends LinearOpMode {
                     new StateAction(true, "IntakeMotor", "OFF")
                 );
             }
-            if(isTryingToFire) {
+            if (isTryingToFire) {
                 if (purpleSensorBall2 == BallColorSet_Decode.Green && purpleSensorBall1 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
                     robot.addToQueue(
                     new StateAction(true, "PurpleGateServo", "OPEN"),
@@ -738,12 +740,12 @@ public class MainTeleOP extends LinearOpMode {
 
         }
 
-        if(P_G_P){
+        if (P_G_P) {
             robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
             }
-            if(isTryingToFire) {
+            if (isTryingToFire) {
                 if (purpleSensorBall2 == BallColorSet_Decode.Purple && purpleSensorBall1 == BallColorSet_Decode.Green && greenSensorBall == BallColorSet_Decode.Purple) {
                     robot.addToQueue(
                             new StateAction(true, "PurpleGateServo", "OPEN"),
@@ -792,7 +794,7 @@ public class MainTeleOP extends LinearOpMode {
                             new StateAction(true, "IntakeMotor", "OFF")
                     );
                 }
-                if(purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green){
+                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green) {
                     robot.addToQueue(
                             new StateAction(true, "PurpleGateServo", "OPEN"),
                             new StateAction(true, "IntakeMotor", "FULL"),
@@ -822,11 +824,11 @@ public class MainTeleOP extends LinearOpMode {
 
         }
 
-        if(P_P_G){
+        if (P_P_G) {
             robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
             if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 !=BallColorSet_Decode.Purple) {
                 robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-            }else if(purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 == BallColorSet_Decode.Purple){
+            }else if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 == BallColorSet_Decode.Purple) {
                 robot.addToQueue(
                         new StateAction(true, "PurpleGateServo", "OPEN"),
                         new StateAction(true, "IntakeMotor", "FULL"),
@@ -839,7 +841,7 @@ public class MainTeleOP extends LinearOpMode {
                         new StateAction(true, "IntakeMotor", "OFF")
                 );
             }
-            if(isTryingToFire) {
+            if (isTryingToFire) {
                 if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green) {
                     robot.addToQueue(
                             new StateAction(true, "PurpleGateServo", "OPEN"),
@@ -902,27 +904,27 @@ public class MainTeleOP extends LinearOpMode {
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
 
-        robot.makeComponent("TurretSpinMotor", new MotorComponent()
-                .addMotor("turretspin")
-                .useWithPIDController(false)
-                .setRPM_PIDCoefficients(0.005, 0.00055, 0)
-                .setTargetOverride(0)
-                .useWithEncoder(false)
-                .setRange(-1, 1)
-        );
+//        robot.makeComponent("TurretSpinMotor", new MotorComponent()
+//                .addMotor("turretspin")
+//                .useWithPIDController(false)
+//                .setRPM_PIDCoefficients(0.005, 0.00055, 0)
+//                .setTargetOverride(0)
+//                .useWithEncoder(false)
+//                .setRange(-1, 1)
+//        );
 
-        robot.makeComponent("TurretRotate", new CRServoComponent()
-                .addMotor("turretrotateleft")
-                .setExternalEncoder("backpurple")
-                .addMotor("turretrotateright")
-                .initExternalEncoderPosition(0) // an initial offset so that the robots "0" is towards the intake
-                .useWithPIDController(true)
-                .setPIDconstants(0, 0, 0)
-                .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
-                .setDirection("turretrotateright", DcMotorSimple.Direction.REVERSE)
-                .setRange(-270, 270) // range for PID
-                .moveDuringInit(false)
-        );
+//        robot.makeComponent("TurretRotate", new CRServoComponent()
+//                .addMotor("turretrotateleft")
+//                .setExternalEncoder("backpurple")
+//                .addMotor("turretrotateright")
+//                .initExternalEncoderPosition(0) // an initial offset so that the robots "0" is towards the intake
+//                .useWithPIDController(true)
+//                .setPIDconstants(0, 0, 0)
+//                .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
+//                .setDirection("turretrotateright", DcMotorSimple.Direction.REVERSE)
+//                .setRange(-270, 270) // range for PID
+//                .moveDuringInit(false)
+//        );
 
         robot.makeComponent("IntakeSorterServo", new ServoComponent()
                 .addMotor("intakeservo")
@@ -952,13 +954,13 @@ public class MainTeleOP extends LinearOpMode {
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("TurretAngle", new ServoComponent()
-                .addMotor("turretangle")
-                .setOverrideTarget_bool(false) //go to init pos
-                .setResolution(360)
-                .setRange(0, 1)
-                .moveDuringInit(true)
-        );
+//        robot.makeComponent("TurretAngle", new ServoComponent()
+//                .addMotor("turretangle")
+//                .setOverrideTarget_bool(false) //go to init pos
+//                .setResolution(360)
+//                .setRange(0, 1)
+//                .moveDuringInit(true)
+//        );
     }
 
     protected void MakeStates() {
@@ -969,9 +971,9 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("FULL_REVERSE", -1)
                 .addState("SLOW_REVERSE", -0.5);
 
-        robot.getComponent("TurretSpinMotor")
-                .addState("OFF", 0, true)
-                .addState("FULL", 1);
+//        robot.getComponent("TurretSpinMotor")
+//                .addState("OFF", 0, true)
+//                .addState("FULL", 1);
 
         robot.getComponent("PurpleGateServo")
                 .addState("OPEN", 15, true)
@@ -992,9 +994,9 @@ public class MainTeleOP extends LinearOpMode {
                 .addState("MIDDLE", 45)
                 .addState("UP", 230);
 
-        robot.getComponent("TurretAngle")
-                .addState("DOWN_MAX", 350, false) // 77 degrees looky
-                .addState("UP_MAX", 192, true); // 50 degrees looky
+//        robot.getComponent("TurretAngle")
+//                .addState("DOWN_MAX", 350, false) // 77 degrees looky
+//                .addState("UP_MAX", 192, true); // 50 degrees looky
 
         robot.addRobotState("TransferGreen", new RobotState(
                 make_pair("GreenGateServo", "OPEN"),
@@ -1073,14 +1075,14 @@ public class MainTeleOP extends LinearOpMode {
         double targetAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
 
         // Normalize to [0, 360)
-        if (targetAngleDeg < 0) targetAngleDeg += 360;
+        if (targetAngleDeg<0) targetAngleDeg += 360;
 
         // Robot heading in degrees
         // Assuming robotPose.getHeading() is in radians, 0° = facing +X, increases counterclockwise
         double robotHeadingDeg = Math.toDegrees(robotPose.getHeading());
 
         // Normalize to [0, 360)
-        if (robotHeadingDeg < 0) robotHeadingDeg += 360;
+        if (robotHeadingDeg<0) robotHeadingDeg += 360;
 
         // Calculate smallest signed angle difference: [-180, 180]
         double angleDiff = targetAngleDeg - robotHeadingDeg;
@@ -1115,7 +1117,7 @@ public class MainTeleOP extends LinearOpMode {
 //
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
-        LLResult llResult = limelight3A.getLatestResult();
+        LLResult llResult = limelight3A.get().getLatestResult();
         return llResult.getTx();
     }
     public long calculateTimeDiff() {
