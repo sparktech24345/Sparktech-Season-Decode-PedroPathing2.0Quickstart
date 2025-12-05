@@ -1,19 +1,28 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetX;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetY;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.TrajectoryCalculator;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Autonomous(name = "Decode Down Auto Blue", group = "Tests")
 public class TestDecodeAutoBlue extends OpMode {
@@ -22,6 +31,8 @@ public class TestDecodeAutoBlue extends OpMode {
     private boolean startAuto = false;
     private boolean hasShooted = false;
     private boolean isShooting = false;
+    protected TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
+    protected AtomicReference<Limelight3A> limelight3A;
     double ballCounter =0;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime shootTimer = new ElapsedTime();
@@ -105,10 +116,35 @@ public class TestDecodeAutoBlue extends OpMode {
     private void AutoShootingSequence(double TurretRotation, double Velocity, double TurretFiringAngle){
         ///shooty shooty
         isShooting = true;
+//        robot.getCRServoComponent("TurretRotate")
+//                .setTargetOverride(65);
+//        robot.getMotorComponent("TurretSpinMotor")
+//                .setPowerOverride(0.7);
+
     }
     private void AutoSequence1(){
         robot.addToQueue(new MoveAction(false, "shooting_small_triangle")); // first shoot 3
         startAuto = false;
+        robot.addToQueue(
+                new StateAction(true, "IntakeMotor", "FULL"),
+                new StateAction(true, "PurpleGateServo", "OPEN"),
+                new StateAction(true, "TransferServo", "UP"),
+                new DelayAction(true, 750),
+                new StateAction(true, "TransferServo", "DOWN"),
+                new StateAction(true, "TransferServo", "UP"),
+                new DelayAction(true, 750),
+                new StateAction(true, "TransferServo", "DOWN"),
+                new StateAction(true, "PurpleGateServo","CLOSED"),
+                new StateAction(true, "GreenGateServo","OPEN"),
+                new StateAction(true, "IntakeMotor", "FULL"),
+                new DelayAction(true, 250),
+                new StateAction(true, "TransferServo", "UP"),
+                new DelayAction(true, 750),
+                new StateAction(true, "TransferServo", "DOWN"),
+                new StateAction(true, "GreenGateServo", "CLOSED"),
+                new StateAction(true, "IntakeMotor", "OFF")
+        );
+
     }
     private void AutoSequence2(){
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL")); // collecting

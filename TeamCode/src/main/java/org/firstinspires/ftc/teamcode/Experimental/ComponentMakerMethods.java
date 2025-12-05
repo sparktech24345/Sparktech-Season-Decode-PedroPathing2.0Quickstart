@@ -25,7 +25,6 @@ public class ComponentMakerMethods {
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
         robot.makeComponent("Servo", new ServoComponent(
-
         ));
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
