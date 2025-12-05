@@ -24,6 +24,9 @@ public class ComponentMakerMethods {
                 .setRange(-1, 1)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
+        robot.makeComponent("Servo", new ServoComponent(
+
+        ));
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
@@ -34,18 +37,18 @@ public class ComponentMakerMethods {
                 .setRange(-1, 1)
         );
 
-        robot.makeComponent("TurretRotate", new CRServoComponent()
-                .addMotor("turretrotateleft")
-                .setExternalEncoder("backpurple")
-                .addMotor("turretrotateright")
-                .initExternalEncoderPosition(0) // an initial offset so that the robots "0" is towards the intake
-                .useWithPIDController(true)
-                .setPIDconstants(0, 0, 0)
-                .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
-                .setDirection("turretrotateright", DcMotorSimple.Direction.REVERSE)
-                .setRange(-270, 270) // range for PID
-                .moveDuringInit(false)
-        );
+//        robot.makeComponent("TurretRotate", new CRServoComponent()
+//                .addMotor("turretrotateleft")
+//                .setExternalEncoder("backpurple")
+//                .addMotor("turretrotateright")
+//                .initExternalEncoderPosition(0) // an initial offset so that the robots "0" is towards the intake
+//                .useWithPIDController(true)
+//                .setPIDconstants(0, 0, 0)
+//                .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
+//                .setDirection("turretrotateright", DcMotorSimple.Direction.REVERSE)
+//                .setRange(-270, 270) // range for PID
+//                .moveDuringInit(false)
+//        );
 
         robot.makeComponent("IntakeSorterServo", new ServoComponent()
                 .addMotor("intakeservo")
