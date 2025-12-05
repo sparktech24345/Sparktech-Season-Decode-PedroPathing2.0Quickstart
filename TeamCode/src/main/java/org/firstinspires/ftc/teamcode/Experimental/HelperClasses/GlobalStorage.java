@@ -96,4 +96,14 @@ public class GlobalStorage {
 
     public static double grade0Far = 610;
     public static double grade1Far = 325;
+    public static double normalizeTurretRotationForServo( double targetDegrees){
+        targetDegrees  = clamp(targetDegrees,-121.5,121.5);
+        return - targetDegrees + 121.5;
+    }
+    public static double degreesToOuttakeTurretServo(double degrees) {
+        double m = 0.1709;
+        double b = 17.19;
+        double result = (degrees - b) / m;
+        return clamp(result, 100, 359);
+    }
 }

@@ -24,9 +24,12 @@ public class ComponentMakerMethods {
                 .setRange(-1, 1)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
-        robot.makeComponent("Servo", new ServoComponent(
-
-        ));
+        robot.makeComponent("TurretRotateServo", new ServoComponent()
+                .addMotor("turretrotateleft")
+                .setResolution(243)
+                .setRange(0, 1)
+                .moveDuringInit(true)
+        );
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")

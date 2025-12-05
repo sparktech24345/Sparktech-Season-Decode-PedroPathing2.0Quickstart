@@ -51,16 +51,16 @@ public class TeleOPasyncUpdates {
         limelight = ll3a_ref;
         makeComponents();
         executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            while (run_flag.get()) {
-                turretSpinComponent.get()
-                        .setRPMPIDconstants(rpmkp,0, rpmkd)
-                        .targetOverride(turretTargetVelocityOverride.get())
-                        .setTargetOverride(turretTargetVelocity.get())
-                ;
-                if (!turretTargetVelocityOverride.get()) turretSpinComponent.get().loadState("OFF");
-            }
-        });
+//        executor.submit(() -> {
+//            while (run_flag.get() && isActive) {
+//                turretSpinComponent.get()
+//                        .setRPMPIDconstants(rpmkp,0, rpmkd)
+//                        .targetOverride(turretTargetVelocityOverride.get())
+//                        .setTargetOverride(turretTargetVelocity.get())
+//                ;
+//                if (!turretTargetVelocityOverride.get()) turretSpinComponent.get().loadState("OFF");
+//            }
+//        });
         executor.shutdown();
     }
 

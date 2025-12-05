@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods.MakeComponents;
+import static org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods.MakeStates;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -27,8 +29,8 @@ public class MainTeleOp_Red extends MainTeleOP {
             }
         };
 
-        MakeComponents();
-        MakeStates();
+        MakeComponents(robot);
+        MakeStates(robot);
         InitOtherStuff();
         robot.UseDefaultMovement();
 
