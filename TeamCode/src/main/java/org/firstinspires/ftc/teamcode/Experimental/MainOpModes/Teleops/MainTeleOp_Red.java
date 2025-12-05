@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods.MakeComponents;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
@@ -27,8 +29,8 @@ public class MainTeleOp_Red extends MainTeleOP {
             }
         };
 
-        MakeComponents();
-        MakeStates();
+        ComponentMakerMethods.MakeComponents(robot);
+        ComponentMakerMethods.MakeStates(robot);
         InitOtherStuff();
         robot.UseDefaultMovement();
 

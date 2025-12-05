@@ -72,6 +72,8 @@ public class MainTeleOP extends LinearOpMode {
     public static  int purpleCounter = 0;
     public static int greenCounter = 0;
     public static boolean canFire = false;
+    public static AtomicReference<Pose> currentPos = new AtomicReference<>(new Pose(0, 0));
+    public static AtomicReference<Double> distToWall = new AtomicReference<>(0.0);
 
     public static int ballCounter = 0;
     protected long timerForIntake = 0;
@@ -112,6 +114,7 @@ public class MainTeleOP extends LinearOpMode {
         // all of the code
 
         // robot.addTelemetryData("id", getMotifID());
+        distToWall.set(trajectoryCalculator.calculateDistance(currentPos.get(), new Pose(targetX, targetY, 0), true));
         long startTime = System.currentTimeMillis();
         tick_ns = calculateTimeDiff();
         robot.addTelemetryData("loop time Nano", tick_ns);
@@ -337,9 +340,9 @@ public class MainTeleOP extends LinearOpMode {
         robot
                 //.addTelemetryData("turret power", robot.getCRServoComponent("TurretRotate").getPower())
                 //.addTelemetryData("estimated calculated power", robot.getCRServoComponent("TurretRotate").getCalculatedPower())
-                .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
-                .addTelemetryData("robot Y", robot.getCurrentPose().getY())
-                .addTelemetryData("robot X", robot.getCurrentPose().getX())
+                .addTelemetryData("robot rotation", currentPos.get().getHeading())
+                .addTelemetryData("robot Y", currentPos.get().getY())
+                .addTelemetryData("robot X", currentPos.get().getX())
                 //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted())
                 .addTelemetryData("target velocity", targetVelocity)
                 //.addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
@@ -352,53 +355,30 @@ public class MainTeleOP extends LinearOpMode {
 
 
 
-        double distance = trajectoryCalculator.calculateDistance(robot.getCurrentPose(), new Pose(targetX, targetY, 0), true);
-        if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
+
+        if (distToWall.get() <= 1) degreeSubtract = degreeSubtractMulti * (distToWall.get() != 0 ? 1 / (distToWall.get() - 0.1) : 0);
         else degreeSubtract = 0;
         degreeSubtract += degreeSubtractAdder;
         robot.addTelemetryData("degreesSubtract", degreeSubtract);
 
 
         robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-        double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
+        double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(currentPos.get(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
         robot.addTelemetryData("turret angle estimation", turretAngleVal);
         robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleOverride));
         //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
 
 
         if (isTryingToFire) {
-            //puterea calculat,unghiul calculat,rotatia calculata;
-            //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
-            robot.addTelemetryData("distance to wall", distance);
-            double dist = distance * 100; //in cm
-            if (distance > 2.8) targetVelocity = grade0Far + distance * grade1Far;
-            else targetVelocity = 0;
-            TeleOPasyncUpdates.turretTargetVelocityOverride.set(true);
-            TeleOPasyncUpdates.turretTargetVelocity.set((dist > 280 ? targetVelocity : turretVelocityOverride));
-
-            targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
-            robot.getCRServoComponent("TurretRotate")
-                    .setCameraPIDconstants(cameraP, cameraI, cameraD)
-                    .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
-                    .setCameraTarget(turretAimOffsetD2)
-                    .setPIDconstants(servoP, servoI, servoD)
-                    .setMotionconstants(servoVel, servoAcel, servoTime)
-                    .setOverrideBool(true)
-                    .setTargetOverride(targetTurret + turretAimOffsetD2);
-            //.setTargetOverride(0);
-
+            robot.addTelemetryData("distance to wall", distToWall.get());
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
         else {
-            TeleOPasyncUpdates.turretTargetVelocityOverride.set(false);
-            targetVelocity = 0;
-            robot.getCRServoComponent("TurretRotate")
-                    .overridePIDerror(0, false)
-                    .setTargetOverride(0)
-            ; //TODO to set this to 0
+            robot.addToQueue(new StateAction(false, "TurretSpinMotor","OFF"));
         }
 
         robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
+        robot.addTelemetryData("Thread #2 loop time:", TeleOPasyncUpdates.loop_time.get());
     }
 
     @Override
@@ -945,7 +925,7 @@ public class MainTeleOP extends LinearOpMode {
 //        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall1);
         robot.addTelemetryData("LAUNCH_SENSOR_BALL", launchSensorBall);
     }
-    public double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
+    public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position
         double x = robotPose.getX();
         double y = robotPose.getY(); // don'// invert Y unless your coordinate system specifically requires it
@@ -971,11 +951,15 @@ public class MainTeleOP extends LinearOpMode {
         angleDiff = ((angleDiff + 540) % 360) - 180;  // neat trick for wrapping to [-180, 180]
 
         // Positive = target to the robot's right (clockwise turn), negative = to the left
-        robot.addTelemetryData("CALCUL Robot heading", robotHeadingDeg);
-        robot.addTelemetryData("CALCUL Target angle", targetAngleDeg);
-        robot.addTelemetryData("CALCUL Heading adjustment", angleDiff);
+        // robot.addTelemetryData("CALCUL Robot heading", robotHeadingDeg);
+        // robot.addTelemetryData("CALCUL Target angle", targetAngleDeg);
+        // robot.addTelemetryData("CALCUL Heading adjustment", angleDiff);
 
         return angleDiff;
+    }
+
+    public static Pose getCurrentPosition() {
+        return currentPos.get();
     }
 
     public static double degreesToOuttakeTurretServo(double degrees) {
