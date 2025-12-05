@@ -27,8 +27,8 @@ public class MotorComponent extends EncodedComponent {
     protected double targetRpm = 0;
     protected boolean rpmOverride = false;
     public static double ksRPM = 0;
-    public static double kvRPM = 0.00055;
-    public static double kpRPM = 0.005;
+    public static double kvRPM = 0.00046;
+    public static double kpRPM = 0.0042;
     protected double velocity = 0;
 
     public MotorComponent setVoltage(double voltage) {
@@ -111,9 +111,10 @@ public class MotorComponent extends EncodedComponent {
         PID.setConstants(p, i, d);
         return this;
     }
-    public void setRPMPIDconstants(double p, double i, double d) {
+    public MotorComponent setRPMPIDconstants(double p, double i, double d) {
         if(PIDForRPM == null) PIDForRPM = new PIDcontroller();
         PIDForRPM.setConstants(p, i, d);
+        return this;
     }
 
     public MotorComponent useWithPIDController(boolean b) {

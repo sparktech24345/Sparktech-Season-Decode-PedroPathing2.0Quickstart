@@ -93,4 +93,7 @@ public class GlobalStorage {
     public static double grade1 = 3.37452358;
     public static double grade2 = -0.0064362671;
     public static double grade3 = 0.0000058014683;
+
+    public static double grade0Far = 610;
+    public static double grade1Far = 325;
 }

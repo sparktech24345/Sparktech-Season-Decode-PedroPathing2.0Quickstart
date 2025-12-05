@@ -144,8 +144,8 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public RobotController addAutoPosition(String name, double x, double y, double heading) {
-        autoPositions.put(name, new Pose(x, y, Math.toRadians(heading)));
+    public RobotController addAutoPosition(String name, double x, double y, double headingInDegrees) {
+        autoPositions.put(name, new Pose(x, y, Math.toRadians(headingInDegrees)));
         return this;
     }
 
