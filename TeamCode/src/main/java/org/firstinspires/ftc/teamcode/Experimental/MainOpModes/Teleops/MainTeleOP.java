@@ -26,7 +26,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,7 +36,7 @@ public class MainTeleOP extends LinearOpMode {
     protected RobotController robot;
     protected TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     protected VoltageSensor controlHubVoltageSensor;
-    protected AtomicReference<Limelight3A> limelight3A;
+    protected Limelight3A limelight3A = null;
     protected AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     protected boolean sorterChoice = false;
     protected boolean G_P_P = false;
@@ -335,12 +334,12 @@ public class MainTeleOP extends LinearOpMode {
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
         robot
-                //.addTelemetryData("turret power", robot.getCRServoComponent("TurretRotate").getPower())
-                //.addTelemetryData("estimated calculated power", robot.getCRServoComponent("TurretRotate").getCalculatedPower())
+                //.addTelemetryData("turret power", robot.getCRServoComponent().getPower())
+                //.addTelemetryData("estimated calculated power", robot.getCRServoComponent().getCalculatedPower())
                 .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
                 .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                 .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent("TurretRotate").getEncoderReadingFormatted())
+                //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent().getEncoderReadingFormatted())
                 .addTelemetryData("target velocity", targetVelocity)
                 //.addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
                 //.addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
@@ -377,33 +376,38 @@ public class MainTeleOP extends LinearOpMode {
             TeleOPasyncUpdates.turretTargetVelocity.set((dist > 280 ? targetVelocity : turretVelocityOverride));
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
-            robot.getCRServoComponent("TurretRotate")
-                    .setCameraPIDconstants(cameraP, cameraI, cameraD)
-                    .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
-                    .setCameraTarget(turretAimOffsetD2)
-                    .setPIDconstants(servoP, servoI, servoD)
-                    .setMotionconstants(servoVel, servoAcel, servoTime)
-                    .setOverrideBool(true)
-                    .setTargetOverride(targetTurret + turretAimOffsetD2);
+//            robot.getCRServoComponent()
+//                    .setCameraPIDconstants(cameraP, cameraI, cameraD)
+//                    .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
+//                    .setCameraTarget(turretAimOffsetD2)
+//                    .setPIDconstants(servoP, servoI, servoD)
+//                    .setMotionconstants(servoVel, servoAcel, servoTime)
+//                    .setOverrideBool(true)
+//                    .setTargetOverride(targetTurret + turretAimOffsetD2);
             //.setTargetOverride(0);
-
+            robot.getServoComponent("TurretRotateServo")
+                    .setOverrideTarget_bool(true)
+                    .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
         else {
             TeleOPasyncUpdates.turretTargetVelocityOverride.set(false);
             targetVelocity = 0;
-            robot.getCRServoComponent("TurretRotate")
-                    .overridePIDerror(0, false)
-                    .setTargetOverride(0)
+            robot.getServoComponent("TurretRotateServo")
+                    .setOverrideTarget_bool(true)
+                    .setOverrideTargetPos(normalizeTurretRotationForServo(0));
             ; //TODO to set this to 0
         }
 
         robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
     }
 
+    public static boolean isActive = false;
+
     @Override
     public void runOpMode() {
         // init
+        isActive = true;
         ballCounter = 0;
         currentTeamColor = TeamColor.Blue;
 
@@ -424,21 +428,22 @@ public class MainTeleOP extends LinearOpMode {
             robot.init_loop();
         }
         // start async execution
-        TeleOPasyncUpdates.init_all(limelight3A);
+        // TeleOPasyncUpdates.init_all(limelight3A);
 
         while (opModeIsActive()) {
             // loop
             robot.loop();
         }
         // stop
+        isActive = false;
     }
     public void InitOtherStuff() {
         //limelight stuff
-        limelight3A.set(hardwareMap.get(Limelight3A.class, "limelight"));
-        limelight3A.get().pipelineSwitch(0);
-        limelight3A.get().reloadPipeline();
-        limelight3A.get().setPollRateHz(100); // poll 100 times per second
-        limelight3A.get().start();
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(0);
+        limelight3A.reloadPipeline();
+        limelight3A.setPollRateHz(100); // poll 100 times per second
+        limelight3A.start();
 
         //other stuff like color sensor
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
@@ -458,8 +463,8 @@ public class MainTeleOP extends LinearOpMode {
 
     }
     protected double getMotifID() {
-        limelight3A.get().pipelineSwitch(2);
-        LLResult result = limelight3A.get().getLatestResult();
+        limelight3A.pipelineSwitch(2);
+        LLResult result = limelight3A.getLatestResult();
         List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
             id = fiducial.getFiducialId(); // The ID number of the fiducial
@@ -978,13 +983,6 @@ public class MainTeleOP extends LinearOpMode {
         return angleDiff;
     }
 
-    public static double degreesToOuttakeTurretServo(double degrees) {
-        double m = 0.1709;
-        double b = 17.19;
-        double result = (degrees - b) / m;
-        return clamp(result, 100, 359);
-    }
-
     public double calculateCameraError() {
         // Logitech code
 //        aprilTagWebcam.update();
@@ -999,7 +997,7 @@ public class MainTeleOP extends LinearOpMode {
 //
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
-        LLResult llResult = limelight3A.get().getLatestResult();
+        LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
     public long calculateTimeDiff() {

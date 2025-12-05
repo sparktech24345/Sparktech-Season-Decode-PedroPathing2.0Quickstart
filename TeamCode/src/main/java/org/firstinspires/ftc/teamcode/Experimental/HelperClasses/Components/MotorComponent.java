@@ -27,8 +27,8 @@ public class MotorComponent extends EncodedComponent {
     protected double targetRpm = 0;
     protected boolean rpmOverride = false;
     public static double ksRPM = 0;
-    public static double kvRPM = 0.00046;
-    public static double kpRPM = 0.0042;
+    public static double kvRPM = 0.00048;
+    public static double kpRPM = 0.004;
     protected double velocity = 0;
 
     public MotorComponent setVoltage(double voltage) {
