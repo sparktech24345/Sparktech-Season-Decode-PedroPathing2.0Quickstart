@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.*;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
@@ -23,12 +22,8 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -133,7 +128,12 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("tester", robot.getComponent("IntakeMotor").getPosition());
         robot.addTelemetryData("CAMERA ERROR", camera_error);
 
-        if (false && (purpleSensorBall1 == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall1 == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green)) {
+        if (false && (
+                purpleSensorBall1 == BallColorSet_Decode.Purple ||
+                greenSensorBall == BallColorSet_Decode.Purple ||
+                        purpleSensorBall1 == BallColorSet_Decode.Green ||
+                        greenSensorBall == BallColorSet_Decode.Green
+        )) {
             if (ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1) { //dont infinite stack comands if full reversing already
                 robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
                 robot.addToQueue(new DelayAction(true, 400));
@@ -394,7 +394,7 @@ public class MainTeleOP extends LinearOpMode {
 //                    .setTargetOverride(targetTurret + turretAimOffsetD2);
             //.setTargetOverride(0);
             /// with encoder corection on camera on normal servo
-            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - late_camera_error * cameraErrorMultiplier;
 
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
