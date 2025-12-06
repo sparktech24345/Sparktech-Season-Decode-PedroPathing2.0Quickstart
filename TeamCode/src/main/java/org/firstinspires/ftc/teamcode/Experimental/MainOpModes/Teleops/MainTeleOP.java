@@ -75,7 +75,7 @@ public class MainTeleOP extends LinearOpMode {
     protected long tick_ns = 0;
     public static double targetX = 125;
     public static double targetY = 46;
-    public static double cameraErrorMultiplier = 1.34;
+    public static double cameraErrorMultiplier = 1.15;
     protected double old_pos_y_purple = 0;
     protected long timeLime = 0;
     protected double id = 0;
@@ -384,16 +384,21 @@ public class MainTeleOP extends LinearOpMode {
             robot.addTelemetryData("distance to wall", distance);
             double dist = distance * 100; //in cm
             if (distance > 2.8){
-                targetVelocity = grade0Far + distance * grade1Far;
-                turretAngleVal = 65;
+                //targetVelocity = grade0Far + distance * grade1Far;
+                targetVelocity = 1580; // only fire from the tip of the triangle
+                turretAngleVal = 58;
             }
-            else{
-                targetVelocity = 0;
-                turretAngleVal = 63;
+            else if(distance > 0.8){
+                targetVelocity = 1400;
+                turretAngleVal = 62;
+            }
+            else {
+                targetVelocity = turretVelocityOverride;
+                turretAngleVal = 65;
             }
             robot.getMotorComponent("TurretSpinMotor")
                         .targetOverride(true)
-                        .setTargetOverride((distance > 2.8 ? turretVelocityOverride : turretVelocityOverride));
+                        .setTargetOverride((distance > 2.8 ? targetVelocity : targetVelocity));
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
 //            robot.getCRServoComponent()
