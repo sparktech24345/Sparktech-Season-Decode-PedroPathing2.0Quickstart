@@ -37,6 +37,7 @@ public class ComplexFollower {
 
     public ComplexFollower(HardwareMap hardwareMap) {
         this.follower = ConstantsDecode.createFollowerDecode(hardwareMap);
+        follower.setStartingPose(new Pose(0, 0, 90));
         follower.update();
         currentPos = startPose;
         currentX = currentPos.getX();
@@ -46,6 +47,11 @@ public class ComplexFollower {
         poseUpdater = new PoseUpdater(hardwareMap, ConstantsDecode.class);
         dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
         dashboardDrawing = new DashboardDrawing(follower,dashboardPoseTracker);
+    }
+
+    public void setStartingPose(Pose start) {
+        if (follower == null) return;
+        follower.setStartingPose(start);
     }
 
     public void follow(Pose targetPos) {
@@ -66,7 +72,6 @@ public class ComplexFollower {
         if (/*currentOpModes == OpModes.Autonomous*/ true) {
             follower.update();
             poseUpdater.update();
-            dashboardDrawing.update();
             dashboardDrawing.update();
             if (follower.isBusy()) {
                 isDone = false;

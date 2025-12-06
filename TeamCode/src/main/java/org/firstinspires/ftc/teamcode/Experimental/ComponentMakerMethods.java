@@ -31,7 +31,7 @@ public class ComponentMakerMethods {
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
                 .useWithPIDController(false)
-                .setRPM_PIDCoefficients(0.005, 0.00055, 0)
+                .setRPM_PIDCoefficients(0.0045, 0.0005, 0)
                 .setTargetOverride(0)
                 .useWithEncoder(false)
                 .setRange(-1, 1)
@@ -88,6 +88,9 @@ public class ComponentMakerMethods {
     }
 
     public static void MakeStates(RobotController robot) {
+        robot.getComponent("TurretRotateServo")
+                .addState("MIDDLE_POINT", 121.5, true);
+
         robot.getComponent("IntakeMotor")
                 .addState("OFF", 0, true)
                 .addState("SLOW", 0.5)
