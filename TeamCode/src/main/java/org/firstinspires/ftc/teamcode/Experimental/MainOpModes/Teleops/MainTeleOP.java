@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.*;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
@@ -23,12 +22,8 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Config
 @TeleOp(name="Main TeleOP", group="Main")
@@ -87,6 +82,8 @@ public class MainTeleOP extends LinearOpMode {
     LLResult llResult = null;
     double[] pythonOutputs = {1, 2};
     double pos_y = pythonOutputs[1];
+    public static double camera_error;
+    public static double late_camera_error;
 
     public static double turretVelocityOverride = 0;
     public static double turretAngleOverride = 0;
@@ -118,9 +115,10 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("loop time Nano", tick_ns);
         robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
         HandleColors();
-        double camera_error = calculateCameraError();
-        canFire = Math.abs(camera_error) <= 2 && camera_error != 0;
+        camera_error = calculateCameraError();
+        canFire = Math.abs(camera_error) <= 1 && camera_error != 0;
         firingSequence(false && launchSensorBall != BallColorSet_Decode.NoBall && canFire);
+        late_camera_error = getLateCameraError();
 
         double turretAimOffsetD2 = gamepad2.right_stick_x * 30;
 
@@ -130,7 +128,12 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("tester", robot.getComponent("IntakeMotor").getPosition());
         robot.addTelemetryData("CAMERA ERROR", camera_error);
 
-        if (false && (purpleSensorBall1 == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple || purpleSensorBall1 == BallColorSet_Decode.Green || greenSensorBall == BallColorSet_Decode.Green)) {
+        if (false && (
+                purpleSensorBall1 == BallColorSet_Decode.Purple ||
+                greenSensorBall == BallColorSet_Decode.Purple ||
+                        purpleSensorBall1 == BallColorSet_Decode.Green ||
+                        greenSensorBall == BallColorSet_Decode.Green
+        )) {
             if (ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1) { //dont infinite stack comands if full reversing already
                 robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
                 robot.addToQueue(new DelayAction(true, 400));
@@ -396,7 +399,7 @@ public class MainTeleOP extends LinearOpMode {
 //                    .setTargetOverride(targetTurret + turretAimOffsetD2);
             //.setTargetOverride(0);
             /// with encoder corection on camera on normal servo
-            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - late_camera_error * cameraErrorMultiplier;
 
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
@@ -423,6 +426,7 @@ public class MainTeleOP extends LinearOpMode {
 
         robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
         robot.addTelemetryData("Current Encoder Position", getEncoderReadingFormatted());
+        robot.addTelemetryData("late camera error", late_camera_error);
     }
 
     public static boolean isActive = false;
@@ -446,6 +450,8 @@ public class MainTeleOP extends LinearOpMode {
         ComponentMakerMethods.MakeStates(robot);
         InitOtherStuff();
         robot.UseDefaultMovement();
+        camera_error = calculateCameraError();
+        late_camera_error = getLateCameraError();
 
         while (opModeInInit()) {
             robot.init_loop();
@@ -460,6 +466,18 @@ public class MainTeleOP extends LinearOpMode {
         // stop
         isActive = false;
     }
+
+    protected static double last_time = 0;
+
+    protected double getLateCameraError() {
+        double now = System.currentTimeMillis();
+        if (now - last_time > 200) {
+            late_camera_error = calculateCameraError();
+            last_time = now;
+        }
+        return late_camera_error;
+    }
+
     public void InitOtherStuff() {
         //limelight stuff
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
@@ -1021,6 +1039,7 @@ public class MainTeleOP extends LinearOpMode {
 //
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
+        limelight3A.pipelineSwitch(0);
         LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
