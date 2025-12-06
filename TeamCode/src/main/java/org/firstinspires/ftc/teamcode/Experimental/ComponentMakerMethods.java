@@ -91,6 +91,9 @@ public class ComponentMakerMethods {
     }
 
     public static void MakeStates(RobotController robot) {
+        robot.getComponent("TurretRotateServo")
+                .addState("MIDDLE_POINT", 121.5, true);
+
         robot.getComponent("IntakeMotor")
                 .addState("OFF", 0, true)
                 .addState("SLOW", 0.5)

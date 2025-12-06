@@ -38,6 +38,7 @@ public class MainTeleOP extends LinearOpMode {
     protected VoltageSensor controlHubVoltageSensor;
     protected Limelight3A limelight3A = null;
     protected AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
+    protected DcMotorEx externalEncoder = null;
     protected boolean sorterChoice = false;
     protected boolean G_P_P = false;
     protected boolean P_G_P = false;
@@ -79,6 +80,7 @@ public class MainTeleOP extends LinearOpMode {
     protected long tick_ns = 0;
     public static double targetX = 125;
     public static double targetY = 46;
+    public static double cameraErrorMultiplier = 1.34;
     protected double old_pos_y_purple = 0;
     protected long timeLime = 0;
     protected double id = 0;
@@ -341,7 +343,7 @@ public class MainTeleOP extends LinearOpMode {
                 .addTelemetryData("robot X", robot.getCurrentPose().getX())
                 //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent().getEncoderReadingFormatted())
                 .addTelemetryData("target velocity", targetVelocity)
-                //.addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
+                .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
                 //.addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
         ;
         //.addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
@@ -358,22 +360,25 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("degreesSubtract", degreeSubtract);
 
 
-        robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-        double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
-        robot.addTelemetryData("turret angle estimation", turretAngleVal);
-        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleOverride));
         //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
 
-
+        double turretAngleVal = 0;
         if (isTryingToFire) {
             //puterea calculat,unghiul calculat,rotatia calculata;
             //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
             robot.addTelemetryData("distance to wall", distance);
             double dist = distance * 100; //in cm
-            if (distance > 2.8) targetVelocity = grade0Far + distance * grade1Far;
-            else targetVelocity = 0;
-            TeleOPasyncUpdates.turretTargetVelocityOverride.set(true);
-            TeleOPasyncUpdates.turretTargetVelocity.set((dist > 280 ? targetVelocity : turretVelocityOverride));
+            if (distance > 2.8){
+                targetVelocity = grade0Far + distance * grade1Far;
+                turretAngleVal = 65;
+            }
+            else{
+                targetVelocity = 0;
+                turretAngleVal = 63;
+            }
+            robot.getMotorComponent("TurretSpinMotor")
+                        .targetOverride(true)
+                        .setTargetOverride((distance > 2.8 ? turretVelocityOverride : turretVelocityOverride));
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
 //            robot.getCRServoComponent()
@@ -385,21 +390,34 @@ public class MainTeleOP extends LinearOpMode {
 //                    .setOverrideBool(true)
 //                    .setTargetOverride(targetTurret + turretAimOffsetD2);
             //.setTargetOverride(0);
+            /// with encoder corection on camera on normal servo
+            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
         else {
-            TeleOPasyncUpdates.turretTargetVelocityOverride.set(false);
+            turretAngleVal = 63;
+            robot.getMotorComponent("TurretSpinMotor")
+                    .targetOverride(false)
+                    .setTargetOverride(0);
+            robot.addToQueue(new StateAction(false, "TurretSpinMotor", "OFF"));
             targetVelocity = 0;
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(0));
             ; //TODO to set this to 0
         }
+        robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
+        //double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
+        robot.addTelemetryData("turret angle estimation", turretAngleVal);
+        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleOverride));
+
 
         robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
+        robot.addTelemetryData("Current Encoder Position", getEncoderReadingFormatted());
     }
 
     public static boolean isActive = false;
@@ -449,8 +467,9 @@ public class MainTeleOP extends LinearOpMode {
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple1 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor1");
         colorSensorPurple2 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor2");
-
         colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
+
+        externalEncoder = hardwareMap.get(DcMotorEx.class,"backpurple");
 
         //pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
@@ -1005,5 +1024,12 @@ public class MainTeleOP extends LinearOpMode {
         long laster = lastTimeNano;
         lastTimeNano = current;
         return current - laster;
+    }
+    public double getEncoderReadingFormatted() {
+        if (externalEncoder == null) return 0;
+        double reading = externalEncoder.getCurrentPosition() * -1 / 123.37;
+//        while (reading < -180) reading += 360;
+//        while (reading > 180) reading -= 360;
+        return reading;
     }
 }
