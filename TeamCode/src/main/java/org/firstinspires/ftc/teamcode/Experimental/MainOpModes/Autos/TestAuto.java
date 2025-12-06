@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -33,12 +34,27 @@ public class TestAuto extends OpMode {
             }
 
             private void telemetry() {
+                followerInstance.telemetry(telemetry);
+                telemetry.update();
             }
 
             private void controls() {
                 if (gamepadInstance.get("A1").ExecuteOnPress) {
                     robot.addToQueue(new MoveAction(true, "p2"));
                     robot.addToQueue(new MoveAction(true, "p1"));
+                }
+
+                if (gamepadInstance.get("B1").ExecuteOnPress) {
+                    robot.addToQueue(new MoveAction(true, new Pose(10, 0, 0)));
+                    robot.addToQueue(new MoveAction(true, new Pose(10, 10, 0)));
+                    robot.addToQueue(new MoveAction(true, new Pose(0, 10, 0)));
+                    robot.addToQueue(new MoveAction(true, new Pose(0, 0, 0)));
+                }
+
+                if (gamepadInstance.get("X1").ExecuteOnPress) {
+                    robot.addToQueue(new MoveAction(true, new Pose(5, 10, 0)));
+                    robot.addToQueue(new MoveAction(true, new Pose(10, 0, 0)));
+                    robot.addToQueue(new MoveAction(true, new Pose(0, 0, 0)));
                 }
             }
         };

@@ -43,10 +43,10 @@ public class AutoRecorder {
                 poses.add(pose_data);
             }
         }
-        telemetryInstance.addData("Poses:", poses.toArray().length);
-        telemetryInstance.addData("Error:", error_str);
-        telemetryInstance.addData("Millis:", timer.milliseconds());
-        telemetryInstance.update();
+        //telemetryInstance.addData("Poses:", poses.toArray().length);
+        //telemetryInstance.addData("Error:", error_str);
+        //telemetryInstance.addData("Millis:", timer.milliseconds());
+        //telemetryInstance.update();
     }
 
     @SuppressLint("SdCardPath")

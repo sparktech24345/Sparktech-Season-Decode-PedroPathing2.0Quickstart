@@ -34,7 +34,7 @@ public enum BallColorSet_Decode {
         return getColorForStorage(colors.red * 10000.0, colors.green * 10000.0, colors.blue * 10000.0);
     }
     public static BallColorSet_Decode getColorForStorage(double r, double g, double b) {
-        if(g < 15) return NoBall;
+        if(g < 20) return NoBall;
         else
         if(b > g) return Purple;
         else return Green;

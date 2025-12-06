@@ -7,6 +7,7 @@ import com.pedropathing.geometry.*;
 import com.pedropathing.paths.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.Drawing.DashboardDrawing;
 import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.PoseUpdater;
@@ -37,16 +38,17 @@ public class ComplexFollower {
 
     public ComplexFollower(HardwareMap hardwareMap) {
         this.follower = ConstantsDecode.createFollowerDecode(hardwareMap);
-        follower.setStartingPose(new Pose(0, 0, 90));
+        follower.setStartingPose(startPose);
         follower.update();
         currentPos = startPose;
         currentX = currentPos.getX();
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
+        currentTargetPos = startPose;
 
-        poseUpdater = new PoseUpdater(hardwareMap, ConstantsDecode.class);
-        dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
-        dashboardDrawing = new DashboardDrawing(follower,dashboardPoseTracker);
+        // poseUpdater = new PoseUpdater(hardwareMap, ConstantsDecode.class);
+        // dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
+        // dashboardDrawing = new DashboardDrawing(follower,dashboardPoseTracker);
     }
 
     public void setStartingPose(Pose start) {
@@ -71,8 +73,8 @@ public class ComplexFollower {
     public void update() {
         if (/*currentOpModes == OpModes.Autonomous*/ true) {
             follower.update();
-            poseUpdater.update();
-            dashboardDrawing.update();
+            // poseUpdater.update();
+            // dashboardDrawing.update();
             if (follower.isBusy()) {
                 isDone = false;
                 currentPos = follower.getPose();
@@ -80,15 +82,15 @@ public class ComplexFollower {
                 currentY = currentPos.getY();
                 currentHeading = currentPos.getHeading();
             }
-            else if (shouldContinue && !poseQueue.isEmpty()) {
+            else if (!poseQueue.isEmpty()) {
                 currentTargetPos = poseQueue.poll();
                 pathToFollow = new Path(new BezierLine(currentPos, currentTargetPos));
-                pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(),currentTargetPos.getHeading());
+                pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
                 follower.followPath(pathToFollow);
-                shouldContinue = false;
-                follower.update();
             }
-            else isDone = true;
+            else {
+                isDone = true;
+            }
         }
     }
 
@@ -101,6 +103,15 @@ public class ComplexFollower {
         if (follower.isBusy()) follower.breakFollowing();
     }
 
-    public void telemetry() {
+    public void telemetry(Telemetry tel) {
+        tel.addData("Queue length:", poseQueue.toArray().length);
+        for (Pose queue_element : poseQueue) {
+            tel.addData("Queue element:", String.format("x: {} -- y: {} -- heading: {}", queue_element.getX(), queue_element.getY(), Math.toDegrees(queue_element.getHeading())));
+        }
+        tel.addData("Follower is busy:", follower.isBusy());
+        tel.addData("Current pose:", String.format("x: {} -- y: {} -- heading: {}", currentX, currentY, currentHeading));
+        tel.addData("Target pose:", String.format("x: {} -- y: {} -- heading: {}", currentTargetPos.getX(), currentTargetPos.getY(), currentTargetPos.getHeading()));
+        tel.addData("Should continue?", shouldContinue);
+        tel.addData("Is done?", isDone);
     }
 }

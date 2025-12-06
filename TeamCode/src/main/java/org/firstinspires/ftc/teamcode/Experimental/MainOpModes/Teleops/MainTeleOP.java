@@ -73,9 +73,16 @@ public class MainTeleOP extends LinearOpMode {
     protected long lastTimeNano = 0;
     protected double nonCorrectedCameraError = 0;
     protected long tick_ns = 0;
-    public static double targetX = 125;
-    public static double targetY = 46;
+    public static double targetX = 46;
+    public static double targetY = -125;
     public static double cameraErrorMultiplier = 1.15;
+    public static double targetVelFar = 1600;
+    public static double targetVelMid = 1300;
+    public static double targetVelClose = 1000;
+
+    public static double targetAngleFar = 58;
+    public static double targetAngleMid = 62;
+    public static double targetAngleClose = 71;
     protected double old_pos_y_purple = 0;
     protected long timeLime = 0;
     protected double id = 0;
@@ -102,6 +109,8 @@ public class MainTeleOP extends LinearOpMode {
     final float[] hsvValuesPurple2 = new float[3];
     final float[] hsvValuesLaunch = new float[3];
     /// --------------------------------------------------------
+    /// 
+    protected int teamPipeline = 0;
 
     protected void robotMainLoop() {
         // all of the code
@@ -111,7 +120,7 @@ public class MainTeleOP extends LinearOpMode {
         tick_ns = calculateTimeDiff();
         robot.addTelemetryData("loop time Nano", tick_ns);
         robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
-        //HandleColors();
+        HandleColors();
         camera_error = calculateCameraError();
         canFire = Math.abs(camera_error) <= 1 && camera_error != 0;
         firingSequence(false && launchSensorBall != BallColorSet_Decode.NoBall && canFire);
@@ -380,22 +389,22 @@ public class MainTeleOP extends LinearOpMode {
             //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
             robot.addTelemetryData("distance to wall", distance);
             double dist = distance * 100; //in cm
-            if (distance > 2.8){
+            if (distance > 2.8) {
                 //targetVelocity = grade0Far + distance * grade1Far;
-                targetVelocity = 1580; // only fire from the tip of the triangle
-                turretAngleVal = 58;
+                targetVelocity = targetVelFar; // only fire from the tip of the triangle
+                turretAngleVal = targetAngleFar;
             }
-            else if(distance > 0.8){
-                targetVelocity = 1400;
-                turretAngleVal = 62;
+            else if(distance > 0.8) {
+                targetVelocity = targetVelMid;
+                turretAngleVal = targetAngleMid;
             }
             else {
-                targetVelocity = 1100;
-                turretAngleVal = 71;
+                targetVelocity = targetVelClose;
+                turretAngleVal = targetAngleClose;
             }
             robot.getMotorComponent("TurretSpinMotor")
                         .targetOverride(true)
-                        .setTargetOverride(targetVelocity);
+                        .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity));
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
 //            robot.getCRServoComponent()
@@ -430,7 +439,7 @@ public class MainTeleOP extends LinearOpMode {
         robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
         //double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
         robot.addTelemetryData("turret angle estimation", turretAngleVal);
-        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleOverride));
+        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
 
 
         //robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
@@ -491,7 +500,7 @@ public class MainTeleOP extends LinearOpMode {
     public void InitOtherStuff() {
         //limelight stuff
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(0);
+        limelight3A.pipelineSwitch(teamPipeline);
         limelight3A.reloadPipeline();
         limelight3A.setPollRateHz(100); // poll 100 times per second
         limelight3A.start();
@@ -507,7 +516,7 @@ public class MainTeleOP extends LinearOpMode {
         //pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
 //        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-//        limelight3A.pipelineSwitch(0);
+//        limelight3A.pipelineSwitch(teamPipeline);
 //        limelight3A.start();
 
         //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
@@ -970,35 +979,33 @@ public class MainTeleOP extends LinearOpMode {
         purpleSensorBall2 = BallColorSet_Decode.getColor(purpleSensorColors2);
         launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
-//
-//        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
-//        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
-//        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green * 10000.0);
-//
-//        robot.addTelemetryData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
-//        robot.addTelemetryData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
-//        robot.addTelemetryData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
-//
-//        robot.addTelemetryData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
-//        robot.addTelemetryData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
-//        robot.addTelemetryData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
-//
-//        robot.addTelemetryData("L_RED",(double)launchSensorColors.red * 10000.0);
-//        robot.addTelemetryData("L_BLUE",(double)launchSensorColors.blue * 10000.0);
-//        robot.addTelemetryData("L_GREEN",(double)launchSensorColors.green * 10000.0);
-//
-//        robot.addTelemetryData("P1 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors1));
-//        robot.addTelemetryData("G Sensed Color", BallColorSet_Decode.getColorForStorage(greenSensorColors.red, greenSensorColors.green * 1.5, greenSensorColors.blue));
-//        robot.addTelemetryData("P2 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors2));
+
+        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
+        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+
+        robot.addTelemetryData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
+        robot.addTelemetryData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
+        robot.addTelemetryData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
+
+        robot.addTelemetryData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
+        robot.addTelemetryData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
+        robot.addTelemetryData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
+
+        robot.addTelemetryData("L_RED",(double)launchSensorColors.red * 10000.0);
+        robot.addTelemetryData("L_BLUE",(double)launchSensorColors.blue * 10000.0);
+        robot.addTelemetryData("L_GREEN",(double)launchSensorColors.green * 10000.0);
+
+        robot.addTelemetryData("G Sensed Color", BallColorSet_Decode.getColorForStorage(greenSensorColors));
+        robot.addTelemetryData("P1 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors1.red * 1.5, purpleSensorColors1.green * 1.5, purpleSensorColors1.blue * 1.5));
+        robot.addTelemetryData("P2 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors2));
+        robot.addTelemetryData("L Sensed Color", BallColorSet_Decode.getColorForStorage(launchSensorColors));
 
 
-//        greenSensorBall = BallColorSet_Decode.NoBall;
-//        purpleSensorBall1 = BallColorSet_Decode.NoBall;
-//        launchSensorBall = BallColorSet_Decode.NoBall;
-
-//        telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
-//        telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall1);
-//        robot.addTelemetryData("LAUNCH_SENSOR_BALL", launchSensorBall);
+        telemetry.addData("G_SENSOR_BALL", greenSensorBall);
+        telemetry.addData("P1_SENSOR_BALL", purpleSensorBall1);
+        telemetry.addData("P2_SENSOR_BALL", purpleSensorBall1);
+        telemetry.addData("L_SENSOR_BALL", launchSensorBall);
     }
     public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position
@@ -1047,7 +1054,7 @@ public class MainTeleOP extends LinearOpMode {
 //
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
-        limelight3A.pipelineSwitch(0);
+        limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }

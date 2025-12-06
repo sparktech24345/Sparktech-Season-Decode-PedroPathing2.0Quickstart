@@ -26,12 +26,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyThreeW
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(14) // ?????
-            .forwardZeroPowerAcceleration(-25.9346931313679598) // copiate direct din exemplul Pedro, de verificat / corectat
-            .lateralZeroPowerAcceleration(-67.342491844080064) // copiate direct din exemplul Pedro, de verificat / corectat
+            .forwardZeroPowerAcceleration(-34.62719) // copiate direct din exemplul Pedro, de verificat / corectat
+            .lateralZeroPowerAcceleration(-78.15554) // copiate direct din exemplul Pedro, de verificat / corectat
             .centripetalScaling(0.0005) // copiate direct din exemplul Pedro, de verificat / corectat
             .translationalPIDFCoefficients(new PIDFCoefficients(0.4, 0, 0.03, 0))//(0.67, 0, 0.45, 0.023))
             .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.04, 0))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.00002, 0.6,0));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0, 0.00001, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
             .leftFrontMotorName(GlobalStorage.frontLeftName)
