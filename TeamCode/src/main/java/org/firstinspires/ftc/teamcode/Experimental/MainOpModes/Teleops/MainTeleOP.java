@@ -388,23 +388,21 @@ public class MainTeleOP extends LinearOpMode {
             //puterea calculat,unghiul calculat,rotatia calculata;
             //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
             robot.addTelemetryData("distance to wall", distance);
-            double dist = distance * 100; //in cm
-            if (distance > 2.8) {
-                //targetVelocity = grade0Far + distance * grade1Far;
+            if (distance > 2.95) {
                 targetVelocity = targetVelFar; // only fire from the tip of the triangle
                 turretAngleVal = targetAngleFar;
             }
-            else if(distance > 0.8) {
-                targetVelocity = targetVelMid;
-                turretAngleVal = targetAngleMid;
-            }
             else {
-                targetVelocity = targetVelClose;
-                turretAngleVal = targetAngleClose;
+                targetVelocity = 0.0569676 * distance + 0.489353;
+                turretAngleVal = -4.12746 * distance + 71.29151;
             }
+            turretAngleVal = clamp(turretAngleVal, 58.5, 72);
             robot.getMotorComponent("TurretSpinMotor")
-                        .targetOverride(true)
-                        .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity));
+            //            .targetOverride(true)
+                    .targetOverride(false)
+                    .setOverrideCondition(true)
+                    .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+            ;
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
 //            robot.getCRServoComponent()
@@ -428,8 +426,9 @@ public class MainTeleOP extends LinearOpMode {
             turretAngleVal = 63;
             robot.getMotorComponent("TurretSpinMotor")
                     .targetOverride(false)
-                    .setTargetOverride(0);
-            robot.addToQueue(new StateAction(false, "TurretSpinMotor", "OFF"));
+                    .setOverrideCondition(true)
+                    .setPowerOverride(0)
+            ;
             targetVelocity = 0;
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
