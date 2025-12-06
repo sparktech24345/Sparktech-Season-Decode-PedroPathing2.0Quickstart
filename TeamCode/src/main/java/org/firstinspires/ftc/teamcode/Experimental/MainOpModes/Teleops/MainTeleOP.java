@@ -192,7 +192,7 @@ public class MainTeleOP extends LinearOpMode {
             } else {
                 if (purpleSensorBall1 == BallColorSet_Decode.Purple || greenSensorBall == BallColorSet_Decode.Purple) {
                     purpleCounter++;
-                    if (purpleCounter>2) {
+                    if (purpleCounter > 2) {
                         robot.addToQueue(new StateAction(false,"IntakeMotor" ,"SLOW_REVERSE"));
                         purpleCounter--;
                         robot.addToQueue(new DelayAction(true,400));
@@ -201,7 +201,7 @@ public class MainTeleOP extends LinearOpMode {
                     sorterChoice = true;
                 }else {
                     greenCounter++;
-                    if (greenCounter>1) {
+                    if (greenCounter > 1) {
                         robot.addToQueue(new StateAction(false , "IntakeMotor","SLOW_REVERSE"));
                         greenCounter--;
                         robot.addToQueue(new DelayAction(true,400));
@@ -245,9 +245,21 @@ public class MainTeleOP extends LinearOpMode {
             robot.setDriveTrainSlowdown(0.3);
         } else robot.setDriveTrainSlowdown(1);
 
-        if (gamepad1.right_bumper) {
-            // output trough intake
-        } if (gamepad1.leftBumperWasPressed()) {
+        if (robot.getControllerKey("RIGHT_BUMPER1").ExecuteOnPress) {
+            if (robot.getControllerKey("RIGHT_BUMPER1").IsToggledOnPress) {
+                robot
+                        .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"))
+                        .addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"))
+                ;
+            } else {
+                robot
+                        .addToQueue(new StateAction(true, "IntakeSorterServo", "BLOCK"))
+                        .addToQueue(new StateAction(true, "IntakeMotor", "OFF"))
+                ;
+            }
+        }
+
+        if (gamepad1.leftBumperWasPressed()) {
 //                    //false is green true is purple
 //                    if (sorterChoice) {
 //                        robot.addToQueue(new StateAction(false, "TurretSpinMotor", "FULL"));
@@ -394,7 +406,7 @@ public class MainTeleOP extends LinearOpMode {
 //                    .setTargetOverride(targetTurret + turretAimOffsetD2);
             //.setTargetOverride(0);
             /// with encoder corection on camera on normal servo
-            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - late_camera_error * cameraErrorMultiplier;
+            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
 
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
