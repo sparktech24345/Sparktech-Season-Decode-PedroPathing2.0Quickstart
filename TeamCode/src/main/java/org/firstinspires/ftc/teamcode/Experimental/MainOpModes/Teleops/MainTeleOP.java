@@ -73,10 +73,11 @@ public class MainTeleOP extends LinearOpMode {
     protected long lastTimeNano = 0;
     protected double nonCorrectedCameraError = 0;
     protected long tick_ns = 0;
-    public static double targetX = 46;
-    public static double targetY = -125;
+    public static double targetX = 125;
+    public static double targetY = 46;
+    public static Pose farStart = new Pose(-120,27,Math.toRadians(90));
     public static double cameraErrorMultiplier = 1.15;
-    public static double targetVelFar = 1600;
+    public static double targetVelFar = 0.7;
     public static double targetVelMid = 1300;
     public static double targetVelClose = 1000;
 
@@ -160,10 +161,10 @@ public class MainTeleOP extends LinearOpMode {
             NoSorting();
         }
         if (robot.getControllerKey("DPAD_RIGHT1").ExecuteAfterPress) {
-            CountingBalls();
+            //CountingBalls();
         }
         if (robot.getControllerKey("DPAD_UP1").ExecuteAfterPress) {
-            fireByMotif ();
+            //fireByMotif ();
         }
         if (robot.getControllerKey("DPAD_DOWN1").ExecuteAfterPress) {
             sort();
@@ -172,9 +173,9 @@ public class MainTeleOP extends LinearOpMode {
             firePurple();
         }
         if (robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
-            fireGreen();
+            //fireGreen();
         }
-
+        if(gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().getInstance().setPose(farStart);
 
 
         if (robot.getControllerKey("A1").IsToggledOnPress) {
@@ -483,6 +484,7 @@ public class MainTeleOP extends LinearOpMode {
         }
         // stop
         isActive = false;
+        passPose();
     }
 
     protected static double last_time = 0;
@@ -1069,5 +1071,9 @@ public class MainTeleOP extends LinearOpMode {
 //        while (reading < -180) reading += 360;
 //        while (reading > 180) reading -= 360;
         return reading;
+    }
+    public Pose passPose(){
+        globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
+        return globalRobotPose;
     }
 }

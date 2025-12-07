@@ -31,9 +31,10 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 import java.io.IOException;
+
 @Config
-@Autonomous(name = "Decode Down Auto Blue Firing Small Triangle", group = "Tests")
-public class DecodeLowTriangleBlueAuto extends OpMode {
+@Autonomous(name = "Decode Down Auto RED AUTO", group = "Tests")
+public class DecodeLowTriangleRedAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     private boolean startAuto = false;
@@ -45,7 +46,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     public static double targetX = 125;
     public static double targetY = 46;
     public static double ballsLaunched = 0;
-    public static double publicAngleConstantThingTemp = 20;
+    public static double publicAngleConstantThingTemp = -22;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime shootTimer = new ElapsedTime();
     ElapsedTime isFiringTimer = new ElapsedTime();
@@ -71,7 +72,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
     private Pose small_triangle_shoot = new Pose(-10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = new Pose(-20, 6, 0); // Pose1: shooting position small triangle
+    private Pose unstuckPose = new Pose(-20, -6, 0); // Pose1: shooting position small triangle
     private Pose HP_collect = new Pose(-38.6, -5.56, 0); // Pose3: HP collect
     private Pose first_row_ready = new Pose(-15, 52, 0); // Pose4: collect first row right
     private Pose first_row_done = new Pose(-30, 52, 0); // Pose5: collect first row left
@@ -144,13 +145,6 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
 
     private boolean isMoving() {
         return robot.getFollowerInstance().getInstance().getVelocity().getMagnitude() > 1;
-    }
-
-    private double getErrorFromShooting() {
-        Pose current = robot.getFollowerInstance().getInstance().getPose();
-        double x_err = Math.abs(big_triangle_shoot.getX() - current.getX());
-        double y_err = Math.abs(big_triangle_shoot.getY() - current.getY());
-        return x_err * y_err;
     }
 
     @Override

@@ -50,6 +50,7 @@ public abstract class RobotController implements RobotControllerInterface {
        followerInstance.update();
         queuerInstance = new StateQueuer();
         robotControllerInstance = this;
+        followerInstance.setStartingPose(globalRobotPose);
     }
 
     public RobotController() {
