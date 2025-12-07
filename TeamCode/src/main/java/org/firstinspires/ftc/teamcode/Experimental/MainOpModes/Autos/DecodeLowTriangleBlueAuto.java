@@ -14,7 +14,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -31,9 +30,8 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 
 import java.io.IOException;
 
-@Disabled
 @Autonomous(name = "Decode Down Auto Blue", group = "Tests")
-public class TestDecodeAutoBlue extends OpMode {
+public class DecodeLowTriangleBlueAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     private boolean startAuto = false;
@@ -107,12 +105,13 @@ public class TestDecodeAutoBlue extends OpMode {
                 countBalls();
                 LoopChecks();
                 if(startAuto) AutoSequence1();
-                if (ballCounter == 1 && !isMoving() && isShooting) unstuckBallSequence();
-                if(!unsticking && ballCounter >= 1 && !isShooting && !isMoving() && getErrorFromShooting() < 1 && !hasShooted) AutoShootingSequenceCloseTriangle();
-                // to be continued if we ever get this far
-                if(hasShooted && canSequence2 && !startAuto) AutoSequence2();
-                if(hasShooted && canSequence3 && !canSequence2) AutoSequence3();
-                if(hasShooted && canSequence4 && !canSequence3) AutoSequence4();
+                AutoShootingSequenceCloseTriangle();
+//                if (ballCounter == 1 && !isMoving() && isShooting) unstuckBallSequence();
+//                if(!unsticking && ballCounter >= 1 && !isShooting && !isMoving() && getErrorFromShooting() < 1 && !hasShooted) AutoShootingSequenceCloseTriangle();
+//                // to be continued if we ever get this far
+//                if(hasShooted && canSequence2 && !startAuto) AutoSequence2();
+//                if(hasShooted && canSequence3 && !canSequence2) AutoSequence3();
+//                if(hasShooted && canSequence4 && !canSequence3) AutoSequence4();
             }
         };
         ComponentMakerMethods.MakeComponents(robot);
@@ -255,49 +254,5 @@ public class TestDecodeAutoBlue extends OpMode {
         startAuto = false;
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
                 .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE")); // collecting
-    }
-    private void AutoSequence3() {
-        robot.getMotorComponent("TurretSpinMotor")
-                .targetOverride(false)
-                .setOverrideCondition(true)
-                .setPowerOverride(0)
-        ;
-
-        //robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL")); // collecting
-        robot.addToQueue(new MoveAction(false, second_row_ready)); // go to collect
-        robot.addToQueue(new MoveAction(false, second_row_done));
-        robot.addToQueue(new MoveAction(false, second_row_ready));
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot));
-        canSequence2 = false;
-        hasShooted = false;
-    }
-    private void AutoSequence2() {
-        robot.getMotorComponent("TurretSpinMotor")
-                .targetOverride(false)
-                .setOverrideCondition(true)
-                .setPowerOverride(0)
-        ;
-        //robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL")); // collecting
-        robot.addToQueue(new MoveAction(false, first_row_ready)); // go to collect
-        robot.addToQueue(new MoveAction(false, first_row_done));
-        robot.addToQueue(new MoveAction(false, first_row_ready));
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot));
-        canSequence3 = false;
-        hasShooted = false;
-    }
-
-    private void AutoSequence4() {
-        robot.getMotorComponent("TurretSpinMotor")
-                .targetOverride(false)
-                .setOverrideCondition(true)
-                .setPowerOverride(0)
-        ;
-        //robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL")); // collecting
-        robot.addToQueue(new MoveAction(false, third_row_ready)); // go to collect
-        robot.addToQueue(new MoveAction(false, third_row_done));
-        robot.addToQueue(new MoveAction(false, third_row_ready));
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot));
-        canSequence4 = false;
-        hasShooted = false;
     }
 }
