@@ -93,6 +93,8 @@ public class MainTeleOP extends LinearOpMode {
     public static double camera_error;
     public static double late_camera_error;
 
+    public boolean shootOnCamera = false;
+    public double last_power = 0;
     public static double turretVelocityOverride = 0;
     public static double turretAngleOverride = 0;
 
@@ -403,20 +405,29 @@ public class MainTeleOP extends LinearOpMode {
             }
             turretAngleVal = clamp(turretAngleVal, 58.5, 72);
 
-            //TEST VERSION
-//            robot.getMotorComponent("TurretSpinMotor")
-//                    //            .targetOverride(true)
-//                    .targetOverride(false)
-//                    .setOverrideCondition(true)
-//                    .setPowerOverride( getPowerOnDistance(getDistanceToAprilTag(llResult.getTa())))
-//            ;
+            if(shootOnCamera) {
+                //TEST VERSION
+                double power =  getPowerOnDistance(getDistanceToAprilTag(llResult.getTa()));
+                if(power > 1){
+                    power = last_power;
+                }
+                last_power = power;
+                robot.getMotorComponent("TurretSpinMotor")
+                        //            .targetOverride(true)
+                        .targetOverride(false)
+                        .setOverrideCondition(true)
+                        .setPowerOverride(power)
+                ;
 
-            robot.getMotorComponent("TurretSpinMotor")
-            //            .targetOverride(true)
-                    .targetOverride(false)
-                    .setOverrideCondition(true)
-                    .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-            ;
+            } else {
+
+                robot.getMotorComponent("TurretSpinMotor")
+                        //            .targetOverride(true)
+                        .targetOverride(false)
+                        .setOverrideCondition(true)
+                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                ;
+            }
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
 //            robot.getCRServoComponent()
