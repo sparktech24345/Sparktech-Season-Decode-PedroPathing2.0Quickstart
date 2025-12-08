@@ -116,6 +116,10 @@ public class MainTeleOP extends LinearOpMode {
     protected void robotMainLoop() {
         // all of the code
 
+        limelight3A.pipelineSwitch(teamPipeline);
+        LLResult llResult = limelight3A.getLatestResult();
+        robot.addTelemetryData("distance_to_april", getDistanceToAprilTag(llResult.getTa()));
+
         // robot.addTelemetryData("id", getMotifID());
         long startTime = System.currentTimeMillis();
         tick_ns = calculateTimeDiff();
@@ -398,6 +402,15 @@ public class MainTeleOP extends LinearOpMode {
                 turretAngleVal = -4.12746 * distance + 71.29151;
             }
             turretAngleVal = clamp(turretAngleVal, 58.5, 72);
+
+            //TEST VERSION
+//            robot.getMotorComponent("TurretSpinMotor")
+//                    //            .targetOverride(true)
+//                    .targetOverride(false)
+//                    .setOverrideCondition(true)
+//                    .setPowerOverride( getPowerOnDistance(getDistanceToAprilTag(llResult.getTa())))
+//            ;
+
             robot.getMotorComponent("TurretSpinMotor")
             //            .targetOverride(true)
                     .targetOverride(false)
@@ -1007,6 +1020,15 @@ public class MainTeleOP extends LinearOpMode {
         telemetry.addData("P1_SENSOR_BALL", purpleSensorBall1);
         telemetry.addData("P2_SENSOR_BALL", purpleSensorBall1);
         telemetry.addData("L_SENSOR_BALL", launchSensorBall);
+    }
+    private double getDistanceToAprilTag(double targetArea) {
+        double a = 8.60403612;
+        double b = -0.0119936722;
+
+        return Math.log(targetArea / a) / b;
+    }
+    private double getPowerOnDistance(double dist){
+        return 0.000551 * dist + 0.5116;
     }
     public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position
