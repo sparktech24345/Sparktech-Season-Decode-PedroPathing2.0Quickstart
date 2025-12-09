@@ -181,6 +181,10 @@ public class MainTeleOP extends LinearOpMode {
         if (robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
             //fireGreen();
         }
+        if(gamepad2.aWasPressed()){
+            shootOnCamera= !shootOnCamera;
+        }
+        robot.addTelemetryData("shootOnCamera", shootOnCamera);
         if(gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().getInstance().setPose(farStart);
 
 
@@ -440,7 +444,12 @@ public class MainTeleOP extends LinearOpMode {
 //                    .setTargetOverride(targetTurret + turretAimOffsetD2);
             //.setTargetOverride(0);
             /// with encoder corection on camera on normal servo
-            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+
+//            if(shootOnCamera){
+//                if(eval(camera_error)) targetTurret = -camera_error * cameraErrorMultiplier;
+//            } else {
+                if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+//            }
 
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
