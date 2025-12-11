@@ -94,6 +94,8 @@ public class MainTeleOP extends LinearOpMode {
     public static double camera_error;
     public static double late_camera_error;
 
+    public boolean shootOnCamera = false;
+    public double last_power = 0;
     public static double turretVelocityOverride = 0;
     public static double turretAngleOverride = 0;
 
@@ -116,6 +118,10 @@ public class MainTeleOP extends LinearOpMode {
 
     protected void robotMainLoop() {
         // all of the code
+
+        limelight3A.pipelineSwitch(teamPipeline);
+        LLResult llResult = limelight3A.getLatestResult();
+        robot.addTelemetryData("distance_to_april", getDistanceToAprilTag(llResult.getTa()));
 
         // robot.addTelemetryData("id", getMotifID());
         long startTime = System.currentTimeMillis();
@@ -176,6 +182,10 @@ public class MainTeleOP extends LinearOpMode {
         if (robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
             //fireGreen();
         }
+        if(gamepad2.aWasPressed()){
+            shootOnCamera= !shootOnCamera;
+        }
+        robot.addTelemetryData("shootOnCamera", shootOnCamera);
         if(gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().getInstance().setPose(farStart);
         if(gamepad1.dpad_down && gamepad1.dpad_left) robot.getFollowerInstance().getInstance().setPose(new Pose(0,0,0));
 
@@ -400,12 +410,30 @@ public class MainTeleOP extends LinearOpMode {
                 turretAngleVal = -4.12746 * distance + 71.29151;
             }
             turretAngleVal = clamp(turretAngleVal, 58.5, 72);
-            robot.getMotorComponent("TurretSpinMotor")
-            //            .targetOverride(true)
-                    .targetOverride(false)
-                    .setOverrideCondition(true)
-                    .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity) * powerMultiplier)
-            ;
+
+            if(shootOnCamera) {
+                //TEST VERSION
+                double power =  getPowerOnDistance(getDistanceToAprilTag(llResult.getTa()));
+                if(power > 1){
+                    power = last_power;
+                }
+                last_power = power;
+                robot.getMotorComponent("TurretSpinMotor")
+                        //            .targetOverride(true)
+                        .targetOverride(false)
+                        .setOverrideCondition(true)
+                        .setPowerOverride(power)
+                ;
+
+            } else {
+
+                robot.getMotorComponent("TurretSpinMotor")
+                        //            .targetOverride(true)
+                        .targetOverride(false)
+                        .setOverrideCondition(true)
+                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                ;
+            }
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
 //            robot.getCRServoComponent()
@@ -418,7 +446,12 @@ public class MainTeleOP extends LinearOpMode {
 //                    .setTargetOverride(targetTurret + turretAimOffsetD2);
             //.setTargetOverride(0);
             /// with encoder corection on camera on normal servo
-            if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+
+//            if(shootOnCamera){
+//                if(eval(camera_error)) targetTurret = -camera_error * cameraErrorMultiplier;
+//            } else {
+                if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+//            }
 
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
@@ -1010,6 +1043,15 @@ public class MainTeleOP extends LinearOpMode {
         telemetry.addData("P1_SENSOR_BALL", purpleSensorBall1);
         telemetry.addData("P2_SENSOR_BALL", purpleSensorBall1);
         telemetry.addData("L_SENSOR_BALL", launchSensorBall);
+    }
+    private double getDistanceToAprilTag(double targetArea) {
+        double a = 8.60403612;
+        double b = -0.0119936722;
+
+        return Math.log(targetArea / a) / b;
+    }
+    private double getPowerOnDistance(double dist){
+        return 0.000551 * dist + 0.5116;
     }
     public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position
