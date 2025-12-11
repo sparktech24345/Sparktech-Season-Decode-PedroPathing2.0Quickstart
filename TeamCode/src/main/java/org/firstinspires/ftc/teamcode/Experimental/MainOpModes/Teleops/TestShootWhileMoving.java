@@ -2,11 +2,12 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
-
+@Disabled
 @TeleOp(name = "Test shooting")
 public class TestShootWhileMoving extends LinearOpMode {
     private static Pose copy_pose(Pose source) {

@@ -46,7 +46,7 @@ public class DecodeLowTriangleRedAuto extends OpMode {
     public static double targetX = 125;
     public static double targetY = 46;
     public static double ballsLaunched = 0;
-    public static double publicAngleConstantThingTemp = -22;
+    public static double publicAngleConstantThingTemp = -23;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime shootTimer = new ElapsedTime();
     ElapsedTime isFiringTimer = new ElapsedTime();
@@ -68,7 +68,7 @@ public class DecodeLowTriangleRedAuto extends OpMode {
     final float[] hsvValuesPurple2 = new float[3];
     final float[] hsvValuesLaunch = new float[3];
     private boolean unsticking = false;
-    public static double targetPower = 0.75;
+    public static double targetPower = 0.7;
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
     private Pose small_triangle_shoot = new Pose(-10, 0, 0); // Pose1: shooting position small triangle
@@ -122,7 +122,7 @@ public class DecodeLowTriangleRedAuto extends OpMode {
                 }
                 if(!isMoving) AutoShootingSequenceCloseTriangle();
                 if(ballsLaunched <= 2 && isFiringTimer.milliseconds() > 5000) ballIsStuck = true;
-                if(ballIsStuck) AutoSequence3();
+                if(ballIsStuck && !(timer.milliseconds()>22000)) AutoSequence3();
                 if(timer.milliseconds()>22000 && canSequence4) AutoPark();
 //                if (ballCounter == 1 && !isMoving() && isShooting) unstuckBallSequence();
 //                if(!unsticking && ballCounter >= 1 && !isShooting && !isMoving() && getErrorFromShooting() < 1 && !hasShooted) AutoShootingSequenceCloseTriangle();

@@ -21,9 +21,9 @@ public class MainTeleOp_Red extends MainTeleOP {
         // init
         ballCounter = 0;
         teamPipeline = 1;
-        targetX = -targetX;
+        powerMultiplier =1;
+        targetY = -targetY;
         currentTeamColor = TeamColor.Red;
-        farStart = new Pose(-120,-27,Math.toRadians(90));
 
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override

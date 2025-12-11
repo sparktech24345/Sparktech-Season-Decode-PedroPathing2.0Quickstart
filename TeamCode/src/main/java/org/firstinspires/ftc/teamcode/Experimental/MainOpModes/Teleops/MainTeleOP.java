@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.List;
 
 @Config
-@TeleOp(name="Main TeleOP", group="Main")
+@TeleOp(name="Main TeleOP Blue", group="Main")
 public class MainTeleOP extends LinearOpMode {
     protected RobotController robot;
     protected TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
@@ -40,6 +40,7 @@ public class MainTeleOP extends LinearOpMode {
     protected boolean P_P_G = false;
     protected boolean isInSortingPeriod = false;
     public static double adderTurretRotateForTests = 0;
+    public static double powerMultiplier = 1;
     public static double cameraP = 0.005;
     public static double cameraI = 0;
     public static double cameraD = 0;
@@ -119,8 +120,8 @@ public class MainTeleOP extends LinearOpMode {
         // robot.addTelemetryData("id", getMotifID());
         long startTime = System.currentTimeMillis();
         tick_ns = calculateTimeDiff();
-        robot.addTelemetryData("loop time Nano", tick_ns);
-        robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
+        ///robot.addTelemetryData("loop time Nano", tick_ns);
+        ///robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
         HandleColors();
         camera_error = calculateCameraError();
         canFire = Math.abs(camera_error) <= 1 && camera_error != 0;
@@ -129,11 +130,11 @@ public class MainTeleOP extends LinearOpMode {
 
         double turretAimOffsetD2 = gamepad2.right_stick_x * 30;
 
-        robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
+        ///robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
         // intakeing
 
-        robot.addTelemetryData("tester", robot.getComponent("IntakeMotor").getPosition());
-        robot.addTelemetryData("CAMERA ERROR", camera_error);
+        ///robot.addTelemetryData("tester", robot.getComponent("IntakeMotor").getPosition());
+        ///robot.addTelemetryData("CAMERA ERROR", camera_error);
 
         if (false && (
                 purpleSensorBall1 == BallColorSet_Decode.Purple ||
@@ -145,7 +146,7 @@ public class MainTeleOP extends LinearOpMode {
                 robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
                 robot.addToQueue(new DelayAction(true, 400));
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
-                robot.addTelemetryData("reversing",true);
+                ///robot.addTelemetryData("reversing",true);
                 ballCounter--;
             }
         }
@@ -154,11 +155,11 @@ public class MainTeleOP extends LinearOpMode {
             //robot.addTelemetryData("blocking",true);
         }else if (timerForIntake + 600 < System.currentTimeMillis()) {
             robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
-            robot.addTelemetryData("redirecting",true);
+            ///robot.addTelemetryData("redirecting",true);
         }
 
         if (robot.getControllerKey("DPAD_LEFT1").ExecuteAfterPress) {
-            NoSorting();
+            //NoSorting();
         }
         if (robot.getControllerKey("DPAD_RIGHT1").ExecuteAfterPress) {
             //CountingBalls();
@@ -167,7 +168,7 @@ public class MainTeleOP extends LinearOpMode {
             //fireByMotif ();
         }
         if (robot.getControllerKey("DPAD_DOWN1").ExecuteAfterPress) {
-            sort();
+            //sort();
         }
         if (robot.getControllerKey("DPAD_LEFT2").ExecuteAfterPress) {
             firePurple();
@@ -176,6 +177,7 @@ public class MainTeleOP extends LinearOpMode {
             //fireGreen();
         }
         if(gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().getInstance().setPose(farStart);
+        if(gamepad1.dpad_down && gamepad1.dpad_left) robot.getFollowerInstance().getInstance().setPose(new Pose(0,0,0));
 
 
         if (robot.getControllerKey("A1").IsToggledOnPress) {
@@ -222,7 +224,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
         }
 
-        robot.addTelemetryData("ball counter",ballCounter);
+        ///robot.addTelemetryData("ball counter",ballCounter);
 
 
         if (robot.getControllerKey("B1").IsToggledOnPress) {
@@ -322,13 +324,13 @@ public class MainTeleOP extends LinearOpMode {
         }
 
         if (gamepad2.leftBumperWasPressed()) {
-            // odometry false
+            powerMultiplier -= 0.05;
         }
 
         if (gamepad2.rightBumperWasPressed()) {
-            // camera targeting false
+            powerMultiplier += 0.05;
         }
-
+        robot.addTelemetryData("POWER MULTIPLIER",powerMultiplier);
         if (gamepad2.xWasPressed() || robot.getControllerKey("Y1").ExecuteAfterPress) {
             isTryingToFire = !isTryingToFire;
             isReadyToFireTimer.reset();
@@ -353,7 +355,7 @@ public class MainTeleOP extends LinearOpMode {
             else robot.addToQueue(new StateAction(false, "PurpleGateServo", "CLOSED"));
         }
 
-        robot.addTelemetryData("Checkpint After logic", System.currentTimeMillis() - startTime);
+        ///robot.addTelemetryData("Checkpint After logic", System.currentTimeMillis() - startTime);
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
@@ -364,14 +366,14 @@ public class MainTeleOP extends LinearOpMode {
                 .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                 .addTelemetryData("robot X", robot.getCurrentPose().getX())
                 //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent().getEncoderReadingFormatted())
-                .addTelemetryData("target velocity", targetVelocity)
-                .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
+                ///.addTelemetryData("target velocity", targetVelocity)
+                ///.addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
                 //.addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
         ;
         //.addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
         //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
-        robot.addTelemetryData("TICK MS", () -> robot.getExecMS());
+        ///robot.addTelemetryData("TICK MS", () -> robot.getExecMS());
 
 
 
@@ -379,7 +381,7 @@ public class MainTeleOP extends LinearOpMode {
         if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
         else degreeSubtract = 0;
         degreeSubtract += degreeSubtractAdder;
-        robot.addTelemetryData("degreesSubtract", degreeSubtract);
+        ///robot.addTelemetryData("degreesSubtract", degreeSubtract);
 
 
         //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
@@ -388,7 +390,7 @@ public class MainTeleOP extends LinearOpMode {
         if (isTryingToFire) {
             //puterea calculat,unghiul calculat,rotatia calculata;
             //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
-            robot.addTelemetryData("distance to wall", distance);
+            ///robot.addTelemetryData("distance to wall", distance);
             if (distance > 2.95) {
                 targetVelocity = targetVelFar; // only fire from the tip of the triangle
                 turretAngleVal = targetAngleFar;
@@ -402,7 +404,7 @@ public class MainTeleOP extends LinearOpMode {
             //            .targetOverride(true)
                     .targetOverride(false)
                     .setOverrideCondition(true)
-                    .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                    .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity) * powerMultiplier)
             ;
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
@@ -438,13 +440,13 @@ public class MainTeleOP extends LinearOpMode {
         }
         robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
         //double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
-        robot.addTelemetryData("turret angle estimation", turretAngleVal);
+        ///robot.addTelemetryData("turret angle estimation", turretAngleVal);
         robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
 
 
         //robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
-        robot.addTelemetryData("Current Encoder Position", getEncoderReadingFormatted());
-        robot.addTelemetryData("late camera error", late_camera_error);
+        ///robot.addTelemetryData("Current Encoder Position", getEncoderReadingFormatted());
+        ///robot.addTelemetryData("late camera error", late_camera_error);
     }
 
     public static boolean isActive = false;
@@ -454,6 +456,7 @@ public class MainTeleOP extends LinearOpMode {
         // init
         isActive = true;
         ballCounter = 0;
+        powerMultiplier =1;
         currentTeamColor = TeamColor.Blue;
 
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -980,27 +983,27 @@ public class MainTeleOP extends LinearOpMode {
         purpleSensorBall2 = BallColorSet_Decode.getColor(purpleSensorColors2);
         launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
-
-        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
-        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
-        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green * 10000.0);
-
-        robot.addTelemetryData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
-        robot.addTelemetryData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
-        robot.addTelemetryData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
-
-        robot.addTelemetryData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
-        robot.addTelemetryData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
-        robot.addTelemetryData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
-
-        robot.addTelemetryData("L_RED",(double)launchSensorColors.red * 10000.0);
-        robot.addTelemetryData("L_BLUE",(double)launchSensorColors.blue * 10000.0);
-        robot.addTelemetryData("L_GREEN",(double)launchSensorColors.green * 10000.0);
-
-        robot.addTelemetryData("G Sensed Color", BallColorSet_Decode.getColorForStorage(greenSensorColors));
-        robot.addTelemetryData("P1 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors1.red * 1.5, purpleSensorColors1.green * 1.5, purpleSensorColors1.blue * 1.5));
-        robot.addTelemetryData("P2 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors2));
-        robot.addTelemetryData("L Sensed Color", BallColorSet_Decode.getColorForStorage(launchSensorColors));
+//
+//        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
+//        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+//        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+//
+//        robot.addTelemetryData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
+//        robot.addTelemetryData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
+//        robot.addTelemetryData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
+//
+//        robot.addTelemetryData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
+//        robot.addTelemetryData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
+//        robot.addTelemetryData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
+//
+//        robot.addTelemetryData("L_RED",(double)launchSensorColors.red * 10000.0);
+//        robot.addTelemetryData("L_BLUE",(double)launchSensorColors.blue * 10000.0);
+//        robot.addTelemetryData("L_GREEN",(double)launchSensorColors.green * 10000.0);
+//
+//        robot.addTelemetryData("G Sensed Color", BallColorSet_Decode.getColorForStorage(greenSensorColors));
+//        robot.addTelemetryData("P1 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors1.red * 1.5, purpleSensorColors1.green * 1.5, purpleSensorColors1.blue * 1.5));
+//        robot.addTelemetryData("P2 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors2));
+//        robot.addTelemetryData("L Sensed Color", BallColorSet_Decode.getColorForStorage(launchSensorColors));
 
 
         telemetry.addData("G_SENSOR_BALL", greenSensorBall);
