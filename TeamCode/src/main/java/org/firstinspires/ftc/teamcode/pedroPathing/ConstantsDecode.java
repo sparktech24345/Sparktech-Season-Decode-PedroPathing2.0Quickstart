@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
@@ -29,15 +30,15 @@ public class ConstantsDecode {
             .forwardZeroPowerAcceleration(-34.62719) // copiate direct din exemplul Pedro, de verificat / corectat
             .lateralZeroPowerAcceleration(-78.15554) // copiate direct din exemplul Pedro, de verificat / corectat
             .centripetalScaling(0.0005) // copiate direct din exemplul Pedro, de verificat / corectat
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.4, 0, 0.03, 0))//(0.67, 0, 0.45, 0.023))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0.004, 0))//(0.67, 0, 0.45, 0.023))
             .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.04, 0))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0, 0.00001, 0.6,0));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.04, 0, 0.006, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
-            .leftFrontMotorName(GlobalStorage.frontLeftName)
-            .rightFrontMotorName(GlobalStorage.frontRightName)
-            .leftRearMotorName(GlobalStorage.backLeftName)
-            .rightRearMotorName(GlobalStorage.backRightName)
+            .leftFrontMotorName(GlobalStorage.frontRightName)
+            .rightFrontMotorName(GlobalStorage.frontLeftName)
+            .leftRearMotorName(GlobalStorage.backRightName)
+            .rightRearMotorName(GlobalStorage.backLeftName)
 
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
@@ -92,9 +93,9 @@ public class ConstantsDecode {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(mecanumConstants)
                 .pathConstraints(pathConstraints)
-                //.pinpointLocalizer(pinpointConstants)
+                .pinpointLocalizer(pinpointConstants)
                 //.setLocalizer(new SparkyThreeWheelIMULocalizer(hardwareMap,SparkyLocalizerConstants))
-                .setLocalizer(new SparkyPinpointLocalizer(hardwareMap,sparkyPinpointConstants))
+                //.setLocalizer(new SparkyPinpointLocalizer(hardwareMap,sparkyPinpointConstants))
                 .build();
     }
 }

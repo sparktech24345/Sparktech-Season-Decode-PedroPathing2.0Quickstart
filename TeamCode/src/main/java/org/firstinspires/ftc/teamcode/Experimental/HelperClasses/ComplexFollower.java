@@ -46,9 +46,9 @@ public class ComplexFollower {
         currentHeading = currentPos.getHeading();
         currentTargetPos = startPose;
 
-        // poseUpdater = new PoseUpdater(hardwareMap, ConstantsDecode.class);
-        // dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
-        // dashboardDrawing = new DashboardDrawing(follower,dashboardPoseTracker);
+         poseUpdater = new PoseUpdater(hardwareMap, ConstantsDecode.class);
+         dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
+         dashboardDrawing = new DashboardDrawing(follower,dashboardPoseTracker);
     }
 
     public void setStartingPose(Pose start) {
@@ -73,8 +73,8 @@ public class ComplexFollower {
     public void update() {
         if (/*currentOpModes == OpModes.Autonomous*/ true) {
             follower.update();
-            // poseUpdater.update();
-            // dashboardDrawing.update();
+            poseUpdater.update();
+            dashboardDrawing.update();
             if (follower.isBusy()) {
                 isDone = false;
                 currentPos = follower.getPose();

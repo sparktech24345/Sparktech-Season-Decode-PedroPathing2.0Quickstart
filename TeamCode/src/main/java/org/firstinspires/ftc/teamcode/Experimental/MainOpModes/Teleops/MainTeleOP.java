@@ -76,8 +76,8 @@ public class MainTeleOP extends LinearOpMode {
     protected long tick_ns = 0;
     public static double targetX = 125;
     public static double targetY = 46;
-    public static Pose farStart = new Pose(-120,27,Math.toRadians(90));
-    public static double cameraErrorMultiplier = 1.15;
+    public static Pose farStart = new Pose(120,27,Math.toRadians(90)); // no more reversing X
+    public static double cameraErrorMultiplier = 1;
     public static double targetVelFar = 0.7;
     public static double targetVelMid = 1300;
     public static double targetVelClose = 1000;
@@ -95,6 +95,7 @@ public class MainTeleOP extends LinearOpMode {
     public static double late_camera_error;
 
     public boolean shootOnCamera = false;
+    public boolean turnOnCamera = false;
     public double last_power = 0;
     public static double turretVelocityOverride = 0;
     public static double turretAngleOverride = 0;
@@ -119,9 +120,10 @@ public class MainTeleOP extends LinearOpMode {
     protected void robotMainLoop() {
         // all of the code
 
-        limelight3A.pipelineSwitch(teamPipeline);
-        LLResult llResult = limelight3A.getLatestResult();
-        robot.addTelemetryData("distance_to_april", getDistanceToAprilTag(llResult.getTa()));
+        //limelight3A.pipelineSwitch(teamPipeline);
+        //LLResult llResult = limelight3A.getLatestResult();
+        double distanceToApriltag = getDistanceToAprilTag();
+        robot.addTelemetryData("distance_to_april", distanceToApriltag);
 
         // robot.addTelemetryData("id", getMotifID());
         long startTime = System.currentTimeMillis();
@@ -184,6 +186,9 @@ public class MainTeleOP extends LinearOpMode {
         }
         if(gamepad2.aWasPressed()){
             shootOnCamera= !shootOnCamera;
+        }
+        if(gamepad2.bWasPressed()){
+            turnOnCamera= !turnOnCamera;
         }
         robot.addTelemetryData("shootOnCamera", shootOnCamera);
         if(gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().getInstance().setPose(farStart);
@@ -413,7 +418,7 @@ public class MainTeleOP extends LinearOpMode {
 
             if(shootOnCamera) {
                 //TEST VERSION
-                double power =  getPowerOnDistance(getDistanceToAprilTag(llResult.getTa()));
+                double power =  getPowerOnDistance(distanceToApriltag);
                 if(power > 1){
                     power = last_power;
                 }
@@ -450,7 +455,7 @@ public class MainTeleOP extends LinearOpMode {
 //            if(shootOnCamera){
 //                if(eval(camera_error)) targetTurret = -camera_error * cameraErrorMultiplier;
 //            } else {
-                if(eval(camera_error)) targetTurret = getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
+                if(eval(camera_error) && turnOnCamera) targetTurret = -getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
 //            }
 
             robot.getServoComponent("TurretRotateServo")
@@ -478,8 +483,9 @@ public class MainTeleOP extends LinearOpMode {
 
 
         //robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
-        ///robot.addTelemetryData("Current Encoder Position", getEncoderReadingFormatted());
-        ///robot.addTelemetryData("late camera error", late_camera_error);
+        robot.addTelemetryData("A Current Encoder Position", getEncoderReadingFormatted());
+        robot.addTelemetryData("A camera error", camera_error);
+        robot.addTelemetryData("A targetTurret", targetTurret);
     }
 
     public static boolean isActive = false;
@@ -1044,7 +1050,34 @@ public class MainTeleOP extends LinearOpMode {
         telemetry.addData("P2_SENSOR_BALL", purpleSensorBall1);
         telemetry.addData("L_SENSOR_BALL", launchSensorBall);
     }
-    private double getDistanceToAprilTag(double targetArea) {
+    protected double getDistanceToAprilTag() {
+        //limelight3A.pipelineSwitch(teamPipeline);
+        LLResult llResult = limelight3A.getLatestResult();
+        List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
+        double targetArea = 0;
+        for (LLResultTypes.FiducialResult fiducial : fiducials) {
+            id = fiducial.getFiducialId(); // The ID number of the fiducial
+//
+//            robot.addTelemetryData("getTargetArea",);
+
+            List <List<Double>> bigList = fiducial.getTargetCorners();
+            double cornern1X = bigList.get(0).get(0);
+            double cornern1Y = bigList.get(0).get(1);
+            double cornern2X = bigList.get(1).get(0);
+            double cornern2Y = bigList.get(1).get(1);
+            double cornern3X = bigList.get(2).get(0);
+            double cornern3Y = bigList.get(2).get(1);
+            double cornern4X = bigList.get(3).get(0);
+            double cornern4Y = bigList.get(3).get(1);
+
+            //robot.addTelemetryData("X Pixels",fiducial.getTargetCorners());
+            //robot.addTelemetryData("cornern1X",cornern1X);robot.addTelemetryData("cornern1Y",cornern1Y);robot.addTelemetryData("cornern2X",cornern2X);robot.addTelemetryData("cornern2Y",cornern2Y);robot.addTelemetryData("cornern3X",cornern3X);robot.addTelemetryData("cornern3Y",cornern3Y);robot.addTelemetryData("cornern4X",cornern4X);robot.addTelemetryData("cornern4Y",cornern4Y);
+
+            double calcualtedHeight = (Math.abs(cornern1Y - cornern4Y) + Math.abs(cornern2Y - cornern3Y)) / 2; // the average
+            targetArea = (calcualtedHeight * calcualtedHeight)/(720*960)*100;
+        }
+
+        robot.addTelemetryData("areaPrecentage", targetArea);
         double a = 8.60403612;
         double b = -0.0119936722;
 
@@ -1100,7 +1133,8 @@ public class MainTeleOP extends LinearOpMode {
 //
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
-        limelight3A.pipelineSwitch(teamPipeline);
+
+        //limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
