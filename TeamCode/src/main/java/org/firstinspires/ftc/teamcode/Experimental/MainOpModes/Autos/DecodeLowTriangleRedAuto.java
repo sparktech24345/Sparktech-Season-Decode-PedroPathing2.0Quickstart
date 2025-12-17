@@ -72,18 +72,18 @@ public class DecodeLowTriangleRedAuto extends OpMode {
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
     private Pose small_triangle_shoot = new Pose(-10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = new Pose(-20, -6, 0); // Pose1: shooting position small triangle
-    private Pose HP_collect = new Pose(-38.6, -5.56, 0); // Pose3: HP collect
-    private Pose first_row_ready = new Pose(-15, 52, 0); // Pose4: collect first row right
-    private Pose first_row_done = new Pose(-30, 52, 0); // Pose5: collect first row left
-    private Pose lever = new Pose(-38.31, -62.65, 0); // Pose6: lever pose
-    private Pose second_row_ready = new Pose(-15, 77, 0); // Pose7: collect second row right
-    private Pose second_row_done = new Pose(-30, 77, 0); // Pose8: colect second row left
-    private Pose big_triangle_shoot = new Pose(-1, -90, 0); // Pose9: shooting big triangle pose
-    private Pose big_triangle_offset = new Pose(-1, -70, 0); // Pose9: shooting big triangle pose
-    private Pose third_row_ready = new Pose(-15, 100, 0); // Pose10: collect third row right
-    private Pose third_row_done = new Pose(-30, 100, 0); // Pose11: collect third row left
-    private Pose classifier_starter = new Pose(-28.355210672213335, 119.64113250492127, 0); // Pose12: start position from sorter
+    private Pose unstuckPose = new Pose(20, -6, 0); // Pose1: shooting position small triangle
+    private Pose HP_collect = new Pose(38.6, -5.56, 0); // Pose3: HP collect
+    private Pose first_row_ready = new Pose(15, 52, 0); // Pose4: collect first row right
+    private Pose first_row_done = new Pose(30, 52, 0); // Pose5: collect first row left
+    private Pose lever = new Pose(38.31, -62.65, 0); // Pose6: lever pose
+    private Pose second_row_ready = new Pose(15, 77, 0); // Pose7: collect second row right
+    private Pose second_row_done = new Pose(30, 77, 0); // Pose8: colect second row left
+    private Pose big_triangle_shoot = new Pose(1, -90, 0); // Pose9: shooting big triangle pose
+    private Pose big_triangle_offset = new Pose(1, -70, 0); // Pose9: shooting big triangle pose
+    private Pose third_row_ready = new Pose(15, 100, 0); // Pose10: collect third row right
+    private Pose third_row_done = new Pose(30, 100, 0); // Pose11: collect third row left
+    private Pose classifier_starter = new Pose(28.355210672213335, 119.64113250492127, 0); // Pose12: start position from sorter
 
     @Override
     public void init() {
