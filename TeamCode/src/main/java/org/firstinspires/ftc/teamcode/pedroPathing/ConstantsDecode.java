@@ -32,7 +32,7 @@ public class ConstantsDecode {
             .centripetalScaling(0.0005) // copiate direct din exemplul Pedro, de verificat / corectat
             .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0.004, 0))//(0.67, 0, 0.45, 0.023))
             .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.04, 0))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.04, 0, 0.006, 0.6,0));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03, 0, 0.001, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
             .leftFrontMotorName(GlobalStorage.frontRightName)
