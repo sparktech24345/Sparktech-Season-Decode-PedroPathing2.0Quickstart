@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.*;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
 
@@ -114,7 +115,25 @@ public class MainTeleOP extends LinearOpMode {
     final float[] hsvValuesPurple2 = new float[3];
     final float[] hsvValuesLaunch = new float[3];
     /// --------------------------------------------------------
-    /// 
+    ///
+    ///
+    public static double v_ks = 0;//TODO:de schimbat valori
+    public static double v_kV = 0.00044;
+    public static double v_kp = 0.0015;
+    public static double multiplier = 0.5;
+    public static double v_error = 0;
+    public static double v_current_rpm = 0;
+    ElapsedTime v_pos_timer= new ElapsedTime();
+    public static double v_current_pos = 0;
+    public static double v_last_pos = 0;
+    public static double v_target_Velocity = 2000;
+    //double ticksPerSecond = turretspin1.getVelocity();
+    private static final double v_TICKS_PER_REV = 28.0;
+    private static final int v_BUFFER_SIZE = 100;
+    private static double[] v_position_history = new double[v_BUFFER_SIZE];
+    private static long[] v_time_history = new long[v_BUFFER_SIZE];
+    private static int v_history_idx = 0;
+    private static double v_measuredRPM = 0.0;
     protected int teamPipeline = 0;
 
     protected void robotMainLoop() {
@@ -431,13 +450,23 @@ public class MainTeleOP extends LinearOpMode {
                 ;
 
             } else {
-
-                robot.getMotorComponent("TurretSpinMotor")
-                        //            .targetOverride(true)
-                        .targetOverride(false)
-                        .setOverrideCondition(true)
-                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-                ;
+//                robot.getMotorComponent("TurretSpinMotor")
+//                        //            .targetOverride(true)
+//                        .targetOverride(false)
+//                        .setOverrideCondition(true)
+//                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+//                ;
+//                robot.getMotorComponent("TurretSpinMotor")
+//                        //            .targetOverride(true)
+//                        .targetOverride(true)
+//                        .setOverrideCondition(false)
+//                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+//                        .setPIDconstants(0.0015, 0, 0.00044)
+//                ;
+//                VPID_v1();
+                robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
+                //robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
+                robot.getMotorComponent("TurretSpinMotor").setTargetOverride(v_target_Velocity);
             }
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
@@ -457,6 +486,8 @@ public class MainTeleOP extends LinearOpMode {
 //            } else {
                 if(eval(camera_error) && turnOnCamera) targetTurret = -getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
 //            }
+            robot.addTelemetryData("cameraError", camera_error);
+            robot.addTelemetryData("targetTurret", targetTurret);
 
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
@@ -1134,7 +1165,7 @@ public class MainTeleOP extends LinearOpMode {
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
 
-        //limelight3A.pipelineSwitch(teamPipeline);
+        limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
@@ -1151,8 +1182,28 @@ public class MainTeleOP extends LinearOpMode {
 //        while (reading > 180) reading -= 360;
         return reading;
     }
-    public Pose passPose(){
+    public Pose passPose() {
         globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
         return globalRobotPose;
+    }
+    DcMotorEx turretspin1;
+    public void VPID_v1(){
+        MultipleTelemetry tele= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        turretspin1= hardwareMap.get(DcMotorEx.class, "turretspin");
+        turretspin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        if (v_pos_timer.milliseconds() >= 100) {
+            v_current_pos = turretspin1.getCurrentPosition();
+            double delta_pos = v_current_pos - v_last_pos;
+            delta_pos /= 28;
+            v_last_pos = v_current_pos;
+            v_current_rpm = delta_pos * 600;
+            v_pos_timer.reset();
+        }
+        double v_velocity = turretspin1.getVelocity();
+        v_error = v_target_Velocity - v_velocity;
+        double v_power = v_ks + v_kV * v_velocity + v_kp * v_error;
+        turretspin1.setPower(Math.max(-1, Math.min(v_power, 1)));
+        tele.addData("target_velocity", v_target_Velocity);
+        tele.addData("current_velocity", v_velocity);
     }
 }
