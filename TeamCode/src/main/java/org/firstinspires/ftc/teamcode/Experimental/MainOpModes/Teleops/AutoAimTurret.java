@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -11,7 +12,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 import java.lang.Math;
 
 
-
+@Disabled
 @TeleOp(name = "AutoAimTurret", group = "LinearOpMode")
 public class AutoAimTurret extends LinearOpMode {
     Pose target = new Pose(5, 5, 0);

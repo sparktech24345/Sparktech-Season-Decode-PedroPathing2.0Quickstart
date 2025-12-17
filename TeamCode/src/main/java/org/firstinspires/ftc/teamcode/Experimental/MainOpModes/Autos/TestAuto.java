@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -19,13 +17,13 @@ import java.io.IOException;
 
 @Autonomous(name = "Test Auto", group = "Tests")
 public class TestAuto extends OpMode {
-    private RobotController robot;
+    public static RobotController robotTester;
     private AutoRecorder recorder;
     ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void init() {
-        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
+        robotTester = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override
             public void main_loop() {
                 controls();
@@ -33,25 +31,40 @@ public class TestAuto extends OpMode {
             }
 
             private void telemetry() {
+                followerInstance.telemetry(telemetry);
+                telemetry.update();
             }
 
             private void controls() {
                 if (gamepadInstance.get("A1").ExecuteOnPress) {
-                    robot.addToQueue(new MoveAction(true, "p2"));
-                    robot.addToQueue(new MoveAction(true, "p1"));
+                    robotTester.addToQueue(new MoveAction(true, "p2"));
+                    robotTester.addToQueue(new MoveAction(true, "p1"));
+                }
+
+                if (gamepadInstance.get("B1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(true, new Pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(true, new Pose(20, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(true, new Pose(0, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(true, new Pose(0, 0, 0)));
+                }
+
+                if (gamepadInstance.get("X1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(true, new Pose(10, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(true, new Pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(true, new Pose(0, 0, 0)));
                 }
             }
         };
         MakeComponents();
         MakeStates();
         MakeAutoStates();
-        robot.init(OpModes.Autonomous);
+        robotTester.init(OpModes.Autonomous);
         recorder = new AutoRecorder(true);
     }
 
     @Override
     public void init_loop() {
-        robot.init_loop();
+        robotTester.init_loop();
     }
 
     @Override
@@ -62,7 +75,7 @@ public class TestAuto extends OpMode {
     @Override
     public void loop() {
         recorder.update();
-        robot.loop();
+        robotTester.loop();
     }
 
     @Override
@@ -75,8 +88,8 @@ public class TestAuto extends OpMode {
     }
 
     private void MakeAutoStates() {
-        robot.addAutoPosition("p1", 0, 0, 0);
-        robot.addAutoPosition("p2", 10, 0, 0);
+        robotTester.addAutoPosition("p1", 0, 0, 0);
+        robotTester.addAutoPosition("p2", 30, 10, 120);
     }
 
     private void MakeComponents() {

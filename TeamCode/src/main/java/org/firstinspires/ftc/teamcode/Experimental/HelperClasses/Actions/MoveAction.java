@@ -18,8 +18,9 @@ public class MoveAction extends Action {
 
         this.Execution = () -> {
             followerInstance.follow(moveTargetPos);
-            followerInstance.Continue();
+            //followerInstance.Continue();
         };
+        this.DoneCondition = () -> start && !followerInstance.getInstance().isBusy();
     }
 
     public MoveAction(boolean waitForPrevious, String posName) {
@@ -28,7 +29,7 @@ public class MoveAction extends Action {
 
         this.Execution = () -> {
             followerInstance.follow(moveTargetPos);
-            followerInstance.Continue();
+            //followerInstance.Continue();
         };
     }
 

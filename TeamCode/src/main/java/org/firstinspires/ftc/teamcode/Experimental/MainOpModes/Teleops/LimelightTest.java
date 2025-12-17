@@ -8,6 +8,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -16,7 +17,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
-
+@Disabled
 @TeleOp(name = "Limelight Test", group = "Tests")
 public class LimelightTest extends OpMode {
 
@@ -27,6 +28,8 @@ public class LimelightTest extends OpMode {
     private double old_Ty = 0;
     private double old_Tx = 0;
     private boolean doOnce = true;
+    private double distance_to_Apriltag = 0;
+    private double ta = 0;
     ElapsedTime timp = new ElapsedTime();
 
     private long timeLime = 0;
@@ -44,7 +47,6 @@ public class LimelightTest extends OpMode {
 
     final float[] hsvValuesGreen = new float[3];
     final float[] hsvValuesPurple = new float[3];
-
     final float[] hsvValuesLaunch = new float[3];
     /// --------------------------------------------------------
 
@@ -62,9 +64,9 @@ public class LimelightTest extends OpMode {
         telemetry.addLine("Limelight initialized and streaming...");
         telemetry.update();
 
-        colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
-        colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
-        colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
+//        colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
+//        colorSensorPurple = hardwareMap.get(NormalizedColorSensor.class, "purplesensor");
+//        colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
 
         intakeMotor = hardwareMap.get(DcMotorEx.class,"intakemotor");
 
@@ -74,8 +76,10 @@ public class LimelightTest extends OpMode {
 
     @Override
     public void loop() {
-        HandleColors();
+//        HandleColors();
         LLResult llResult = limelight3A.getLatestResult();
+        telemetry.addData("ta", llResult.getTa());
+        telemetry.addData("distance", getDistanceToAprilTag(llResult.getTa()));
 
         intakeMotor.setPower(gamepad1.left_stick_y);
 
@@ -169,6 +173,19 @@ public class LimelightTest extends OpMode {
         telemetry.addData("GREEN_SENSOR_BALL", greenSensorBall);
         telemetry.addData("PURPLE_SENSOR_BALL", purpleSensorBall1);
         telemetry.addData("LAUNCH_SENSOR_BALL", launchSensorBall);
+    }
+
+    private void getDistance(){
+        LLResult llResult = limelight3A.getLatestResult();
+        ta = llResult.getTa();
+        telemetry.addData("ta", ta);
+    }
+
+    private double getDistanceToAprilTag(double targetArea) {
+        double a = 8.60403612;
+        double b = -0.0119936722;
+
+        return Math.log(targetArea / a) / b;
     }
 
 }

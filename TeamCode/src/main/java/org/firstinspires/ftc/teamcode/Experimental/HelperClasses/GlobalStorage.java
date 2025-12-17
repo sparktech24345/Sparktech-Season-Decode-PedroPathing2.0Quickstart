@@ -96,7 +96,8 @@ public class GlobalStorage {
 
     public static double grade0Far = 610;
     public static double grade1Far = 325;
-    public static double normalizeTurretRotationForServo( double targetDegrees){
+    public static Pose globalRobotPose = new Pose();
+    public static double normalizeTurretRotationForServo(double targetDegrees) {
         targetDegrees  = clamp(targetDegrees,-121.5,121.5);
         return - targetDegrees + 121.5;
     }

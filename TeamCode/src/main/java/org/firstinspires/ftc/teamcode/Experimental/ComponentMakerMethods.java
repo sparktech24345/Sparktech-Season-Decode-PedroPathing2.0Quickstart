@@ -30,10 +30,10 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
-                .useWithPIDController(false)
-                .setRPM_PIDCoefficients(0.0045, 0.0005, 0)
-                .setTargetOverride(0)
-                .useWithEncoder(false)
+                .useWithPIDController(true)
+                .setPIDconstants(0.00044, 0, 0.0015)
+                .setTargetOverride(1200)
+                .useWithEncoder(true)
                 .setRange(-1, 1)
         );
 

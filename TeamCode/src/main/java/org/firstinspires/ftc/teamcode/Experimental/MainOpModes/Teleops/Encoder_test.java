@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
-
+@Disabled
 @TeleOp(name = "Test Encoder", group = "Linear OpMode")
 public class Encoder_test extends LinearOpMode {
  private Encoder encoder = null;

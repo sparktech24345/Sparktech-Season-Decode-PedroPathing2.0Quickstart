@@ -6,9 +6,11 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 @TeleOp(name = "Main TeleOp Red", group = "Main")
@@ -18,7 +20,8 @@ public class MainTeleOp_Red extends MainTeleOP {
     public void runOpMode() {
         // init
         ballCounter = 0;
-
+        teamPipeline = 1;
+        powerMultiplier =1;
         targetY = -targetY;
         currentTeamColor = TeamColor.Red;
 
@@ -28,7 +31,7 @@ public class MainTeleOp_Red extends MainTeleOP {
                 robotMainLoop();
             }
         };
-
+        robot.init(OpModes.TeleOP);
         MakeComponents(robot);
         MakeStates(robot);
         InitOtherStuff();
@@ -41,6 +44,7 @@ public class MainTeleOp_Red extends MainTeleOP {
         while (opModeIsActive()) {
             // loop
             robot.loop();
+            passPose();
         }
         // stop
     }

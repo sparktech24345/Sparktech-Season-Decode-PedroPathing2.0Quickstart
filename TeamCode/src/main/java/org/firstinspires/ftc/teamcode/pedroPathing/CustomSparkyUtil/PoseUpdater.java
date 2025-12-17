@@ -31,7 +31,7 @@ public class PoseUpdater {
     private long previousPoseTime;
     private long currentPoseTime;
 
-    public PoseUpdater(HardwareMap hardwareMap, Localizer localizer, Class<?> ITDConstants) {
+    public PoseUpdater(HardwareMap hardwareMap, Localizer localizer, Class<?> ConstantsDecode) {
         this.startingPose = new Pose(0.0, 0.0, 0.0);
         this.currentPose = this.startingPose;
         this.previousPose = this.startingPose;
@@ -41,7 +41,7 @@ public class PoseUpdater {
         this.xOffset = 0.0;
         this.yOffset = 0.0;
         this.headingOffset = 0.0;
-        this.constants = ITDConstants;
+        this.constants = ConstantsDecode;
         this.hardwareMap = hardwareMap;
         this.localizer = localizer;
         if (localizer.getClass() != PinpointLocalizer.class) {
@@ -52,8 +52,8 @@ public class PoseUpdater {
         }
     }
 
-    public PoseUpdater(HardwareMap hardwareMap, Class<?> ITDConstants) {
-        this(hardwareMap, createLocalizer(hardwareMap),ITDConstants);
+    public PoseUpdater(HardwareMap hardwareMap, Class<?> ConstantsDecode) {
+        this(hardwareMap, createLocalizer(hardwareMap),ConstantsDecode);
     }
 
     public PoseUpdater(HardwareMap hardwareMap, Localizer localizer) {
@@ -99,8 +99,8 @@ public class PoseUpdater {
         }
 
          */
-        //return new PinpointLocalizer(hardwareMap, ConstantsDecode.pinpointConstants);
-        return new SparkyPinpointLocalizer(hardwareMap, ConstantsDecode.sparkyPinpointConstants);
+        return new PinpointLocalizer(hardwareMap, ConstantsDecode.pinpointConstants);
+       /// return new SparkyPinpointLocalizer(hardwareMap, ConstantsDecode.sparkyPinpointConstants);
     }
 
     public void update() {

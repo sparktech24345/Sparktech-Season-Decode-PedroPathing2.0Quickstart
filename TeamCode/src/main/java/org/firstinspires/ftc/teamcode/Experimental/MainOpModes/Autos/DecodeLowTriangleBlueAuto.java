@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.degreesToOuttakeTurretServo;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.launchSensorBall;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.normalizeTurretRotationForServo;
@@ -11,10 +12,10 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -30,24 +31,26 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 import java.io.IOException;
-
-@Disabled
-@Autonomous(name = "Decode Down Auto Blue", group = "Tests")
-public class TestDecodeAutoBlue extends OpMode {
+@Config
+@Autonomous(name = "Decode Down Auto Blue Firing Small Triangle", group = "Tests")
+public class DecodeLowTriangleBlueAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     private boolean startAuto = false;
     private boolean hasShooted = false;
     private boolean isShooting = false;
     private boolean turretHasBall = false;
-    private boolean canSequence2, canSequence3, canSequence4;
+    private boolean timeToFire, canSequence3, canSequence4,ballIsStuck,isMoving;
     double ballCounter = 0;
     public static double targetX = 125;
     public static double targetY = 46;
-    public static double publicAngleConstantThingTemp = -48;
+    public static double ballsLaunched = 0;
+    public static double publicAngleConstantThingTemp = 21;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime shootTimer = new ElapsedTime();
     ElapsedTime isFiringTimer = new ElapsedTime();
+    ElapsedTime shouldJiggle = new ElapsedTime();
+    ElapsedTime shouldFinish = new ElapsedTime();
     private boolean had_balls = false;
 
     /// ----------------- Color Sensor Stuff ------------------
@@ -64,11 +67,11 @@ public class TestDecodeAutoBlue extends OpMode {
     final float[] hsvValuesPurple2 = new float[3];
     final float[] hsvValuesLaunch = new float[3];
     private boolean unsticking = false;
-
-    public static double targetPower = 0.6;
+    public static double targetPower = 0.7;
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose small_triangle_shoot = new Pose(5.64, -11.5, 0); // Pose1: shooting position small triangle
+    private Pose small_triangle_shoot = new Pose(-10, 0, 0); // Pose1: shooting position small triangle
+    private Pose unstuckPose = new Pose(-20, 6, 0); // Pose1: shooting position small triangle
     private Pose HP_collect = new Pose(-38.6, -5.56, 0); // Pose3: HP collect
     private Pose first_row_ready = new Pose(-15, 52, 0); // Pose4: collect first row right
     private Pose first_row_done = new Pose(-30, 52, 0); // Pose5: collect first row left
@@ -99,39 +102,44 @@ public class TestDecodeAutoBlue extends OpMode {
                         .addTelemetryData("hasShooted", hasShooted)
                         .addTelemetryData("ballCounter", ballCounter)
                         .addTelemetryData("shootTimer_ms", shootTimer.milliseconds())
+                //if(!isMoving && timeToFire && !startAuto)
                 ;
+                robot.
+                        addTelemetryData("isMoving", isMoving)
+                        .addTelemetryData("timeToFire", timeToFire)
+                        .addTelemetryData("start auto", startAuto);
             }
 
             private void controls() { // this will happen in a loop
-                boolean isMoving = robot.getFollowerInstance().getInstance().isBusy();
+                isMoving = robot.getFollowerInstance().getInstance().isBusy();
+                if(isMoving) isFiringTimer.reset();
                 countBalls();
-                LoopChecks();
                 if(startAuto) AutoSequence1();
-                if (ballCounter == 1 && !isMoving() && isShooting) unstuckBallSequence();
-                if(!unsticking && ballCounter >= 1 && !isShooting && !isMoving() && getErrorFromShooting() < 1 && !hasShooted) AutoShootingSequenceCloseTriangle();
-                // to be continued if we ever get this far
-                if(hasShooted && canSequence2 && !startAuto) AutoSequence2();
-                if(hasShooted && canSequence3 && !canSequence2) AutoSequence3();
-                if(hasShooted && canSequence4 && !canSequence3) AutoSequence4();
+                if(!isMoving && timeToFire && !startAuto){
+                    timeToFire = false;
+                    isFiringTimer.reset();
+                }
+                if(!isMoving) AutoShootingSequenceCloseTriangle();
+                if(ballsLaunched <= 2 && isFiringTimer.milliseconds() > 5000) ballIsStuck = true;
+                if(ballIsStuck && !(timer.milliseconds()>22000)) AutoSequence3();
+                if(timer.milliseconds()>22000 && canSequence4) AutoPark();
+//                if (ballCounter == 1 && !isMoving() && isShooting) unstuckBallSequence();
+//                if(!unsticking && ballCounter >= 1 && !isShooting && !isMoving() && getErrorFromShooting() < 1 && !hasShooted) AutoShootingSequenceCloseTriangle();
+//                // to be continued if we ever get this far
+//                if(hasShooted && canSequence2 && !startAuto) AutoSequence2();
+//                if(hasShooted && canSequence3 && !canSequence2) AutoSequence3();
+//                if(hasShooted && canSequence4 && !canSequence3) AutoSequence4();
             }
         };
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
         recorder = new AutoRecorder(true);
-        canSequence2 = true; canSequence3 = true; canSequence4 = true;
+        timeToFire = true; canSequence3 = true; canSequence4 = true; ballsLaunched = 0; ballIsStuck = false;
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple1 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor1");
         colorSensorPurple2 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor2");
         colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
-    }
-
-    private void unstuckBallSequence() {
-        if (unsticking) return;
-        unsticking = true;
-        robot.addToQueue(new MoveAction(false, big_triangle_offset));
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot));
-        unsticking = false;
     }
 
     private boolean isMoving() {
@@ -166,6 +174,7 @@ public class TestDecodeAutoBlue extends OpMode {
     public void stop() {
         try {
             recorder.save();
+            passPose();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -195,7 +204,7 @@ public class TestDecodeAutoBlue extends OpMode {
                 .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
 
         //angle
-        double turretAngleVal = 61;
+        double turretAngleVal = 58;
         robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
         robot.addTelemetryData("turret angle estimation", turretAngleVal);
         robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
@@ -208,7 +217,7 @@ public class TestDecodeAutoBlue extends OpMode {
                 .setPowerOverride(targetVelocity)
         ;
 
-        if (turretHasBall && robot.getMotorComponent("TurretSpinMotor").getVelocity() > 1000 && isFiringTimer.milliseconds() > 800) {
+        if (turretHasBall && isFiringTimer.milliseconds() > 3000 && !isMoving) {
             isFiringTimer.reset();
             robot.addToQueue(
                     new StateAction(false, "PurpleGateServo", "CLOSED"),
@@ -218,8 +227,10 @@ public class TestDecodeAutoBlue extends OpMode {
                     new StateAction(true, "TransferServo", "DOWN"),
                     new StateAction(true, "PurpleGateServo", "OPEN")
             );
+            ballsLaunched++;
         }
     }
+
     private void countBalls() {
 
         greenSensorColors = colorSensorGreen.getNormalizedColors();
@@ -235,7 +246,7 @@ public class TestDecodeAutoBlue extends OpMode {
         greenSensorBall = BallColorSet_Decode.getColorForStorage(greenSensorColors);
         purpleSensorBall1 = BallColorSet_Decode.getColorForStorage(purpleSensorColors1.red * 1.5, purpleSensorColors1.green * 1.5, purpleSensorColors1.blue * 1.5);
         purpleSensorBall2 = BallColorSet_Decode.getColorForStorage(purpleSensorColors2);
-        launchSensorBall = BallColorSet_Decode.getColorForStorage(launchSensorColors);
+        launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
         robot.addTelemetryData("green sensor detect", greenSensorBall);
         robot.addTelemetryData("purple sensor1 detect", purpleSensorBall1);
@@ -251,53 +262,36 @@ public class TestDecodeAutoBlue extends OpMode {
                 + eval(launchSensorBall != BallColorSet_Decode.NoBall);
     }
     private void AutoSequence1() {
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot)); // first shoot 3
+        robot.addToQueue(new MoveAction(false, small_triangle_shoot)); // first shoot 3
         startAuto = false;
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
                 .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE")); // collecting
     }
-    private void AutoSequence3() {
-        robot.getMotorComponent("TurretSpinMotor")
-                .targetOverride(false)
-                .setOverrideCondition(true)
-                .setPowerOverride(0)
-        ;
-
-        //robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL")); // collecting
-        robot.addToQueue(new MoveAction(false, second_row_ready)); // go to collect
-        robot.addToQueue(new MoveAction(false, second_row_done));
-        robot.addToQueue(new MoveAction(false, second_row_ready));
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot));
-        canSequence2 = false;
-        hasShooted = false;
-    }
-    private void AutoSequence2() {
-        robot.getMotorComponent("TurretSpinMotor")
-                .targetOverride(false)
-                .setOverrideCondition(true)
-                .setPowerOverride(0)
-        ;
-        //robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL")); // collecting
-        robot.addToQueue(new MoveAction(false, first_row_ready)); // go to collect
-        robot.addToQueue(new MoveAction(false, first_row_done));
-        robot.addToQueue(new MoveAction(false, first_row_ready));
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot));
+    private void AutoSequence3(){
+        robot.addToQueue(new MoveAction(false, unstuckPose));
+        robot.addToQueue(new MoveAction(true, small_triangle_shoot));
         canSequence3 = false;
-        hasShooted = false;
+        isFiringTimer.reset();
+        ballIsStuck = false;
     }
+    private void AutoPark(){
+        robot.addToQueue(new MoveAction(false, unstuckPose));
+        canSequence4 = false;
+        robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+        robot.getServoComponent("TurretRotateServo")
+                .setOverrideTarget_bool(true)
+                .setOverrideTargetPos(normalizeTurretRotationForServo(0));
 
-    private void AutoSequence4() {
         robot.getMotorComponent("TurretSpinMotor")
                 .targetOverride(false)
                 .setOverrideCondition(true)
-                .setPowerOverride(0)
-        ;
-        //robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL")); // collecting
-        robot.addToQueue(new MoveAction(false, third_row_ready)); // go to collect
-        robot.addToQueue(new MoveAction(false, third_row_done));
-        robot.addToQueue(new MoveAction(false, third_row_ready));
-        robot.addToQueue(new MoveAction(false, big_triangle_shoot));
-        canSequence4 = false;
-        hasShooted = false;
+                .setPowerOverride(0);
+
+
     }
+    public Pose passPose(){
+        globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
+        return globalRobotPose;
+    }
+
 }
