@@ -40,7 +40,13 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     private boolean hasShooted = false;
     private boolean isShooting = false;
     private boolean turretHasBall = false;
-    private boolean timeToFire, canSequence3, canSequence4,ballIsStuck,isMoving;
+    private boolean firstRowBool = false;
+    private boolean secondRowBool = false;
+    private boolean thirdRowBool = false;
+    private boolean canShootFirstRow = false;
+    private boolean canShootSecondRow = false;
+    private boolean canShootThirdRow = false;
+    private boolean timeToFire, canSequence3, parkBool,ballIsStuck,isMoving;
     double ballCounter = 0;
     public static double targetX = 125;
     public static double targetY = 46;
@@ -70,18 +76,18 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     public static double targetPower = 0.7;
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose small_triangle_shoot = new Pose(10, 0, 0); // Pose1: shooting position small triangle
+    private Pose small_triangle_shoot = new Pose(10, 0  , 0); // Pose1: shooting position small triangle
     private Pose unstuckPose = new Pose(20, 6, 0); // Pose1: shooting position small triangle
     private Pose HP_collect = new Pose(38.6, -5.56, 0); // Pose3: HP collect
-    private Pose first_row_ready = new Pose(15, 52, 0); // Pose4: collect first row right
-    private Pose first_row_done = new Pose(30, 52, 0); // Pose5: collect first row left
+    private Pose first_row_ready = new Pose(52, 12, 90); // Pose4: collect first row right
+    private Pose first_row_done = new Pose(52, 40, 90); // Pose5: collect first row left
     private Pose lever = new Pose(38.31, -62.65, 0); // Pose6: lever pose
-    private Pose second_row_ready = new Pose(15, 77, 0); // Pose7: collect second row right
-    private Pose second_row_done = new Pose(30, 77, 0); // Pose8: colect second row left
+    private Pose second_row_ready = new Pose(16, 76, 90); // Pose7: collect second row right
+    private Pose second_row_done = new Pose(34, 77, 90); // Pose8: colect second row left
     private Pose big_triangle_shoot = new Pose(1, -90, 0); // Pose9: shooting big triangle pose
     private Pose big_triangle_offset = new Pose(1, -70, 0); // Pose9: shooting big triangle pose
-    private Pose third_row_ready = new Pose(15, 100, 0); // Pose10: collect third row right
-    private Pose third_row_done = new Pose(30, 100, 0); // Pose11: collect third row left
+    private Pose third_row_ready = new Pose(16, 100, 90); // Pose10: collect third row right
+    private Pose third_row_done = new Pose(34, 99, 90); // Pose11: collect third row left
     private Pose classifier_starter = new Pose(28.355210672213335, 119.64113250492127, 0); // Pose12: start position from sorter
 
     @Override
@@ -115,14 +121,41 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                 if(isMoving) isFiringTimer.reset();
                 countBalls();
                 if(startAuto) AutoSequence1();
-                if(!isMoving && timeToFire && !startAuto){
+                if(!isMoving && timeToFire && !startAuto) {
                     timeToFire = false;
                     isFiringTimer.reset();
                 }
                 if(!isMoving) AutoShootingSequenceCloseTriangle();
                 if(ballsLaunched <= 2 && isFiringTimer.milliseconds() > 5000) ballIsStuck = true;
-                if(ballIsStuck && !(timer.milliseconds()>22000)) AutoSequence3();
-                if(timer.milliseconds()>22000 && canSequence4) AutoPark();
+                if(ballIsStuck && timer.milliseconds() <= 22000) AutoSequence3();
+                if(ballsLaunched == 2 || ballsLaunched == 3) firstRowBool = true;
+                if(firstRowBool || timer.milliseconds() > 20000) {
+                    AutoSequenceFirstRow();
+                    canShootFirstRow = true;
+                }
+                if(ballsLaunched >= 3 && ballsLaunched < 6 && canShootFirstRow) {
+                    AutoShootingSequenceCloseTriangle();
+                }
+                if(secondRowBool) {
+                    AutoSequenceSecondRow();
+                    canShootSecondRow = true;
+                }
+                if(ballsLaunched >= 3 && ballsLaunched < 6 && canShootSecondRow) {
+                    AutoShootingSequenceCloseTriangle();
+                }
+                if(thirdRowBool) {
+                    AutoSequenceThirdRow();
+                    canShootThirdRow = true;
+                }
+                if(ballsLaunched >= 3 && ballsLaunched < 6 && canShootThirdRow) {
+                    AutoShootingSequenceCloseTriangle();
+                }
+
+
+                //TODO:: -->>> UNCOMMENT THIS LINE OF CODE
+                if(timer.milliseconds()>22000 && parkBool) AutoPark();
+
+
 //                if (ballCounter == 1 && !isMoving() && isShooting) unstuckBallSequence();
 //                if(!unsticking && ballCounter >= 1 && !isShooting && !isMoving() && getErrorFromShooting() < 1 && !hasShooted) AutoShootingSequenceCloseTriangle();
 //                // to be continued if we ever get this far
@@ -135,7 +168,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
         recorder = new AutoRecorder(true);
-        timeToFire = true; canSequence3 = true; canSequence4 = true; ballsLaunched = 0; ballIsStuck = false;
+        timeToFire = true; canSequence3 = true; parkBool = true; ballsLaunched = 0; ballIsStuck = false;
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple1 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor1");
         colorSensorPurple2 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor2");
@@ -179,7 +212,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    private void LoopChecks(){
+    private void LoopChecks() {
         if (!eval(ballCounter)) {
             if (had_balls) {
                 shootTimer.reset();
@@ -194,7 +227,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         }
 
     }
-    private void AutoShootingSequenceCloseTriangle(){
+    private void AutoShootingSequenceCloseTriangle() {
         ///shooty shooty
 
         // rotation
@@ -262,21 +295,64 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                 + eval(launchSensorBall != BallColorSet_Decode.NoBall);
     }
     private void AutoSequence1() {
-        robot.addToQueue(new MoveAction(false, small_triangle_shoot)); // first shoot 3
         startAuto = false;
-        robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
+        robot
+                .addToQueue(new MoveAction(false, small_triangle_shoot)) // first shoot 3
+                .addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
                 .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE")); // collecting
     }
-    private void AutoSequence3(){
+    private void AutoSequence3() {
         robot.addToQueue(new MoveAction(false, unstuckPose));
         robot.addToQueue(new MoveAction(true, small_triangle_shoot));
         canSequence3 = false;
         isFiringTimer.reset();
         ballIsStuck = false;
     }
-    private void AutoPark(){
+    private void AutoSequenceFire() {
+        robot.addToQueue(
+                new MoveAction(false, small_triangle_shoot),
+                new StateAction(true, "IntakeMotor")
+        );
+    }
+    private void AutoSequenceFirstRow() {
+        robot.addToQueue(
+                new MoveAction(false, first_row_ready),
+                new StateAction(false, "IntakeMotor", "FULL"),
+                new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"),
+                new MoveAction(true, first_row_done),
+                new DelayAction(true, 500),
+                new StateAction(true, "IntakeSorterServo", "BLOCK"),
+                new StateAction(true, "IntakeMotor", "OFF")
+        );
+        firstRowBool = false;
+    }
+    private void AutoSequenceSecondRow() {
+        robot.addToQueue(
+                new MoveAction(false, second_row_ready),
+                new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"),
+                new StateAction(true, "IntakeMotor", "FULL"),
+                new MoveAction(true, second_row_done),
+                new DelayAction(true, 500),
+                new StateAction(true, "IntakeSorterServo", "BLOCK"),
+                new StateAction(true, "IntakeMotor", "OFF")
+        );
+        secondRowBool = false;
+    }
+    private void AutoSequenceThirdRow() {
+        robot.addToQueue(
+                new MoveAction(false, third_row_ready),
+                new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"),
+                new StateAction(true, "IntakeMotor", "FULL"),
+                new MoveAction(true, third_row_done),
+                new DelayAction(true, 500),
+                new StateAction(true, "IntakeSorterServo", "BLOCK"),
+                new StateAction(true, "IntakeMotor", "OFF")
+        );
+        thirdRowBool = false;
+    }
+    private void AutoPark() {
         robot.addToQueue(new MoveAction(false, unstuckPose));
-        canSequence4 = false;
+        parkBool = false;
         robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
         robot.getServoComponent("TurretRotateServo")
                 .setOverrideTarget_bool(true)
@@ -289,7 +365,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
 
 
     }
-    public Pose passPose(){
+    public Pose passPose() {
         globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
         return globalRobotPose;
     }
