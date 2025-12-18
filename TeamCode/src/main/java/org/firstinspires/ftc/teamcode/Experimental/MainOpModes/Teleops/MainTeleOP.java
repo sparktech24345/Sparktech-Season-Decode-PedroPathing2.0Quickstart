@@ -450,12 +450,12 @@ public class MainTeleOP extends LinearOpMode {
                 ;
 
             } else {
-//                robot.getMotorComponent("TurretSpinMotor")
-//                        //            .targetOverride(true)
-//                        .targetOverride(false)
-//                        .setOverrideCondition(true)
-//                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-//                ;
+                robot.getMotorComponent("TurretSpinMotor")
+                        //            .targetOverride(true)
+                        .targetOverride(false)
+                        .setOverrideCondition(true)
+                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                ;
 //                robot.getMotorComponent("TurretSpinMotor")
 //                        //            .targetOverride(true)
 //                        .targetOverride(true)
@@ -464,9 +464,9 @@ public class MainTeleOP extends LinearOpMode {
 //                        .setPIDconstants(0.0015, 0, 0.00044)
 //                ;
 //                VPID_v1();
-                robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-                //robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
-                robot.getMotorComponent("TurretSpinMotor").setTargetOverride(v_target_Velocity);
+//                robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
+//                //robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
+//                robot.getMotorComponent("TurretSpinMotor").setTargetOverride(v_target_Velocity);
             }
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);

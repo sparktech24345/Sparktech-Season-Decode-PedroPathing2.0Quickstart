@@ -37,6 +37,15 @@ public class ComponentMakerMethods {
                 .setRange(-1, 1)
         );
 
+        //TODO:: De sters
+
+        robot.makeComponent("TurretRotateServo", new ServoComponent()
+                .addMotor("turretrotateservo")
+                .setResolution(360)
+                .setRange(0, 1)
+                .moveDuringInit(true)
+        );
+
 //        robot.makeComponent("TurretRotate", new CRServoComponent()
 //                .addMotor("turretrotateleft")
 //                .setExternalEncoder("backpurple")
@@ -88,15 +97,22 @@ public class ComponentMakerMethods {
     }
 
     public static void MakeStates(RobotController robot) {
-        robot.getComponent("TurretRotateServo")
-                .addState("MIDDLE_POINT", 121.5, true);
-
+        robot.addTelemetryData("hello", "hello");
         robot.getComponent("IntakeMotor")
                 .addState("OFF", 0, true)
                 .addState("SLOW", 0.5)
                 .addState("FULL", 1)
                 .addState("FULL_REVERSE", -1)
                 .addState("SLOW_REVERSE", -0.5);
+        robot.getComponent("TurretRotateServo")
+                .addState("MIDDLE_POINT", 121.5, true);
+
+//        robot.getComponent("IntakeMotor")
+//                .addState("OFF", 0, true)
+//                .addState("SLOW", 0.5)
+//                .addState("FULL", 1)
+//                .addState("FULL_REVERSE", -1)
+//                .addState("SLOW_REVERSE", -0.5);
 
         robot.getComponent("TurretSpinMotor")
                 .addState("OFF", 0, true)
