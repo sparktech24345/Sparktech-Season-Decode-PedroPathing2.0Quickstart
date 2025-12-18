@@ -192,9 +192,9 @@ public class MotorComponent extends EncodedComponent {
     public DcMotor get(String name) {
         return motorMap.get(name);
     }
+
     public double getVelocity() {
-        if (componentEncoder != null) return componentEncoder.getEncoderPosition();
-        return mainMotor.getVelocity();
+        return velocity;
     }
 
     @Override

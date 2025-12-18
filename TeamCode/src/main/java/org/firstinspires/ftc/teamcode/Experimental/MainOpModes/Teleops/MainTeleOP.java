@@ -6,6 +6,7 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -203,10 +204,10 @@ public class MainTeleOP extends LinearOpMode {
         if (robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
             //fireGreen();
         }
-        if(gamepad2.aWasPressed()){
+        if(gamepad2.aWasPressed()) {
             shootOnCamera= !shootOnCamera;
         }
-        if(gamepad2.bWasPressed()){
+        if(gamepad2.bWasPressed()) {
             turnOnCamera= !turnOnCamera;
         }
         robot.addTelemetryData("shootOnCamera", shootOnCamera);
@@ -437,8 +438,8 @@ public class MainTeleOP extends LinearOpMode {
 
             if(shootOnCamera) {
                 //TEST VERSION
-                double power =  getPowerOnDistance(distanceToApriltag);
-                if(power > 1){
+                double power = getPowerOnDistance(distanceToApriltag);
+                if(power > 1) {
                     power = last_power;
                 }
                 last_power = power;
@@ -450,23 +451,18 @@ public class MainTeleOP extends LinearOpMode {
                 ;
 
             } else {
-                robot.getMotorComponent("TurretSpinMotor")
-                        //            .targetOverride(true)
-                        .targetOverride(false)
-                        .setOverrideCondition(true)
-                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-                ;
 //                robot.getMotorComponent("TurretSpinMotor")
 //                        //            .targetOverride(true)
-//                        .targetOverride(true)
-//                        .setOverrideCondition(false)
+//                        .targetOverride(false)
+//                        .setOverrideCondition(true)
 //                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-//                        .setPIDconstants(0.0015, 0, 0.00044)
 //                ;
+                robot.getMotorComponent("TurretSpinMotor")
+                        .targetOverride(true)
+                        .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+//                        .setPIDconstants(0.0015, 0, 0.00044)
+                ;
 //                VPID_v1();
-//                robot.getMotorComponent("TurretSpinMotor").targetOverride(true);
-//                //robot.getMotorComponent("TurretSpinMotor").setTargetOverride(motorRpm);
-//                robot.getMotorComponent("TurretSpinMotor").setTargetOverride(v_target_Velocity);
             }
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
@@ -481,7 +477,7 @@ public class MainTeleOP extends LinearOpMode {
             //.setTargetOverride(0);
             /// with encoder corection on camera on normal servo
 
-//            if(shootOnCamera){
+//            if(shootOnCamera) {
 //                if(eval(camera_error)) targetTurret = -camera_error * cameraErrorMultiplier;
 //            } else {
                 if(eval(camera_error) && turnOnCamera) targetTurret = -getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
@@ -501,7 +497,6 @@ public class MainTeleOP extends LinearOpMode {
                     .setOverrideCondition(true)
                     .setPowerOverride(0)
             ;
-            targetVelocity = 0;
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(0));
@@ -517,6 +512,8 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("A Current Encoder Position", getEncoderReadingFormatted());
         robot.addTelemetryData("A camera error", camera_error);
         robot.addTelemetryData("A targetTurret", targetTurret);
+        robot.addTelemetryData("A target velocity", eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity);
+        robot.addTelemetryData("A actual velocity", ((MotorComponent)robot.getComponent("TurretSpinMotor")).getVelocity());
     }
 
     public static boolean isActive = false;
@@ -526,7 +523,7 @@ public class MainTeleOP extends LinearOpMode {
         // init
         isActive = true;
         ballCounter = 0;
-        powerMultiplier =1;
+        powerMultiplier = 1;
         currentTeamColor = TeamColor.Blue;
 
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -1114,7 +1111,7 @@ public class MainTeleOP extends LinearOpMode {
 
         return Math.log(targetArea / a) / b;
     }
-    private double getPowerOnDistance(double dist){
+    private double getPowerOnDistance(double dist) {
         return 0.000551 * dist + 0.5116;
     }
     public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
@@ -1187,7 +1184,7 @@ public class MainTeleOP extends LinearOpMode {
         return globalRobotPose;
     }
     DcMotorEx turretspin1;
-    public void VPID_v1(){
+    public void VPID_v1() {
         MultipleTelemetry tele= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         turretspin1= hardwareMap.get(DcMotorEx.class, "turretspin");
         turretspin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

@@ -40,8 +40,8 @@ public class ComponentMakerMethods {
         //TODO:: De sters
 
         robot.makeComponent("TurretRotateServo", new ServoComponent()
-                .addMotor("turretrotateservo")
-                .setResolution(360)
+                .addMotor("turretrotateleft")
+                .setResolution(243)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
