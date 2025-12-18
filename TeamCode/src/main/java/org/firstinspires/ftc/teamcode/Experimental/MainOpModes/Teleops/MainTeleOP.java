@@ -517,8 +517,7 @@ public class MainTeleOP extends LinearOpMode {
         while (opModeInInit()) {
             robot.init_loop();
         }
-        // start async execution
-        // TeleOPasyncUpdates.init_all(limelight3A);
+        // start
 
         while (opModeIsActive()) {
             // loop
@@ -527,6 +526,7 @@ public class MainTeleOP extends LinearOpMode {
         // stop
         isActive = false;
         passPose();
+        robot.stop();
     }
 
     protected static double last_time = 0;
@@ -1151,7 +1151,7 @@ public class MainTeleOP extends LinearOpMode {
 //        while (reading > 180) reading -= 360;
         return reading;
     }
-    public Pose passPose(){
+    public Pose passPose() {
         globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
         return globalRobotPose;
     }

@@ -19,29 +19,30 @@ public class CRServoComponent extends Component {
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
     protected PIDcontroller PIDcamera = null;
-    protected double overridePower = -2;
-    protected double overrideTarget = 0;
-    protected double lastPower = 0;
+    protected double overridePower = -2.0;
+    protected double overrideTarget = 0.0;
+    protected double lastPower = 0.0;
     protected boolean overrideTarget_bool = false;
     protected boolean overridePower_bool = false;
 
     // Encoder for servo position feedback
     protected AnalogInput servoEncoder = null;
     protected DcMotorEx externalEncoder = null;
-    protected double externalEncoderPosition=0;
-    protected double pinpointPosition = 0; // a passer value
-    protected double externalEncoderAbsolutePosition=0;
-    protected double curentPos = 0;
-    protected double lastCurentPos = 0;
-    protected double lastLastCurentPos = 0;
-    protected double lastLastLastCurentPos = 0;
-    protected double maxAccel = 10000;
-    protected double maxVel = 4000;
+    protected double externalEncoderPosition = 0.0;
+    protected double pinpointPosition = 0.0; // a passer value
+    protected double externalEncoderAbsolutePosition = 0;
+    protected double curentPos = 0.0;
+    protected double lastCurentPos = 0.0;
+    protected double lastLastCurentPos = 0.0;
+    protected double lastLastLastCurentPos = 0.0;
+    protected double maxAccel = 10000.0;
+    protected double maxVel = 4000.0;
     protected double motionTime = 0.5;
-    public static double encoderDirectionMulti = -1;
     protected final double encoderUnitConstant = 123.37;
     protected boolean overridePIDerror = false;
-    protected double errorOverride = 0;
+    protected double errorOverride = 0.0;
+    
+    public static double encoderDirectionMulti = -1;
     public static double MinErrorThreshold = 1.2;
     public static double ErrorThresholdMulti = 0;
     public static double MinVelocityThreshold = 0.13;

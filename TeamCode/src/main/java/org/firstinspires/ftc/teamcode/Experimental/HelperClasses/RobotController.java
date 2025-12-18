@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.isActive;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.rpmkd;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.rpmkp;
 
 import android.util.Pair;
 
@@ -16,11 +19,17 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRSe
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.EncodedComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Multithread.AtomicComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -39,6 +48,7 @@ public abstract class RobotController implements RobotControllerInterface {
     private ColorSet_ITD currentColor = ColorSet_ITD.Undefined;
     private HashMap<String, RobotState> states = new HashMap<>();
     private HashMap<String, Component> components = new HashMap<>();
+    private AtomicReference<HashMap<String, AtomicComponent>> atomic_components = new AtomicReference<>(new HashMap<>());
     private boolean useDefaultMovement = false;
     private DriveTrain movement = null;
     private ArrayList<Pair<BooleanSupplier, Runnable>> callbacks = new ArrayList<>();
@@ -73,6 +83,11 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public RobotController makeComponent(String name, Component component) {
         components.put(name, component);
+        return this;
+    }
+
+    public RobotController makeComponent(String name, AtomicComponent component) {
+        atomic_components.get().put(name, component);
         return this;
     }
 
@@ -128,12 +143,12 @@ public abstract class RobotController implements RobotControllerInterface {
     public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
         return (T) components.get(componentName);
     }
-    public Pose getCurrentPose(){ return followerInstance.getInstance().getPose();
-//        return new Pose (- followerInstance.getInstance().getPose().getX(), no more reversing X due to Pedro beeing fixed
-//                followerInstance.getInstance().getPose().getY(),
-//                followerInstance.getInstance().getPose().getHeading());
+    public Pose getCurrentPose() {
+        return followerInstance.getInstance().getPose();
     }
-    public ComplexFollower getFollowerInstance(){return followerInstance;}
+    public ComplexFollower getFollowerInstance() {
+        return followerInstance;
+    }
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         movement = new DriveTrain(frontLeftName, frontRightName, backLeftName, backLeftName);
@@ -216,11 +231,30 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
+    private ExecutorService executor = null;
+    private AtomicBoolean init_loop_running = new AtomicBoolean(false);
+    private AtomicBoolean loop_running = new AtomicBoolean(false);
     public void init(OpModes mode) {
         currentOpModes = mode;
+        executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            while (init_loop_running.get()) {
+                for (AtomicComponent c : atomic_components.get().values()) {
+                    if (c.moveDuringInit()) {
+                        c.update();
+                    }
+                }
+            }
+            while (loop_running.get()) {
+                for (AtomicComponent c : atomic_components.get().values()) {
+                    c.update();
+                }
+            }
+        });
     }
 
     public void init_loop() {
+        init_loop_running.set(true);
         gamepadInstance.update();
         followerInstance.update();
         for (Component c : components.values()) {
@@ -243,17 +277,18 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     public void loop() {
+        init_loop_running.set(false);
+        loop_running.set(true);
         tickTimer.reset();
         runUpdates();
         main_loop();
-        if (currentOpModes == OpModes.TeleOP) {
-            for (Pair<BooleanSupplier, Runnable> pair : callbacks) {
-                if (pair.first.getAsBoolean()) {
-                    pair.second.run();
-                }
-            }
-        }
         tickMS = tickTimer.milliseconds();
+    }
+
+    public void stop() {
+        init_loop_running.set(false);
+        loop_running.set(false);
+        executor.shutdown();
     }
 
     public double getExecMS() { return tickMS; }

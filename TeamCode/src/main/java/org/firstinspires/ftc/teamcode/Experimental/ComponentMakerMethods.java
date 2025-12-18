@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Multithread.AtomicMotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
@@ -31,7 +32,7 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("TurretSpinMotor", new MotorComponent()
+        robot.makeComponent("TurretSpinMotor", new AtomicMotorComponent()
                 .addMotor("turretspin")
                 .useWithPIDController(false)
                 .setRPM_PIDCoefficients(0.0045, 0.0005, 0)
