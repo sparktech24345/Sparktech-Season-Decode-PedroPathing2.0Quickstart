@@ -90,7 +90,7 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
-    public MotorComponent targetOverride(boolean rpmOverride) {
+    public MotorComponent targetOverrideBoolean(boolean rpmOverride) {
         this.rpmOverride = rpmOverride;
         return this;
     }

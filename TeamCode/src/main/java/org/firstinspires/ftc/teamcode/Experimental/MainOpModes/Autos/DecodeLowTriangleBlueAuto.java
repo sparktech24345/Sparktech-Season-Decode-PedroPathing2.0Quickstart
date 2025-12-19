@@ -245,7 +245,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         //velocity
         double targetVelocity = targetPower;
         robot.getMotorComponent("TurretSpinMotor")
-                .targetOverride(false)
+                .targetOverrideBoolean(false)
                 .setOverrideCondition(true)
                 .setPowerOverride(targetVelocity)
         ;
@@ -359,7 +359,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                 .setOverrideTargetPos(normalizeTurretRotationForServo(0));
 
         robot.getMotorComponent("TurretSpinMotor")
-                .targetOverride(false)
+                .targetOverrideBoolean(false)
                 .setOverrideCondition(true)
                 .setPowerOverride(0);
 

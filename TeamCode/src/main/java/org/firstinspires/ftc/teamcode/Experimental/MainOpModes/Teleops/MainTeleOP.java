@@ -6,7 +6,6 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -445,7 +444,7 @@ public class MainTeleOP extends LinearOpMode {
                 last_power = power;
                 robot.getMotorComponent("TurretSpinMotor")
                         //            .targetOverride(true)
-                        .targetOverride(false)
+                        .targetOverrideBoolean(false)
                         .setOverrideCondition(true)
                         .setPowerOverride(power)
                 ;
@@ -458,7 +457,7 @@ public class MainTeleOP extends LinearOpMode {
 //                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
 //                ;
                 robot.getMotorComponent("TurretSpinMotor")
-                        .targetOverride(true)
+                        .targetOverrideBoolean(true)
                         .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
 //                        .setPIDconstants(0.0015, 0, 0.00044)
                 ;
@@ -490,10 +489,10 @@ public class MainTeleOP extends LinearOpMode {
                     .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
-        else {
+        else { // if its not trying to fire
             turretAngleVal = 63;
             robot.getMotorComponent("TurretSpinMotor")
-                    .targetOverride(false)
+                    .targetOverrideBoolean(false)
                     .setOverrideCondition(true)
                     .setPowerOverride(0)
             ;
