@@ -79,12 +79,15 @@ public class MainTeleOP extends LinearOpMode {
     public static double targetY = 46;
     public static Pose farStart = new Pose(120,27,Math.toRadians(90)); // no more reversing X
     public static double cameraErrorMultiplier = 1;
-    public static double targetVelFar = 0.7;
+    public static double encoderMultiplier = 1;
+    public static double cameraAdder = 0;
+    public static double farZoneCameraAdder = 2;
+    public static double targetVelFar = 0.67;
     public static double targetVelMid = 1300;
     public static double targetVelClose = 1000;
 
     public static double targetAngleFar = 58;
-    public static double targetAngleMid = 62;
+    public static double targetAngleMid = 61;
     public static double targetAngleClose = 71;
     protected double old_pos_y_purple = 0;
     protected long timeLime = 0;
@@ -98,6 +101,7 @@ public class MainTeleOP extends LinearOpMode {
     public boolean shootOnCamera = false;
     public boolean turnOnCamera = false;
     public double last_power = 0;
+    public double lastTargetTurret = 0;
     public static double turretVelocityOverride = 0;
     public static double turretAngleOverride = 0;
 
@@ -301,55 +305,6 @@ public class MainTeleOP extends LinearOpMode {
                 ;
             }
         }
-
-        if (gamepad1.leftBumperWasPressed()) {
-//                    //false is green true is purple
-//                    if (sorterChoice) {
-//                        robot.addToQueue(new StateAction(false, "TurretSpinMotor", "FULL"));
-//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
-//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
-//                        robot.addToQueue(new DelayAction(true, 2000));
-//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
-//                        robot.addToQueue(new DelayAction(true, 1400));
-//                        //robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
-//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
-//                        robot.addToQueue(new DelayAction(true, 600));
-//                        robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
-//                        robot.addToQueue(new DelayAction(true, 600));
-//                        robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
-//                        robot.addToQueue(new StateAction(true, "TurretSpinMotor", "OFF"));
-//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
-//                    }
-//                    else {
-//                        robot.addToQueue(new StateAction(false, "TurretSpinMotor", "FULL"));
-//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
-//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
-//                        robot.addToQueue(new DelayAction(true, 2000));
-//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
-//                        robot.addToQueue(new DelayAction(true, 1400));
-//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
-//                        robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
-//                        robot.addToQueue(new DelayAction(true, 600));
-//                        robot.addToQueue(new StateAction(true, "TransferServo", "UP"));
-//                        robot.addToQueue(new DelayAction(true, 600));
-//                        robot.addToQueue(new StateAction(true, "TransferServo", "DOWN"));
-//                        robot.addToQueue(new StateAction(true, "TurretSpinMotor", "OFF"));
-//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
-//                    }
-        }
-//                if (gamepad1.rightBumperWasPressed()) {
-//                    sorterChoice = !sorterChoice;
-//                    if (sorterChoice) {
-//                        //is now purple
-//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "OPEN"));
-//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "CLOSED"));
-//                    }
-//                    else {
-//                        //is now green
-//                        robot.addToQueue(new StateAction(true, "GreenGateServo", "OPEN"));
-//                        robot.addToQueue(new StateAction(true, "PurpleGateServo", "CLOSED"));
-//                    }
-//                }
         // ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == =DRIVER 2 ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == =
 
         if (gamepad2.yWasPressed()) {
@@ -421,76 +376,98 @@ public class MainTeleOP extends LinearOpMode {
         //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
 
         double turretAngleVal = 0;
-        if (isTryingToFire) {
-            //puterea calculat,unghiul calculat,rotatia calculata;
-            //motorRpm = degreesToOuttakeTurretServo(trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(),targetPose,true).getMinInitialVelocity()) * rpmMultiplier;
-            ///robot.addTelemetryData("distance to wall", distance);
-            if (distance > 2.95) {
-                targetVelocity = targetVelFar; // only fire from the tip of the triangle
-                turretAngleVal = targetAngleFar;
-            }
-            else {
-                targetVelocity = 0.0569676 * distance + 0.489353;
-                turretAngleVal = -4.12746 * distance + 71.29151;
-            }
-            turretAngleVal = clamp(turretAngleVal, 58.5, 72);
+        if(isTryingToFire){
+            //power and angle stuff
+            if(!shootOnCamera){
 
-            if(shootOnCamera) {
-                //TEST VERSION
-                double power = getPowerOnDistance(distanceToApriltag);
-                if(power > 1) {
+                if (distance > 2.95) {
+                    targetVelocity = targetVelFar; // only fire from the tip of the triangle
+                    turretAngleVal = targetAngleFar;
+                    cameraAdder = farZoneCameraAdder;
+                }
+                else if(distance>0.8) {
+                    turretAngleVal = targetAngleMid;
+                    targetVelocity = 0.0569676 * distance + 0.489353;
+                    cameraAdder = 0;
+                }
+                else{
+                    targetVelocity = 0.0569676 * distance + 0.489353;
+                    turretAngleVal = -4.12746 * distance + 71.29151;
+                    cameraAdder = 0;
+                }
+
+            }
+            else{ // if shoot on camera
+                double distanceOnCamera = getDistanceToAprilTag();
+                double power = 0;
+
+
+                if (distanceOnCamera > 255) {
+                    power = targetVelFar; // only fire from the tip of the triangle
+                    turretAngleVal = targetAngleFar;
+                    cameraAdder = farZoneCameraAdder;
+                }
+                else if(distanceOnCamera > 90) {
+                    power =  getPowerOnDistance(distanceOnCamera);
+                    turretAngleVal = targetAngleMid;
+                    cameraAdder = 0;
+                }
+                else{
+                    power =  getPowerOnDistance(distanceOnCamera);
+                    turretAngleVal = -4.12746 * distance + 71.29151;
+                    cameraAdder = 0;
+                }
+
+                if(power > 1){
                     power = last_power;
                 }
-                last_power = power;
-                robot.getMotorComponent("TurretSpinMotor")
-                        //            .targetOverride(true)
-                        .targetOverrideBoolean(false)
-                        .setOverrideCondition(true)
-                        .setPowerOverride(power)
-                ;
-
-            } else {
-//                robot.getMotorComponent("TurretSpinMotor")
-//                        //            .targetOverride(true)
-//                        .targetOverride(false)
-//                        .setOverrideCondition(true)
-//                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-//                ;
-                robot.getMotorComponent("TurretSpinMotor")
-                        .targetOverrideBoolean(true)
-                        .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-//                        .setPIDconstants(0.0015, 0, 0.00044)
-                ;
-//                VPID_v1();
+                last_power = power; // so that we avoid infinity
+                targetVelocity = power;
             }
 
-            targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
-//            robot.getCRServoComponent()
-//                    .setCameraPIDconstants(cameraP, cameraI, cameraD)
-//                    .overridePIDerror(camera_error, eval(camera_error)) // CORRECTIE PE CAMERA FLAG
-//                    .setCameraTarget(turretAimOffsetD2)
-//                    .setPIDconstants(servoP, servoI, servoD)
-//                    .setMotionconstants(servoVel, servoAcel, servoTime)
-//                    .setOverrideBool(true)
-//                    .setTargetOverride(targetTurret + turretAimOffsetD2);
-            //.setTargetOverride(0);
-            /// with encoder corection on camera on normal servo
+            // ==================== power setting ====================
 
-//            if(shootOnCamera) {
-//                if(eval(camera_error)) targetTurret = -camera_error * cameraErrorMultiplier;
-//            } else {
-                if(eval(camera_error) && turnOnCamera) targetTurret = -getEncoderReadingFormatted() - camera_error * cameraErrorMultiplier;
-//            }
-            robot.addTelemetryData("cameraError", camera_error);
-            robot.addTelemetryData("targetTurret", targetTurret);
+            //targetVelocity *= voltageMultiplier(controlHubVoltageSensor.getVoltage());
+
+            robot.getMotorComponent("TurretSpinMotor")
+                    //            .targetOverride(true)
+                    .targetOverrideBoolean(false)
+                    .setOverrideCondition(true)
+                    .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+            ;
+            robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
+
+            // ==================== angle setting ====================
+
+            turretAngleVal = clamp(turretAngleVal, 58.5, 72);
+            robot.getServoComponent("TurretAngle")
+                    .setOverrideTarget_bool(true)
+                    .setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
+
+            // ==================== rotation stuff ====================
+
+            targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
+            //if on camera
+            if(eval(camera_error) && turnOnCamera){
+                if (Math.abs(camera_error) < 50) // if camera is seeing the tag and is not infinite
+                    targetTurret = -getEncoderReadingFormatted() * encoderMultiplier -camera_error * cameraErrorMultiplier + cameraAdder;
+                else{
+                    targetTurret = lastTargetTurret;
+                }
+                lastTargetTurret = targetTurret;
+            }
+
+            robot.addTelemetryData("target on camera",getEncoderReadingFormatted() * encoderMultiplier + camera_error * cameraErrorMultiplier + cameraAdder);
+            robot.addTelemetryData("target on odometry",calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY));
 
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
-            robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
         }
-        else { // if its not trying to fire
-            turretAngleVal = 63;
+        else{
+            //if not trying to fire
+
+            targetVelocity = 0;
             robot.getMotorComponent("TurretSpinMotor")
                     .targetOverrideBoolean(false)
                     .setOverrideCondition(true)
@@ -499,20 +476,22 @@ public class MainTeleOP extends LinearOpMode {
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(0));
-            ; //TODO to set this to 0
+
+            turretAngleVal = 63;
+            robot.getServoComponent("TurretAngle")
+                    .setOverrideTarget_bool(true)
+                    .setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
         }
-        robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-        //double turretAngleVal = trajectoryCalculator.findLowestSafeTrajectory(robot.getCurrentPose(), new Pose(targetX,targetY,0), true).getOptimalAngleDegrees() - degreeSubtract;
-        ///robot.addTelemetryData("turret angle estimation", turretAngleVal);
-        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
 
 
-        //robot.addTelemetryData("Checkpoint After telemetry", System.currentTimeMillis() - startTime);
-        robot.addTelemetryData("A Current Encoder Position", getEncoderReadingFormatted());
-        robot.addTelemetryData("A camera error", camera_error);
-        robot.addTelemetryData("A targetTurret", targetTurret);
-        robot.addTelemetryData("A target velocity", eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity);
-        robot.addTelemetryData("A actual velocity", ((MotorComponent)robot.getComponent("TurretSpinMotor")).getVelocity());
+        robot.addTelemetryData("turret angle estimation", turretAngleVal);
+        robot.addTelemetryData("Current Encoder Position", getEncoderReadingFormatted());
+        robot.addTelemetryData("late camera error", late_camera_error);
+        robot.addTelemetryData("voltage", controlHubVoltageSensor.getVoltage());
+        robot.addTelemetryData("voltage multiplier ", voltageMultiplier(controlHubVoltageSensor.getVoltage()));
+        robot.addTelemetryData("motor power", robot.getMotorComponent("TurretSpinMotor").getPower());
+        robot.addTelemetryData("power on distance",getPowerOnDistance(getDistanceToAprilTag()));
+
     }
 
     public static boolean isActive = false;
@@ -582,6 +561,8 @@ public class MainTeleOP extends LinearOpMode {
         colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
 
         externalEncoder = hardwareMap.get(DcMotorEx.class,"backpurple");
+
+        controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class,"Control Hub");
 
         //pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
 
@@ -1181,25 +1162,5 @@ public class MainTeleOP extends LinearOpMode {
     public Pose passPose() {
         globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
         return globalRobotPose;
-    }
-    DcMotorEx turretspin1;
-    public void VPID_v1() {
-        MultipleTelemetry tele= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        turretspin1= hardwareMap.get(DcMotorEx.class, "turretspin");
-        turretspin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        if (v_pos_timer.milliseconds() >= 100) {
-            v_current_pos = turretspin1.getCurrentPosition();
-            double delta_pos = v_current_pos - v_last_pos;
-            delta_pos /= 28;
-            v_last_pos = v_current_pos;
-            v_current_rpm = delta_pos * 600;
-            v_pos_timer.reset();
-        }
-        double v_velocity = turretspin1.getVelocity();
-        v_error = v_target_Velocity - v_velocity;
-        double v_power = v_ks + v_kV * v_velocity + v_kp * v_error;
-        turretspin1.setPower(Math.max(-1, Math.min(v_power, 1)));
-        tele.addData("target_velocity", v_target_Velocity);
-        tele.addData("current_velocity", v_velocity);
     }
 }

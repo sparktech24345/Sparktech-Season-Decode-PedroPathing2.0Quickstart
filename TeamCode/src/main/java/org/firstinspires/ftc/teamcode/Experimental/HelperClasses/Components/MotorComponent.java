@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
@@ -21,7 +22,7 @@ public class MotorComponent extends EncodedComponent {
     protected DcMotorEx mainMotor = null;
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
-    protected PIDcontroller PIDForRPM = null;
+    protected PIDFCoefficients PIDForRPM = null;
     protected double overridePower = -2;
     protected boolean andreiOverride = false;
     protected double targetRpm = 0;
@@ -71,6 +72,10 @@ public class MotorComponent extends EncodedComponent {
         motorMap.put(hardwareMapName, motor);
         return this;
     }
+    public MotorComponent setMode(DcMotor.RunMode mode){
+        mainMotor.setMode(mode);
+        return this; // with or without encoder
+    }
 
     public double getPosition() {
         return mainMotor.getCurrentPosition();
@@ -111,9 +116,8 @@ public class MotorComponent extends EncodedComponent {
         PID.setConstants(p, i, d);
         return this;
     }
-    public MotorComponent setRPMPIDconstants(double p, double i, double d) {
-        if(PIDForRPM == null) PIDForRPM = new PIDcontroller();
-        PIDForRPM.setConstants(p, i, d);
+    public MotorComponent setRPMPIDconstants(double p, double i, double d, double f) {
+        if(PIDForRPM == null) PIDForRPM = new PIDFCoefficients(p,i,d,f);
         return this;
     }
 

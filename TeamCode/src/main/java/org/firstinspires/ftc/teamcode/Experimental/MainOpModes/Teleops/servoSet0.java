@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.degreesToOuttakeTurretServo;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -11,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-@Disabled
+
 @Config
 @TeleOp(name = "servoSet0", group = "Linear OpMode")
 public class servoSet0 extends LinearOpMode {
@@ -22,7 +24,7 @@ public class servoSet0 extends LinearOpMode {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        Servo servo1 = hardwareMap.get(Servo.class, "turretrotateleft");
+        Servo servo1 = hardwareMap.get(Servo.class, "turretangle");
 
         waitForStart();
         if (isStopRequested()) return;
@@ -34,7 +36,8 @@ public class servoSet0 extends LinearOpMode {
             if(gamepad1.y) servoPos = 0;
             if(gamepad1.x) servoPos = (double) 30 / 360;
 
-            servo1.setPosition(servoPos);
+            //servo1.setPosition(servoPos);
+            servo1.setPosition(degreesToOuttakeTurretServo(servoPos) / 360);
             tel.addData("position",servoPos);
             tel.addData("position * 360",servoPos*360);
 

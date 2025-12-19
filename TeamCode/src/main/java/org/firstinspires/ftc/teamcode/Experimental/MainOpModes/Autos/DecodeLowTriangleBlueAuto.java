@@ -9,6 +9,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall1;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall2;
 
+import android.content.pm.ModuleInfo;
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -32,7 +33,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 
 import java.io.IOException;
 @Config
-@Autonomous(name = "Decode Down Auto Blue Firing Small Triangle", group = "Tests")
+@Autonomous(name = "Auto Small Triangle BLUE", group = "Tests")
 public class DecodeLowTriangleBlueAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
@@ -173,6 +174,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         colorSensorPurple1 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor1");
         colorSensorPurple2 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor2");
         colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
+        ConvertPoses();
     }
 
     private boolean isMoving() {
@@ -368,6 +370,26 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     public Pose passPose() {
         globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
         return globalRobotPose;
+    }
+
+    public Pose ModifyPose(Pose pose){
+        return pose;
+    }
+    public void ConvertPoses(){
+        starter = ModifyPose(starter);
+        small_triangle_shoot = ModifyPose(small_triangle_shoot); // Pose1: shooting position small triangle
+        unstuckPose = ModifyPose(unstuckPose); // Pose1: shooting position small triangle
+        HP_collect = ModifyPose(HP_collect); // Pose3: HP collect
+        first_row_ready = ModifyPose(first_row_ready); // Pose4: collect first row right
+        first_row_done = ModifyPose(first_row_done); // Pose5: collect first row left
+        lever = ModifyPose(lever); // Pose6: lever pose
+        second_row_ready = ModifyPose(second_row_ready); // Pose7: collect second row right
+        second_row_done = ModifyPose(second_row_done); // Pose8: colect second row left
+        big_triangle_shoot = ModifyPose(big_triangle_shoot); // Pose9: shooting big triangle pose
+        big_triangle_offset = ModifyPose(big_triangle_offset); // Pose9: shooting big triangle pose
+        third_row_ready = ModifyPose(third_row_ready); // Pose10: collect third row right
+        third_row_done = ModifyPose(third_row_done); // Pose11: collect third row left
+        classifier_starter = ModifyPose(classifier_starter); // Pose12: start position from sorter
     }
 
 }

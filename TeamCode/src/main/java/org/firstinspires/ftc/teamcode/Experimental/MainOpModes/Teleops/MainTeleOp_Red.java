@@ -22,6 +22,7 @@ public class MainTeleOp_Red extends MainTeleOP {
         ballCounter = 0;
         teamPipeline = 1;
         powerMultiplier =1;
+        farZoneCameraAdder = - farZoneCameraAdder;
         targetY = -targetY;
         currentTeamColor = TeamColor.Red;
 

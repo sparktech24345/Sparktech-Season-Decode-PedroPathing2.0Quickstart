@@ -102,9 +102,26 @@ public class GlobalStorage {
         return - targetDegrees + 121.5;
     }
     public static double degreesToOuttakeTurretServo(double degrees) {
-        double m = 0.1709;
-        double b = 17.19;
-        double result = (degrees - b) / m;
-        return clamp(result, 100, 359);
+        double realDown = 76; // unghi real, masurate in cad, a nu se schimba
+        double realUp = 58; // tot areal, unghi pana la blocker mecanic
+
+        double servoDown = 136.8; // servo down * 360 actually 0.1
+        double servoUp = 36; // servo up * 360 actually 0.38
+
+        clamp(degrees,realUp, realDown); // maxing it out
+
+        //interpolation
+        return servoDown + (degrees - realDown) * (servoUp - servoDown) / (realUp - realDown);
+    }
+    public static double voltageMultiplier(double voltage){
+        voltage = clamp(voltage,11,14);
+        //set points for function
+        double voltajA = 12.7;
+        double multiplierA = 0.9;
+
+        double voltajB = 12;
+        double multiplierB = 1;
+
+        return multiplierA + (voltage - voltajA) * (multiplierB - multiplierA) / (voltajB - voltajA);
     }
 }

@@ -31,6 +31,7 @@ public class ComponentMakerMethods {
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
                 .useWithPIDController(true)
+                .setMode(DcMotor.RunMode.RUN_USING_ENCODER)
                 .setPIDconstants(0.00044, 0, 0.0015)
                 .setTargetOverride(1200)
                 .useWithEncoder(true)
@@ -138,8 +139,8 @@ public class ComponentMakerMethods {
                 .addState("UP", 230);
 
         robot.getComponent("TurretAngle")
-                .addState("DOWN_MAX", 350, false) // 77 degrees looky
-                .addState("UP_MAX", 192, true); // 50 degrees looky
+                .addState("servoDown", 136.8, false) // 77 degrees looky
+                .addState("UP_MAX", 36, true); // 50 degrees looky
 
         robot.addRobotState("TransferGreen", new RobotState(
                 make_pair("GreenGateServo", "OPEN"),
