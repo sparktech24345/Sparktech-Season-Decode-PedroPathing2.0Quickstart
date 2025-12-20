@@ -137,6 +137,7 @@ public class MainTeleOP extends LinearOpMode {
     private static long[] v_time_history = new long[v_BUFFER_SIZE];
     private static int v_history_idx = 0;
     private static double v_measuredRPM = 0.0;
+    private static boolean out_green = false;
 
     protected void robotMainLoop() {
         // all of the code
@@ -326,6 +327,17 @@ public class MainTeleOP extends LinearOpMode {
 
         if (gamepad2.aWasPressed()) {
             // take out a ball trough outtake
+        }
+
+        if (gamepad2.dpadUpWasPressed()) {
+            out_green = !out_green;
+            if(out_green){
+                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"));
+                robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"));
+            } else {
+                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
+                robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
+            }
         }
 
         if (gamepad2.dpadLeftWasPressed()) {
