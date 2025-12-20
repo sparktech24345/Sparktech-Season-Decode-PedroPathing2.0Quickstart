@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AbsoluteAnalogE
 @Config
 @TeleOp(name = "servoSpin", group = "Linear OpMode")
 public class servoSpin extends LinearOpMode {
-    public static double servoPos = 30/360;
+    public static double servoPos = 30 / 360;
     public static double pow = 0;
     AbsoluteAnalogEncoder encoder;
 
@@ -40,9 +40,9 @@ public class servoSpin extends LinearOpMode {
             servo2.setPower(gamepad1.left_stick_x + pow);
             //servo2.setPower(gamepad1.right_stick_x);
 
-            tel.addData("servo 1 powe",servo1.getPower());
-            tel.addData("servo 2 powe",servo2.getPower());
-            tel.addData("encodeh ",Math.toDegrees(encoder.getCurrentPosition()));
+            tel.addData("servo 1 powe", servo1.getPower());
+            tel.addData("servo 2 powe", servo2.getPower());
+            tel.addData("encodeh ", Math.toDegrees(encoder.getCurrentPosition()));
 
             tel.update();
         }

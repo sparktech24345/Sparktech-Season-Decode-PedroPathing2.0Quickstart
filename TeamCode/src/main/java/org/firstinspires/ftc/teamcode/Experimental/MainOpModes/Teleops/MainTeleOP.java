@@ -391,23 +391,23 @@ public class MainTeleOP extends LinearOpMode {
             if(!shootOnCamera){
 
                 if (distance > 2.95) {
-                    targetVelocity = targetVelFar; // only fire from the tip of the triangle
                     turretAngleVal = targetAngleFar;
                     cameraAdder = farZoneCameraAdder;
                 }
-                else if(distance>0.8) {
+                else if (distance > 0.8) {
                     turretAngleVal = targetAngleMid;
-                    targetVelocity = 0.0569676 * distance + 0.489353;
                     cameraAdder = 0;
                 }
-                else{
-                    targetVelocity = 0.0569676 * distance + 0.489353;
+                else {
                     turretAngleVal = -4.12746 * distance + 71.29151;
                     cameraAdder = 0;
                 }
+                distance = distanceToApriltag;
+                if (Double.isInfinite(distance)) distance = 0;
+                targetVelocity = 0.0001807 * Math.pow(distance, 3) - 0.077115 * distance * distance + 11.6851 * distance + 371.81972;
 
             }
-            else{ // if shoot on camera
+            else { // if shoot on camera
                 double distanceOnCamera = getDistanceToAprilTag();
                 double power = 0;
 
@@ -417,18 +417,18 @@ public class MainTeleOP extends LinearOpMode {
                     turretAngleVal = targetAngleFar;
                     cameraAdder = farZoneCameraAdder;
                 }
-                else if(distanceOnCamera > 90) {
+                else if (distanceOnCamera > 90) {
                     power =  getPowerOnDistance(distanceOnCamera);
                     turretAngleVal = targetAngleMid;
                     cameraAdder = 0;
                 }
-                else{
-                    power =  getPowerOnDistance(distanceOnCamera);
+                else {
+                    power = getPowerOnDistance(distanceOnCamera);
                     turretAngleVal = -4.12746 * (distanceOnCamera / 100)+ 71.29151;
                     cameraAdder = 0;
                 }
 
-                if(power > 1){
+                if (power > 1) {
                     power = last_power;
                 }
                 last_power = power; // so that we avoid infinity
@@ -474,7 +474,7 @@ public class MainTeleOP extends LinearOpMode {
                     .setOverrideTarget_bool(true)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
         }
-        else{
+        else {
             //if not trying to fire
 
             targetVelocity = 0;
@@ -501,6 +501,7 @@ public class MainTeleOP extends LinearOpMode {
         robot.addTelemetryData("voltage multiplier ", voltageMultiplier(controlHubVoltageSensor.getVoltage()));
         robot.addTelemetryData("motor power", robot.getMotorComponent("TurretSpinMotor").getPower());
         robot.addTelemetryData("power on distance",getPowerOnDistance(getDistanceToAprilTag()));
+        robot.addTelemetryData("actual velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity());
 
     }
 
