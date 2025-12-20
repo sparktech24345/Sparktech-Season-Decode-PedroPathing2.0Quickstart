@@ -203,7 +203,7 @@ public class TestDecodeAutoBlue extends OpMode {
         //velocity
         double targetVelocity = targetPower;
         robot.getMotorComponent("TurretSpinMotor")
-                .targetOverrideBoolean(false)
+                .targetVPIDOverrideBoolean(false)
                 .setOverrideCondition(true)
                 .setPowerOverride(targetVelocity)
         ;
@@ -258,7 +258,7 @@ public class TestDecodeAutoBlue extends OpMode {
     }
     private void AutoSequence3() {
         robot.getMotorComponent("TurretSpinMotor")
-                .targetOverrideBoolean(false)
+                .targetVPIDOverrideBoolean(false)
                 .setOverrideCondition(true)
                 .setPowerOverride(0)
         ;
@@ -273,7 +273,7 @@ public class TestDecodeAutoBlue extends OpMode {
     }
     private void AutoSequence2() {
         robot.getMotorComponent("TurretSpinMotor")
-                .targetOverrideBoolean(false)
+                .targetVPIDOverrideBoolean(false)
                 .setOverrideCondition(true)
                 .setPowerOverride(0)
         ;
@@ -288,7 +288,7 @@ public class TestDecodeAutoBlue extends OpMode {
 
     private void AutoSequence4() {
         robot.getMotorComponent("TurretSpinMotor")
-                .targetOverrideBoolean(false)
+                .targetVPIDOverrideBoolean(false)
                 .setOverrideCondition(true)
                 .setPowerOverride(0)
         ;

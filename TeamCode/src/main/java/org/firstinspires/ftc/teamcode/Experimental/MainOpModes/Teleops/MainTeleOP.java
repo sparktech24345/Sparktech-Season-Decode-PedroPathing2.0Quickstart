@@ -15,7 +15,6 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.*;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
 
@@ -138,7 +137,6 @@ public class MainTeleOP extends LinearOpMode {
     private static long[] v_time_history = new long[v_BUFFER_SIZE];
     private static int v_history_idx = 0;
     private static double v_measuredRPM = 0.0;
-    protected int teamPipeline = 0;
 
     protected void robotMainLoop() {
         // all of the code
@@ -414,7 +412,7 @@ public class MainTeleOP extends LinearOpMode {
                 }
                 else{
                     power =  getPowerOnDistance(distanceOnCamera);
-                    turretAngleVal = -4.12746 * distance + 71.29151;
+                    turretAngleVal = -4.12746 * (distanceOnCamera / 100)+ 71.29151;
                     cameraAdder = 0;
                 }
 
@@ -431,9 +429,9 @@ public class MainTeleOP extends LinearOpMode {
 
             robot.getMotorComponent("TurretSpinMotor")
                     //            .targetOverride(true)
-                    .targetOverrideBoolean(false)
-                    .setOverrideCondition(true)
-                    .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                    .targetVPIDOverrideBoolean(true)
+                    .setOverrideCondition(false)
+                    .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
             ;
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 
@@ -469,7 +467,7 @@ public class MainTeleOP extends LinearOpMode {
 
             targetVelocity = 0;
             robot.getMotorComponent("TurretSpinMotor")
-                    .targetOverrideBoolean(false)
+                    .targetVPIDOverrideBoolean(false)
                     .setOverrideCondition(true)
                     .setPowerOverride(0)
             ;
@@ -502,6 +500,7 @@ public class MainTeleOP extends LinearOpMode {
         isActive = true;
         ballCounter = 0;
         powerMultiplier = 1;
+        teamPipeline = 0;
         currentTeamColor = TeamColor.Blue;
 
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -1092,7 +1091,7 @@ public class MainTeleOP extends LinearOpMode {
         return Math.log(targetArea / a) / b;
     }
     private double getPowerOnDistance(double dist) {
-        return 0.000551 * dist + 0.5116;
+        return 0.000551 * dist + 0.4816;
     }
     public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position

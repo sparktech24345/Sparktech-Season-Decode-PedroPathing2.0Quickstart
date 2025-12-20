@@ -6,12 +6,14 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+
+
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 @TeleOp(name = "Main TeleOp Red", group = "Main")
 public class MainTeleOp_Red extends MainTeleOP {

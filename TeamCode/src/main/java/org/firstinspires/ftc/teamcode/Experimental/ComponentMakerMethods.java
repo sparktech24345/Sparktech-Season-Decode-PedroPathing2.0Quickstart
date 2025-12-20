@@ -3,9 +3,7 @@ package org.firstinspires.ftc.teamcode.Experimental;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.make_pair;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
@@ -30,10 +28,11 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
-                .useWithPIDController(true)
+                .useWithPIDController(false)
+                .targetVPIDOverrideBoolean(false)
                 .setMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setPIDconstants(0.00044, 0, 0.0015)
-                .setTargetOverride(1200)
+                .setVPIDconstants(180, 0,18,15)
+                .setTargetOverride(0)
                 .useWithEncoder(true)
                 .setRange(-1, 1)
         );
@@ -131,6 +130,7 @@ public class ComponentMakerMethods {
                 .addState("PUSH_TO_GREEN", 250) // push to green
                 .addState("REDIRECT_TO_PURPLE", 146.64)
                 .addState("REDIRECT_TO_GREEN", 35)
+                .addState("PUSH_TO_PURPLE", 1)
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")

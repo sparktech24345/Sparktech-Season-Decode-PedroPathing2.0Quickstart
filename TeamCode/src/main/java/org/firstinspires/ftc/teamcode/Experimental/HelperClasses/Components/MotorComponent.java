@@ -6,9 +6,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
@@ -18,18 +16,15 @@ import java.util.HashMap;
 @Config
 public class MotorComponent extends EncodedComponent {
     public static double voltageMultiplier = 1;
-    protected HashMap<String, DcMotor> motorMap = new HashMap<>();
+    protected HashMap<String, DcMotorEx> motorMap = new HashMap<>();
     protected DcMotorEx mainMotor = null;
     protected boolean usePID = false;
     protected PIDcontroller PID = null;
-    protected PIDFCoefficients PIDForRPM = null;
+    protected PIDFCoefficients CoefficientsForVPID = null;
     protected double overridePower = -2;
     protected boolean andreiOverride = false;
-    protected double targetRpm = 0;
-    protected boolean rpmOverride = false;
-    public static double ksRPM = 0;
-    public static double kvRPM = 0.0005;
-    public static double kpRPM = 0.004;
+    protected double targetVPID = 0;
+    protected boolean VPIDOverride = false;
     protected double velocity = 0;
 
     public MotorComponent setVoltage(double voltage) {
@@ -44,7 +39,7 @@ public class MotorComponent extends EncodedComponent {
         PID = new PIDcontroller();
     }
 
-    public DcMotor getMotor(String name) {
+    public DcMotorEx getMotor(String name) {
         return motorMap.get(name);
     }
 
@@ -68,11 +63,11 @@ public class MotorComponent extends EncodedComponent {
         if (motorMap.isEmpty()) {
             mainMotor = motor;
         }
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motorMap.put(hardwareMapName, motor);
         return this;
     }
-    public MotorComponent setMode(DcMotor.RunMode mode){
+    public MotorComponent setMode(DcMotorEx.RunMode mode){
         mainMotor.setMode(mode);
         return this; // with or without encoder
     }
@@ -83,28 +78,28 @@ public class MotorComponent extends EncodedComponent {
     public double getPower() {
         return mainMotor.getPower();
     }
-    public MotorComponent setBehaviour(DcMotor.ZeroPowerBehavior zeroPower) {
-        for (DcMotor motor : motorMap.values()) {
+    public MotorComponent setBehaviour(DcMotorEx.ZeroPowerBehavior zeroPower) {
+        for (DcMotorEx motor : motorMap.values()) {
             motor.setZeroPowerBehavior(zeroPower);
         }
         return this;
     }
 
-    public MotorComponent setDirection(String motorName, DcMotorSimple.Direction dir) {
+    public MotorComponent setDirection(String motorName, DcMotorEx.Direction dir) {
         motorMap.get(motorName).setDirection(dir);
         return this;
     }
 
-    public MotorComponent targetOverrideBoolean(boolean rpmOverride) {
-        this.rpmOverride = rpmOverride;
+    public MotorComponent targetVPIDOverrideBoolean(boolean VPIDOverride) {
+        this.VPIDOverride = VPIDOverride;
         return this;
     }
     public MotorComponent setOverrideCondition(boolean andreiOverride) {
         this.andreiOverride = andreiOverride;
         return this;
     }
-    public MotorComponent setTargetOverride(double targetRpm) {
-        this.targetRpm = targetRpm;
+    public MotorComponent setTargetOverride(double targetVPID) {
+        this.targetVPID = targetVPID;
         return this;
     }
     public MotorComponent setPowerOverride(double power) {
@@ -116,8 +111,11 @@ public class MotorComponent extends EncodedComponent {
         PID.setConstants(p, i, d);
         return this;
     }
-    public MotorComponent setRPMPIDconstants(double p, double i, double d, double f) {
-        if(PIDForRPM == null) PIDForRPM = new PIDFCoefficients(p,i,d,f);
+    public MotorComponent setVPIDconstants(double p, double i, double d, double f) {
+        if(CoefficientsForVPID == null) CoefficientsForVPID = new PIDFCoefficients(p,i,d,f);
+        for (DcMotorEx motor : motorMap.values()) {
+            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForVPID);
+        }
         return this;
     }
 
@@ -131,69 +129,9 @@ public class MotorComponent extends EncodedComponent {
         max_range = max;
         return this;
     }
-    public double calculateVoltageMultiplier(double voltage){
-        return voltageMultiplier = 1.3 + (voltage - 11) * (0.9 - 1.3) / (14 - 11); // should be around 1.3 at 11V and 0.9 at 14
-    }
-    double current_pos;
-    double last_pos = 0;
-    ElapsedTime pos_timer = new ElapsedTime();
-    double lastPosForRpm =0;
-    double posForRpm =0;
-    long timerForRpm =System.currentTimeMillis();
     private static final double TICKS_PER_REV = 28.0;
-    private static final int BUFFER_SIZE = 100;
-    private static double[] position_history = new double[BUFFER_SIZE];
-    private static long[] time_history = new long[BUFFER_SIZE];
-    private static int history_idx = 0;
-    private static double measuredRPM = 0.0;
-    public double MeasureRPM() {
-        double current_pos = mainMotor.getCurrentPosition();
 
-        // 1. Store the new measurement at the current index
-        time_history[history_idx] = System.currentTimeMillis();
-        position_history[history_idx] = current_pos;
-
-        int oldest_idx = (history_idx + 1) % BUFFER_SIZE;
-
-        double newest_pos = current_pos;
-        long newest_timeMs = System.currentTimeMillis();
-
-        double oldest_pos = position_history[oldest_idx];
-        long oldest_timeMs = time_history[oldest_idx];
-
-
-        long deltaT_ms = newest_timeMs - oldest_timeMs;
-        double deltaP_ticks = newest_pos - oldest_pos;
-        if (deltaT_ms > 50) {
-            measuredRPM = (deltaP_ticks / TICKS_PER_REV) * (60000.0 / deltaT_ms);
-        } else if (deltaT_ms <= 0) {
-            measuredRPM = 0.0;
-        }
-
-        history_idx = (history_idx + 1) % BUFFER_SIZE;
-        return measuredRPM;
-    }
-
-    public double getMeasuredRPM(){return measuredRPM;}
-    public double CalculatePower(double target_rpm){
-        return (target_rpm)/3500*calculateVoltageMultiplier(voltage-0.5);
-        //return (target_rpm*errMultiplier + error*errMultiplier)/3500;
-    }
-
-    public MotorComponent setRPM_PIDCoefficients(double kpRPM, double kvRPM, double ksRPM){
-        this.kvRPM = kvRPM;
-        this.ksRPM = ksRPM;
-        this.kpRPM = kpRPM;
-        return this;
-    }
-    public double CalculatePowerV2(double targetVelocity) {
-        double error = targetVelocity - velocity;
-        double power = ksRPM + kvRPM * velocity + kpRPM * error;
-        if (targetVelocity == 0) return 0;
-        return power;
-    }
-
-    public DcMotor get(String name) {
+    public DcMotorEx get(String name) {
         return motorMap.get(name);
     }
 
@@ -215,10 +153,15 @@ public class MotorComponent extends EncodedComponent {
             targetPower = PID.calculate(target, componentEncoder.getEncoderPosition());
         }
         if (andreiOverride) targetPower = overridePower;
-        //if(rpmOverride){MeasureRPM(); targetPower = CalculatePower(targetRpm);}
-        if (rpmOverride) targetPower = CalculatePowerV2(targetRpm);
-        for (DcMotor motor : motorMap.values()) {
-            motor.setPower(targetPower);
+
+        if (VPIDOverride)
+            for (DcMotorEx motor : motorMap.values()) {
+                motor.setVelocity(targetVPID);
+            }
+        else{
+            for (DcMotorEx motor : motorMap.values()) {
+                motor.setPower(targetPower);
+            }
         }
     }
 }
