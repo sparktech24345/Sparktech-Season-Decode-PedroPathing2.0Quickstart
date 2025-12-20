@@ -106,8 +106,8 @@ public class GlobalStorage {
         double realDown = 76; // unghi real, masurate in cad, a nu se schimba
         double realUp = 58; // tot areal, unghi pana la blocker mecanic
 
-        double servoDown = 136.8; // servo down * 360 actually 0.1
-        double servoUp = 36; // servo up * 360 actually 0.38
+        double servoDown = 136.8; // servo down * 360 actually 0.38
+        double servoUp = 36; // servo up * 360 actually 0.1
 
         clamp(degrees,realUp, realDown); // maxing it out
 

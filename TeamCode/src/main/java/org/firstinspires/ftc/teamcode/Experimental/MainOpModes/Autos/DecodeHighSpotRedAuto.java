@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 
-@Autonomous(name = "Auto Small Triangle Red", group = "Main")
-public class DecodeLowTriangleRedAuto extends DecodeLowTriangleBlueAuto {
+@Autonomous(name = "DecodeHighSpotRedAuto", group = "Main")
+public class DecodeHighSpotRedAuto extends DecodeHighSpotBlueAuto {
     @Override
     public Pose ModifyPose(Pose pose){
         return new Pose(pose.getX(),-pose.getY(),pose.getHeading());

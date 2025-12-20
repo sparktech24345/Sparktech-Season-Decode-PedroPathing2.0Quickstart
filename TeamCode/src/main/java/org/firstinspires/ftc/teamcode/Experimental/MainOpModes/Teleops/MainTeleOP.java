@@ -76,16 +76,17 @@ public class MainTeleOP extends LinearOpMode {
     protected long tick_ns = 0;
     public static double targetX = 125;
     public static double targetY = 46;
-    public static Pose farStart = new Pose(120,27,Math.toRadians(90)); // no more reversing X
+    public static Pose farStart = new Pose(120,24,Math.toRadians(90)); // no more reversing X
     public static double cameraErrorMultiplier = 1;
     public static double encoderMultiplier = 1;
     public static double cameraAdder = 0;
     public static double farZoneCameraAdder = 2;
-    public static double targetVelFar = 0.67;
+    public static double targetVelFar = 1300;
+    public static double targetPowerFar = 0.67;
     public static double targetVelMid = 1300;
     public static double targetVelClose = 1000;
 
-    public static double targetAngleFar = 58;
+    public static double targetAngleFar = 60;
     public static double targetAngleMid = 61;
     public static double targetAngleClose = 71;
     protected double old_pos_y_purple = 0;
@@ -96,10 +97,9 @@ public class MainTeleOP extends LinearOpMode {
     double pos_y = pythonOutputs[1];
     public static double camera_error;
     public static double late_camera_error;
-
-    public boolean shootOnCamera = false;
-    public boolean turnOnCamera = false;
+    public boolean turnOnCamera = true;
     public double last_power = 0;
+    public double lastDistance = 0;
     public double lastTargetTurret = 0;
     public static double turretVelocityOverride = 0;
     public static double turretAngleOverride = 0;
@@ -206,13 +206,9 @@ public class MainTeleOP extends LinearOpMode {
         if (robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
             //fireGreen();
         }
-        if(gamepad2.aWasPressed()) {
-            shootOnCamera= !shootOnCamera;
-        }
         if(gamepad2.bWasPressed()) {
             turnOnCamera= !turnOnCamera;
         }
-        robot.addTelemetryData("shootOnCamera", shootOnCamera);
         if(gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().getInstance().setPose(farStart);
         if(gamepad1.dpad_down && gamepad1.dpad_left) robot.getFollowerInstance().getInstance().setPose(new Pose(0,0,0));
 
@@ -308,7 +304,7 @@ public class MainTeleOP extends LinearOpMode {
 
         if (gamepad2.yWasPressed()) {
             // Sorting toggle
-            isInSortingPeriod = !isInSortingPeriod;
+            //isInSortingPeriod = !isInSortingPeriod;
         }
 
         if (gamepad2.leftBumperWasPressed()) {
@@ -319,7 +315,7 @@ public class MainTeleOP extends LinearOpMode {
             powerMultiplier += 0.05;
         }
         robot.addTelemetryData("POWER MULTIPLIER",powerMultiplier);
-        if (gamepad2.xWasPressed() || robot.getControllerKey("Y1").ExecuteAfterPress) {
+        if (robot.getControllerKey("Y1").ExecuteAfterPress) {
             isTryingToFire = !isTryingToFire;
             isReadyToFireTimer.reset();
         }
@@ -384,67 +380,61 @@ public class MainTeleOP extends LinearOpMode {
 
 
         //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
-
+        boolean shouldRawPow = false;
         double turretAngleVal = 0;
         if(isTryingToFire){
             //power and angle stuff
-            if(!shootOnCamera){
 
-                if (distance > 2.95) {
+                distance = distanceToApriltag;
+                if (Double.isInfinite(distance)) distance =lastDistance;
+                lastDistance = distance;
+
+                distance /= 100;
+
+                if (distance > 2.55) {
                     turretAngleVal = targetAngleFar;
                     cameraAdder = farZoneCameraAdder;
+                    shouldRawPow = true;
                 }
                 else if (distance > 0.8) {
                     turretAngleVal = targetAngleMid;
                     cameraAdder = 0;
+                    shouldRawPow = false;
                 }
                 else {
                     turretAngleVal = -4.12746 * distance + 71.29151;
                     cameraAdder = 0;
+                    shouldRawPow = false;
                 }
-                distance = distanceToApriltag;
-                if (Double.isInfinite(distance)) distance = 0;
-                targetVelocity = 0.0001807 * Math.pow(distance, 3) - 0.077115 * distance * distance + 11.6851 * distance + 371.81972;
+                distance *= 100;
 
-            }
-            else { // if shoot on camera
-                double distanceOnCamera = getDistanceToAprilTag();
-                double power = 0;
-
-
-                if (distanceOnCamera > 255) {
-                    power = targetVelFar; // only fire from the tip of the triangle
-                    turretAngleVal = targetAngleFar;
-                    cameraAdder = farZoneCameraAdder;
+                //targetVelocity = 0.0001807 * Math.pow(distance, 3) - 0.077115 * distance * distance + 11.6851 * distance + 371.81972;
+                targetVelocity = 1.13037*distance + 835.31442;
+                if (targetVelocity > 2500) {
+                targetVelocity = last_power;
                 }
-                else if (distanceOnCamera > 90) {
-                    power =  getPowerOnDistance(distanceOnCamera);
-                    turretAngleVal = targetAngleMid;
-                    cameraAdder = 0;
-                }
-                else {
-                    power = getPowerOnDistance(distanceOnCamera);
-                    turretAngleVal = -4.12746 * (distanceOnCamera / 100)+ 71.29151;
-                    cameraAdder = 0;
-                }
-
-                if (power > 1) {
-                    power = last_power;
-                }
-                last_power = power; // so that we avoid infinity
-                targetVelocity = power;
-            }
+                last_power = targetVelocity; // so that we avoid infinity
 
             // ==================== power setting ====================
 
             //targetVelocity *= voltageMultiplier(controlHubVoltageSensor.getVoltage());
 
-            robot.getMotorComponent("TurretSpinMotor")
-                    //            .targetOverride(true)
-                    .targetVPIDOverrideBoolean(true)
-                    .setOverrideCondition(false)
-                    .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-            ;
+            if(!shouldRawPow){
+                robot.getMotorComponent("TurretSpinMotor")
+                        .targetVPIDOverrideBoolean(true)
+                        .setOverrideCondition(false)
+                        .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                ;
+            }
+            else {
+                targetVelocity = targetPowerFar;
+                robot.getMotorComponent("TurretSpinMotor")
+                        .targetVPIDOverrideBoolean(false)
+                        .setOverrideCondition(true)
+                        .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                ;
+            }
+
             robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
 
             // ==================== angle setting ====================
@@ -1104,7 +1094,7 @@ public class MainTeleOP extends LinearOpMode {
         return Math.log(targetArea / a) / b;
     }
     private double getPowerOnDistance(double dist) {
-        return 0.000551 * dist + 0.4816;
+        return  1.13037*dist + 835.31442;
     }
     public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
         // Current robot position

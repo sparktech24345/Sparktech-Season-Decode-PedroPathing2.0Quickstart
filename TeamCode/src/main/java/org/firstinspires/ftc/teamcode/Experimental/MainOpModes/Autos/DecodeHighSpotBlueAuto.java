@@ -11,16 +11,16 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall1;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall2;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.DecodeHighSpotBlueAuto.AutoEnum.*;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.calculateHeadingAdjustment;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.cameraErrorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.encoderMultiplier;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.farStart;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.farZoneCameraAdder;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetAngleFar;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetAngleMid;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetPowerFar;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetVelFar;
-
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.DecodeLowTriangleBlueAuto.AutoEnum.*;
 
 import android.graphics.Color;
 
@@ -52,8 +52,8 @@ import java.io.IOException;
 import java.util.List;
 
 @Config
-@Autonomous(name = "Auto Small Triangle BLUE", group = "Tests")
-public class DecodeLowTriangleBlueAuto extends OpMode {
+@Autonomous(name = "DecodeHighSpotBlueAuto", group = "Tests")
+public class DecodeHighSpotBlueAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     protected Limelight3A limelight3A = null;
@@ -116,6 +116,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     private Pose third_row_done = new Pose(101, 33.8, 90); // Pose11: collect third row left
     private Pose classifier_starter = new Pose(120.7, 23.7, 90); // Pose12: start position from sorter
 
+
     @Override
     public void init() {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -131,9 +132,9 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                         .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                         .addTelemetryData("robot X", robot.getCurrentPose().getX())
                         .addTelemetryData("current velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
-                        .addTelemetryData("balls launched", ballsLaunched)
+                        .addTelemetryData("hasShooted", hasShooted)
                         .addTelemetryData("ballCounter", ballCounter)
-                        .addTelemetryData("waitToShoot", waitToShoot.milliseconds())
+                        .addTelemetryData("shootTimer_ms", shootTimer.milliseconds())
                 ;
                 robot.
                         addTelemetryData("isMoving", isMoving)
@@ -155,21 +156,20 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
+        robot.getFollowerInstance().setStartingPose(ModifyPose(farStart));   /// very important
         recorder = new AutoRecorder(true);
         timeToFire = true;
         canSequence3 = true;
         parkBool = false;
         ballsLaunched = 0;
         ballIsStuck = false;
-        autoEnum = StartSequence;
+        autoEnum = getInFrontOfSorterSequence;
         colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
         colorSensorPurple1 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor1");
         colorSensorPurple2 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor2");
         colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
 
         externalEncoder = hardwareMap.get(DcMotorEx.class,"backpurple");
-
-
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(teamPipeline);
         limelight3A.reloadPipeline();
@@ -243,10 +243,9 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
 
     private void shoot(){
         if(isMoving) waitToShoot.reset();
-        if(waitToShoot.milliseconds() >= 1000 && turretHasBall) {
-
+        if(waitToShoot.milliseconds()>=800 && turretHasBall) {
             robot.addToQueue(
-                    new StateAction(false, "IntakeMotor", "FULL"),
+                    new StateAction(true, "IntakeMotor", "FULL"),
                     new DelayAction(true, 250),
                     new StateAction(true, "TransferServo", "UP"),
                     new DelayAction(true, 250),
@@ -256,61 +255,51 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
             );
             ballsLaunched++;
             waitToShoot.reset();
-            robot.addTelemetryData("isShooty",true);
         }
     }
 
     /// ============================== Sequence Stuff ===========================
 
     public enum AutoEnum{
-        StartSequence,
-        IsAfterStartSequence,
+        getInFrontOfSorterSequence,
+        IsAfterGetInFrontOfSorterSequence,
         UnstuckSequence,
-        HPSequence,
-        FirstRowSequence,
         SecondRowSequence,
         ThirdRowSequence,
         IsAfterSecondSequence,
         ParkingSequence,
-
     }
-    public static AutoEnum autoEnum = StartSequence;
-    public static AutoEnum autoRememberUnstuckEnum = StartSequence;
+    public static AutoEnum autoEnum = getInFrontOfSorterSequence;
+    public static AutoEnum autoRememberUnstuckEnum = getInFrontOfSorterSequence;
     public void checkSwitch(boolean isBusy){
         if(!isBusy && startAuto){
             switch (autoEnum) {
-                case StartSequence:
+                case getInFrontOfSorterSequence:
                     AutoSequence1();
-                    autoEnum = IsAfterStartSequence;
+                    autoEnum = IsAfterGetInFrontOfSorterSequence;
                     break;
 
-                case IsAfterStartSequence: // has arrived at end of start
+                case IsAfterGetInFrontOfSorterSequence: // has arrived at end of start
                     shoot();
-                    if(waitToShoot.milliseconds() > 1200 && ballCounter > 0){
+                    if(waitToShoot.milliseconds() > 1200){
                         autoEnum = UnstuckSequence;
-                        autoRememberUnstuckEnum = IsAfterStartSequence;
+                        autoRememberUnstuckEnum = IsAfterGetInFrontOfSorterSequence;
                     }
-                    if(ballCounter == 0 && waitToShoot.milliseconds() > 400){
-                        if(firstRowBool){ //  coming from hp collect
-                            autoEnum =FirstRowSequence;
-                            firstRowBool = false;
+                    if(ballCounter == 0 && waitToShoot.milliseconds() > 200){
+
+                        if(thirdRowBool){ //  coming from hp collect
+                            autoEnum =SecondRowSequence;
+                            thirdRowBool = false;
                         }
+
                         else if(secondRowBool){ // coming from first row
                             //autoEnum = SecondRowSequence;
                             autoEnum = ParkingSequence; // go to park
                             //secondRowBool = false;
                         }
-                        else if(thirdRowBool){
-                            autoEnum =UnstuckSequence;
-                            autoRememberUnstuckEnum = ThirdRowSequence;
-                            thirdRowBool = false;
-                        }
-                        else if(parkBool){
-                            autoEnum =UnstuckSequence;
-                            autoRememberUnstuckEnum = ParkingSequence;
-                            parkBool = false;
-                        }
-                        else autoEnum = HPSequence;
+
+                        else autoEnum = ThirdRowSequence;
+
                     }
                     break;
 
@@ -320,29 +309,18 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                     autoEnum = autoRememberUnstuckEnum;
                     break;
 
-                case HPSequence:
-                    AutoSequenceHP();
-                    autoEnum = IsAfterStartSequence;
-                    firstRowBool = true;
+                case ThirdRowSequence:
+                    AutoSequenceThirdRow();
+                    autoEnum = IsAfterGetInFrontOfSorterSequence;
+                    thirdRowBool = true;
                     break;
 
-                case FirstRowSequence:
-                    AutoSequenceFirstRow();
-                    autoEnum = IsAfterStartSequence;
-                    secondRowBool = true;
+                case SecondRowSequence:
+                    AutoSequenceSecondRow();
+                    autoEnum = IsAfterGetInFrontOfSorterSequence;
+                    thirdRowBool = true;
                     break;
-//
-//                case SecondRowSequence:
-//                    AutoSequenceSecondRow();
-//                    autoEnum = IsAfterStartSequence;
-//                    thirdRowBool = true;
-//                    break;
-//
-//                case ThirdRowSequence:
-//                    AutoSequenceThirdRow();
-//                    autoEnum = IsAfterStartSequence;
-//                    parkBool = true;
-//                    break;
+
 
                 case ParkingSequence: // parking stuff
                     AutoPark();
@@ -356,7 +334,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
 
 
     private void AutoSequence1() {
-        robot.addToQueue(new MoveAction(false, small_triangle_shoot)); // first shoot 3
+        robot.addToQueue(new MoveAction(false, big_triangle_shoot)); // first shoot 3
     }
 
     private void AutoSequenceUnstuck() {
@@ -370,33 +348,27 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         isFiringTimer.reset();
         ballIsStuck = false;
     }
-    private void AutoSequenceHP(){
-        robot.addToQueue(
-                new MoveAction(false, HP_collect),
-                new MoveAction(true,new Pose(HP_collect.getX()+15,HP_collect.getY(),HP_collect.getHeading())),
-                new MoveAction(true, small_triangle_shoot)
-        );
-
-    }
-    private void AutoSequenceFirstRow() {
-        robot.addToQueue(
-                new MoveAction(false, first_row_ready),
-                new MoveAction(true, first_row_done),
-                new MoveAction(true, small_triangle_shoot)
-        );
-    }
-
     private void AutoSequenceSecondRow() {
         robot.addToQueue(
                 new MoveAction(false, second_row_ready),
                 new MoveAction(true, second_row_done),
                 new DelayAction(true, 500),
-                new MoveAction(true, small_triangle_shoot)
+                new MoveAction(true, big_triangle_shoot)
+        );
+    }
+
+    private void AutoSequenceThirdRow() {
+        robot.addToQueue(
+                new MoveAction(false, third_row_ready),
+                new MoveAction(true, third_row_done),
+                new DelayAction(true, 500),
+                new MoveAction(true, big_triangle_shoot)
+
         );
     }
 
     private void AutoPark() {
-        robot.addToQueue(new MoveAction(false, unstuckPose));
+        robot.addToQueue(new MoveAction(false, second_row_ready));
         parkBool = false;
         robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
         robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
@@ -544,12 +516,12 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         robot.addTelemetryData("target on odometry",calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY));
 
         robot.getServoComponent("TurretRotateServo")
-            .setOverrideTarget_bool(true)
-            .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
+                .setOverrideTarget_bool(true)
+                .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
 
         robot
-            .addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
-            .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE")); // collecting
+                .addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
+                .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE")); // collecting
 
     }
 
