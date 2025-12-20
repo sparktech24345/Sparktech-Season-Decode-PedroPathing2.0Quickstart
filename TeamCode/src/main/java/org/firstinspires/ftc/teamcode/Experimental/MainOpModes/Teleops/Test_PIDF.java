@@ -32,7 +32,6 @@ public class Test_PIDF extends LinearOpMode {
         PIDFCoefficients PIDFCoefficients = new PIDFCoefficients(P,I,D,F);
         turretSpin.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PIDFCoefficients);
 
-
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {

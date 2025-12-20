@@ -47,6 +47,4 @@ public class servoSpin extends LinearOpMode {
             tel.update();
         }
     }
-
-
 }
