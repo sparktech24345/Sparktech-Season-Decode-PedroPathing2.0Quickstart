@@ -16,9 +16,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 @TeleOp(name = "servoSpinRobotv2", group = "Linear OpMode")
 public class servoSpinRobot2 extends LinearOpMode {
-    public static double P = 180;
-    public static double I = 0;
-    public static double D = 18;
+    public static double P = 185;
+    public static double I = 0.02;
+    public static double D = 17.8;
     public static double F = 15;
     public static double currentVel1;
     public static double currentVel2;
