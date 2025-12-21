@@ -18,9 +18,10 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.Ma
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetAngleFar;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetAngleMid;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetPowerFar;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.targetVelFar;
 
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.DecodeLowTriangleBlueAuto.AutoEnum.*;
+
+import static java.lang.Thread.sleep;
 
 import android.graphics.Color;
 
@@ -33,6 +34,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -54,14 +56,15 @@ import java.io.IOException;
 import java.util.List;
 
 @Config
-@Autonomous(name = "Auto Small Triangle BLUE", group = "Tests")
+@Disabled
+@Autonomous(name = "Auto Small Triangle BLUE !!!! NU ASTA", group = "Tests")
 public class DecodeLowTriangleBlueAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     protected Limelight3A limelight3A = null;
     protected DcMotorEx externalEncoder = null;
     private boolean startAuto = false;
-    private boolean hasShooted = false;
+    private boolean hasShot = false;
     private boolean isShooting = false;
     private boolean turretHasBall = false;
     private boolean firstRowBool = false;
@@ -70,7 +73,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     private boolean canShootFirstRow = false;
     private boolean canShootSecondRow = false;
     private boolean canShootThirdRow = false;
-    private boolean timeToFire, canSequence3, parkBool, ballIsStuck, isMoving = false, isBusy = false, shouldStop = false, hasUnstuck = false;
+    private boolean timeToFire, canSequence3, parkBool, ballIsStuck, isMoving = false, isBusy = false, shouldStop = false, hasUnstuck = false, reachedTargetVelocity = false;
     public static double ballCounter = 0;
     public static double targetX = 125;
     public static double targetY = 46;
@@ -161,7 +164,11 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                 isBusy = isMoving || isShooting;
                 if (isShooting && ballsLaunched < targetBalls && !isMoving) {
                     calculateFiringStuffV2();
-                    shoot();
+                    try {
+                        shoot();
+                    } catch (InterruptedException e) {
+                        // nasol
+                    }
                 } else {
                     checkStatesSwitch();
                 }
@@ -267,8 +274,9 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                 + eval(launchSensorBall != BallColorSet_Decode.NoBall);
     }
 
-    private void shoot() {
-        if (waitToShoot.milliseconds() >= 1300) {
+    private void shoot() throws InterruptedException {
+        // robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
+        if (waitToShoot.milliseconds() >= 1700 && reachedTargetVelocity) {
             robot.addToQueue(
                     new StateAction(false, "IntakeMotor", "FULL"),
                     new DelayAction(true, 300),
@@ -278,15 +286,18 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                     new StateAction(true, "TransferServo", "UP"),
                     new DelayAction(true, 200),
                     new StateAction(true, "TransferServo", "DOWN"),
-            new StateAction(false, "PurpleGateServo", "OPEN")
+                    new StateAction(false, "PurpleGateServo", "OPEN")
                     //new StateAction(true, "IntakeMotor", "OFF")
             );
             ++ballsLaunched;
             waitToShoot.reset();
         }
         if (ballsLaunched >= targetBalls) {
+            sleep(1000);
             isShooting = false;
             ballsLaunched = 0;
+            robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+            hasShot = true;
         }
     }
 
@@ -308,6 +319,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     public enum AutoEnumStates {
         ShootingFromSmallTriangle,
         ShootingFromBigTriangle,
+        HasShot,
         AtPark,
         AtStart,
         ShouldUnstuck,
@@ -336,11 +348,13 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                 case ShootingFromSmallTriangle:
                     isShooting = true;
                     waitToShoot.reset();
-                    autoState = hasUnstuck ? AutoEnumStates.AtPark : AutoEnumStates.ShouldUnstuck;
-                    hasUnstuck = true;
+                    autoState = AutoEnumStates.HasShot;
                     break;
+                case HasShot:
+                    if (!hasShot) return;
+                    hasShot = false;
+                    autoState = hasUnstuck ? AutoEnumStates.AtPark : AutoEnumStates.ShouldUnstuck;
                 case ShouldUnstuck:
-                    isShooting = false;
                     targetBalls = 1;
                     AutoSequenceUnstuck();
                     autoState = autoShootState;
@@ -349,6 +363,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                     AutoPark();
                     shouldStop = true;
                     autoState = AutoEnumStates.ShouldStop;
+                    terminateTurret();
                     break;
                 case ShouldStop:
                     break;
@@ -365,7 +380,11 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
                     break;
 
                 case IsAfterStartSequence: // has arrived at end of start
-                    shoot();
+                    try {
+                        shoot();
+                    } catch (InterruptedException e) {
+                        // nasol x2
+                    }
                     if(waitToShoot.milliseconds() > 1200 && ballCounter > 0) {
                         autoEnum = UnstuckSequence;
                         autoRememberUnstuckEnum = IsAfterStartSequence;
@@ -443,8 +462,8 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         Pose starterPose = robot.getCurrentPose();
         Pose goToForUnstuck;
         if(teamPipeline == 0) // 0 at blue
-            goToForUnstuck = new Pose(starterPose.getX() + 15,starterPose.getY() + 15,starterPose.getHeading());
-        else goToForUnstuck = new Pose(starterPose.getX() + 15,starterPose.getY() - 15,starterPose.getHeading());
+            goToForUnstuck = new Pose(starterPose.getX() + 15,starterPose.getY() + 15, starterPose.getHeading());
+        else goToForUnstuck = new Pose(starterPose.getX() + 15,starterPose.getY() - 15, starterPose.getHeading());
         robot.addToQueue(new MoveAction(false, goToForUnstuck));
         robot.addToQueue(new MoveAction(true, starterPose));
         isFiringTimer.reset();
@@ -538,7 +557,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
     }
 
     void calculateFiringStuffV2() {
-        double targetVelocity = 0;
+        double targetVelocity = 1300;
         double distanceOnCamera = getDistanceToAprilTag();
         double cameraAdder = 0;
 
@@ -563,6 +582,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
         //}
         if (autoState == AutoEnumStates.ShootingFromSmallTriangle) targetVelocity = velocity_far;
         if (autoState == AutoEnumStates.ShootingFromBigTriangle) targetVelocity = velocity_close;
+        reachedTargetVelocity = robot.getMotorComponent("TurretSpinMotor").getVelocity() >= targetVelocity - 20;
         robot.getMotorComponent("TurretSpinMotor")
                 .targetVPIDOverrideBoolean(true)
                 .setOverrideCondition(false)
@@ -571,7 +591,7 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
 
         // ==================== angle setting ====================
 
-        double targetAngle = 0;
+        double targetAngle = 58;
         if (autoState == AutoEnumStates.ShootingFromSmallTriangle) targetAngle = angle_far;
         if (autoState == AutoEnumStates.ShootingFromBigTriangle) targetAngle = angle_close;
         targetAngle = clamp(targetAngle, 58, 72);

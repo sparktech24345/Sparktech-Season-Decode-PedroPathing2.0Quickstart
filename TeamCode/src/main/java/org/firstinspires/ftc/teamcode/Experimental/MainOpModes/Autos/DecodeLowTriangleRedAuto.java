@@ -6,9 +6,11 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.Ma
 
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 
+@Disabled
 @Autonomous(name = "Auto Small Triangle Red", group = "Main")
 public class DecodeLowTriangleRedAuto extends DecodeLowTriangleBlueAuto {
     @Override

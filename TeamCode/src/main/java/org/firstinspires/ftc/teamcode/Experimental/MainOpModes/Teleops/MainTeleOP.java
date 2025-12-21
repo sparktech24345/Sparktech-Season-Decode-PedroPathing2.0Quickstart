@@ -51,6 +51,7 @@ public class MainTeleOP extends LinearOpMode {
     public static double servoAcel = 10000;
     public static double servoTime = 1;
     public static double cameraError = 0;
+    public static boolean absoluteZeroTurretRotation = false;
     public static double targetVelocity = 0;
     public static double rpmMultiplier = 0;
     public static double rpmDefault = 1500;
@@ -58,6 +59,7 @@ public class MainTeleOP extends LinearOpMode {
     public static double rpmkp = 2;
     public static double rpmkd = 1;
     public static double targetTurret = 0;
+    public static double lastTargetTurret = 0;
     public static double degreeSubtract = 2;
     public static double degreeSubtractAdder = -5;
     public static double degreeSubtractMulti = 1;
@@ -100,7 +102,6 @@ public class MainTeleOP extends LinearOpMode {
     public boolean turnOnCamera = true;
     public double last_power = 0;
     public double lastDistance = 0;
-    public double lastTargetTurret = 0;
     public static double turretVelocityOverride = 0;
     public static double turretAngleOverride = 0;
 
@@ -329,9 +330,13 @@ public class MainTeleOP extends LinearOpMode {
             // take out a ball trough outtake
         }
 
+        if (gamepad2.xWasPressed()) {
+            absoluteZeroTurretRotation = !absoluteZeroTurretRotation;
+        }
+
         if (gamepad2.dpadUpWasPressed()) {
             out_green = !out_green;
-            if(out_green){
+            if(out_green) {
                 robot.addToQueue(new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"));
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"));
             } else {
@@ -452,10 +457,10 @@ public class MainTeleOP extends LinearOpMode {
 
             targetTurret = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
             //if on camera
-            if(eval(camera_error) && turnOnCamera){
+            if(eval(camera_error) && turnOnCamera) {
                 if (Math.abs(camera_error) < 50) // if camera is seeing the tag and is not infinite
                     targetTurret = -getEncoderReadingFormatted() * encoderMultiplier -camera_error * cameraErrorMultiplier + cameraAdder;
-                else{
+                else {
                     targetTurret = lastTargetTurret;
                 }
                 lastTargetTurret = targetTurret;
@@ -464,6 +469,7 @@ public class MainTeleOP extends LinearOpMode {
             robot.addTelemetryData("target on camera",getEncoderReadingFormatted() * encoderMultiplier + camera_error * cameraErrorMultiplier + cameraAdder);
             robot.addTelemetryData("target on odometry",calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY));
 
+            if (absoluteZeroTurretRotation) targetTurret = 0;
             robot.getServoComponent("TurretRotateServo")
                     .setOverrideTarget_bool(true)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));

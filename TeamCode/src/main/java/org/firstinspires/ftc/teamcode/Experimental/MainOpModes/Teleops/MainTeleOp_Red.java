@@ -23,7 +23,7 @@ public class MainTeleOp_Red extends MainTeleOP {
         // init
         ballCounter = 0;
         teamPipeline = 1;
-        powerMultiplier =1;
+        powerMultiplier = 1;
         farZoneCameraAdder = - farZoneCameraAdder;
         targetY = -targetY;
         currentTeamColor = TeamColor.Red;
@@ -47,8 +47,9 @@ public class MainTeleOp_Red extends MainTeleOP {
         while (opModeIsActive()) {
             // loop
             robot.loop();
-            passPose();
         }
         // stop
+        isActive = false;
+        passPose();
     }
 }

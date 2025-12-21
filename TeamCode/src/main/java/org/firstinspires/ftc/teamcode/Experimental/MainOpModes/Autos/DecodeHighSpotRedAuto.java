@@ -4,15 +4,19 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOP.farZoneCameraAdder;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 
-@Autonomous(name = "DecodeHighSpotRedAuto", group = "Main")
+@Config
+@Disabled
+@Autonomous(name = "Auto big triangle red", group = "Tests")
 public class DecodeHighSpotRedAuto extends DecodeHighSpotBlueAutoV2 {
     @Override
-    public Pose ModifyPose(Pose pose){
+    public Pose ModifyPose(Pose pose) {
         return new Pose(pose.getX(),-pose.getY(),pose.getHeading());
     }
     @Override
