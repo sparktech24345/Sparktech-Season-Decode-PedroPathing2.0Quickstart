@@ -38,11 +38,13 @@ public class MainTeleOp_Red extends MainTeleOP {
         MakeComponents(robot);
         MakeStates(robot);
         InitOtherStuff();
+        limelight3A.pipelineSwitch(1); /// OVERRIDE TO MAKE SURE EVERYTHING IS OK
         robot.UseDefaultMovement();
 
         while (opModeInInit()) {
             robot.init_loop();
         }
+        robot.getFollowerInstance().setStartingPose(globalRobotPose);
 
         while (opModeIsActive()) {
             // loop

@@ -134,7 +134,7 @@ public class ComponentMakerMethods {
                 .addState("BLOCK", 93.816, true);
 
         robot.getComponent("TransferServo")
-                .addState("DOWN", 27, true)
+                .addState("DOWN", 20, true)
                 .addState("MIDDLE", 45)
                 .addState("UP", 230);
 

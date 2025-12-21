@@ -67,11 +67,11 @@ public class SmallTriangleOld extends OpMode {
     final float[] hsvValuesPurple2 = new float[3];
     final float[] hsvValuesLaunch = new float[3];
     private boolean unsticking = false;
-    public static double targetPower = 0.75;
+    public static double targetVel = 1250;
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
     private Pose small_triangle_shoot = new Pose(10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = new Pose(20, 6, 0); // Pose1: shooting position small triangle
+    private Pose unstuckPose = new Pose(10, 15, 0); // Pose1: shooting position small triangle
     private Pose HP_collect = new Pose(38.6, -5.56, 0); // Pose3: HP collect
     private Pose first_row_ready = new Pose(15, 52, 0); // Pose4: collect first row right
     private Pose first_row_done = new Pose(30, 52, 0); // Pose5: collect first row left
@@ -211,16 +211,17 @@ public class SmallTriangleOld extends OpMode {
         robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
 
         //velocity
-        double targetVelocity = targetPower;
+        double targetVelocity = targetVel;
         robot.getMotorComponent("TurretSpinMotor")
-                .setOverrideCondition(true)
-                .setPowerOverride(targetVelocity)
+                .targetVPIDOverrideBoolean(true)
+                .setTargetOverride(targetVelocity)
         ;
 
         if (turretHasBall && isFiringTimer.milliseconds() > 3000 && !isMoving) {
             isFiringTimer.reset();
             robot.addToQueue(
-                    new StateAction(false, "PurpleGateServo", "CLOSED"),
+                    new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"),
+                    new StateAction(true, "PurpleGateServo", "CLOSED"),
                     new DelayAction(true, 400),
                     new StateAction(true, "TransferServo", "UP"),
                     new DelayAction(true, 350),
@@ -265,7 +266,8 @@ public class SmallTriangleOld extends OpMode {
         robot.addToQueue(new MoveAction(false, small_triangle_shoot)); // first shoot 3
         startAuto = false;
         robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
-                .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE")); // collecting
+        //        .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"))
+        ; // collecting
     }
     private void AutoSequence3(){
         robot.addToQueue(new MoveAction(false, unstuckPose));

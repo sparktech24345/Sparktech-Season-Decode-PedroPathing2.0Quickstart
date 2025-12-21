@@ -46,7 +46,7 @@ public class SmallTriangleRedOld extends OpMode {
     public static double targetX = 125;
     public static double targetY = 46;
     public static double ballsLaunched = 0;
-    public static double publicAngleConstantThingTemp = -22;
+    public static double publicAngleConstantThingTemp = -25;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime shootTimer = new ElapsedTime();
     ElapsedTime isFiringTimer = new ElapsedTime();
@@ -68,11 +68,11 @@ public class SmallTriangleRedOld extends OpMode {
     final float[] hsvValuesPurple2 = new float[3];
     final float[] hsvValuesLaunch = new float[3];
     private boolean unsticking = false;
-    public static double targetPower = 0.75;
+    public static double targetVel = 1280;
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
     private Pose small_triangle_shoot = new Pose(10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = new Pose(20, -6, 0); // Pose1: shooting position small triangle
+    private Pose unstuckPose = new Pose(10, -15, 0); // Pose1: shooting position small triangle
     private Pose HP_collect = new Pose(38.6, 5.56, 0); // Pose3: HP collect
     private Pose first_row_ready = new Pose(15, -52, 0); // Pose4: collect first row right
     private Pose first_row_done = new Pose(30, -52, 0); // Pose5: collect first row left
@@ -123,7 +123,7 @@ public class SmallTriangleRedOld extends OpMode {
                 if(!isMoving) AutoShootingSequenceCloseTriangle();
                 if(ballsLaunched <= 2 && isFiringTimer.milliseconds() > 5000) ballIsStuck = true;
                 if(ballIsStuck) AutoSequence3();
-                if(timer.milliseconds()>22000 && canSequence4) AutoPark();
+                if(timer.milliseconds() > 22000 && canSequence4) AutoPark();
 //                if (ballCounter == 1 && !isMoving() && isShooting) unstuckBallSequence();
 //                if(!unsticking && ballCounter >= 1 && !isShooting && !isMoving() && getErrorFromShooting() < 1 && !hasShooted) AutoShootingSequenceCloseTriangle();
 //                // to be continued if we ever get this far
@@ -189,7 +189,7 @@ public class SmallTriangleRedOld extends OpMode {
         }
 
     }
-    private void AutoShootingSequenceCloseTriangle(){
+    private void AutoShootingSequenceCloseTriangle() {
         ///shooty shooty
 
         // rotation
@@ -205,17 +205,17 @@ public class SmallTriangleRedOld extends OpMode {
         robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
 
         // velocity
-        double targetVelocity = targetPower;
+        double targetVelocity = targetVel;
         robot.getMotorComponent("TurretSpinMotor")
-                .targetVPIDOverrideBoolean(false)
-                .setOverrideCondition(true)
-                .setPowerOverride(targetVelocity)
+                .targetVPIDOverrideBoolean(true)
+                .setTargetOverride(targetVelocity)
         ;
 
         if (turretHasBall && isFiringTimer.milliseconds() > 3000 && !isMoving) {
             isFiringTimer.reset();
             robot.addToQueue(
-                    new StateAction(false, "PurpleGateServo", "CLOSED"),
+                    new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"),
+                    new StateAction(true, "PurpleGateServo", "CLOSED"),
                     new DelayAction(true, 400),
                     new StateAction(true, "TransferServo", "UP"),
                     new DelayAction(true, 350),

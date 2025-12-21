@@ -335,14 +335,8 @@ public class MainTeleOP extends LinearOpMode {
         }
 
         if (gamepad2.dpadUpWasPressed()) {
-            out_green = !out_green;
-            if(out_green) {
                 robot.addToQueue(new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"));
                 robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"));
-            } else {
-                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
-                robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
-            }
         }
 
         if (gamepad2.dpadLeftWasPressed()) {
@@ -418,7 +412,7 @@ public class MainTeleOP extends LinearOpMode {
                 distance *= 100;
 
                 //targetVelocity = 0.0001807 * Math.pow(distance, 3) - 0.077115 * distance * distance + 11.6851 * distance + 371.81972;
-                targetVelocity = 1.13037*distance + 835.31442;
+                targetVelocity = 1.13037 * distance + 835.31442;
                 if (targetVelocity > 2500) {
                 targetVelocity = last_power;
                 }
@@ -468,6 +462,7 @@ public class MainTeleOP extends LinearOpMode {
 
             robot.addTelemetryData("target on camera",getEncoderReadingFormatted() * encoderMultiplier + camera_error * cameraErrorMultiplier + cameraAdder);
             robot.addTelemetryData("target on odometry",calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY));
+            robot.addTelemetryData("targetY", targetY);
 
             if (absoluteZeroTurretRotation) targetTurret = 0;
             robot.getServoComponent("TurretRotateServo")
@@ -537,6 +532,7 @@ public class MainTeleOP extends LinearOpMode {
         }
         // start async execution
         // TeleOPasyncUpdates.init_all(limelight3A);
+        robot.getFollowerInstance().setStartingPose(globalRobotPose);
 
         while (opModeIsActive()) {
             // loop
@@ -586,7 +582,7 @@ public class MainTeleOP extends LinearOpMode {
         //aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
     }
     protected double getMotifID() {
-        limelight3A.pipelineSwitch(2);
+        //limelight3A.pipelineSwitch(2);
         LLResult result = limelight3A.getLatestResult();
         List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
@@ -1079,32 +1075,39 @@ public class MainTeleOP extends LinearOpMode {
         telemetry.addData("L_SENSOR_BALL", launchSensorBall);
     }
     protected double getDistanceToAprilTag() {
-        //limelight3A.pipelineSwitch(teamPipeline);
+        limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
         List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
+        if (fiducials == null) return 0;
         double targetArea = 0;
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
             id = fiducial.getFiducialId(); // The ID number of the fiducial
-//
+            robot.addTelemetryData("fiducial id", id);
 //            robot.addTelemetryData("getTargetArea",);
 
             List <List<Double>> bigList = fiducial.getTargetCorners();
-            double cornern1X = bigList.get(0).get(0);
-            double cornern1Y = bigList.get(0).get(1);
-            double cornern2X = bigList.get(1).get(0);
-            double cornern2Y = bigList.get(1).get(1);
-            double cornern3X = bigList.get(2).get(0);
-            double cornern3Y = bigList.get(2).get(1);
-            double cornern4X = bigList.get(3).get(0);
-            double cornern4Y = bigList.get(3).get(1);
 
-            //robot.addTelemetryData("X Pixels",fiducial.getTargetCorners());
-            //robot.addTelemetryData("cornern1X",cornern1X);robot.addTelemetryData("cornern1Y",cornern1Y);robot.addTelemetryData("cornern2X",cornern2X);robot.addTelemetryData("cornern2Y",cornern2Y);robot.addTelemetryData("cornern3X",cornern3X);robot.addTelemetryData("cornern3Y",cornern3Y);robot.addTelemetryData("cornern4X",cornern4X);robot.addTelemetryData("cornern4Y",cornern4Y);
+            try {
+                double cornern1X = bigList.get(0).get(0);
+                double cornern1Y = bigList.get(0).get(1);
+                double cornern2X = bigList.get(1).get(0);
+                double cornern2Y = bigList.get(1).get(1);
+                double cornern3X = bigList.get(2).get(0);
+                double cornern3Y = bigList.get(2).get(1);
+                double cornern4X = bigList.get(3).get(0);
+                double cornern4Y = bigList.get(3).get(1);
 
-            double calcualtedHeight = (Math.abs(cornern1Y - cornern4Y) + Math.abs(cornern2Y - cornern3Y)) / 2; // the average
-            targetArea = (calcualtedHeight * calcualtedHeight)/(720*960)*100;
+                //robot.addTelemetryData("X Pixels",fiducial.getTargetCorners());
+                //robot.addTelemetryData("cornern1X",cornern1X);robot.addTelemetryData("cornern1Y",cornern1Y);robot.addTelemetryData("cornern2X",cornern2X);robot.addTelemetryData("cornern2Y",cornern2Y);robot.addTelemetryData("cornern3X",cornern3X);robot.addTelemetryData("cornern3Y",cornern3Y);robot.addTelemetryData("cornern4X",cornern4X);robot.addTelemetryData("cornern4Y",cornern4Y);
+
+                double calcualtedHeight = (Math.abs(cornern1Y - cornern4Y) + Math.abs(cornern2Y - cornern3Y)) / 2; // the average
+                targetArea = (calcualtedHeight * calcualtedHeight) / (720 * 960) * 100;
+            } catch (Exception e) {
+                // nasol
+            }
         }
 
+        robot.addTelemetryData("areaPrecentage", targetArea);
         robot.addTelemetryData("areaPrecentage", targetArea);
         double a = 8.60403612;
         double b = -0.0119936722;
@@ -1162,7 +1165,7 @@ public class MainTeleOP extends LinearOpMode {
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
 
-        limelight3A.pipelineSwitch(teamPipeline);
+        //limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
