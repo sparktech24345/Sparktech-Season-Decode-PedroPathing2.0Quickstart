@@ -516,12 +516,13 @@ public class DecodeLowTriangleBlueAuto extends OpMode {
 
 
     public double getDistanceToAprilTag() {
-        //limelight3A.pipelineSwitch(teamPipeline);
+        limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
         List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
         double targetArea = 0;
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
             List <List<Double>> bigList = fiducial.getTargetCorners();
+
             double cornern1X = bigList.get(0).get(0);
             double cornern1Y = bigList.get(0).get(1);
             double cornern2X = bigList.get(1).get(0);

@@ -17,7 +17,6 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
-@Disabled
 @TeleOp(name = "Limelight Test", group = "Tests")
 public class LimelightTest extends OpMode {
 
@@ -56,7 +55,6 @@ public class LimelightTest extends OpMode {
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(1);
-        limelight3A.pipelineSwitch(0);
         limelight3A.reloadPipeline();
         limelight3A.setPollRateHz(100); // poll 100 times per second
         limelight3A.start();

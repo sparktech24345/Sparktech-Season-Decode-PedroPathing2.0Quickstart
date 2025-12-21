@@ -72,7 +72,8 @@ public class SmallTriangleRedOld extends OpMode {
     /// --------------------------------------------------------
     private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
     private Pose small_triangle_shoot = new Pose(10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = new Pose(10, -15, 0); // Pose1: shooting position small triangle
+    private Pose parkPose = new Pose(10, -15, 0);
+    private Pose unstuckPose = new Pose(20, 0, 0); // Pose1: shooting position small triangle
     private Pose HP_collect = new Pose(38.6, 5.56, 0); // Pose3: HP collect
     private Pose first_row_ready = new Pose(15, -52, 0); // Pose4: collect first row right
     private Pose first_row_done = new Pose(30, -52, 0); // Pose5: collect first row left
@@ -270,7 +271,7 @@ public class SmallTriangleRedOld extends OpMode {
         ballIsStuck = false;
     }
     private void AutoPark(){
-        robot.addToQueue(new MoveAction(false, unstuckPose));
+        robot.addToQueue(new MoveAction(false, parkPose));
         canSequence4 = false;
         robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
         robot.getServoComponent("TurretRotateServo")

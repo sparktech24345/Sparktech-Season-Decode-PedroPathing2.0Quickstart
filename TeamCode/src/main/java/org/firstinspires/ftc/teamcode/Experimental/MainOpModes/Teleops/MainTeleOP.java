@@ -139,6 +139,7 @@ public class MainTeleOP extends LinearOpMode {
     private static int v_history_idx = 0;
     private static double v_measuredRPM = 0.0;
     private static boolean out_green = false;
+    public static int teamAprilID = 20;
 
     protected void robotMainLoop() {
         // all of the code
@@ -522,7 +523,8 @@ public class MainTeleOP extends LinearOpMode {
         robot.init(OpModes.TeleOP);
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
-        InitOtherStuff();
+        InitOtherStuff(0);
+        //limelight3A.pipelineSwitch(0);
         robot.UseDefaultMovement();
         camera_error = calculateCameraError();
         late_camera_error = getLateCameraError();
@@ -554,10 +556,10 @@ public class MainTeleOP extends LinearOpMode {
         return late_camera_error;
     }
 
-    public void InitOtherStuff() {
+    public void InitOtherStuff(int limelightPipeline) {
         //limelight stuff
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(teamPipeline);
+        limelight3A.pipelineSwitch(limelightPipeline);
         limelight3A.reloadPipeline();
         limelight3A.setPollRateHz(100); // poll 100 times per second
         limelight3A.start();
@@ -582,7 +584,6 @@ public class MainTeleOP extends LinearOpMode {
         //aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
     }
     protected double getMotifID() {
-        //limelight3A.pipelineSwitch(2);
         LLResult result = limelight3A.getLatestResult();
         List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
@@ -1075,39 +1076,9 @@ public class MainTeleOP extends LinearOpMode {
         telemetry.addData("L_SENSOR_BALL", launchSensorBall);
     }
     protected double getDistanceToAprilTag() {
-        limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
-        List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
-        if (fiducials == null) return 0;
-        double targetArea = 0;
-        for (LLResultTypes.FiducialResult fiducial : fiducials) {
-            id = fiducial.getFiducialId(); // The ID number of the fiducial
-            robot.addTelemetryData("fiducial id", id);
-//            robot.addTelemetryData("getTargetArea",);
+        double targetArea = llResult.getTa();
 
-            List <List<Double>> bigList = fiducial.getTargetCorners();
-
-            try {
-                double cornern1X = bigList.get(0).get(0);
-                double cornern1Y = bigList.get(0).get(1);
-                double cornern2X = bigList.get(1).get(0);
-                double cornern2Y = bigList.get(1).get(1);
-                double cornern3X = bigList.get(2).get(0);
-                double cornern3Y = bigList.get(2).get(1);
-                double cornern4X = bigList.get(3).get(0);
-                double cornern4Y = bigList.get(3).get(1);
-
-                //robot.addTelemetryData("X Pixels",fiducial.getTargetCorners());
-                //robot.addTelemetryData("cornern1X",cornern1X);robot.addTelemetryData("cornern1Y",cornern1Y);robot.addTelemetryData("cornern2X",cornern2X);robot.addTelemetryData("cornern2Y",cornern2Y);robot.addTelemetryData("cornern3X",cornern3X);robot.addTelemetryData("cornern3Y",cornern3Y);robot.addTelemetryData("cornern4X",cornern4X);robot.addTelemetryData("cornern4Y",cornern4Y);
-
-                double calcualtedHeight = (Math.abs(cornern1Y - cornern4Y) + Math.abs(cornern2Y - cornern3Y)) / 2; // the average
-                targetArea = (calcualtedHeight * calcualtedHeight) / (720 * 960) * 100;
-            } catch (Exception e) {
-                // nasol
-            }
-        }
-
-        robot.addTelemetryData("areaPrecentage", targetArea);
         robot.addTelemetryData("areaPrecentage", targetArea);
         double a = 8.60403612;
         double b = -0.0119936722;
@@ -1165,7 +1136,6 @@ public class MainTeleOP extends LinearOpMode {
 //        nonCorrectedCameraError = cameraError;
 //        return clamp(actualError, -20, 20);
 
-        //limelight3A.pipelineSwitch(teamPipeline);
         LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
