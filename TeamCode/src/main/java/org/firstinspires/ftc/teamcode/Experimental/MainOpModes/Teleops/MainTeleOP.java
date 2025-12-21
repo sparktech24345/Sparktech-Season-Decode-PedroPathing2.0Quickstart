@@ -311,6 +311,10 @@ public class MainTeleOP extends LinearOpMode {
             powerMultiplier -= 0.05;
         }
 
+        if (gamepad2.dpadDownWasPressed()) {
+            resetEncoder();
+        }
+
         if (gamepad2.rightBumperWasPressed()) {
             powerMultiplier += 0.05;
         }
@@ -784,6 +788,14 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
         }
     }
+
+    protected void resetEncoder() {
+        if (!isTryingToFire) {
+            externalEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            externalEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
     protected void fireByMotif () {
         // cazuri favorabile in care am putea scora puncte
         //think on how to do the motif receiving message and how to implement it
