@@ -204,7 +204,7 @@ public class SmallTriangleOld extends OpMode {
                 .setOverrideTarget_bool(true)
                 .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
 
-        //angle
+        // angle
         double turretAngleVal = 58;
         robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
         robot.addTelemetryData("turret angle estimation", turretAngleVal);

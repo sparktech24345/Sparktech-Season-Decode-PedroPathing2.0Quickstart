@@ -204,7 +204,7 @@ public class SmallTriangleRedOld extends OpMode {
         robot.addTelemetryData("turret angle estimation", turretAngleVal);
         robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
 
-        //velocity
+        // velocity
         double targetVelocity = targetPower;
         robot.getMotorComponent("TurretSpinMotor")
                 .targetVPIDOverrideBoolean(false)
