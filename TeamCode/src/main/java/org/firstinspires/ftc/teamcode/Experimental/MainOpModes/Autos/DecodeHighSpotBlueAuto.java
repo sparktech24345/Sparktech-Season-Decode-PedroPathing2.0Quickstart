@@ -32,6 +32,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Config
+@Disabled
 @Autonomous(name = "DecodeHighSpotBlueAuto", group = "Tests")
 public class DecodeHighSpotBlueAuto extends OpMode {
     private RobotController robot;
@@ -260,7 +262,7 @@ public class DecodeHighSpotBlueAuto extends OpMode {
 
     /// ============================== Sequence Stuff ===========================
 
-    public enum AutoEnum{
+    public enum AutoEnum {
         getInFrontOfSorterSequence,
         IsAfterGetInFrontOfSorterSequence,
         UnstuckSequence,
@@ -271,8 +273,8 @@ public class DecodeHighSpotBlueAuto extends OpMode {
     }
     public static AutoEnum autoEnum = getInFrontOfSorterSequence;
     public static AutoEnum autoRememberUnstuckEnum = getInFrontOfSorterSequence;
-    public void checkSwitch(boolean isBusy){
-        if(!isBusy && startAuto){
+    public void checkSwitch(boolean isBusy) {
+        if(!isBusy && startAuto) {
             switch (autoEnum) {
                 case getInFrontOfSorterSequence:
                     AutoSequence1();

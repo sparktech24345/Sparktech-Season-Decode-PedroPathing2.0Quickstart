@@ -10,13 +10,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 
 @Autonomous(name = "DecodeHighSpotRedAuto", group = "Main")
-public class DecodeHighSpotRedAuto extends DecodeHighSpotBlueAuto {
+public class DecodeHighSpotRedAuto extends DecodeHighSpotBlueAutoV2 {
     @Override
     public Pose ModifyPose(Pose pose){
         return new Pose(pose.getX(),-pose.getY(),pose.getHeading());
     }
     @Override
-    public void FixTeamStuff(){
+    public void FixTeamStuff() {
         // init
         currentTeamColor = TeamColor.Red;
         teamPipeline = 1;

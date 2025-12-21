@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 @TeleOp(name="Autonomy Recorder", group="Linear OpMode")
 public class AutoRecorderTeleOp extends LinearOpMode {
-    private final Pose startPose = new Pose(0, 0, Math.toRadians(90));
+    private final Pose startPose = new Pose(0, 0, 0);
     Follower follower;
 
     @SuppressLint("SdCardPath")
