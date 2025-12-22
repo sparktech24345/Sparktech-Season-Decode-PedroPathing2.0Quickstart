@@ -220,8 +220,9 @@ public class SmallTriangleOld extends OpMode {
 
         if (turretHasBall && isFiringTimer.milliseconds() > 3000 && !isMoving) {
             isFiringTimer.reset();
+            if(ballsLaunched >= 1)
+                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"));
             robot.addToQueue(
-                    new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"),
                     new StateAction(true, "PurpleGateServo", "CLOSED"),
                     new DelayAction(true, 400),
                     new StateAction(true, "TransferServo", "UP"),
