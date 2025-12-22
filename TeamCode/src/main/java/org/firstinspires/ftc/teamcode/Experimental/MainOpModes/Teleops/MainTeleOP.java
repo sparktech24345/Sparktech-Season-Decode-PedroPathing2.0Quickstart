@@ -32,32 +32,15 @@ public class MainTeleOP extends LinearOpMode {
     protected TrajectoryCalculator trajectoryCalculator = new TrajectoryCalculator();
     protected VoltageSensor controlHubVoltageSensor;
     protected Limelight3A limelight3A = null;
-    protected AprilTagWebcam aprilTagWebcam = new AprilTagWebcam();
     protected DcMotorEx externalEncoder = null;
     protected boolean sorterChoice = false;
     protected boolean G_P_P = false;
     protected boolean P_G_P = false;
     protected boolean P_P_G = false;
     protected boolean isInSortingPeriod = false;
-    public static double adderTurretRotateForTests = 0;
     public static double powerMultiplier = 1;
-    public static double cameraP = 0.005;
-    public static double cameraI = 0;
-    public static double cameraD = 0;
-    public static double servoP = 0.013; //0.013a5a
-    public static double servoI = 0;
-    public static double servoD = 0; //0.001
-    public static double servoVel = 5000;
-    public static double servoAcel = 10000;
-    public static double servoTime = 1;
-    public static double cameraError = 0;
     public static boolean absoluteZeroTurretRotation = false;
     public static double targetVelocity = 0;
-    public static double rpmMultiplier = 0;
-    public static double rpmDefault = 1500;
-    public static double rpmExponent = 0;
-    public static double rpmkp = 2;
-    public static double rpmkd = 1;
     public static double targetTurret = 0;
     public static double lastTargetTurret = 0;
     public static double degreeSubtract = 2;
@@ -74,7 +57,6 @@ public class MainTeleOP extends LinearOpMode {
     public static int ballCounter = 0;
     protected long timerForIntake = 0;
     protected long lastTimeNano = 0;
-    protected double nonCorrectedCameraError = 0;
     protected long tick_ns = 0;
     public static double targetX = 125;
     public static double targetY = 46;
@@ -85,16 +67,10 @@ public class MainTeleOP extends LinearOpMode {
     public static double farZoneCameraAdder = 2;
     public static double targetVelFar = 1300;
     public static double targetPowerFar = 0.67;
-    public static double targetVelMid = 1300;
-    public static double targetVelClose = 1000;
 
     public static double targetAngleFar = 60;
     public static double targetAngleMid = 61;
-    public static double targetAngleClose = 71;
-    protected double old_pos_y_purple = 0;
-    protected long timeLime = 0;
     protected double id = 0;
-    LLResult llResult = null;
     double[] pythonOutputs = {1, 2};
     double pos_y = pythonOutputs[1];
     public static double camera_error;
@@ -118,96 +94,30 @@ public class MainTeleOP extends LinearOpMode {
     final float[] hsvValuesPurple1 = new float[3];
     final float[] hsvValuesPurple2 = new float[3];
     final float[] hsvValuesLaunch = new float[3];
-    /// --------------------------------------------------------
-    ///
-    ///
-    public static double v_ks = 0;//TODO:de schimbat valori
-    public static double v_kV = 0.00044;
-    public static double v_kp = 0.0015;
-    public static double multiplier = 0.5;
-    public static double v_error = 0;
-    public static double v_current_rpm = 0;
-    ElapsedTime v_pos_timer= new ElapsedTime();
-    public static double v_current_pos = 0;
-    public static double v_last_pos = 0;
-    public static double v_target_Velocity = 2000;
-    //double ticksPerSecond = turretspin1.getVelocity();
-    private static final double v_TICKS_PER_REV = 28.0;
-    private static final int v_BUFFER_SIZE = 100;
-    private static double[] v_position_history = new double[v_BUFFER_SIZE];
-    private static long[] v_time_history = new long[v_BUFFER_SIZE];
-    private static int v_history_idx = 0;
-    private static double v_measuredRPM = 0.0;
-    private static boolean out_green = false;
-    public static int teamAprilID = 20;
 
     protected void robotMainLoop() {
         // all of the code
 
-        //limelight3A.pipelineSwitch(teamPipeline);
-        //LLResult llResult = limelight3A.getLatestResult();
         double distanceToApriltag = getDistanceToAprilTag();
         robot.addTelemetryData("distance_to_april", distanceToApriltag);
 
-        // robot.addTelemetryData("id", getMotifID());
-        long startTime = System.currentTimeMillis();
         tick_ns = calculateTimeDiff();
-        ///robot.addTelemetryData("loop time Nano", tick_ns);
-        ///robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
+        robot.addTelemetryData("loop time Milis",tick_ns / 1000000);
         HandleColors();
         camera_error = calculateCameraError();
         canFire = Math.abs(camera_error) <= 1 && camera_error != 0;
-        firingSequence(false && launchSensorBall != BallColorSet_Decode.NoBall && canFire);
         late_camera_error = getLateCameraError();
 
-        double turretAimOffsetD2 = gamepad2.right_stick_x * 30;
 
-        ///robot.addTelemetryData("Checkpint After pinpoint and coloers", System.currentTimeMillis() - startTime);
         // intakeing
 
-        ///robot.addTelemetryData("tester", robot.getComponent("IntakeMotor").getPosition());
-        ///robot.addTelemetryData("CAMERA ERROR", camera_error);
+        robot.addTelemetryData("CAMERA ERROR", camera_error);
 
-        if (false && (
-                purpleSensorBall1 == BallColorSet_Decode.Purple ||
-                greenSensorBall == BallColorSet_Decode.Purple ||
-                        purpleSensorBall1 == BallColorSet_Decode.Green ||
-                        greenSensorBall == BallColorSet_Decode.Green
-        )) {
-            if (ballCounter > 3 && robot.getComponent("IntakeMotor").getPosition() != -1) { //dont infinite stack comands if full reversing already
-                robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
-                robot.addToQueue(new DelayAction(true, 400));
-                robot.addToQueue(new StateAction(true, "IntakeMotor", "OFF"));
-                ///robot.addTelemetryData("reversing",true);
-                ballCounter--;
-            }
-        }
-        if (ballCounter >= 3  && timerForIntake + 600 < System.currentTimeMillis() && false) {
-            //robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
-            //robot.addTelemetryData("blocking",true);
-        }else if (timerForIntake + 600 < System.currentTimeMillis()) {
+        if (timerForIntake + 600 < System.currentTimeMillis()) {
             robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
-            ///robot.addTelemetryData("redirecting",true);
         }
 
-        if (robot.getControllerKey("DPAD_LEFT1").ExecuteAfterPress) {
-            //NoSorting();
-        }
-        if (robot.getControllerKey("DPAD_RIGHT1").ExecuteAfterPress) {
-            //CountingBalls();
-        }
-        if (robot.getControllerKey("DPAD_UP1").ExecuteAfterPress) {
-            //fireByMotif ();
-        }
-        if (robot.getControllerKey("DPAD_DOWN1").ExecuteAfterPress) {
-            //sort();
-        }
-        if (robot.getControllerKey("DPAD_LEFT2").ExecuteAfterPress) {
-            firePurple();
-        }
-        if (robot.getControllerKey("DPAD_RIGHT2").ExecuteAfterPress) {
-            //fireGreen();
-        }
+
         if(gamepad2.bWasPressed()) {
             turnOnCamera= !turnOnCamera;
         }
@@ -230,7 +140,6 @@ public class MainTeleOP extends LinearOpMode {
 
             //decide where gate should be opened
             if (!isInSortingPeriod) {
-                //robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
                 robot.addToQueue(new StateAction(false, "GreenGateServo", "CLOSED"));
                 robot.addToQueue(new StateAction(false, "PurpleGateServo", "OPEN"));
             } else {
@@ -259,7 +168,6 @@ public class MainTeleOP extends LinearOpMode {
             robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
         }
 
-        ///robot.addTelemetryData("ball counter",ballCounter);
 
 
         if (robot.getControllerKey("B1").IsToggledOnPress) {
@@ -304,10 +212,7 @@ public class MainTeleOP extends LinearOpMode {
         }
         // ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == =DRIVER 2 ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == =
 
-        if (gamepad2.yWasPressed()) {
-            // Sorting toggle
-            //isInSortingPeriod = !isInSortingPeriod;
-        }
+
 
         if (gamepad2.leftBumperWasPressed()) {
             powerMultiplier -= 0.05;
@@ -354,25 +259,19 @@ public class MainTeleOP extends LinearOpMode {
             else robot.addToQueue(new StateAction(false, "PurpleGateServo", "CLOSED"));
         }
 
-        ///robot.addTelemetryData("Checkpint After logic", System.currentTimeMillis() - startTime);
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
         robot
-                //.addTelemetryData("turret power", robot.getCRServoComponent().getPower())
-                //.addTelemetryData("estimated calculated power", robot.getCRServoComponent().getCalculatedPower())
                 .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
                 .addTelemetryData("robot Y", robot.getCurrentPose().getY())
                 .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                //.addTelemetryData("turret external encoder rotation estimation",robot.getCRServoComponent().getEncoderReadingFormatted())
-                ///.addTelemetryData("target velocity", targetVelocity)
-                ///.addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
-                //.addTelemetryData("SPEEDD", robot.getMotorComponent("TurretSpinMotor").getPower())
+                .addTelemetryData("target velocity", targetVelocity)
+                .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
+                .addTelemetryData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower())
         ;
         //.addTelemetryData("Pinpoint actual pos", pinpointTurret.getHeading(AngleUnit.DEGREES))
-        //robot.addTelemetryData("turret VERTICAL ANGLE",trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm));
 
-        ///robot.addTelemetryData("TICK MS", () -> robot.getExecMS());
 
 
 
@@ -380,10 +279,8 @@ public class MainTeleOP extends LinearOpMode {
         if (distance <= 1) degreeSubtract = degreeSubtractMulti * (distance != 0 ? 1 / (distance - 0.1) : 0);
         else degreeSubtract = 0;
         degreeSubtract += degreeSubtractAdder;
-        ///robot.addTelemetryData("degreesSubtract", degreeSubtract);
 
 
-        //robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(trajectoryCalculator.calcAngle(robot.getCurrentPose(),targetPose,true,motorRpm)));
         boolean shouldRawPow = false;
         double turretAngleVal = 0;
         if(isTryingToFire){
@@ -524,7 +421,6 @@ public class MainTeleOP extends LinearOpMode {
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         InitOtherStuff(0);
-        //limelight3A.pipelineSwitch(0);
         robot.UseDefaultMovement();
         camera_error = calculateCameraError();
         late_camera_error = getLateCameraError();
@@ -532,8 +428,6 @@ public class MainTeleOP extends LinearOpMode {
         while (opModeInInit()) {
             robot.init_loop();
         }
-        // start async execution
-        // TeleOPasyncUpdates.init_all(limelight3A);
         robot.getFollowerInstance().setStartingPose(globalRobotPose);
 
         while (opModeIsActive()) {
@@ -574,223 +468,10 @@ public class MainTeleOP extends LinearOpMode {
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class,"Control Hub");
 
-        //pinpointTurret = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointturret");
-
-//        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-//        limelight3A.pipelineSwitch(teamPipeline);
-//        limelight3A.start();
-
         //controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
-        //aprilTagWebcam.init(hardwareMap, robot.getTelemetryInstance(),"Webcam 1");
-    }
-    protected double getMotifID() {
-        LLResult result = limelight3A.getLatestResult();
-        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-        for (LLResultTypes.FiducialResult fiducial : fiducials) {
-            id = fiducial.getFiducialId(); // The ID number of the fiducial
-        }
-        return id;
-    }
-    protected void firingSequence(boolean turretHasBall) {
-
-        if (turretHasBall && isReadyToFire && isFiringTimer.milliseconds() > 750) {
-            isFiringTimer.reset();
-            robot.addToQueue(
-                    new StateAction(false, "PurpleGateServo", "CLOSED"),
-                    new DelayAction(true, 400),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 350),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "PurpleGateServo", "OPEN")
-            );
-        }
-    }
-    protected void fireGreen() {
-        if (purpleSensorBall2 == BallColorSet_Decode.Green) {
-            robot.addToQueue(
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "PurpleGateServo", "CLOSED")
-                    );
-            if (isTryingToFire) {
-                robot.addToQueue(
-                        new StateAction(true, "TransferServo", "UP"),
-                        new DelayAction(true, 350),
-                        new StateAction(true, "TransferServo", "DOWN"));
-            }
-        } else if (greenSensorBall == BallColorSet_Decode.Green) {
-            robot.addToQueue(
-                    new StateAction(true, "GreenGateServo", "OPEN"),
-                    new StateAction(true, "IntakeSorterServo", "PUSH_TO_GREEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 1000),
-                    new StateAction(true, "IntakeSorterServo", "BLOCK"),
-                    new StateAction(true, "GreenGateServo", "CLOSED")
-            );
-            if (isTryingToFire) {
-                robot.addToQueue(
-                        new StateAction(true, "TransferServo", "UP"),
-                        new DelayAction(true, 350),
-                        new StateAction(true, "TransferServo", "DOWN")
-                );
-            }
-        }
-    }
-    protected void firePurple() {
-        if (purpleSensorBall2 == BallColorSet_Decode.Purple) {
-            robot.addToQueue(
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "PurpleGateServo", "CLOSED")
-            );
-            if (isTryingToFire) {
-                robot.addToQueue(
-                        new StateAction(true, "TransferServo", "UP"),
-                        new DelayAction(true, 350),
-                        new StateAction(true, "TransferServo", "DOWN"));
-            }
-        } else if (greenSensorBall == BallColorSet_Decode.Purple) {
-            robot.addToQueue(
-                    new StateAction(true, "GreenGateServo", "OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "GreenGateServo", "CLOSED")
-            );
-            if (isTryingToFire) {
-                robot.addToQueue(
-                        new StateAction(true, "TransferServo", "UP"),
-                        new DelayAction(true, 350),
-                        new StateAction(true, "TransferServo", "DOWN")
-                );
-            }
-        }
     }
     public double PurpleDetect = 0;
     public double GreenDetect = 0;
-    public double  CountBall= PurpleDetect + GreenDetect;
-    public void CountingBalls() {
-        if (purpleSensorBall1 != BallColorSet_Decode.NoBall) {
-            PurpleDetect ++;
-        }
-        if (greenSensorBall != BallColorSet_Decode.NoBall) {
-            GreenDetect ++;
-        }
-        CountBall = PurpleDetect + GreenDetect;
-        //in cazul in care ar vrea o a 4a bila sa intre atunci cand sunt 3 deja inauntru
-        if (CountBall >=3) {
-            robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL_REVERSE"));
-        }else if (CountBall<3) {
-            robot.addToQueue(new StateAction(true, "IntakeMotor", "FULL"));
-        }
-    }
-    //pt cazurile naspa
-    protected void NoSorting() {//prob treb implementat si altfel, dar asa m-am gandit acm
-        //nu depinde de motif
-        if (purpleSensorBall1 == BallColorSet_Decode.Green
-                && purpleSensorBall2 == BallColorSet_Decode.Green
-                && greenSensorBall == BallColorSet_Decode.Green) {
-            robot.addToQueue(
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "PurpleGateServo","CLOSED"),
-                    new StateAction(true, "GreenGateServo","OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "GreenGateServo", "CLOSED"),
-                    new StateAction(true, "IntakeMotor", "OFF")
-            );
-        }
-        if (purpleSensorBall1 == BallColorSet_Decode.Purple
-                && purpleSensorBall2 == BallColorSet_Decode.Purple
-                && greenSensorBall == BallColorSet_Decode.Purple) {
-            robot.addToQueue(
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "PurpleGateServo","CLOSED"),
-                    new StateAction(true, "GreenGateServo","OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "GreenGateServo", "CLOSED"),
-                    new StateAction(true, "IntakeMotor", "OFF")
-            );
-        }
-        if (purpleSensorBall1 == BallColorSet_Decode.Green
-                && purpleSensorBall2 == BallColorSet_Decode.Purple
-                && greenSensorBall == BallColorSet_Decode.Green) {
-            robot.addToQueue(
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "PurpleGateServo","CLOSED"),
-                    new StateAction(true, "GreenGateServo","OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "GreenGateServo", "CLOSED"),
-                    new StateAction(true, "IntakeMotor", "OFF")
-            );
-        }
-        if (purpleSensorBall1 == BallColorSet_Decode.Purple
-                && purpleSensorBall2 == BallColorSet_Decode.Green
-                && greenSensorBall == BallColorSet_Decode.Green) {
-            robot.addToQueue(
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "PurpleGateServo","CLOSED"),
-                    new StateAction(true, "GreenGateServo","OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "GreenGateServo", "CLOSED"),
-                    new StateAction(true, "IntakeMotor", "OFF")
-            );
-        }
-    }
-
-    protected void sort() {
-        // de modificat putin logica, s-a putea ca intakeSorterServo sa nu se poata misca ca e blocat de bila...(dar treb testata ipoteza asta)
-        if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
-            robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-        }
-        else {
-            robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"));
-        }
-    }
 
     protected void resetEncoder() {
         if (!isTryingToFire) {
@@ -799,234 +480,6 @@ public class MainTeleOP extends LinearOpMode {
         }
     }
 
-    protected void fireByMotif () {
-        // cazuri favorabile in care am putea scora puncte
-        //think on how to do the motif receiving message and how to implement it
-        if (G_P_P) {
-           robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
-            if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.Green) {
-                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-            }else if (purpleSensorBall1 != BallColorSet_Decode.NoBall &&  purpleSensorBall2 == BallColorSet_Decode.Green) {
-                robot.addToQueue(
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new StateAction(true, "PurpleGateServo", "CLOSED"),
-                    new StateAction(true, "GreenGateServo", "OPEN"),
-                    new StateAction(true, "IntakeSorterServo", "BLOCK"),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "IntakeMotor", "OFF")
-                );
-            }
-            if (isTryingToFire) {
-                if (purpleSensorBall2 == BallColorSet_Decode.Green && purpleSensorBall1 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
-                    robot.addToQueue(
-                    new StateAction(true, "PurpleGateServo", "OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-//                    new DelayAction(true, 120),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new DelayAction(true,250),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true,"PurpleGateServo","CLOSED"),
-                    new StateAction(true,"GreenGateServo","OPEN"),
-                    new StateAction(true, "IntakeMotor", "FULL"),
-                    new DelayAction(true, 750),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 250),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true,"GreenGateServo","CLOSED"),
-                    new StateAction(true, "IntakeMotor", "OFF")
-                    );
-                }
-                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green) {
-                    robot.addToQueue(
-                            new StateAction(true,"GreenGateServo","OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"GreenGateServo","CLOSED"),
-                            new StateAction(true, "PurpleGateServo", "OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 750),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new DelayAction(true,750),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"PurpleGateServo","CLOSED"),
-                            new StateAction(true, "IntakeMotor", "OFF")
-                    );
-                }
-            }
-
-        }
-
-        if (P_G_P) {
-            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
-            if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall) {
-                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-            }
-            if (isTryingToFire) {
-                if (purpleSensorBall2 == BallColorSet_Decode.Purple && purpleSensorBall1 == BallColorSet_Decode.Green && greenSensorBall == BallColorSet_Decode.Purple) {
-                    robot.addToQueue(
-                            new StateAction(true, "PurpleGateServo", "OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 750),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new DelayAction(true,250),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"PurpleGateServo","CLOSED"),
-                            new StateAction(true,"GreenGateServo","OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 750),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"GreenGateServo","CLOSED"),
-                            new StateAction(true, "IntakeMotor", "OFF")
-                    );
-                }
-                if (purpleSensorBall2 == BallColorSet_Decode.Green && purpleSensorBall1 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Purple) {
-                    robot.addToQueue(
-                            new StateAction(true,"GreenGateServo","OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 750),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"GreenGateServo","CLOSED"),
-                            new StateAction(true, "PurpleGateServo", "OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 750),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new DelayAction(true,250),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"PurpleGateServo","CLOSED"),
-                            new StateAction(true, "IntakeMotor", "OFF")
-                    );
-                }
-                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green) {
-                    robot.addToQueue(
-                            new StateAction(true, "PurpleGateServo", "OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 750),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"PurpleGateServo","CLOSED"),
-                            new StateAction(true,"GreenGateServo","OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true,250),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"GreenGateServo","CLOSED"),
-                            new StateAction(true, "PurpleGateServo", "OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true, "PurpleGateServo", "CLOSED"),
-                            new StateAction(true, "IntakeMotor", "OFF")
-                    );
-                }
-            }
-
-        }
-
-        if (P_P_G) {
-            robot.addToQueue(new StateAction(true , "IntakeSorterServo","REDIRECT_TO_PURPLE"));
-            if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 != BallColorSet_Decode.NoBall && purpleSensorBall2 !=BallColorSet_Decode.Purple) {
-                robot.addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_GREEN"));
-            }else if (purpleSensorBall1 != BallColorSet_Decode.NoBall && purpleSensorBall2 == BallColorSet_Decode.Purple) {
-                robot.addToQueue(
-                        new StateAction(true, "PurpleGateServo", "OPEN"),
-                        new StateAction(true, "IntakeMotor", "FULL"),
-                        new DelayAction(true, 250),
-                        new StateAction(true, "TransferServo", "UP"),
-                        new StateAction(true, "PurpleGateServo", "CLOSED"),
-                        new StateAction(true, "GreenGateServo", "OPEN"),
-                        new StateAction(true, "IntakeSorterServo", "BLOCK"),
-                        new StateAction(true, "TransferServo", "DOWN"),
-                        new StateAction(true, "IntakeMotor", "OFF")
-                );
-            }
-            if (isTryingToFire) {
-                if (purpleSensorBall1 == BallColorSet_Decode.Purple && purpleSensorBall2 == BallColorSet_Decode.Purple && greenSensorBall == BallColorSet_Decode.Green) {
-                    robot.addToQueue(
-                            new StateAction(true, "PurpleGateServo", "OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 750),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new DelayAction(true,250),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"PurpleGateServo","CLOSED"),
-                            new StateAction(true,"GreenGateServo","OPEN"),
-                            new StateAction(true, "IntakeMotor", "FULL"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "UP"),
-                            new DelayAction(true, 250),
-                            new StateAction(true, "TransferServo", "DOWN"),
-                            new StateAction(true,"GreenGateServo","CLOSED"),
-                            new StateAction(true, "IntakeMotor", "OFF")
-                    );
-                }
-            }
-            if (purpleSensorBall2 == BallColorSet_Decode.Purple && purpleSensorBall1 == BallColorSet_Decode.Green  && greenSensorBall == BallColorSet_Decode.Purple) {
-                robot.addToQueue(
-                        new StateAction(true,"GreenGateServo","OPEN"),
-                        new StateAction(true, "IntakeMotor", "FULL"),
-                        new DelayAction(true, 750),
-                        new StateAction(true, "TransferServo", "UP"),
-                        new DelayAction(true, 250),
-                        new StateAction(true, "TransferServo", "DOWN"),
-                        new StateAction(true,"GreenGateServo","CLOSED"),
-                        new StateAction(true, "PurpleGateServo", "OPEN"),
-                        new StateAction(true, "IntakeMotor", "FULL"),
-                        new DelayAction(true, 750),
-                        new StateAction(true, "TransferServo", "UP"),
-                        new DelayAction(true, 250),
-                        new StateAction(true, "TransferServo", "DOWN"),
-                        new StateAction(true, "IntakeMotor", "FULL"),
-                        new DelayAction(true,250),
-                        new StateAction(true, "TransferServo", "UP"),
-                        new DelayAction(true, 250),
-                        new StateAction(true, "TransferServo", "DOWN"),
-                        new StateAction(true,"PurpleGateServo","CLOSED"),
-                        new StateAction(true, "IntakeMotor", "OFF")
-                );
-            }
-
-        }
-    }
 
      protected void HandleColors() {
 
@@ -1047,7 +500,6 @@ public class MainTeleOP extends LinearOpMode {
         purpleSensorBall2 = BallColorSet_Decode.getColor(purpleSensorColors2);
         launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
-//
 //        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
 //        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
 //        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green * 10000.0);
@@ -1114,28 +566,11 @@ public class MainTeleOP extends LinearOpMode {
         angleDiff = ((angleDiff + 540) % 360) - 180;  // neat trick for wrapping to [-180, 180]
 
         // Positive = target to the robot's right (clockwise turn), negative = to the left
-        //robot.addTelemetryData("CALCUL Robot heading", robotHeadingDeg);
-        //robot.addTelemetryData("CALCUL Target angle", targetAngleDeg);
-        //robot.addTelemetryData("CALCUL Heading adjustment", angleDiff);
 
         return angleDiff;
     }
 
     public double calculateCameraError() {
-        // Logitech code
-//        aprilTagWebcam.update();
-//        AprilTagDetection id20 = aprilTagWebcam.getTagBySpecificId(20);
-//        if (id20 != null) aprilTagWebcam.displayDetectionTelemetry(id20);
-//
-//        if (id20 != null) cameraError = id20.ftcPose.x; //might be the wrong thing
-//        else cameraError = existingError;
-//
-//        // telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detectedId.ftcPose.pitch, detectedId.ftcPose.roll, detectedId.ftcPose.yaw));
-//        double actualError = cameraError - existingError;
-//
-//        nonCorrectedCameraError = cameraError;
-//        return clamp(actualError, -20, 20);
-
         LLResult llResult = limelight3A.getLatestResult();
         return llResult.getTx();
     }
