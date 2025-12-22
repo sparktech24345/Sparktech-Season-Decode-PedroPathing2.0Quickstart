@@ -129,7 +129,6 @@ public class MotorComponent extends EncodedComponent {
         max_range = max;
         return this;
     }
-    private static final double TICKS_PER_REV = 28.0;
 
     public DcMotorEx get(String name) {
         return motorMap.get(name);
