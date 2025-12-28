@@ -86,6 +86,8 @@ public class GlobalStorage {
     public static String leftGateServoName = "leftGateServo";
     public static String turretAngleServoName = "turretAngleServo";
     public static String intakeSorterServoName = "intakeServo";
+    public static String colorSensorRightName = "colorSensorRight";
+    public static String colorSensorLeftName = "colorSensorLeft";
 
     // OTHER S(TUFF)
     public static double slowdownConstant       = 1;

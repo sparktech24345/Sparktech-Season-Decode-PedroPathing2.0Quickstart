@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.degreesToOuttakeTurretServo;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
@@ -50,18 +52,12 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static Pose farStart = new Pose(120,24,Math.toRadians(90)); // no more reversing X
 
     /// ----------------- Color Sensor Stuff ------------------
-    protected NormalizedColorSensor colorSensorGreen;
-    protected NormalizedColorSensor colorSensorPurple1;
-    protected NormalizedColorSensor colorSensorPurple2;
-    protected NormalizedColorSensor colorSensorLaunch;
-    protected NormalizedRGBA greenSensorColors;
-    protected NormalizedRGBA purpleSensorColors1;
-    protected NormalizedRGBA purpleSensorColors2;
-    protected NormalizedRGBA launchSensorColors;
-    final float[] hsvValuesGreen = new float[3];
-    final float[] hsvValuesPurple1 = new float[3];
-    final float[] hsvValuesPurple2 = new float[3];
-    final float[] hsvValuesLaunch = new float[3];
+    protected NormalizedColorSensor colorSensorRight;
+    protected NormalizedColorSensor colorSensorLeft;
+    protected NormalizedRGBA rightSensorColors;
+    protected NormalizedRGBA leftSensorColors;
+    final float[] hsvRightSensorColors = new float[3];
+    final float[] hsvLeftSensorColors = new float[3];
     public static int ballCounter = 0;
     public static boolean hasBallInRightChamber = false;
     public static boolean hasBallInLeftChamber = false;
@@ -100,6 +96,9 @@ public class MainTeleOPBlue extends LinearOpMode {
         processCameraStuff(teamPipeline);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(),targetX,targetY);
         rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(),targetX,targetY);
+
+        //colors
+        HandleColors();
 
         // Choosing which values to use
         double usedDistance=0;
@@ -204,7 +203,7 @@ public class MainTeleOPBlue extends LinearOpMode {
                 robot.addToQueue(new StateAction(true, "LeftGateServo", "OPEN"));
             }
         }
-        else if(needsToLowerGates){
+        else if(!needsToLowerGates){
             needsToLowerGates = true; // to not infi repeat, will not trigger the one abover due to wantToFireWithIntake
             robot.addToQueue(new StateAction(false, "RightGateServo", "CLOSED"));
             robot.addToQueue(new StateAction(false, "LeftGateServo", "CLOSED"));
@@ -339,10 +338,8 @@ public class MainTeleOPBlue extends LinearOpMode {
         limelight3A.start();
 
         //other stuff like color sensor
-        colorSensorGreen = hardwareMap.get(NormalizedColorSensor.class, "greensensor");
-        colorSensorPurple1 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor1");
-        colorSensorPurple2 = hardwareMap.get(NormalizedColorSensor.class, "purplesensor2");
-        colorSensorLaunch = hardwareMap.get(NormalizedColorSensor.class, "launchsensor");
+        colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
+        colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class,"Control Hub");
     }
@@ -351,23 +348,14 @@ public class MainTeleOPBlue extends LinearOpMode {
     // ============================ Color Stuff ============================
 
      protected void HandleColors() {
+        rightSensorColors = colorSensorRight.getNormalizedColors();
+        leftSensorColors = colorSensorLeft.getNormalizedColors();
 
+        Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
+        Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
 
-        greenSensorColors = colorSensorGreen.getNormalizedColors();
-        purpleSensorColors1 = colorSensorPurple1.getNormalizedColors();
-        purpleSensorColors2 = colorSensorPurple2.getNormalizedColors();
-        launchSensorColors = colorSensorLaunch.getNormalizedColors();
-
-        Color.colorToHSV(greenSensorColors.toColor(), hsvValuesGreen);
-        Color.colorToHSV(purpleSensorColors1.toColor(), hsvValuesPurple1);
-        Color.colorToHSV(purpleSensorColors2.toColor(), hsvValuesPurple2);
-        Color.colorToHSV(launchSensorColors.toColor(), hsvValuesLaunch);
-
-
-        greenSensorBall = BallColorSet_Decode.getColor(greenSensorColors);
-        purpleSensorBall1 = BallColorSet_Decode.getColor(purpleSensorColors1);
-        purpleSensorBall2 = BallColorSet_Decode.getColor(purpleSensorColors2);
-        launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
+         hasBallInRightChamber = (BallColorSet_Decode.getColor(rightSensorColors) != BallColorSet_Decode.NoBall);
+         hasBallInLeftChamber = (BallColorSet_Decode.getColor(leftSensorColors) != BallColorSet_Decode.NoBall);
 
 //        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
 //        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
