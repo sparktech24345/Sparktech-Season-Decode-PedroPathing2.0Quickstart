@@ -198,25 +198,25 @@ public class SmallTriangleOld extends OpMode {
     }
     private void AutoShootingSequenceCloseTriangle(){
         ///shooty shooty
-
-        // rotation
-        double targetTurret = publicAngleConstantThingTemp;
-        robot.getServoComponent("TurretRotateServo")
-                .setOverrideTarget_bool(true)
-                .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
-
-        // angle
-        double turretAngleVal = 58;
-        robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-        robot.addTelemetryData("turret angle estimation", turretAngleVal);
-        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
-
-        //velocity
-        double targetVelocity = targetVel;
-        robot.getMotorComponent("TurretSpinMotor")
-                .targetVPIDOverrideBoolean(true)
-                .setTargetOverride(targetVelocity)
-        ;
+//
+//        // rotation
+//        double targetTurret = publicAngleConstantThingTemp;
+//        robot.getServoComponent("TurretRotateServo")
+//                .setOverrideTarget_bool(true)
+//                .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
+//
+//        // angle
+//        double turretAngleVal = 58;
+//        robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
+//        robot.addTelemetryData("turret angle estimation", turretAngleVal);
+//        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
+//
+//        //velocity
+//        double targetVelocity = targetVel;
+//        robot.getMotorComponent("TurretSpinMotor")
+//                .targetVPIDOverrideBoolean(true)
+//                .setVPIDTarget(targetVelocity)
+//        ;
 
         if (turretHasBall && isFiringTimer.milliseconds() > 3000 && !isMoving) {
             isFiringTimer.reset();
@@ -279,17 +279,17 @@ public class SmallTriangleOld extends OpMode {
         ballIsStuck = false;
     }
     private void AutoPark(){
-        robot.addToQueue(new MoveAction(false, parkPose));
-        canSequence4 = false;
-        robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
-        robot.getServoComponent("TurretRotateServo")
-                .setOverrideTarget_bool(true)
-                .setOverrideTargetPos(normalizeTurretRotationForServo(0));
-
-        robot.getMotorComponent("TurretSpinMotor")
-                .setOverrideCondition(true)
-                .setPowerOverride(0);
-
+//        robot.addToQueue(new MoveAction(false, parkPose));
+//        canSequence4 = false;
+//        robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+//        robot.getServoComponent("TurretRotateServo")
+//                .setOverrideTarget_bool(true)
+//                .setOverrideTargetPos(normalizeTurretRotationForServo(0));
+//
+//        robot.getMotorComponent("TurretSpinMotor")
+//                .setOverrideCondition(true)
+//                .setPowerOverride(0);
+//
 
     }
     public Pose passPose(){

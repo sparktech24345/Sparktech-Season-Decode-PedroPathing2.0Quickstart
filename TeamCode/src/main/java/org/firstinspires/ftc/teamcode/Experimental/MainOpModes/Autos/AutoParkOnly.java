@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.DecodeLowTriangleBlueAuto.AutoEnum.StartSequence;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;

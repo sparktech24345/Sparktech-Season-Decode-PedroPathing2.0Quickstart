@@ -10,11 +10,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.EncodedComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 
@@ -180,32 +178,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public boolean getDirectionFlip() {
         return movement.getDirectionFlip();
     }
-
-    public double getCurrentPosition(String componentName) {
-        Component comp = components.get(componentName);
-        if (comp instanceof EncodedComponent) {
-            return ((EncodedComponent)comp).getPosition();
-        }
-        return comp.getPosition();
-    }
     public MultipleTelemetry getTelemetryInstance(){return telemetryInstance;}
-
-    public Encoder getComponentEncoder(String componentName) {
-        Component comp = components.get(componentName);
-        if (comp instanceof EncodedComponent) {
-            return ((EncodedComponent)comp).getEncoderInstance();
-        }
-        return null;
-    }
-
-    public RobotController makeEncoder(String componentName) {
-        Component comp = components.get(componentName);
-        if (comp instanceof EncodedComponent) {
-            ((EncodedComponent)comp).useWithEncoder(true);
-        }
-        return this;
-    }
-
     public RobotController addTelemetryData(String str, Object obj) {
         telemetryList.put(str, obj);
         return this;

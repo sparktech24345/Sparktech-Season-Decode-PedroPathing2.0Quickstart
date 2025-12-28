@@ -9,10 +9,19 @@ import java.util.HashMap;
 
 public class ServoComponent extends Component {
 
+    public static enum ServoModes{
+        executeState,
+        positionOverride
+    }
     protected HashMap<String, Servo> motorMap = new HashMap<>();
     protected Servo mainServo = null;
-    protected boolean overrideTarget_bool = false;
     protected double overrideTargetPos = 0;
+    protected ServoModes servoCurrentMode = ServoModes.executeState;
+
+    public ServoComponent(){
+        super();
+        servoCurrentMode = ServoModes.executeState;
+    }
 
     public ServoComponent addMotor(String hardwareMapName) {
         Servo motor = hardwareMapInstance.get(Servo.class, hardwareMapName);
@@ -31,10 +40,11 @@ public class ServoComponent extends Component {
         motorMap.put(customMapName, motor);
         return this;
     }
-    public ServoComponent setOverrideTarget_bool(boolean shoulOverride) {
-        this.overrideTarget_bool = shoulOverride;
+    public ServoComponent setOperationMode(ServoModes mode){
+        this.servoCurrentMode = mode;
         return this;
     }
+
     public void setOverrideTargetPos(double overrideTargetPos) {
         this.overrideTargetPos = overrideTargetPos;
     }
@@ -42,9 +52,15 @@ public class ServoComponent extends Component {
     public double getPosition() {
         return mainServo.getPosition();
     }
+    public double getPrettyPosition() {
+        return mainServo.getPosition() * resolution;
+    }
 
     public Servo get(String name) {
         return motorMap.get(name);
+    }
+    public ServoModes getOperationMode(){
+        return this.servoCurrentMode;
     }
 
     @Override
@@ -54,10 +70,21 @@ public class ServoComponent extends Component {
             targetPos = clamp(targetPos, min_range, max_range);
         }
 
-        if(overrideTarget_bool) targetPos = overrideTargetPos / resolution;
+        switch (servoCurrentMode){
+            case executeState:
+                for (Servo motor : motorMap.values()) {
+                    motor.setPosition(targetPos);
+                }
+                break;
 
-        for (Servo motor : motorMap.values()) {
-            motor.setPosition(targetPos);
+            case positionOverride:
+                targetPos = overrideTargetPos / resolution;
+                for (Servo motor : motorMap.values()) {
+                    motor.setPosition(targetPos);
+                }
+                break;
         }
+
+
     }
 }

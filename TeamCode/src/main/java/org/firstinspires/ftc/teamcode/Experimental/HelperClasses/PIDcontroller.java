@@ -66,32 +66,4 @@ public class PIDcontroller {
 
         return output;
     }
-
-    // target position, current position
-    public double calculateSpecial(double target, double current,double kv,double ks) {
-        long now = System.nanoTime();
-        double deltaTime = (now - lastTime);  // in nanoseconds
-        lastTime = now;
-
-        // target velocity
-        double targetVelocity = (target - current) / 10;
-
-        //vel
-        double velocity = (deltaTime > 0) ? (current - lastPos) / deltaTime : 0;
-        lastPos = current;
-
-        // derivata la vel, adica acceleratia
-        double derivative = (deltaTime > 0) ? (velocity - lastVelocity) / deltaTime : 0;
-        lastVelocity = velocity;
-
-        double errorVelocity = targetVelocity - velocity;
-
-        // PID output
-        double output = ks + (kp * velocity) + (kd * errorVelocity);
-
-        // Clamp to motor power limits
-        //output = clamp(output, -1.0, 1.0); //Not needed and detrimental for tests
-
-        return output;
-    }
 }

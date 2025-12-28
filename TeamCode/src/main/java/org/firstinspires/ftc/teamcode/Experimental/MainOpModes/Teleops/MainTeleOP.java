@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
@@ -15,15 +14,13 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.*;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.*;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.*;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Visual.*;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-
-import java.util.List;
 
 @Config
 @TeleOp(name="Main TeleOP Blue", group="Main")
@@ -322,16 +319,14 @@ public class MainTeleOP extends LinearOpMode {
 
             if(!shouldRawPow){
                 robot.getMotorComponent("TurretSpinMotor")
-                        .targetVPIDOverrideBoolean(true)
-                        .setOverrideCondition(false)
-                        .setTargetOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                        .setOperationMode(MotorComponent.MotorModes.powerOverride)
+                        .setVPIDTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
                 ;
             }
             else {
                 targetVelocity = targetPowerFar;
                 robot.getMotorComponent("TurretSpinMotor")
-                        .targetVPIDOverrideBoolean(false)
-                        .setOverrideCondition(true)
+                        .setOperationMode(MotorComponent.MotorModes.VPIDOverride)
                         .setPowerOverride((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
                 ;
             }
@@ -342,7 +337,7 @@ public class MainTeleOP extends LinearOpMode {
 
             turretAngleVal = clamp(turretAngleVal, 58.5, 72);
             robot.getServoComponent("TurretAngle")
-                    .setOverrideTarget_bool(true)
+                    .setOperationMode(ServoComponent.ServoModes.positionOverride)
                     .setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
 
             // ==================== rotation stuff ====================
@@ -364,7 +359,7 @@ public class MainTeleOP extends LinearOpMode {
 
             if (absoluteZeroTurretRotation) targetTurret = 0;
             robot.getServoComponent("TurretRotateServo")
-                    .setOverrideTarget_bool(true)
+                    .setOperationMode(ServoComponent.ServoModes.positionOverride)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(targetTurret));
         }
         else {
@@ -372,17 +367,16 @@ public class MainTeleOP extends LinearOpMode {
 
             targetVelocity = 0;
             robot.getMotorComponent("TurretSpinMotor")
-                    .targetVPIDOverrideBoolean(false)
-                    .setOverrideCondition(true)
+                    .setOperationMode(MotorComponent.MotorModes.VPIDOverride)
                     .setPowerOverride(0)
             ;
             robot.getServoComponent("TurretRotateServo")
-                    .setOverrideTarget_bool(true)
+                    .setOperationMode(ServoComponent.ServoModes.positionOverride)
                     .setOverrideTargetPos(normalizeTurretRotationForServo(0));
 
             turretAngleVal = 63;
             robot.getServoComponent("TurretAngle")
-                    .setOverrideTarget_bool(true)
+                    .setOperationMode(ServoComponent.ServoModes.positionOverride)
                     .setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
         }
 

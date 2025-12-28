@@ -8,56 +8,34 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Encoder;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
-
 import java.util.HashMap;
 
 @Config
-public class MotorComponent extends EncodedComponent {
-    public static double voltageMultiplier = 1;
+public class MotorComponent extends Component {
+    public static enum MotorModes{
+        executeState,
+        PIDToPositionWithState,
+        powerOverride,
+        VPIDOverride,
+        PIDToPositionOverride
+    }
     protected HashMap<String, DcMotorEx> motorMap = new HashMap<>();
     protected DcMotorEx mainMotor = null;
-    protected boolean usePID = false;
-    protected PIDcontroller PID = null;
     protected PIDFCoefficients CoefficientsForVPID = null;
-    protected double overridePower = -2;
-    protected boolean andreiOverride = false;
+    protected PIDFCoefficients CoefficientsForPositionPID = null;
+    protected double positionTolerance = 0;
+    protected MotorModes motorCurrentMode = MotorModes.executeState;
+    protected double overridePower = 0;
     protected double targetVPID = 0;
-    protected boolean VPIDOverride = false;
+    protected double targetPositionPID = 0;
     protected double velocity = 0;
 
-    public MotorComponent setVoltage(double voltage) {
-        this.voltage = voltage;
-        return this;
-    }
-
-    protected double voltage = 12;
+    // ================== Make motor component==================
 
     public MotorComponent() {
         super();
-        PID = new PIDcontroller();
+        motorCurrentMode = MotorModes.executeState;
     }
-
-    public DcMotorEx getMotor(String name) {
-        return motorMap.get(name);
-    }
-
-    public MotorComponent loadState(String s) {
-        target = states.get(s);
-        return this;
-    }
-
-    public MotorComponent useWithEncoder(boolean useWithEncoder) {
-        if (useWithEncoder) componentEncoder = new Encoder(mainMotor);
-        return this;
-    }
-
-    public MotorComponent setResolution(double res) {
-        resolution = res;
-        return this;
-    }
-
     public MotorComponent addMotor(String hardwareMapName) {
         DcMotorEx motor = hardwareMapInstance.get(DcMotorEx.class, hardwareMapName);
         if (motorMap.isEmpty()) {
@@ -67,16 +45,26 @@ public class MotorComponent extends EncodedComponent {
         motorMap.put(hardwareMapName, motor);
         return this;
     }
-    public MotorComponent setMode(DcMotorEx.RunMode mode){
-        mainMotor.setMode(mode);
-        return this; // with or without encoder
+
+    public MotorComponent loadState(String s) {
+        target = states.get(s);
+        return this;
     }
 
-    public double getPosition() {
-        return mainMotor.getCurrentPosition();
+    public MotorComponent setResolution(double res) {
+        resolution = res;
+        return this;
     }
-    public double getPower() {
-        return mainMotor.getPower();
+
+    public MotorComponent setRange(double min, double max) {
+        min_range = min;
+        max_range = max;
+        return this;
+    }
+
+    public MotorComponent setDcMotorMode(DcMotorEx.RunMode mode){
+        mainMotor.setMode(mode);
+        return this; // with or without encoder
     }
     public MotorComponent setBehaviour(DcMotorEx.ZeroPowerBehavior zeroPower) {
         for (DcMotorEx motor : motorMap.values()) {
@@ -89,17 +77,56 @@ public class MotorComponent extends EncodedComponent {
         motorMap.get(motorName).setDirection(dir);
         return this;
     }
+    public MotorComponent setOperationMode(MotorModes mode){
 
-    public MotorComponent targetVPIDOverrideBoolean(boolean VPIDOverride) {
-        this.VPIDOverride = VPIDOverride;
+        if(motorCurrentMode != mode){
+            switch (mode){
+                case PIDToPositionOverride: // they both do the same thing
+
+                case PIDToPositionWithState:
+                    if(CoefficientsForPositionPID != null)
+                        for (DcMotorEx motor : motorMap.values()) {
+                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForPositionPID);
+                            motor.setTargetPositionTolerance( (int) positionTolerance);
+                        }
+                    else{
+                        CoefficientsForPositionPID = new PIDFCoefficients(0,0,0,0);
+                        for (DcMotorEx motor : motorMap.values()) {
+                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForPositionPID);
+                            motor.setTargetPositionTolerance( (int) positionTolerance);
+                        }
+                    }
+
+
+                    break;
+
+                case VPIDOverride:
+                    if(CoefficientsForVPID != null)
+                        for (DcMotorEx motor : motorMap.values()) {
+                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForVPID);
+                        }
+                    else {
+                        CoefficientsForVPID = new PIDFCoefficients(0, 0, 0, 0);
+                        for (DcMotorEx motor : motorMap.values()) {
+                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, CoefficientsForVPID);
+                        }
+                    }
+                    break;
+            }
+
+        }
+
+        this.motorCurrentMode = mode;
         return this;
     }
-    public MotorComponent setOverrideCondition(boolean andreiOverride) {
-        this.andreiOverride = andreiOverride;
-        return this;
-    }
-    public MotorComponent setTargetOverride(double targetVPID) {
+
+    // ================== Set target stuff ==================
+    public MotorComponent setVPIDTarget(double targetVPID) {
         this.targetVPID = targetVPID;
+        return this;
+    }
+    public MotorComponent setPositionPIDTarget(double targetPositionPID) {
+        this.targetPositionPID = targetPositionPID;
         return this;
     }
     public MotorComponent setPowerOverride(double power) {
@@ -107,8 +134,16 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
-    public MotorComponent setPIDconstants(double p, double i, double d) {
-        PID.setConstants(p, i, d);
+
+    // ================== Set PID Coefficients ==================
+
+    public MotorComponent setPositionPIDconstants(double p, double i, double d, double f,double positionTolerance) {
+        CoefficientsForPositionPID = new PIDFCoefficients(p,i,d,f);
+        this.positionTolerance = positionTolerance;
+        for (DcMotorEx motor : motorMap.values()) {
+            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForPositionPID);
+            motor.setTargetPositionTolerance( (int) positionTolerance);
+        }
         return this;
     }
     public MotorComponent setVPIDconstants(double p, double i, double d, double f) {
@@ -119,16 +154,8 @@ public class MotorComponent extends EncodedComponent {
         return this;
     }
 
-    public MotorComponent useWithPIDController(boolean b) {
-        usePID = b;
-        return this;
-    }
+    // ================== Getters ==================
 
-    public MotorComponent setRange(double min, double max) {
-        min_range = min;
-        max_range = max;
-        return this;
-    }
 
     public DcMotorEx get(String name) {
         return motorMap.get(name);
@@ -137,30 +164,83 @@ public class MotorComponent extends EncodedComponent {
     public double getVelocity() {
         return velocity;
     }
+    public MotorModes getOperationMode(){
+        return this.motorCurrentMode;
+    }
+    public double getPosition() {
+        return mainMotor.getCurrentPosition();
+    }
+    public double getPower() {
+        return mainMotor.getPower();
+    }
+    public DcMotorEx getMotor(String name) {
+        return motorMap.get(name);
+    }
+
+
+    // ================== Main Loop ==================
 
     @Override
     public void update() {
+
         velocity = mainMotor.getVelocity();
-        if (componentEncoder != null) {
-            componentEncoder.update();
-        }
+
         if (min_range < 0 && max_range > 0) {
             target = clamp(target, min_range, max_range);
         }
         double targetPower = target / resolution;
-        if (usePID) {
-            targetPower = PID.calculate(target, componentEncoder.getEncoderPosition());
-        }
-        if (andreiOverride) targetPower = overridePower;
 
-        if (VPIDOverride)
-            for (DcMotorEx motor : motorMap.values()) {
-                motor.setVelocity(targetVPID);
-            }
-        else{
-            for (DcMotorEx motor : motorMap.values()) {
-                motor.setPower(targetPower);
-            }
+
+        switch (motorCurrentMode){
+
+            // ================== state stuff ==================
+            case executeState:
+                for (DcMotorEx motor : motorMap.values()) {
+                    motor.setPower(targetPower);
+                }
+                break;
+
+            case PIDToPositionWithState:
+                mainMotor.setTargetPosition( (int) target);
+                targetPower = mainMotor.getPower();
+                for (DcMotorEx motor : motorMap.values()) {
+                    motor.setPower(targetPower);
+                }
+                break;
+
+
+            // ================== override stuff ==================
+
+            case powerOverride:
+                targetPower = overridePower;
+                for (DcMotorEx motor : motorMap.values()) {
+                    motor.setPower(targetPower);
+                }
+                break;
+
+            case PIDToPositionOverride:
+                mainMotor.setTargetPosition( (int) targetPositionPID);
+                targetPower = mainMotor.getPower();
+                for (DcMotorEx motor : motorMap.values()) {
+                    motor.setPower(targetPower);
+                }
+                break;
+
+            case VPIDOverride:
+                if(targetVPID != 0){
+                    mainMotor.setVelocity(targetVPID); // this is so that we can have only 1 encoder per system of 1 or more engines on the same shaft
+                    targetPower = mainMotor.getPower();
+                    for (DcMotorEx motor : motorMap.values()) {
+                        motor.setPower(targetPower);
+                    }
+                }
+                else{
+                    targetPower = 0;
+                    for (DcMotorEx motor : motorMap.values()) {
+                        motor.setPower(targetPower);
+                    }
+                }
+                break;
         }
     }
 }

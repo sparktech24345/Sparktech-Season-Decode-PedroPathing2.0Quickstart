@@ -17,8 +17,7 @@ public class ComponentMakerMethods {
     public static void MakeComponents(RobotController robot) {
         robot.makeComponent("IntakeMotor", new MotorComponent()
                 .addMotor("intakemotor")
-                .useWithPIDController(false)
-                .useWithEncoder(false)
+                .setOperationMode(MotorComponent.MotorModes.executeState)
                 .setRange(-1, 1)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
@@ -28,12 +27,10 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor("turretspin")
-                .useWithPIDController(false)
-                .targetVPIDOverrideBoolean(false)
-                .setMode(DcMotor.RunMode.RUN_USING_ENCODER)
+                .setOperationMode(MotorComponent.MotorModes.VPIDOverride)
+                .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
                 .setVPIDconstants(180, 0,18,15)
-                .setTargetOverride(0)
-                .useWithEncoder(true)
+                .setVPIDTarget(0)
                 .setRange(-1, 1)
         );
 
@@ -41,26 +38,15 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TurretRotateServo", new ServoComponent()
                 .addMotor("turretrotateleft")
+                .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(243)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
 
-//        robot.makeComponent("TurretRotate", new CRServoComponent()
-//                .addMotor("turretrotateleft")
-//                .setExternalEncoder("backpurple")
-//                .addMotor("turretrotateright")
-//                .initExternalEncoderPosition(0) // an initial offset so that the robots "0" is towards the intake
-//                .useWithPIDController(true)
-//                .setPIDconstants(0, 0, 0)
-//                .setDirection("turretrotateleft", DcMotorSimple.Direction.REVERSE)
-//                .setDirection("turretrotateright", DcMotorSimple.Direction.REVERSE)
-//                .setRange(-270, 270) // range for PID
-//                .moveDuringInit(false)
-//        );
-
         robot.makeComponent("IntakeSorterServo", new ServoComponent()
                 .addMotor("intakeservo")
+                .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -68,6 +54,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("PurpleGateServo", new ServoComponent()
                 .addMotor("purplegate")
+                .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -75,6 +62,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("GreenGateServo", new ServoComponent()
                 .addMotor("greengate")
+                .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -82,6 +70,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TransferServo", new ServoComponent()
                 .addMotor("transferservo")
+                .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -89,7 +78,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TurretAngle", new ServoComponent()
                 .addMotor("turretangle")
-                .setOverrideTarget_bool(false) //go to init pos
+                .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -106,13 +95,6 @@ public class ComponentMakerMethods {
                 .addState("SLOW_REVERSE", -0.5);
         robot.getComponent("TurretRotateServo")
                 .addState("MIDDLE_POINT", 121.5, true);
-
-//        robot.getComponent("IntakeMotor")
-//                .addState("OFF", 0, true)
-//                .addState("SLOW", 0.5)
-//                .addState("FULL", 1)
-//                .addState("FULL_REVERSE", -1)
-//                .addState("SLOW_REVERSE", -0.5);
 
         robot.getComponent("TurretSpinMotor")
                 .addState("OFF", 0, true)
@@ -141,22 +123,5 @@ public class ComponentMakerMethods {
         robot.getComponent("TurretAngle")
                 .addState("servoDown", 136.8, false) // 77 degrees looky
                 .addState("UP_MAX", 36, true); // 50 degrees looky
-
-        robot.addRobotState("TransferGreen", new RobotState(
-                make_pair("GreenGateServo", "OPEN"),
-                make_pair("TransferServo", "DOWN"),
-                make_pair("IntakeMotor", "FULL")
-        ));
-        robot.addRobotState("TransferPurple", new RobotState(
-                make_pair("PurpleGateServo", "OPEN"),
-                make_pair("TransferServo", "DOWN"),
-                make_pair("IntakeMotor", "FULL")
-        ));
-        robot.addRobotState("TransferUp", new RobotState(
-                make_pair("IntakeMotor", "OFF"),
-                make_pair("PurpleGateServo", "CLOSED"),
-                make_pair("GreenGateServo", "CLOSED"),
-                make_pair("TransferServo", "UP")
-        ));
     }
 }
