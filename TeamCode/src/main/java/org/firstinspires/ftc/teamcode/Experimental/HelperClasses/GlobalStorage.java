@@ -76,6 +76,17 @@ public class GlobalStorage {
     public static String PushServoOneName       = "expansionpushservo";
     public static String PushServoTwoName       = "controlpushservo";
 
+    // DECODE ROBOT V2
+    public static String intakeMotorName = "intakeMotor";
+    public static String turretRotationMotorName = "turretRotationMotor";
+    public static String turretFlyWheelMotorUpName = "turretFlyWheelMotorUp";
+    public static String turretFlyWheelMotorDownName = "turretFlyWheelMotorDown";
+
+    public static String rightGateServoName = "rightGateServo";
+    public static String leftGateServoName = "leftGateServo";
+    public static String turretAngleServoName = "turretAngleServo";
+    public static String intakeSorterServoName = "intakeServo";
+
     // OTHER S(TUFF)
     public static double slowdownConstant       = 1;
     public static OpModes currentOpModes = OpModes.TeleOP;
@@ -114,7 +125,7 @@ public class GlobalStorage {
         //interpolation
         return servoDown + (degrees - realDown) * (servoUp - servoDown) / (realUp - realDown);
     }
-    public static double voltageMultiplier(double voltage){
+    public static double voltageMultiplierForMotor(double voltage){
         voltage = clamp(voltage,11,14);
         //set points for function
         double voltajA = 12.7;
@@ -124,5 +135,28 @@ public class GlobalStorage {
         double multiplierB = 1;
 
         return multiplierA + (voltage - voltajA) * (multiplierB - multiplierA) / (voltajB - voltajA);
+    }
+    public static  double calculateDistance(Pose pose1, Pose pose2, boolean convertToMeters) {
+
+        double dx = pose2.getX() - pose1.getX();
+        double dy = pose2.getY() - pose1.getY();
+
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (convertToMeters) {
+            // Assuming your Pose coordinates are in INCHES (FTC standard)
+            distance *= 0.0254; // inches to meters
+        }
+
+        if(distance == 0) return  0.001;
+
+        return distance;
+    }
+
+    public static double distanceToAngleFunction(double distance){
+        return 0; // TODO: Change this
+    }
+    public static double distanceToVelocityFunction(double distance){
+        return 0; // TODO: Change this
     }
 }

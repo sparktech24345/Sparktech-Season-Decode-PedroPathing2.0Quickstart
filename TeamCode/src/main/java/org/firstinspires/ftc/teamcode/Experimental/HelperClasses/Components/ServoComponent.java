@@ -16,6 +16,8 @@ public class ServoComponent extends Component {
     protected HashMap<String, Servo> motorMap = new HashMap<>();
     protected Servo mainServo = null;
     protected double overrideTargetPos = 0;
+    protected double prettyMinRange = 0;
+    protected double prettyMaxRange = 0;
     protected ServoModes servoCurrentMode = ServoModes.executeState;
 
     public ServoComponent(){
@@ -45,8 +47,14 @@ public class ServoComponent extends Component {
         return this;
     }
 
-    public void setOverrideTargetPos(double overrideTargetPos) {
+    public ServoComponent setOverrideTargetPos(double overrideTargetPos) {
         this.overrideTargetPos = overrideTargetPos;
+        return this;
+    }
+    public ServoComponent setPrettyRange(double min, double max){
+        prettyMinRange = min;
+        prettyMaxRange = max;
+        return this;
     }
 
     public double getPosition() {
@@ -65,7 +73,14 @@ public class ServoComponent extends Component {
 
     @Override
     public void update() {
-        double targetPos = target / resolution;
+        double targetPos = target;
+
+        if (prettyMinRange < 0 && prettyMaxRange > 0) {
+            targetPos = clamp(targetPos, prettyMinRange, prettyMaxRange);
+        }
+
+        targetPos /= resolution;
+
         if (min_range < 0 && max_range > 0) {
             targetPos = clamp(targetPos, min_range, max_range);
         }

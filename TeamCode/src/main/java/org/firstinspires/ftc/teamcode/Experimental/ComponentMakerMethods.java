@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.make_pair;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -16,17 +16,15 @@ public class ComponentMakerMethods {
 
     public static void MakeComponents(RobotController robot) {
         robot.makeComponent("IntakeMotor", new MotorComponent()
-                .addMotor("intakemotor")
+                .addMotor(intakeMotorName)
                 .setOperationMode(MotorComponent.MotorModes.executeState)
                 .setRange(-1, 1)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
-        robot.makeComponent("Servo", new ServoComponent(
 
-        ));
-
-        robot.makeComponent("TurretSpinMotor", new MotorComponent()
-                .addMotor("turretspin")
+        robot.makeComponent("TurretFlyWheelMotor", new MotorComponent()
+                .addMotor(turretFlyWheelMotorUpName)
+                .addMotor(turretFlyWheelMotorDownName)
                 .setOperationMode(MotorComponent.MotorModes.VPIDOverride)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
                 .setVPIDconstants(180, 0,18,15)
@@ -34,42 +32,36 @@ public class ComponentMakerMethods {
                 .setRange(-1, 1)
         );
 
-        //TODO:: De sters
-
-        robot.makeComponent("TurretRotateServo", new ServoComponent()
-                .addMotor("turretrotateleft")
-                .setOperationMode(ServoComponent.ServoModes.executeState)
-                .setResolution(243)
+        robot.makeComponent("TurretRotateMotor", new MotorComponent()
+                .addMotor(turretRotationMotorName)
+                .setOperationMode(MotorComponent.MotorModes.PIDToPositionOverride)
+                .setPositionPIDTarget(0) // default middle point should be 0
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
+
+
+        // Servos
+
 
         robot.makeComponent("IntakeSorterServo", new ServoComponent()
-                .addMotor("intakeservo")
+                .addMotor(intakeSorterServoName)
                 .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("PurpleGateServo", new ServoComponent()
-                .addMotor("purplegate")
+        robot.makeComponent("RightGateServo", new ServoComponent()
+                .addMotor(rightGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("GreenGateServo", new ServoComponent()
-                .addMotor("greengate")
-                .setOperationMode(ServoComponent.ServoModes.executeState)
-                .setResolution(360)
-                .setRange(0, 1)
-                .moveDuringInit(true)
-        );
-
-        robot.makeComponent("TransferServo", new ServoComponent()
-                .addMotor("transferservo")
+        robot.makeComponent("LeftGateServo", new ServoComponent()
+                .addMotor(leftGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
@@ -77,51 +69,50 @@ public class ComponentMakerMethods {
         );
 
         robot.makeComponent("TurretAngle", new ServoComponent()
-                .addMotor("turretangle")
+                .addMotor(turretAngleServoName)
                 .setOperationMode(ServoComponent.ServoModes.executeState)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
+        ///init stuff
+        robot.getServoComponent("TurretAngle")
+                .setOperationMode(ServoComponent.ServoModes.positionOverride)
+                .setOverrideTargetPos(50); // TODO CHANGE THIS
     }
 
     public static void MakeStates(RobotController robot) {
-        robot.addTelemetryData("hello", "hello");
         robot.getComponent("IntakeMotor")
                 .addState("OFF", 0, true)
                 .addState("SLOW", 0.5)
                 .addState("FULL", 1)
                 .addState("FULL_REVERSE", -1)
                 .addState("SLOW_REVERSE", -0.5);
-        robot.getComponent("TurretRotateServo")
-                .addState("MIDDLE_POINT", 121.5, true);
 
         robot.getComponent("TurretSpinMotor")
                 .addState("OFF", 0, true)
                 .addState("FULL", 1);
 
-        robot.getComponent("PurpleGateServo")
-                .addState("OPEN", 15, true)
-                .addState("CLOSED", 122);
 
-        robot.getComponent("GreenGateServo")
-                .addState("OPEN", 30)
-                .addState("CLOSED", 200, true);
+        // Servos
+
+
+        robot.getComponent("RightGateServo")
+                .addState("OPEN", 0, true)
+                .addState("CLOSED", 150);
+
+        robot.getComponent("LeftGateServo")
+                .addState("OPEN", 0, true)
+                .addState("CLOSED", 150);
 
         robot.getComponent("IntakeSorterServo")
-                .addState("PUSH_TO_GREEN", 250) // push to green
-                .addState("REDIRECT_TO_PURPLE", 146.64)
-                .addState("REDIRECT_TO_GREEN", 35)
-                .addState("PUSH_TO_PURPLE", 1)
-                .addState("BLOCK", 93.816, true);
-
-        robot.getComponent("TransferServo")
-                .addState("DOWN", 20, true)
-                .addState("MIDDLE", 45)
-                .addState("UP", 230);
+                .addState("REDIRECT_TO_RIGHT", 0)
+                .addState("REDIRECT_TO_LEFT", 0)
+                .addState("BLOCK", 180, true);
 
         robot.getComponent("TurretAngle")
-                .addState("servoDown", 136.8, false) // 77 degrees looky
-                .addState("UP_MAX", 36, true); // 50 degrees looky
+                .addState("DOWN_MAX", 0)
+                .addState("DEFAULT", 50, true) // abt a middle point for safe init
+                .addState("UP_MAX",80);
     }
 }

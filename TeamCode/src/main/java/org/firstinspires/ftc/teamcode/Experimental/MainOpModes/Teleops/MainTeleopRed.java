@@ -16,41 +16,13 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 @TeleOp(name = "Main TeleOp Red", group = "Main")
-public class MainTeleOp_Red extends MainTeleOP {
+public class MainTeleopRed extends MainTeleOPBlue {
 
     @Override
-    public void runOpMode() {
-        // init
-        ballCounter = 0;
+    public void teamSensitiveStuff(){
         teamPipeline = 1;
-        powerMultiplier = 1;
         farZoneCameraAdder = - farZoneCameraAdder;
         targetY = -targetY;
         currentTeamColor = TeamColor.Red;
-
-        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
-            @Override
-            public void main_loop() {
-                robotMainLoop();
-            }
-        };
-        robot.init(OpModes.TeleOP);
-        MakeComponents(robot);
-        MakeStates(robot);
-        InitOtherStuff(1);
-        robot.UseDefaultMovement();
-
-        while (opModeInInit()) {
-            robot.init_loop();
-        }
-        robot.getFollowerInstance().setStartingPose(globalRobotPose);
-
-        while (opModeIsActive()) {
-            // loop
-            robot.loop();
-        }
-        // stop
-        isActive = false;
-        passPose();
     }
 }
