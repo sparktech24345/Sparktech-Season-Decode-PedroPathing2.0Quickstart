@@ -6,27 +6,7 @@ import java.util.function.BooleanSupplier;
 
 public class StateAction extends Action {
 
-    public StateAction(boolean waitForPrevious, String ComponentName, String PositionName) {
-        super(waitForPrevious);
-        this.Execution = () -> {
-            robotControllerInstance.getComponent(ComponentName).loadState(PositionName);
-        };
-    }
-
-    public StateAction(boolean waitForPrevious, String RobotStateName) {
-        super(waitForPrevious);
-        this.Execution = () -> {
-            robotControllerInstance.loadRobotState(RobotStateName);
-        };
-    }
-
-    public StateAction setExecutionCondition(BooleanSupplier exec) {
-        this.ExecutionCondition = exec;
-        return this;
-    }
-
-    public StateAction setDoneCondition(BooleanSupplier done) {
-        this.DoneCondition = done;
-        return this;
+    public StateAction(String ComponentName, String PositionName) {
+        this.Execution = () -> robotControllerInstance.getComponent(ComponentName).loadState(PositionName);
     }
 }

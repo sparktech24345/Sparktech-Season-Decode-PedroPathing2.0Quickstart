@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.degreesToOuttakeTurretServo;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.launchSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.normalizeTurretRotationForServo;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall1;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall2;
 
@@ -95,24 +93,20 @@ public class SmallTriangleOld extends OpMode {
             }
 
             private void telemetry() {
-                robot
-                        .addTelemetryData("robot rotation", Math.toDegrees(robot.getCurrentPose().getHeading()))
-                        .addTelemetryData("robot Y", robot.getCurrentPose().getY())
-                        .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                        .addTelemetryData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity())
-                        .addTelemetryData("hasShooted", hasShooted)
-                        .addTelemetryData("ballCounter", ballCounter)
-                        .addTelemetryData("shootTimer_ms", shootTimer.milliseconds())
-                //if(!isMoving && timeToFire && !startAuto)
-                ;
-                robot.
-                        addTelemetryData("isMoving", isMoving)
-                        .addTelemetryData("timeToFire", timeToFire)
-                        .addTelemetryData("start auto", startAuto);
+                        RobotController.telemetry.addData("robot rotation", Math.toDegrees(robot.getCurrentPose().getHeading()));
+                        RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
+                        RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
+                        RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+                        RobotController.telemetry.addData("hasShooted", hasShooted);
+                        RobotController.telemetry.addData("ballCounter", ballCounter);
+                        RobotController.telemetry.addData("shootTimer_ms", shootTimer.milliseconds());
+                        RobotController.telemetry.addData("isMoving", isMoving);
+                        RobotController.telemetry.addData("timeToFire", timeToFire);
+                        RobotController.telemetry.addData("start auto", startAuto);
             }
 
             private void controls() { // this will happen in a loop
-                isMoving = robot.getFollowerInstance().getInstance().isBusy();
+                isMoving = robot.getFollowerInstance().instance().isBusy();
                 if(isMoving) isFiringTimer.reset();
                 countBalls();
                 if(startAuto) AutoSequence1();
@@ -144,11 +138,11 @@ public class SmallTriangleOld extends OpMode {
     }
 
     private boolean isMoving() {
-        return robot.getFollowerInstance().getInstance().getVelocity().getMagnitude() > 1;
+        return robot.getFollowerInstance().instance().getVelocity().getMagnitude() > 1;
     }
 
     private double getErrorFromShooting() {
-        Pose current = robot.getFollowerInstance().getInstance().getPose();
+        Pose current = robot.getFollowerInstance().instance().getPose();
         double x_err = Math.abs(big_triangle_shoot.getX() - current.getX());
         double y_err = Math.abs(big_triangle_shoot.getY() - current.getY());
         return x_err * y_err;
@@ -208,7 +202,7 @@ public class SmallTriangleOld extends OpMode {
 //        // angle
 //        double turretAngleVal = 58;
 //        robot.getServoComponent("TurretAngle").setOverrideTarget_bool(true);
-//        robot.addTelemetryData("turret angle estimation", turretAngleVal);
+//        RobotController.telemetry.addData("turret angle estimation", turretAngleVal);
 //        robot.getServoComponent("TurretAngle").setOverrideTargetPos(degreesToOuttakeTurretServo(turretAngleVal));
 //
 //        //velocity
@@ -221,14 +215,14 @@ public class SmallTriangleOld extends OpMode {
         if (turretHasBall && isFiringTimer.milliseconds() > 3000 && !isMoving) {
             isFiringTimer.reset();
             if(ballsLaunched >= 1)
-                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "PUSH_TO_PURPLE"));
+                robot.addToQueue(new StateAction("IntakeSorterServo", "PUSH_TO_PURPLE"));
             robot.addToQueue(
-                    new StateAction(true, "PurpleGateServo", "CLOSED"),
-                    new DelayAction(true, 400),
-                    new StateAction(true, "TransferServo", "UP"),
-                    new DelayAction(true, 350),
-                    new StateAction(true, "TransferServo", "DOWN"),
-                    new StateAction(true, "PurpleGateServo", "OPEN")
+                    new StateAction("PurpleGateServo", "CLOSED"),
+                    new DelayAction(400),
+                    new StateAction("TransferServo", "UP"),
+                    new DelayAction(350),
+                    new StateAction("TransferServo", "DOWN"),
+                    new StateAction("PurpleGateServo", "OPEN")
             );
             ballsLaunched++;
         }
@@ -251,10 +245,10 @@ public class SmallTriangleOld extends OpMode {
         purpleSensorBall2 = BallColorSet_Decode.getColorForStorage(purpleSensorColors2);
         launchSensorBall = BallColorSet_Decode.getColorForTurret(launchSensorColors);
 
-        robot.addTelemetryData("green sensor detect", greenSensorBall);
-        robot.addTelemetryData("purple sensor1 detect", purpleSensorBall1);
-        robot.addTelemetryData("purple sensor2 detect", purpleSensorBall2);
-        robot.addTelemetryData("launch sensor detect", launchSensorBall);
+        RobotController.telemetry.addData("green sensor detect", greenSensorBall);
+        RobotController.telemetry.addData("purple sensor1 detect", purpleSensorBall1);
+        RobotController.telemetry.addData("purple sensor2 detect", purpleSensorBall2);
+        RobotController.telemetry.addData("launch sensor detect", launchSensorBall);
 
         turretHasBall = (launchSensorBall != BallColorSet_Decode.NoBall);
 
@@ -265,23 +259,23 @@ public class SmallTriangleOld extends OpMode {
                 + eval(launchSensorBall != BallColorSet_Decode.NoBall);
     }
     private void AutoSequence1() {
-        robot.addToQueue(new MoveAction(false, small_triangle_shoot)); // first shoot 3
+        robot.addToQueue(new MoveAction(small_triangle_shoot)); // first shoot 3
         startAuto = false;
-        robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"))
-        //        .addToQueue(new StateAction(true, "IntakeSorterServo", "REDIRECT_TO_PURPLE"))
+        robot.addToQueue(new StateAction("IntakeMotor", "FULL"))
+        //        .addToQueue(new StateAction("IntakeSorterServo", "REDIRECT_TO_PURPLE"))
         ; // collecting
     }
-    private void AutoSequence3(){
-        robot.addToQueue(new MoveAction(false, unstuckPose));
-        robot.addToQueue(new MoveAction(true, small_triangle_shoot));
+    private void AutoSequence3() {
+        robot.addToQueue(new MoveAction(unstuckPose));
+        robot.addToQueue(new MoveAction(small_triangle_shoot));
         canSequence3 = false;
         isFiringTimer.reset();
         ballIsStuck = false;
     }
-    private void AutoPark(){
+    private void AutoPark() {
 //        robot.addToQueue(new MoveAction(false, parkPose));
 //        canSequence4 = false;
-//        robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+//        robot.addToQueue(new StateAction("IntakeMotor", "OFF"));
 //        robot.getServoComponent("TurretRotateServo")
 //                .setOverrideTarget_bool(true)
 //                .setOverrideTargetPos(normalizeTurretRotationForServo(0));
@@ -292,8 +286,8 @@ public class SmallTriangleOld extends OpMode {
 //
 
     }
-    public Pose passPose(){
-        globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
+    public Pose passPose() {
+        globalRobotPose = robot.getFollowerInstance().instance().getPose();
         return globalRobotPose;
     }
 

@@ -4,19 +4,8 @@ import java.util.function.BooleanSupplier;
 
 public class GeneralAction extends Action {
 
-    public GeneralAction(boolean waitForPrevious, Runnable exec) {
-        super(waitForPrevious);
+    public GeneralAction(Runnable exec) {
         this.Execution = exec;
-    }
-
-    public GeneralAction setExecutionCondition(BooleanSupplier exec) {
-        this.ExecutionCondition = exec;
-        return this;
-    }
-
-    public GeneralAction setDoneCondition(BooleanSupplier done) {
-        this.DoneCondition = done;
-        return this;
     }
 }
 // example

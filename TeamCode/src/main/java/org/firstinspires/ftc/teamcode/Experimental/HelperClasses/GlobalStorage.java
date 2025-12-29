@@ -138,27 +138,30 @@ public class GlobalStorage {
 
         return multiplierA + (voltage - voltajA) * (multiplierB - multiplierA) / (voltajB - voltajA);
     }
-    public static  double calculateDistance(Pose pose1, Pose pose2, boolean convertToMeters) {
+    public static double calculateDistance(Pose pose1, Pose pose2, boolean convertToMeters) {
 
         double dx = pose2.getX() - pose1.getX();
         double dy = pose2.getY() - pose1.getY();
 
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (convertToMeters) {
+        if (convertToMeters)
             // Assuming your Pose coordinates are in INCHES (FTC standard)
             distance *= 0.0254; // inches to meters
-        }
-
-        if(distance == 0) return  0.001;
 
         return distance;
     }
 
-    public static double distanceToAngleFunction(double distance){
+    public static double calculateDistanceNonZero(Pose pose1, Pose pose2, boolean convertToMeters) {
+        double distance = calculateDistance(pose1, pose2, convertToMeters);
+        if (distance == 0) return 0.00001;
+        return distance;
+    }
+
+    public static double distanceToAngleFunction(double distance) {
         return 0; // TODO: Change this
     }
-    public static double distanceToVelocityFunction(double distance){
+    public static double distanceToVelocityFunction(double distance) {
         return 0; // TODO: Change this
     }
 }

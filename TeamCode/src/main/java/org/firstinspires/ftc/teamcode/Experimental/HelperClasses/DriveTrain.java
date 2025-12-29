@@ -46,15 +46,19 @@ public class DriveTrain {
     public void setSlowdown(double slowdownMultiplier) {
         this.slowdownMultiplier = slowdownMultiplier;
     }
-    public void setDirectionFlip(boolean shouldFlip){this.directionFlip = shouldFlip;}
-    public boolean getDirectionFlip(){return this.directionFlip;}
+    public void setDirectionFlip(boolean shouldFlip) {
+        this.directionFlip = shouldFlip;
+    }
+    public boolean getDirectionFlip() {
+        return this.directionFlip;
+    }
 
     public void init() {
         if (currentOpModes == OpModes.TeleOP) {
-            RFDrive = hardwareMapInstance.get(DcMotor.class, frontRight);
-            LFDrive = hardwareMapInstance.get(DcMotor.class, frontLeft);
-            RBDrive = hardwareMapInstance.get(DcMotor.class, backRight);
-            LBDrive = hardwareMapInstance.get(DcMotor.class, backLeft);
+            RFDrive = hardwareMap.get(DcMotor.class, frontRight);
+            LFDrive = hardwareMap.get(DcMotor.class, frontLeft);
+            RBDrive = hardwareMap.get(DcMotor.class, backRight);
+            LBDrive = hardwareMap.get(DcMotor.class, backLeft);
 
             RFDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             LFDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -70,13 +74,13 @@ public class DriveTrain {
 
     public void loop() {
 
-        double vertical     = - gamepadInstance.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
-        double horizontal   = gamepadInstance.get("LEFT_STICK_X1").raw();
-        double pivot        = -gamepadInstance.get("RIGHT_STICK_X1").raw();
+        double vertical     = - gamepad.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
+        double horizontal   = gamepad.get("LEFT_STICK_X1").raw();
+        double pivot        = -gamepad.get("RIGHT_STICK_X1").raw();
 
         /// SOMETHING WEIRD HAPPENED WHEN FIXING PEDRO
 
-        if(directionFlip){
+        if(directionFlip) {
             horizontal = - horizontal;
             vertical = - vertical;
         }

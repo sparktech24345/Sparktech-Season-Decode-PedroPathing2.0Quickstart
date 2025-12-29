@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotState;
 
 public class ComponentMakerMethods {
 
@@ -17,7 +16,7 @@ public class ComponentMakerMethods {
     public static void MakeComponents(RobotController robot) {
         robot.makeComponent("IntakeMotor", new MotorComponent()
                 .addMotor(intakeMotorName)
-                .setOperationMode(MotorComponent.MotorModes.executeState)
+                .setOperationMode(MotorComponent.MotorModes.Power)
                 .setRange(-1, 1)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
@@ -25,17 +24,17 @@ public class ComponentMakerMethods {
         robot.makeComponent("TurretFlyWheelMotor", new MotorComponent()
                 .addMotor(turretFlyWheelMotorUpName)
                 .addMotor(turretFlyWheelMotorDownName)
-                .setOperationMode(MotorComponent.MotorModes.VPIDOverride)
+                .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setVPIDconstants(180, 0,18,15)
-                .setVPIDTarget(0)
+                .setVelocityCoefficients(180, 0,18,15)
+                .setTarget(0)
                 .setRange(-1, 1)
         );
 
         robot.makeComponent("TurretRotateMotor", new MotorComponent()
                 .addMotor(turretRotationMotorName)
-                .setOperationMode(MotorComponent.MotorModes.PIDToPositionOverride)
-                .setPositionPIDTarget(0) // default middle point should be 0
+                .setOperationMode(MotorComponent.MotorModes.Position)
+                .setTarget(0) // default middle point should be 0
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
@@ -46,7 +45,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("IntakeSorterServo", new ServoComponent()
                 .addMotor(intakeSorterServoName)
-                .setOperationMode(ServoComponent.ServoModes.executeState)
+                .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -54,7 +53,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("RightGateServo", new ServoComponent()
                 .addMotor(rightGateServoName)
-                .setOperationMode(ServoComponent.ServoModes.executeState)
+                .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -62,7 +61,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("LeftGateServo", new ServoComponent()
                 .addMotor(leftGateServoName)
-                .setOperationMode(ServoComponent.ServoModes.executeState)
+                .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
@@ -70,15 +69,15 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TurretAngle", new ServoComponent()
                 .addMotor(turretAngleServoName)
-                .setOperationMode(ServoComponent.ServoModes.executeState)
+                .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0, 1)
                 .moveDuringInit(true)
         );
         ///init stuff
         robot.getServoComponent("TurretAngle")
-                .setOperationMode(ServoComponent.ServoModes.positionOverride)
-                .setOverrideTargetPos(50); // TODO CHANGE THIS
+                .setOperationMode(ServoComponent.ServoModes.Position)
+                .setTarget(50); // TODO CHANGE THIS
     }
 
     public static void MakeStates(RobotController robot) {

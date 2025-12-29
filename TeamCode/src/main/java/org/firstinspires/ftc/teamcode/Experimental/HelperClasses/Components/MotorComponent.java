@@ -12,32 +12,22 @@ import java.util.HashMap;
 
 @Config
 public class MotorComponent extends Component {
-    public static enum MotorModes{
-        executeState,
-        PIDToPositionWithState,
-        powerOverride,
-        VPIDOverride,
-        PIDToPositionOverride
+    public static enum MotorModes {
+        Power,
+        Velocity,
+        Position
     }
     protected HashMap<String, DcMotorEx> motorMap = new HashMap<>();
     protected DcMotorEx mainMotor = null;
-    protected PIDFCoefficients CoefficientsForVPID = null;
-    protected PIDFCoefficients CoefficientsForPositionPID = null;
+    protected PIDFCoefficients VelocityCoefficients = null;
+    protected PIDFCoefficients PositionCoefficients = null;
     protected double positionTolerance = 0;
-    protected MotorModes motorCurrentMode = MotorModes.executeState;
-    protected double overridePower = 0;
-    protected double targetVPID = 0;
-    protected double targetPositionPID = 0;
+    protected MotorModes motorCurrentMode = MotorModes.Power;
     protected double velocity = 0;
-
-    // ================== Make motor component==================
-
-    public MotorComponent() {
-        super();
-        motorCurrentMode = MotorModes.executeState;
-    }
+    protected boolean isOverriden = false;
+    
     public MotorComponent addMotor(String hardwareMapName) {
-        DcMotorEx motor = hardwareMapInstance.get(DcMotorEx.class, hardwareMapName);
+        DcMotorEx motor = hardwareMap.get(DcMotorEx.class, hardwareMapName);
         if (motorMap.isEmpty()) {
             mainMotor = motor;
         }
@@ -48,6 +38,7 @@ public class MotorComponent extends Component {
 
     public MotorComponent loadState(String s) {
         target = states.get(s);
+        isOverriden = false;
         return this;
     }
 
@@ -62,7 +53,7 @@ public class MotorComponent extends Component {
         return this;
     }
 
-    public MotorComponent setDcMotorMode(DcMotorEx.RunMode mode){
+    public MotorComponent setDcMotorMode(DcMotorEx.RunMode mode) {
         mainMotor.setMode(mode);
         return this; // with or without encoder
     }
@@ -77,94 +68,62 @@ public class MotorComponent extends Component {
         motorMap.get(motorName).setDirection(dir);
         return this;
     }
-    public MotorComponent setOperationMode(MotorModes mode){
-
-        if(motorCurrentMode != mode){
-            switch (mode){
-                case PIDToPositionOverride: // they both do the same thing
-
-                case PIDToPositionWithState:
-                    if(CoefficientsForPositionPID != null)
-                        for (DcMotorEx motor : motorMap.values()) {
-                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForPositionPID);
-                            motor.setTargetPositionTolerance( (int) positionTolerance);
-                        }
-                    else{
-                        CoefficientsForPositionPID = new PIDFCoefficients(0,0,0,0);
-                        for (DcMotorEx motor : motorMap.values()) {
-                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForPositionPID);
-                            motor.setTargetPositionTolerance( (int) positionTolerance);
-                        }
-                    }
-
-
-                    break;
-
-                case VPIDOverride:
-                    if(CoefficientsForVPID != null)
-                        for (DcMotorEx motor : motorMap.values()) {
-                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForVPID);
-                        }
-                    else {
-                        CoefficientsForVPID = new PIDFCoefficients(0, 0, 0, 0);
-                        for (DcMotorEx motor : motorMap.values()) {
-                            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, CoefficientsForVPID);
-                        }
-                    }
-                    break;
-            }
-
+    public MotorComponent setOperationMode(MotorModes mode) {
+        if (motorCurrentMode == mode) return this;
+        switch (mode) {
+            case Position:
+                if (PositionCoefficients != null)
+                    PositionCoefficients = new PIDFCoefficients(0, 0, 0, 0);
+                for (DcMotorEx motor : motorMap.values()) {
+                    motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PositionCoefficients);
+                    motor.setTargetPositionTolerance((int)positionTolerance);
+                }
+                break;
+            case Velocity:
+                if (VelocityCoefficients != null)
+                    VelocityCoefficients = new PIDFCoefficients(0, 0, 0, 0);
+                for (DcMotorEx motor : motorMap.values())
+                    motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
+                break;
         }
-
-        this.motorCurrentMode = mode;
+        motorCurrentMode = mode;
         return this;
     }
 
     // ================== Set target stuff ==================
-    public MotorComponent setVPIDTarget(double targetVPID) {
-        this.targetVPID = targetVPID;
+    public MotorComponent setTarget(double target) {
+        this.target = target;
+        isOverriden = true;
         return this;
     }
-    public MotorComponent setPositionPIDTarget(double targetPositionPID) {
-        this.targetPositionPID = targetPositionPID;
-        return this;
-    }
-    public MotorComponent setPowerOverride(double power) {
-        this.overridePower = power;
-        return this;
-    }
-
 
     // ================== Set PID Coefficients ==================
 
-    public MotorComponent setPositionPIDconstants(double p, double i, double d, double f,double positionTolerance) {
-        CoefficientsForPositionPID = new PIDFCoefficients(p,i,d,f);
-        this.positionTolerance = positionTolerance;
+    public MotorComponent setPositionCoefficients(double p, double i, double d, double f, double positionTolerance) {
+        PositionCoefficients = new PIDFCoefficients(p, i, d, f);
         for (DcMotorEx motor : motorMap.values()) {
-            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForPositionPID);
-            motor.setTargetPositionTolerance( (int) positionTolerance);
+            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PositionCoefficients);
+            motor.setTargetPositionTolerance((int) positionTolerance);
         }
+        this.positionTolerance = positionTolerance;
         return this;
     }
-    public MotorComponent setVPIDconstants(double p, double i, double d, double f) {
-        if(CoefficientsForVPID == null) CoefficientsForVPID = new PIDFCoefficients(p,i,d,f);
-        for (DcMotorEx motor : motorMap.values()) {
-            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,CoefficientsForVPID);
-        }
+    public MotorComponent setVelocityCoefficients(double p, double i, double d, double f) {
+        VelocityCoefficients = new PIDFCoefficients(p, i, d, f);
+        for (DcMotorEx motor : motorMap.values())
+            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
         return this;
     }
 
     // ================== Getters ==================
 
-
-    public DcMotorEx get(String name) {
-        return motorMap.get(name);
+    public boolean isOverriden() {
+        return isOverriden;
     }
-
     public double getVelocity() {
         return velocity;
     }
-    public MotorModes getOperationMode(){
+    public MotorModes getOperationMode() {
         return this.motorCurrentMode;
     }
     public double getPosition() {
@@ -182,64 +141,31 @@ public class MotorComponent extends Component {
 
     @Override
     public void update() {
-
         velocity = mainMotor.getVelocity();
 
-        if (min_range < 0 && max_range > 0) {
+        if (min_range <= 0 && max_range > 0)
             target = clamp(target, min_range, max_range);
-        }
         double targetPower = target / resolution;
 
-
-        switch (motorCurrentMode){
-
+        switch (motorCurrentMode) {
             // ================== state stuff ==================
-            case executeState:
-                for (DcMotorEx motor : motorMap.values()) {
+            case Power:
+                for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
-                }
                 break;
 
-            case PIDToPositionWithState:
-                mainMotor.setTargetPosition( (int) target);
+            case Position:
+                mainMotor.setTargetPosition((int)target);
                 targetPower = mainMotor.getPower();
-                for (DcMotorEx motor : motorMap.values()) {
+                for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
-                }
                 break;
 
-
-            // ================== override stuff ==================
-
-            case powerOverride:
-                targetPower = overridePower;
-                for (DcMotorEx motor : motorMap.values()) {
-                    motor.setPower(targetPower);
-                }
-                break;
-
-            case PIDToPositionOverride:
-                mainMotor.setTargetPosition( (int) targetPositionPID);
+            case Velocity:
+                mainMotor.setVelocity(target); // this is so that we can have only 1 encoder per system of 1 or more engines on the same shaft
                 targetPower = mainMotor.getPower();
-                for (DcMotorEx motor : motorMap.values()) {
+                for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
-                }
-                break;
-
-            case VPIDOverride:
-                if(targetVPID != 0){
-                    mainMotor.setVelocity(targetVPID); // this is so that we can have only 1 encoder per system of 1 or more engines on the same shaft
-                    targetPower = mainMotor.getPower();
-                    for (DcMotorEx motor : motorMap.values()) {
-                        motor.setPower(targetPower);
-                    }
-                }
-                else{
-                    targetPower = 0;
-                    for (DcMotorEx motor : motorMap.values()) {
-                        motor.setPower(targetPower);
-                    }
-                }
                 break;
         }
     }

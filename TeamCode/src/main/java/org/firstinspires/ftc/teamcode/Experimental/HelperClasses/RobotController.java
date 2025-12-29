@@ -25,11 +25,11 @@ import java.util.function.Supplier;
 
 public abstract class RobotController implements RobotControllerInterface {
 
-    public static ComplexFollower followerInstance = null;
-    public static ComplexGamepad gamepadInstance = null;
-    public static HardwareMap hardwareMapInstance = null;
-    public static MultipleTelemetry telemetryInstance = null;
-    public static StateQueuer queuerInstance = null;
+    public static ComplexFollower follower = null;
+    public static ComplexGamepad gamepad = null;
+    public static HardwareMap hardwareMap = null;
+    public static MultipleTelemetry telemetry = null;
+    public static StateQueuer queuer = null;
     
     
     private double tickMS = 0;
@@ -44,11 +44,11 @@ public abstract class RobotController implements RobotControllerInterface {
     private HashMap<String, Pose> autoPositions = new HashMap<>();
 
     private void init_all() {
-       followerInstance = new ComplexFollower(hardwareMapInstance);
-       followerInstance.update();
-        queuerInstance = new StateQueuer();
+        follower = new ComplexFollower(hardwareMap);
+        follower.setStartingPose(globalRobotPose);
+        follower.update();
+        queuer = new StateQueuer();
         robotControllerInstance = this;
-        followerInstance.setStartingPose(globalRobotPose);
     }
 
     public RobotController() {
@@ -56,16 +56,16 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     public RobotController(HardwareMap hmap, MultipleTelemetry telemetry, ComplexGamepad gamepad) {
-        hardwareMapInstance = hmap;
-        telemetryInstance = telemetry;
-        gamepadInstance = gamepad;
+        hardwareMap = hmap;
+        RobotController.telemetry = telemetry;
+        RobotController.gamepad = gamepad;
         init_all();
     }
 
     public RobotController(HardwareMap hmap, MultipleTelemetry telemetry, Gamepad gpad1, Gamepad gpad2) {
-        hardwareMapInstance = hmap;
-        telemetryInstance = telemetry;
-        gamepadInstance = new ComplexGamepad(gpad1, gpad2);
+        hardwareMap = hmap;
+        RobotController.telemetry = telemetry;
+        gamepad = new ComplexGamepad(gpad1, gpad2);
         init_all();
     }
 
@@ -90,19 +90,20 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public RobotController addToQueue(Action action) {
-        queuerInstance.addAction(action);
+    public RobotController executeNow(Action... actions) {
+        for (Action action : actions)
+            queuer.executeNow(action);
         return this;
     }
 
     public RobotController addToQueue(Action... actions) {
         for (Action action : actions)
-            queuerInstance.addAction(action);
+            queuer.addAction(action);
         return this;
     }
 
     public Button getControllerKey(String name) {
-        return gamepadInstance.get(name);
+        return gamepad.get(name);
     }
 
     public Pose getAutoPose(String name) {
@@ -126,12 +127,12 @@ public abstract class RobotController implements RobotControllerInterface {
     public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
         return (T) components.get(componentName);
     }
-    public Pose getCurrentPose(){ return followerInstance.getInstance().getPose();
+    public Pose getCurrentPose(){ return follower.instance().getPose();
 //        return new Pose (- followerInstance.getInstance().getPose().getX(), no more reversing X due to Pedro beeing fixed
 //                followerInstance.getInstance().getPose().getY(),
 //                followerInstance.getInstance().getPose().getHeading());
     }
-    public ComplexFollower getFollowerInstance(){return followerInstance;}
+    public ComplexFollower getFollowerInstance(){return follower;}
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         movement = new DriveTrain(frontLeftName, frontRightName, backLeftName, backLeftName);
@@ -154,7 +155,7 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     public RobotController setAutoStartingPos(String name) {
-        followerInstance.getInstance().setStartingPose(autoPositions.get(name));
+        follower.instance().setStartingPose(autoPositions.get(name));
         return this;
     }
 
@@ -178,24 +179,14 @@ public abstract class RobotController implements RobotControllerInterface {
     public boolean getDirectionFlip() {
         return movement.getDirectionFlip();
     }
-    public MultipleTelemetry getTelemetryInstance(){return telemetryInstance;}
-    public RobotController addTelemetryData(String str, Object obj) {
-        telemetryList.put(str, obj);
-        return this;
-    }
-
-    public RobotController addTelemetryData(String str, Supplier<?> obj) {
-        telemetryList.put(str, obj);
-        return this;
-    }
 
     public void init(OpModes mode) {
         currentOpModes = mode;
     }
 
     public void init_loop() {
-        gamepadInstance.update();
-        followerInstance.update();
+        gamepad.update();
+        follower.update();
         for (Component c : components.values()) {
             if (c.moveDuringInit()) {
                 c.update();
@@ -205,9 +196,9 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     private void runUpdates() {
-        gamepadInstance.update(); // up to here about 0.5 milis
-        followerInstance.update(); // up to here about 20 milis
-        queuerInstance.update(); // up to here also 20 milis
+        gamepad.update(); // up to here about 0.5 milis
+        follower.update(); // up to here about 20 milis
+        queuer.update(); // up to here also 20 milis
         for (Component c : components.values()) {
             c.update();
         } // aprox 40 milisec tends to 45 / 50
@@ -234,9 +225,9 @@ public abstract class RobotController implements RobotControllerInterface {
     private void showTelemetry() {
         for (Map.Entry<String, Object> entry : telemetryList.entrySet()) {
             if (entry.getValue() instanceof Supplier<?>)
-                telemetryInstance.addData(entry.getKey(), ((Supplier<?>)entry.getValue()).get());
-            else telemetryInstance.addData(entry.getKey(), entry.getValue());
+                telemetry.addData(entry.getKey(), ((Supplier<?>)entry.getValue()).get());
+            else telemetry.addData(entry.getKey(), entry.getValue());
         }
-        telemetryInstance.update();
+        telemetry.update();
     }
 }

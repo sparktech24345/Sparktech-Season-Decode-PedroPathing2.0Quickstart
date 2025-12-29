@@ -11,35 +11,19 @@ import java.util.HashMap;
 @Config
 public class CRServoComponent extends Component {
 
-    public static enum CRServoModes{
-        executeState,
-        powerOverride
+    public static enum CRServoModes {
+        Power // just this for now since PID controllers dont work well on CRServos
     }
     protected HashMap<String, CRServo> motorMap = new HashMap<>();
     protected CRServo mainServo = null;
-    protected double powerOverrideValue = -2;
-    protected double overrideTarget = 0;
-    protected double lastPower = 0;
-    protected CRServoModes CRServoCurrentMode = CRServoModes.executeState;
-
-    public CRServoComponent(){
-        super();
-        this.CRServoCurrentMode = CRServoModes.executeState;
-    }
+    protected CRServoModes CRServoCurrentMode = CRServoModes.Power;
+    
     public CRServoComponent addMotor(String hardwareMapName) {
-        CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
+        CRServo motor = hardwareMap.get(CRServo.class, hardwareMapName);
         if (motorMap.isEmpty()) {
             mainServo = motor;
         }
         motorMap.put(hardwareMapName, motor);
-        return this;
-    }
-    public CRServoComponent addMotor(String hardwareMapName, String customMapName) {
-        CRServo motor = hardwareMapInstance.get(CRServo.class, hardwareMapName);
-        if (motorMap.isEmpty()) {
-            mainServo = motor;
-        }
-        motorMap.put(customMapName, motor);
         return this;
     }
 
@@ -47,16 +31,20 @@ public class CRServoComponent extends Component {
         motorMap.get(servoName).setDirection(dir);
         return this;
     }
-    public CRServoComponent setPowerOverride(double power) {
-        this.powerOverrideValue = power;
-        return this;
-    }
-    public CRServoComponent setOperationMode(CRServoModes mode){
+    
+    public CRServoComponent setOperationMode(CRServoModes mode) {
         this.CRServoCurrentMode = mode;
         return this;
     }
 
-    public double getPosition() { return mainServo.getPower(); }
+    public CRServoComponent setTarget(double target) {
+        this.target = target;
+        return this;
+    }
+
+    public double getPosition() {
+        return mainServo.getPower();
+    }
 
     public double getPower() {
         return mainServo.getPower();
@@ -65,28 +53,15 @@ public class CRServoComponent extends Component {
     public CRServo get(String name) {
         return motorMap.get(name);
     }
-    public CRServoModes getOperationMode(){
+    public CRServoModes getOperationMode() {
         return this.CRServoCurrentMode;
     }
 
     @Override
     public void update() {
-        if (min_range < 0 && max_range > 0) {
+        if (min_range <= 0 && max_range > 0)
             target = clamp(target, min_range, max_range);
-        }
-
-        switch (CRServoCurrentMode){
-            case executeState:
-                for (CRServo servo : motorMap.values()) {
-                    servo.setPower(target);
-                    lastPower = target;
-                }
-            case powerOverride:
-                target = powerOverrideValue;
-                for (CRServo servo : motorMap.values()) {
-                    servo.setPower(target);
-                    lastPower = target;
-                }
-        }
+        for (CRServo servo : motorMap.values())
+            servo.setPower(target);
     }
 }

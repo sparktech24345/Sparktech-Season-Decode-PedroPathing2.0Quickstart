@@ -31,27 +31,27 @@ public class TestAuto extends OpMode {
             }
 
             private void telemetry() {
-                followerInstance.telemetry(telemetry);
+                follower.telemetry(telemetry);
                 telemetry.update();
             }
 
             private void controls() {
-                if (gamepadInstance.get("A1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(true, "p2"));
-                    robotTester.addToQueue(new MoveAction(true, "p1"));
+                if (gamepad.get("A1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(new Pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(new Pose(0, 0, 0)));
                 }
 
-                if (gamepadInstance.get("B1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(true, new Pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(true, new Pose(20, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(true, new Pose(0, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(true, new Pose(0, 0, 0)));
+                if (gamepad.get("B1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(new Pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(new Pose(20, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(new Pose(0, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(new Pose(0, 0, 0)));
                 }
 
-                if (gamepadInstance.get("X1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(true, new Pose(10, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(true, new Pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(true, new Pose(0, 0, 0)));
+                if (gamepad.get("X1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(new Pose(10, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(new Pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(new Pose(0, 0, 0)));
                 }
             }
         };

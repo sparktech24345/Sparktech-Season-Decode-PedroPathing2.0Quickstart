@@ -43,11 +43,9 @@ public class AutoParkOnly extends OpMode {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override
             public void main_loop() {
-                robot
-                        .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                        .addTelemetryData("robot Y", robot.getCurrentPose().getY())
-                        .addTelemetryData("robot rotation", Math.toDegrees(robot.getCurrentPose().getHeading()))
-                ;
+                RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
+                RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
+                RobotController.telemetry.addData("robot rotation", Math.toDegrees(robot.getCurrentPose().getHeading()));
             }
         };
         robot.init(OpModes.Autonomous);
@@ -62,7 +60,7 @@ public class AutoParkOnly extends OpMode {
 
     @Override
     public void start() {
-        robot.addToQueue(new MoveAction(true, getParkPose()));
+        robot.addToQueue(new MoveAction(getParkPose()));
     }
 
     @Override

@@ -38,7 +38,7 @@ public class AutoRecorder {
             if (timer == null) { timer = new ElapsedTime(); timer.reset(); }
             if (Math.abs(timer.milliseconds() - lastSaveMs) >= 25) {
                 lastSaveMs = timer.milliseconds();
-                pose = followerInstance.getInstance().getPose();
+                pose = follower.instance().getPose();
                 TimedPoseData pose_data = new TimedPoseData(pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()), timer.milliseconds());
                 poses.add(pose_data);
             }

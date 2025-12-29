@@ -42,8 +42,8 @@ public enum AutoPositions {
         this.pose = pose;
     }
 
-    AutoPositions(double x, double y, double heading) {
-        this.pose = new Pose(x, y, Math.toRadians(heading));
+    AutoPositions(double x, double y, double headingInDeg) {
+        this.pose = new Pose(x, y, Math.toRadians(headingInDeg));
     }
 
     Pose get() {

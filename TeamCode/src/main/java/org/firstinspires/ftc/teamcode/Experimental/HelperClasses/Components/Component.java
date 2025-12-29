@@ -38,7 +38,9 @@ public abstract class Component {
         return target == states.get(state_name);
     }
 
-    public abstract double getPosition();
+    public double getPosition() {
+        return 0;
+    }
 
     public <T extends Component> T setResolution(double res) {
         resolution = res;

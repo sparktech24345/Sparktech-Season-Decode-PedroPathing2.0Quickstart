@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
@@ -12,9 +11,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.launchSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.normalizeTurretRotationForServo;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall1;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall2;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 
 import android.graphics.Color;
@@ -27,7 +24,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -49,7 +45,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     protected VoltageSensor controlHubVoltageSensor;
     public static double targetX = 125;
     public static double targetY = 46;
-    public static Pose farStart = new Pose(120,24,Math.toRadians(90)); // no more reversing X
+    public static Pose farStart = new Pose(120, 24, Math.toRadians(90)); // no more reversing X
 
     /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
@@ -73,8 +69,8 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static boolean shouldShootOnCamera = false;
 
     /// ----------------- Odometry Stuff -----------------
-    public static double distanceToWallOdometry  =0;
-    public static double rotationToWallOdometry  =0;
+    public static double distanceToWallOdometry = 0;
+    public static double rotationToWallOdometry = 0;
 
     /// ----------------- Intake Priorities -----------------
 
@@ -93,30 +89,28 @@ public class MainTeleOPBlue extends LinearOpMode {
         // all of the code
 
         // processing
-        processCameraStuff(teamPipeline);
-        distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(),targetX,targetY);
-        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(),targetX,targetY);
+        processCameraStuff();
+        distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
+        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
 
         //colors
         HandleColors();
 
         // Choosing which values to use
-        double usedDistance=0;
-        double neededAngleForTurretRotation=0;
-        if(!shouldShootOnCamera){
-            usedDistance = distanceToWallOdometry;
-            neededAngleForTurretRotation = -getEncoderReadingFormatted() * encoderMultiplier + rotationToWallOdometry; /// TODO this might be to be reversed in some ways
-        }
-        else{
+        double usedDistance;
+        double neededAngleForTurretRotation = -getEncoderReadingFormatted() * encoderMultiplier;
+        if (shouldShootOnCamera) {
             usedDistance = distanceMeasuredCamera;
-            neededAngleForTurretRotation = -getEncoderReadingFormatted() * encoderMultiplier -rotationDegreesMeasuredCamera * cameraErrorMultiplier + cameraAdder;
+            neededAngleForTurretRotation += cameraAdder - rotationDegreesMeasuredCamera * cameraErrorMultiplier;
         }
-
-
+        else {
+            usedDistance = distanceToWallOdometry;
+            neededAngleForTurretRotation += rotationToWallOdometry; /// TODO this might be to be reversed in some ways
+        }
 
         // pose resets
-        if(gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().getInstance().setPose(farStart);
-        if(gamepad1.dpad_down && gamepad1.dpad_left) robot.getFollowerInstance().getInstance().setPose(new Pose(0,0,0));
+        if (gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().instance().setPose(farStart);
+        if (gamepad1.dpad_down && gamepad1.dpad_left) robot.getFollowerInstance().instance().setPose(new Pose(0,0,0));
 
         // Driver Intake
         wantsToIntakeDriver = robot.getControllerKey("A1").IsToggledOnPress;
@@ -127,7 +121,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // Driver Actual Shooting
         wantsToFireWithIntake = robot.getControllerKey("X1").IsToggledOnPress;
-        needsToLowerGates =  robot.getControllerKey("X1").ExecuteOnPress;
+        needsToLowerGates = robot.getControllerKey("X1").ExecuteOnPress;
 
         // Driver Outputting
         wantsToOutput = robot.getControllerKey("RIGHT_BUMPER1").IsToggledOnPress;
@@ -136,133 +130,120 @@ public class MainTeleOPBlue extends LinearOpMode {
 
 
         // Slowdown
-        if (robot.getControllerKey("LEFT_BUMPER1").IsToggledOnPress) {
-            robot.setDriveTrainSlowdown(0.3);
-        } else robot.setDriveTrainSlowdown(1);
-
+        if (robot.getControllerKey("LEFT_BUMPER1").ExecuteOnPress) {
+            if (robot.getControllerKey("LEFT_BUMPER1").IsToggledOnPress) {
+                robot.setDriveTrainSlowdown(0.3);
+            } else robot.setDriveTrainSlowdown(1);
+        }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
         // Intake stuff
-        int intakeState =0; // if -1 then output if 0 then do nothing if 1 then intake
-        int gateState =0; // if -1 then gate To The Left if 0 then do block if 1 then to the right
-        if(!wantsToIntakeDriver && !wantsToIntakeLaunching && !wantsToFireWithIntake && !wantsToOutput){
+        int intakeState = 0; // if -1 then output if 0 then do nothing if 1 then intake
+        int gateState = 0; // if -1 then gate To The Left if 0 then do block if 1 then to the right
+        if (!wantsToIntakeDriver && !wantsToIntakeLaunching && !wantsToFireWithIntake && !wantsToOutput) {
             intakeState = 0;
             gateState = 0; // if doing nothing
         }
-        if(wantsToOutput){
+        if (wantsToOutput) {
             wantsToIntakeDriver = wantsToIntakeLaunching = wantsToFireWithIntake = false; // make all of them false for override
             intakeState = -1;
-            if(hasBallInRightChamber) gateState = 1; // open to the right so you can outtake
-            else if(hasBallInLeftChamber) gateState = -1; // left is lower priority but checked
+            if (hasBallInRightChamber) gateState = 1; // open to the right so you can outtake
+            else if (hasBallInLeftChamber) gateState = -1; // left is lower priority but checked
             else gateState = 0; // output last one fast
         }
-        if(wantsToIntakeDriver || wantsToIntakeLaunching || wantsToFireWithIntake){ // for now keep them in the same bucket
+        if (wantsToIntakeDriver || wantsToIntakeLaunching || wantsToFireWithIntake) { // for now keep them in the same bucket
             intakeState = 1;
             if (!hasBallInRightChamber) gateState = 1; // first fill up right
-            else if(!hasBallInLeftChamber) gateState = -1; // then left
+            else if (!hasBallInLeftChamber) gateState = -1; // then left
             else gateState = 1; // then continue pointing to right for when you fire
         }
 
-        switch (intakeState){
+        switch (intakeState) {
             case -1:
-                robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL_REVERSE"));
+                robot.addToQueue(new StateAction("IntakeMotor", "FULL_REVERSE"));
                 break;
 
             case 0:
-                robot.addToQueue(new StateAction(false, "IntakeMotor", "OFF"));
+                robot.addToQueue(new StateAction("IntakeMotor", "OFF"));
                 break;
 
             case 1:
-                robot.addToQueue(new StateAction(false, "IntakeMotor", "FULL"));
+                robot.addToQueue(new StateAction("IntakeMotor", "FULL"));
                 break;
         }
-        switch (gateState){
+        switch (gateState) {
             case -1:
-                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_LEFT"));
+                robot.addToQueue(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
                 break;
 
             case 0:
-                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "BLOCK"));
+                robot.addToQueue(new StateAction("IntakeSorterServo", "BLOCK"));
                 break;
 
             case 1:
-                robot.addToQueue(new StateAction(false, "IntakeSorterServo", "REDIRECT_TO_RIGHT"));
+                robot.addToQueue(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
                 break;
         }
-
-
-
 
         //firing logic
-        if(wantsToFireWithIntake){
-            if(needsToLowerGates){
+        if (wantsToFireWithIntake) {
+            if (needsToLowerGates) {
                 needsToLowerGates = false; // to not infi repeat
-                robot.addToQueue(new StateAction(false, "RightGateServo", "OPEN"));
-                robot.addToQueue(new DelayAction(true,200));
-                robot.addToQueue(new StateAction(true, "LeftGateServo", "OPEN"));
+                robot.addToQueue(new StateAction("RightGateServo", "OPEN"));
+                robot.addToQueue(new DelayAction(200));
+                robot.addToQueue(new StateAction("LeftGateServo", "OPEN"));
             }
         }
-        else if(!needsToLowerGates){
-            needsToLowerGates = true; // to not infi repeat, will not trigger the one abover due to wantToFireWithIntake
-            robot.addToQueue(new StateAction(false, "RightGateServo", "CLOSED"));
-            robot.addToQueue(new StateAction(false, "LeftGateServo", "CLOSED"));
+        else if (!needsToLowerGates) {
+            needsToLowerGates = true; // to not infi repeat, will not trigger the one above due to wantToFireWithIntake
+            robot.addToQueue(new StateAction("RightGateServo", "CLOSED"));
+            robot.addToQueue(new StateAction("LeftGateServo", "CLOSED"));
         }
 
         // Outtake Stuff
-        if(isTryingToFire){
+        if (isTryingToFire) {
             // ----------------------- Power Stuff -----------------------
 
             double targetVelocity = distanceToVelocityFunction(usedDistance);
             robot.getMotorComponent("TurretSpinMotor")
-                    .setOperationMode(MotorComponent.MotorModes.VPIDOverride)
-                    .setVPIDTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity));
+                    .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity));
 
 
             // ----------------------- Angle Stuff -----------------------
 
             double turretAngleVal = distanceToAngleFunction(usedDistance);
             robot.getServoComponent("TurretAngle")
-                    .setOperationMode(ServoComponent.ServoModes.positionOverride)
-                    .setOverrideTargetPos(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
+                    .setTarget(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
 
 
             // ----------------------- Rotation Stuff -----------------------
 
             robot.getMotorComponent("TurretRotateServo")
-                    .setOperationMode(MotorComponent.MotorModes.PIDToPositionOverride)
-                    .setPositionPIDTarget(neededAngleForTurretRotation);
-
-
+                    .setTarget(neededAngleForTurretRotation);
+            
         }
-        else{
+        else {
             double targetVelocity = distanceToVelocityFunction(usedDistance);
             robot.getMotorComponent("TurretSpinMotor")
-                    .setOperationMode(MotorComponent.MotorModes.VPIDOverride)
-                    .setVPIDTarget(0);
+                    .setTarget(0);
 
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            robot.getServoComponent("TurretAngle")
-                    .setOperationMode(ServoComponent.ServoModes.executeState);
-            robot.addToQueue(new StateAction(false, "TurretAngle", "DEFAULT")); // go to default position
+            robot.addToQueue(new StateAction("TurretAngle", "DEFAULT")); // go to default position
 
             robot.getMotorComponent("TurretRotateServo")
-                    .setOperationMode(MotorComponent.MotorModes.PIDToPositionOverride)
-                    .setPositionPIDTarget(0);
+                    .setTarget(0);
 
 
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
-        robot
-                .addTelemetryData("robot rotation", robot.getCurrentPose().getHeading())
-                .addTelemetryData("robot Y", robot.getCurrentPose().getY())
-                .addTelemetryData("robot X", robot.getCurrentPose().getX())
-                .addTelemetryData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity())
-                .addTelemetryData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower())
-        ;
-
+        RobotController.telemetry.addData("robot rotation", robot.getCurrentPose().getHeading());
+        RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
+        RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
+        RobotController.telemetry.addData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity());
+        RobotController.telemetry.addData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower());
     }
 
 
@@ -301,18 +282,18 @@ public class MainTeleOPBlue extends LinearOpMode {
         passPose();
     }
 
-    public void teamSensitiveStuff(){
+    public void teamSensitiveStuff() {
         teamPipeline = 0;
         currentTeamColor = TeamColor.Blue;
     }
 
-    public void setStuffToDefault(){ // occasionally copy paste declarations here so we dont have surprises
+    public void setStuffToDefault() { // occasionally copy paste declarations here so we don't have surprises
         ballCounter = 0;
         shouldShootOnCamera = false;
 
         /// ----------------- Odometry Stuff -----------------
-        distanceToWallOdometry  =0;
-        rotationToWallOdometry  =0;
+        distanceToWallOdometry = 0;
+        rotationToWallOdometry = 0;
 
         /// ----------------- Intake Priorities -----------------
 
@@ -357,38 +338,38 @@ public class MainTeleOPBlue extends LinearOpMode {
          hasBallInRightChamber = (BallColorSet_Decode.getColor(rightSensorColors) != BallColorSet_Decode.NoBall);
          hasBallInLeftChamber = (BallColorSet_Decode.getColor(leftSensorColors) != BallColorSet_Decode.NoBall);
 
-//        robot.addTelemetryData("G_RED",(double)greenSensorColors.red * 10000.0);
-//        robot.addTelemetryData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
-//        robot.addTelemetryData("G_GREEN",(double)greenSensorColors.green * 10000.0);
+//        RobotController.telemetry.addData("G_RED",(double)greenSensorColors.red * 10000.0);
+//        RobotController.telemetry.addData("G_BLUE",(double)greenSensorColors.blue * 10000.0);
+//        RobotController.telemetry.addData("G_GREEN",(double)greenSensorColors.green * 10000.0);
 //
-//        robot.addTelemetryData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
-//        robot.addTelemetryData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
-//        robot.addTelemetryData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
+//        RobotController.telemetry.addData("P1_RED",(double)purpleSensorColors1.red * 10000.0);
+//        RobotController.telemetry.addData("P1_BLUE",(double)purpleSensorColors1.blue * 10000.0);
+//        RobotController.telemetry.addData("P1_GREEN",(double)purpleSensorColors1.green * 10000.0);
 //
-//        robot.addTelemetryData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
-//        robot.addTelemetryData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
-//        robot.addTelemetryData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
+//        RobotController.telemetry.addData("P2_RED",(double)purpleSensorColors2.red * 10000.0);
+//        RobotController.telemetry.addData("P2_BLUE",(double)purpleSensorColors2.blue * 10000.0);
+//        RobotController.telemetry.addData("P2_GREEN",(double)purpleSensorColors2.green * 10000.0);
 //
-//        robot.addTelemetryData("L_RED",(double)launchSensorColors.red * 10000.0);
-//        robot.addTelemetryData("L_BLUE",(double)launchSensorColors.blue * 10000.0);
-//        robot.addTelemetryData("L_GREEN",(double)launchSensorColors.green * 10000.0);
+//        RobotController.telemetry.addData("L_RED",(double)launchSensorColors.red * 10000.0);
+//        RobotController.telemetry.addData("L_BLUE",(double)launchSensorColors.blue * 10000.0);
+//        RobotController.telemetry.addData("L_GREEN",(double)launchSensorColors.green * 10000.0);
 //
-//        robot.addTelemetryData("G Sensed Color", BallColorSet_Decode.getColorForStorage(greenSensorColors));
-//        robot.addTelemetryData("P1 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors1.red * 1.5, purpleSensorColors1.green * 1.5, purpleSensorColors1.blue * 1.5));
-//        robot.addTelemetryData("P2 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors2));
-//        robot.addTelemetryData("L Sensed Color", BallColorSet_Decode.getColorForStorage(launchSensorColors));
+//        RobotController.telemetry.addData("G Sensed Color", BallColorSet_Decode.getColorForStorage(greenSensorColors));
+//        RobotController.telemetry.addData("P1 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors1.red * 1.5, purpleSensorColors1.green * 1.5, purpleSensorColors1.blue * 1.5));
+//        RobotController.telemetry.addData("P2 Sensed Color", BallColorSet_Decode.getColorForStorage(purpleSensorColors2));
+//        RobotController.telemetry.addData("L Sensed Color", BallColorSet_Decode.getColorForStorage(launchSensorColors));
 
 
-        telemetry.addData("G_SENSOR_BALL", greenSensorBall);
-        telemetry.addData("P1_SENSOR_BALL", purpleSensorBall1);
-        telemetry.addData("P2_SENSOR_BALL", purpleSensorBall1);
-        telemetry.addData("L_SENSOR_BALL", launchSensorBall);
+        RobotController.telemetry.addData("G_SENSOR_BALL", greenSensorBall);
+        RobotController.telemetry.addData("P1_SENSOR_BALL", purpleSensorBall1);
+        RobotController.telemetry.addData("P2_SENSOR_BALL", purpleSensorBall1);
+        RobotController.telemetry.addData("L_SENSOR_BALL", launchSensorBall);
     }
 
 
     // ============================ Camera Stuff ============================
 
-    public void processCameraStuff(int currentPipeline){
+    public void processCameraStuff() {
         LLResult llResult = limelight3A.getLatestResult();
 
         // rotation
@@ -398,11 +379,11 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         double targetArea = llResult.getTa();
 
-        robot.addTelemetryData("areaPrecentage", targetArea);
+        RobotController.telemetry.addData("areaPercentage", targetArea);
         double a = 8.60403612;
         double b = -0.0119936722;
 
-        distanceMeasuredCamera =  Math.log(targetArea / a) / b;
+        distanceMeasuredCamera = Math.log(targetArea / a) / b;
     }
 
     // ============================ Odometry Stuff ============================
@@ -437,7 +418,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         return angleDiff;
     }
 
-    public static double calculateDistanceToWallInMeters(Pose robotPose, double targetX, double targetY){
+    public static double calculateDistanceToWallInMeters(Pose robotPose, double targetX, double targetY) {
         return calculateDistance(robotPose, new Pose(targetX, targetY, 0), true);
     }
 
@@ -448,7 +429,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         return reading;
     }
     public Pose passPose() {
-        globalRobotPose = robot.getFollowerInstance().getInstance().getPose();
+        globalRobotPose = robot.getFollowerInstance().instance().getPose();
         return globalRobotPose;
     }
 }

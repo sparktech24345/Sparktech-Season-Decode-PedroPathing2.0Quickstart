@@ -54,9 +54,9 @@ public class ServoMath {
 
 
         // Positive = target to the robot's right (clockwise turn), negative = to the left
-        robot.addTelemetryData("CALCUL Robot heading", robotHeadingDeg);
-        robot.addTelemetryData("CALCUL Target angle", targetAngleDeg);
-        robot.addTelemetryData("CALCUL Heading adjustment", angleDiff);
+        RobotController.telemetry.addData("CALCUL Robot heading", robotHeadingDeg);
+        RobotController.telemetry.addData("CALCUL Target angle", targetAngleDeg);
+        RobotController.telemetry.addData("CALCUL Heading adjustment", angleDiff);
 
         return angleDiff;
     }
