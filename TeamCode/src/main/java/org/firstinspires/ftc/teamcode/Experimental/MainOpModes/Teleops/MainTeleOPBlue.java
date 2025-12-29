@@ -29,6 +29,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
@@ -161,28 +162,28 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         switch (intakeState) {
             case -1:
-                robot.addToQueue(new StateAction("IntakeMotor", "FULL_REVERSE"));
+                robot.executeNow(new StateAction("IntakeMotor", "FULL_REVERSE"));
                 break;
 
             case 0:
-                robot.addToQueue(new StateAction("IntakeMotor", "OFF"));
+                robot.executeNow(new StateAction("IntakeMotor", "OFF"));
                 break;
 
             case 1:
-                robot.addToQueue(new StateAction("IntakeMotor", "FULL"));
+                robot.executeNow(new StateAction("IntakeMotor", "FULL"));
                 break;
         }
         switch (gateState) {
             case -1:
-                robot.addToQueue(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
+                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
                 break;
 
             case 0:
-                robot.addToQueue(new StateAction("IntakeSorterServo", "BLOCK"));
+                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
                 break;
 
             case 1:
-                robot.addToQueue(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
+                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
                 break;
         }
 
@@ -190,15 +191,17 @@ public class MainTeleOPBlue extends LinearOpMode {
         if (wantsToFireWithIntake) {
             if (needsToLowerGates) {
                 needsToLowerGates = false; // to not infi repeat
-                robot.addToQueue(new StateAction("RightGateServo", "OPEN"));
-                robot.addToQueue(new DelayAction(200));
-                robot.addToQueue(new StateAction("LeftGateServo", "OPEN"));
+                robot.executeNow(new ActionSequence(
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(200),
+                        new StateAction("LeftGateServo", "OPEN")
+                ));
             }
         }
         else if (!needsToLowerGates) {
             needsToLowerGates = true; // to not infi repeat, will not trigger the one above due to wantToFireWithIntake
-            robot.addToQueue(new StateAction("RightGateServo", "CLOSED"));
-            robot.addToQueue(new StateAction("LeftGateServo", "CLOSED"));
+            robot.executeNow(new StateAction("RightGateServo", "CLOSED"));
+            robot.executeNow(new StateAction("LeftGateServo", "CLOSED"));
         }
 
         // Outtake Stuff
@@ -229,7 +232,7 @@ public class MainTeleOPBlue extends LinearOpMode {
                     .setTarget(0);
 
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            robot.addToQueue(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+            robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
 
             robot.getMotorComponent("TurretRotateServo")
                     .setTarget(0);
