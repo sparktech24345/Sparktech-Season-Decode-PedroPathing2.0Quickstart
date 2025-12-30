@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ColorSensorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
@@ -21,9 +22,9 @@ public class ComponentMakerMethods {
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
         );
 
-        robot.makeComponent("TurretFlyWheelMotor", new MotorComponent()
-                .addMotor(turretFlyWheelMotorUpName)
-                .addMotor(turretFlyWheelMotorDownName)
+        robot.makeComponent("TurretSpinMotor", new MotorComponent()
+                .addMotor(turretFlyWheelMotorLeftName)
+                .addMotor(turretFlyWheelMotorRightName)
                 .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
                 .setVelocityCoefficients(180, 0,18,15)
@@ -77,7 +78,12 @@ public class ComponentMakerMethods {
         ///init stuff
         robot.getServoComponent("TurretAngle")
                 .setOperationMode(ServoComponent.ServoModes.Position)
-                .setTarget(50); // TODO CHANGE THIS
+                .setTarget(288); // TODO CHANGE THIS
+
+        // color sensor stuff
+
+        robot.makeComponent("colorSensorRight",new ColorSensorComponent(colorSensorRightName));
+        robot.makeComponent("colorSensorLeft",new ColorSensorComponent(colorSensorLeftName));
     }
 
     public static void MakeStates(RobotController robot) {
@@ -110,8 +116,8 @@ public class ComponentMakerMethods {
                 .addState("BLOCK", 180, true);
 
         robot.getComponent("TurretAngle")
-                .addState("DOWN_MAX", 0)
-                .addState("DEFAULT", 50, true) // abt a middle point for safe init
-                .addState("UP_MAX",80);
+                .addState("DOWN_MAX", 262.8)
+                .addState("DEFAULT", 288, true) // abt a middle point for safe init
+                .addState("UP_MAX",324);
     }
 }

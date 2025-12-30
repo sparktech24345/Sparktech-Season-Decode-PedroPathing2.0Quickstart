@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.hardwareMap;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Color;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GenericColor;
@@ -18,6 +21,11 @@ public class ColorSensorComponent extends Component {
         detectedColor = new Color(sensor.argb());
         formattedColor = detectedColor.getColor();
     }
+    public ColorSensorComponent(String hardwareName){
+        this.sensor = hardwareMap.get(ColorSensor.class, hardwareName);
+        detectedColor = new Color(sensor.argb());
+        formattedColor = detectedColor.getColor();
+    }
 
     public Color getDetectedColor() {
         return detectedColor;
@@ -25,6 +33,9 @@ public class ColorSensorComponent extends Component {
 
     public GenericColor.Colors getFormattedColor() {
         return formattedColor;
+    }
+    public void useSensorLight(boolean use){
+        sensor.enableLed(use);
     }
 
     @Override

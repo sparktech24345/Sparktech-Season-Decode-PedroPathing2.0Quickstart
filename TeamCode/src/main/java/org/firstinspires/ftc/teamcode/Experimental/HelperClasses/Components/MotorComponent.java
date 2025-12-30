@@ -72,7 +72,7 @@ public class MotorComponent extends Component {
         if (motorCurrentMode == mode) return this;
         switch (mode) {
             case Position:
-                if (PositionCoefficients != null)
+                if (PositionCoefficients == null)
                     PositionCoefficients = new PIDFCoefficients(0, 0, 0, 0);
                 for (DcMotorEx motor : motorMap.values()) {
                     motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PositionCoefficients);
@@ -80,7 +80,7 @@ public class MotorComponent extends Component {
                 }
                 break;
             case Velocity:
-                if (VelocityCoefficients != null)
+                if (VelocityCoefficients == null)
                     VelocityCoefficients = new PIDFCoefficients(0, 0, 0, 0);
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);

@@ -77,10 +77,10 @@ public class GlobalStorage {
     public static String PushServoTwoName       = "controlpushservo";
 
     // DECODE ROBOT V2
-    public static String intakeMotorName = "intakeMotor";
-    public static String turretRotationMotorName = "turretRotationMotor";
-    public static String turretFlyWheelMotorUpName = "turretFlyWheelMotorUp";
-    public static String turretFlyWheelMotorDownName = "turretFlyWheelMotorDown";
+    public static String intakeMotorName = "intakeMotor"; // port control 3
+    public static String turretRotationMotorName = "turretRotateMotor"; // port control 2
+    public static String turretFlyWheelMotorLeftName = "turretFlyWheelMotorLeft"; // port control 0
+    public static String turretFlyWheelMotorRightName = "turretFlyWheelMotorRight"; // port control 1
 
     public static String rightGateServoName = "rightGateServo";
     public static String leftGateServoName = "leftGateServo";

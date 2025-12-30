@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ColorSensorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
@@ -122,6 +123,9 @@ public abstract class RobotController implements RobotControllerInterface {
         return (T) components.get(componentName);
     }
     public <T extends ServoComponent> T getServoComponent(String componentName) {
+        return (T) components.get(componentName);
+    }
+    public <T extends ColorSensorComponent> T getColorSensorComponent(String componentName) {
         return (T) components.get(componentName);
     }
     public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
