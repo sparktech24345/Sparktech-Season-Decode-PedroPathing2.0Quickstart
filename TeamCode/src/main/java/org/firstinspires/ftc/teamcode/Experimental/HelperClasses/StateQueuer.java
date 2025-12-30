@@ -31,9 +31,11 @@ public class StateQueuer {
     public boolean isEmpty() { return actionQueue.isEmpty(); }
 
     public void update() {
-        for (Action action : instantActions) {
+        for (int i = 0; i < instantActions.size();) {
+            Action action = instantActions.get(i);
             action.update();
-            if (action.finished()) instantActions.remove(action);
+            if (action.finished()) instantActions.remove(i);
+            else ++i;
         }
 
         for (Action action : actionQueue) {
