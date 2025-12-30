@@ -87,7 +87,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double turretVelocityOverride = 0;
 
     public static boolean isTryingToFire = false;
-    public static boolean needsToLowerGates = false;
+    public static boolean needsToLowerGates = true;
     protected void robotMainLoop() {
         // all of the code
 
@@ -314,7 +314,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         turretVelocityOverride = 0;
 
         isTryingToFire = false;
-        needsToLowerGates = false;
+        needsToLowerGates = true;
     }
 
     public void InitOtherStuff(int limelightPipeline) {

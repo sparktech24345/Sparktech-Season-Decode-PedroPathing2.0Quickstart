@@ -145,6 +145,7 @@ public class MotorComponent extends Component {
 
         if (min_range <= 0 && max_range > 0)
             target = clamp(target, min_range, max_range);
+
         double targetPower = target / resolution;
 
         switch (motorCurrentMode) {

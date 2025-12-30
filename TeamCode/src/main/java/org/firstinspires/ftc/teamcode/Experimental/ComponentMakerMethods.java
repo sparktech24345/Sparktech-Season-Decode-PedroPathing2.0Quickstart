@@ -36,7 +36,7 @@ public class ComponentMakerMethods {
                 .addMotor(turretRotationMotorName)
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0) // default middle point should be 0
-                .setRange(0, 1)
+                .setRange(-1, 1)
                 .moveDuringInit(true)
         );
 
@@ -75,10 +75,6 @@ public class ComponentMakerMethods {
                 .setRange(0.7, 0.9)
                 .moveDuringInit(true)
         );
-        ///init stuff
-        robot.getServoComponent("TurretAngle")
-                .setOperationMode(ServoComponent.ServoModes.Position)
-                .setTarget(288); // TODO CHANGE THIS
 
         // color sensor stuff
 
@@ -103,21 +99,21 @@ public class ComponentMakerMethods {
 
 
         robot.getComponent("RightGateServo")
-                .addState("OPEN", 0, true)
-                .addState("CLOSED", 150);
+                .addState("OPEN", 180) // 0.5
+                .addState("CLOSED", 75,true); // 0.21
 
         robot.getComponent("LeftGateServo")
-                .addState("OPEN", 0, true)
-                .addState("CLOSED", 150);
+                .addState("CLOSED", 130, true) // 0.36
+                .addState("OPEN", 36); // 0.1
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_RIGHT", 0)
-                .addState("REDIRECT_TO_LEFT", 0)
-                .addState("BLOCK", 180, true);
+                .addState("REDIRECT_TO_RIGHT", 61) // 61
+                .addState("REDIRECT_TO_LEFT", 154.8) // 154.8
+                .addState("BLOCK", 108, true); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
 
         robot.getComponent("TurretAngle")
                 .addState("DOWN_MAX", 262.8)
                 .addState("DEFAULT", 288, true) // abt a middle point for safe init
-                .addState("UP_MAX",324);
+                .addState("UP_MAX",324); // 0.9 is max down and 0.73 is max up
     }
 }

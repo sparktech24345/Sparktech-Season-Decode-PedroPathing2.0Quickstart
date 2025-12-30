@@ -52,10 +52,12 @@ public class ServoComponent extends Component {
     public void update() {
         double targetPos = target;
 
+        targetPos /= resolution;
+
         if (min_range <= 0 && max_range > 0)
             targetPos = clamp(targetPos, min_range, max_range);
 
-        targetPos /= resolution;
+
         for (Servo motor : motorMap.values())
             motor.setPosition(targetPos);
     }
