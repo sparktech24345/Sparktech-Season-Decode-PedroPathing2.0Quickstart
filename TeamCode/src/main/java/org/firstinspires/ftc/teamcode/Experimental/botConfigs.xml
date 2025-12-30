@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
+        <LynxModule name="Expansion Hub 2" port="2">
+            <goBILDA5202SeriesMotor name="frontpurple" port="0" />
+            <goBILDA5202SeriesMotor name="frontgreen" port="1" />
+            <goBILDA5202SeriesMotor name="backpurple" port="2" />
+            <goBILDA5202SeriesMotor name="backgreen" port="3" />
+            <AnalogInput name="laserAnalogInput" port="0" />
+            <RevColorSensorV3 name="colorSensorLeft" port="0" bus="0" />
+        </LynxModule>
+        <LynxModule name="Control Hub" port="173">
+            <goBILDA5202SeriesMotor name="turretFlyWheelMotorLeft" port="0" />
+            <goBILDA5202SeriesMotor name="turretFlyWheelMotorRight" port="1" />
+            <goBILDA5202SeriesMotor name="turretRotateMotor" port="2" />
+            <goBILDA5202SeriesMotor name="intakeMotor" port="3" />
+            <Servo name="rightGateServo" port="0" />
+            <Servo name="leftGateServo" port="1" />
+            <Servo name="intakeServo" port="2" />
+            <Servo name="turretAngleServo" port="3" />
+            <goBILDAPinpoint name="pinpoint" port="0" bus="3" />
+            <RevColorSensorV3 name="colorSensorRight" port="0" bus="2" />
+        </LynxModule>
+    </LynxUsbDevice>
+    <EthernetDevice name="limelight" serialNumber="EthernetOverUsb:eth0:172.29.0.28" name="limelight" port="-1" ipAddress="172.29.0.1" />
+</Robot>
