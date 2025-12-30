@@ -71,7 +71,7 @@ public class ComponentMakerMethods {
                 .addMotor(turretAngleServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
-                .setRange(0, 1)
+                .setRange(0.7, 0.9)
                 .moveDuringInit(true)
         );
         ///init stuff
