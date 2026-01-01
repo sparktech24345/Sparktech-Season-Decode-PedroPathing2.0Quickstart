@@ -58,8 +58,13 @@ public class MainTeleOPBlue extends LinearOpMode {
     final float[] hsvRightSensorColors = new float[3];
     final float[] hsvLeftSensorColors = new float[3];
     public static int ballCounter = 0;
+    protected BallColorSet_Decode actualRightSensorDetectedBall;
+    protected BallColorSet_Decode calculatedRightSensorDetectedBall;
+    protected BallColorSet_Decode actualLeftSensorDetectedBall;
+    protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
     public static boolean hasBallInRightChamber = false;
     public static boolean hasBallInLeftChamber = false;
+    public static boolean shouldRemoveBalls = false;
 
     /// ----------------- Limelight Stuff -----------------
     protected Limelight3A limelight3A = null;
@@ -141,6 +146,11 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
+
+        if(wantsToOutput || wantsToFireWithIntake) // only actually affect balls when you can output balls so you can count them even if they are stying on the hole and are undetected for a time
+            shouldRemoveBalls = true;
+        else shouldRemoveBalls = false;
+
 
         // Intake stuff
         int intakeState = 0; // if -1 then output if 0 then do nothing if 1 then intake
@@ -297,6 +307,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     public void setStuffToDefault() { // occasionally copy paste declarations here so we don't have surprises
         ballCounter = 0;
         shouldShootOnCamera = false;
+        shouldRemoveBalls = false;
 
         /// ----------------- Odometry Stuff -----------------
         distanceToWallOdometry = 0;
@@ -342,8 +353,23 @@ public class MainTeleOPBlue extends LinearOpMode {
         Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
         Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
 
-        hasBallInLeftChamber = (BallColorSet_Decode.getColor(leftSensorColors) != BallColorSet_Decode.NoBall);
-        hasBallInRightChamber = (BallColorSet_Decode.getColor(rightSensorColors) != BallColorSet_Decode.NoBall);
+        actualLeftSensorDetectedBall = BallColorSet_Decode.getColor(leftSensorColors);
+        actualRightSensorDetectedBall = BallColorSet_Decode.getColor(rightSensorColors);
+
+        if(!shouldRemoveBalls){ // when not moving balls out of chambers they dont have permission to change to no ball
+            if(actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
+                calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
+
+            if(actualRightSensorDetectedBall != BallColorSet_Decode.NoBall)
+                calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
+        }
+        else{
+            calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
+            calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
+        }
+
+        hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
+        hasBallInRightChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
 
         RobotController.telemetry.addData("LEFT_RED",(double)leftSensorColors.red * 10000.0);
         RobotController.telemetry.addData("LEFT_BLUE",(double)leftSensorColors.blue * 10000.0);
@@ -353,8 +379,8 @@ public class MainTeleOPBlue extends LinearOpMode {
         RobotController.telemetry.addData("RIGHT_BLUE",(double)rightSensorColors.blue * 10000.0);
         RobotController.telemetry.addData("RIGHT_GREEN",(double)rightSensorColors.green * 10000.0);
 
-        RobotController.telemetry.addData("LEFT Sensed Color", BallColorSet_Decode.getColorForStorage(leftSensorColors));
-        RobotController.telemetry.addData("RIGHT Sensed Color", BallColorSet_Decode.getColorForStorage(rightSensorColors));
+        RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+        RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
 
 
