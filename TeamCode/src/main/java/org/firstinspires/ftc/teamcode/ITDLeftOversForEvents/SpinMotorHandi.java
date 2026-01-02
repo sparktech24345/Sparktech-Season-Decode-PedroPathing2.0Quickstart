@@ -21,9 +21,9 @@ public class SpinMotorHandi extends LinearOpMode {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        DcMotor motor = hardwareMap.dcMotor.get("turretspin");
-        DcMotor motor1 = hardwareMap.dcMotor.get("turretspin1");
-        DcMotor motor2 = hardwareMap.dcMotor.get("turretspin2");
+        DcMotor motor = hardwareMap.dcMotor.get("intakeMotor");
+        DcMotor motor1 = hardwareMap.dcMotor.get("turretFlyWheelMotorLeft");
+        DcMotor motor2 = hardwareMap.dcMotor.get("turretFlyWheelMotorRight");
         timer = System.currentTimeMillis();
 
         waitForStart();

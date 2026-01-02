@@ -3,6 +3,12 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.degreesToOuttakeTurretServo;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.turretAngleOverride;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -11,23 +17,29 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+
 
 
 @Config
 @TeleOp(name ="VPID", group = "Linear OpMode")
 public class Test_VPID extends LinearOpMode {
     DcMotorEx turretspin1;
+    DcMotorEx turretspin2;
+    protected RobotController robot;
     public static double v_ks = 0;//TODO:de schimbat valori
-    public static double v_kV = 0.00044;
+    public static double v_kV = 0.00001;
     public static double v_kp = 0.0015;
-    public static double multiplier = 0.5;
-    public static double v_error = 0;
+    public static double multiplier = 0.2;
+    public static double v_errorR = 0;
+    public static double v_errorL = 0;
     public static double v_current_rpm = 0;
     ElapsedTime v_pos_timer= new ElapsedTime();
     public static double v_current_pos = 0;
     public static double v_last_pos = 0;
-    public static double v_target_Velocity = 2000;
+    public static double v_target_Velocity = 1030;
     //double ticksPerSecond = turretspin1.getVelocity();
     private static final double v_TICKS_PER_REV = 28.0;
     private static final int v_BUFFER_SIZE = 100;
@@ -68,8 +80,11 @@ public class Test_VPID extends LinearOpMode {
     @Override
     public void runOpMode() {
         MultipleTelemetry tele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        turretspin1= hardwareMap.get(DcMotorEx.class, "turretspin");
+        turretspin1= hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorLeft");
         turretspin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turretspin1.setDirection(DcMotorSimple.Direction.REVERSE);
+        turretspin2= hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
+        turretspin2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //double rpm = ticksPerSecond * 60 / TICKS_PER_REV;
 
         waitForStart();
@@ -84,15 +99,22 @@ public class Test_VPID extends LinearOpMode {
             v_current_rpm = delta_pos * 600;
             v_pos_timer.reset();
         }
-        double velocity = turretspin1.getVelocity();
-        v_error = v_target_Velocity - velocity;
-        double v_power = v_ks + v_kV * velocity + v_kp * v_error;
-        turretspin1.setPower(Math.max(-1,Math.min(v_power,1)));
+        double velocityL = turretspin1.getVelocity();
+        v_errorL = v_target_Velocity - velocityL;
+        double v_powerL = v_ks + v_kV * velocityL + v_kp * v_errorL;
+        turretspin1.setPower(Math.max(-1,Math.min(v_powerL,1)));
+        double velocityR = turretspin2.getVelocity();
+            v_errorR = v_target_Velocity - velocityR;
+            double v_powerR = v_ks + v_kV * velocityR + v_kp * v_errorR;
+            turretspin2.setPower(Math.max(-1,Math.min(v_powerR,1)));
 
             tele.addData("targetVelocity", v_target_Velocity);
-            tele.addData("power", v_power);
-            tele.addData("measured velocity", velocity);
-            tele.addData("error", v_error);
+            tele.addData("power LEFT", v_powerL);
+            tele.addData("power RIGHT", v_powerR);
+            tele.addData("measured velocity LEFT", velocityL);
+            tele.addData("measured velocity RIGHT", velocityR);
+            tele.addData("error RIGHT", v_errorR);
+            tele.addData("error LEFT", v_errorL);
             tele.addData("ks",v_ks);
             tele.addData("kV",v_kV);
             tele.addData("kp",v_kp);
