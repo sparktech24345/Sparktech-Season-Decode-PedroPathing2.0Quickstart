@@ -30,24 +30,26 @@ public class Test_PIDF extends LinearOpMode {
         turretSpinL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretSpinL.setDirection(DcMotorSimple.Direction.REVERSE);
         turretSpinR = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
-        turretSpinR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //turretSpinR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        turretSpinR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         PIDFCoefficients PIDFCoefficients = new PIDFCoefficients(P,I,D,F);
         turretSpinL.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PIDFCoefficients);
-        turretSpinR.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PIDFCoefficients);
+        //turretSpinR.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PIDFCoefficients);
 
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {
             turretSpinL.setVelocity(targetVel);
-            turretSpinR.setVelocity(targetVel);
+            turretSpinR.setPower(turretSpinL.getPower());
+            //turretSpinR.setVelocity(targetVel);
             currentVelLeft = turretSpinL.getVelocity();
             currentVelRight = turretSpinR.getVelocity();
             double errorLeft = targetVel - currentVelLeft;
             double errorRight = targetVel - currentVelRight;
             turretSpinL.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(P,I,D,F));
-            turretSpinR.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(P,I,D,F));
-            sleep(150);
+            //turretSpinR.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(P,I,D,F));
+            sleep(50);
 
             tele.addData("errorLeft" , errorLeft);
             tele.addData("errorRight" , errorRight);

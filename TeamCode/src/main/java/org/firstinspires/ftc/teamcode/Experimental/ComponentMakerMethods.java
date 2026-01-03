@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Experimental;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ColorSensorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
@@ -25,18 +26,21 @@ public class ComponentMakerMethods {
         robot.makeComponent("TurretSpinMotor", new MotorComponent()
                 .addMotor(turretFlyWheelMotorLeftName)
                 .addMotor(turretFlyWheelMotorRightName)
+                .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
                 .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
                 .setVelocityCoefficients(180, 0,18,15)
                 .setTarget(0)
-                .setRange(-1, 1)
+                .setRange(-1,3000)
         );
 
         robot.makeComponent("TurretRotateMotor", new MotorComponent()
                 .addMotor(turretRotationMotorName)
+                .setPositionCoefficients(0.025,0,0.0015,3)
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0) // default middle point should be 0
-                .setRange(-1, 1)
+                .setResolution(2.62)
+                .setRange(-30,330)
                 .moveDuringInit(true)
         );
 

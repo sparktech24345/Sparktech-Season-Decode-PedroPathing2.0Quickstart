@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.intakeSorterServoName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.turretAngleServoName;
+
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -10,78 +12,69 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
-import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
+
 @Config
 @TeleOp( name = "TESTnush", group = "Linear OpMode")
 public class TESTnush extends LinearOpMode {
-    DcMotorEx turretspin1;
-    DcMotorEx turretspin2;
+    DcMotorEx turretSpinLeft;
+    DcMotorEx turretSpinRight;
+    Servo intakeSorterServo;
     protected RobotController robot;
-    public static double v_ks = 0;//TODO:de schimbat valori
-    public static double v_kV = 0.00001;
-    public static double v_kp = 0.0015;
-    public static double multiplier = 0.2;
-    public static double v_errorR = 0;
-    public static double v_errorL = 0;
-    public static double v_current_rpm = 0;
-    ElapsedTime v_pos_timer= new ElapsedTime();
-    public static double v_current_pos = 0;
-    public static double v_last_pos = 0;
-    public static double v_target_Velocity = 1030;
+    public static double P = 180;
+    public static double D = 18;
+    public static double I = 0;
+    public static double F = 15;
+    public static double v_target_Velocity = 0;
+    public static double pow = 0;
+    public static double servoPos = 0.8;
 
     @Override
     public void runOpMode() {
-
         MultipleTelemetry tele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        turretspin1= hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorLeft");
-        turretspin1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        turretspin1.setDirection(DcMotorSimple.Direction.REVERSE);
-        turretspin2= hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
-        turretspin2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turretSpinLeft = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorLeft");
+        turretSpinLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turretSpinLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        turretSpinRight = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
+        turretSpinRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        PIDFCoefficients PIDFCoefficients = new PIDFCoefficients(P,I,D,F);
+        turretSpinRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PIDFCoefficients);
+
+
         DcMotor motor = hardwareMap.dcMotor.get("intakeMotor");
         Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
+        intakeSorterServo = hardwareMap.get(Servo.class, intakeSorterServoName);
 
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {
             //robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
-            servo2.setPosition(0.8);
-            if(v_pos_timer.milliseconds() >= 100) {
-                v_current_pos = turretspin1.getCurrentPosition();
-                double delta_pos = v_current_pos - v_last_pos;
-                delta_pos /= 28;
-                v_last_pos = v_current_pos;
-                v_current_rpm = delta_pos * 600;
-                v_pos_timer.reset();
-            }
+            servo2.setPosition(servoPos);
             motor.setPower(gamepad1.left_stick_y);
 
-            double velocityL = turretspin1.getVelocity();
-            v_errorL = v_target_Velocity - velocityL;
-            double v_powerL = v_ks + v_kV * velocityL + v_kp * v_errorL;
-            turretspin1.setPower(Math.max(-1,Math.min(v_powerL,1)));
-
-            double velocityR = turretspin2.getVelocity();
-            v_errorR = v_target_Velocity - velocityR;
-            double v_powerR = v_ks + v_kV * velocityR + v_kp * v_errorR;
-            turretspin2.setPower(Math.max(-1,Math.min(v_powerR,1)));
-
+            turretSpinRight.setVelocity(v_target_Velocity);
+            turretSpinLeft.setPower(turretSpinRight.getPower());
+            //turretSpinR.setVelocity(targetVel);
+            double currentVelLeft = turretSpinLeft.getVelocity();
+            double currentVelRight = turretSpinRight.getVelocity();
+            double errorLeft = v_target_Velocity - currentVelLeft;
+            double errorRight = v_target_Velocity - currentVelRight;
+            turretSpinRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(P,I,D,F));
+            intakeSorterServo.setPosition(154.8/360);
             tele.addData("targetVelocity", v_target_Velocity);
-            tele.addData("power LEFT", v_powerL);
-            tele.addData("power RIGHT", v_powerR);
-            tele.addData("measured velocity LEFT", velocityL);
-            tele.addData("measured velocity RIGHT", velocityR);
-            tele.addData("error RIGHT", v_errorR);
-            tele.addData("error LEFT", v_errorL);
-            tele.addData("ks",v_ks);
-            tele.addData("kV",v_kV);
-            tele.addData("kp",v_kp);
+            tele.addData("error RIGHT", currentVelRight);
+            tele.addData("error LEFT", currentVelLeft);
+            tele.addData("motor pow right", turretSpinRight.getPower());
+            tele.addData("motor pow left", turretSpinLeft.getPower());
+            tele.addData("P",P);
+            tele.addData("I",I);
+            tele.addData("D",D);
+            tele.addData("F",F);
             tele.update();
 
         }

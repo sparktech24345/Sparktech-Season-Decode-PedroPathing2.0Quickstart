@@ -106,15 +106,16 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // Choosing which values to use
         double usedDistance;
-        double neededAngleForTurretRotation = -getEncoderReadingFormatted() * encoderMultiplier;
+        double neededAngleForTurretRotation = 0;
         if (shouldShootOnCamera) {
             usedDistance = distanceMeasuredCamera;
-            neededAngleForTurretRotation += cameraAdder - rotationDegreesMeasuredCamera * cameraErrorMultiplier;
+            neededAngleForTurretRotation += cameraAdder - rotationDegreesMeasuredCamera * cameraErrorMultiplier - robot.getMotorComponent("TurretRotateMotor").getPosition() * encoderMultiplier;
         }
         else {
             usedDistance = distanceToWallOdometry;
-            neededAngleForTurretRotation += rotationToWallOdometry; /// TODO this might be to be reversed in some ways
+            neededAngleForTurretRotation -= rotationToWallOdometry; /// TODO this might be to be reversed in some ways
         }
+        if(neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
         // pose resets
         if (gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().instance().setPose(farStart);
@@ -124,7 +125,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         wantsToIntakeDriver = robot.getControllerKey("A1").IsToggledOnPress;
 
         // Driver preparing for shooting
-        isTryingToFire = robot.getControllerKey("B1").IsToggledOnPress;
+        isTryingToFire = robot.getControllerKey("Y1").IsToggledOnPress;
         wantsToIntakeLaunching = isTryingToFire;
 
         // Driver Actual Shooting
@@ -136,7 +137,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // Enable / Disable camera
 
-        flashSensors(robot.getControllerKey("RIGHT_TRIGGER1").IsToggledOnPress);
+        flashSensors(gamepad1.right_trigger > 0.4);
 
         // Slowdown
         if (robot.getControllerKey("LEFT_BUMPER1").ExecuteOnPress) {
@@ -223,6 +224,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
             double targetVelocity = distanceToVelocityFunction(usedDistance);
             robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Velocity)
                     .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity));
 
 
@@ -231,7 +233,7 @@ public class MainTeleOPBlue extends LinearOpMode {
             double turretAngleVal = distanceToAngleFunction(usedDistance);
             turretAngleVal = clamp(turretAngleVal,262,324);
             robot.getServoComponent("TurretAngle")
-                    .setTarget(degreesToOuttakeTurretServo((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal)));
+                    .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
 
             // ----------------------- Rotation Stuff -----------------------
@@ -243,6 +245,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         else {
             double targetVelocity = distanceToVelocityFunction(usedDistance);
             robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Power)
                     .setTarget(0);
 
             double turretAngleVal = distanceToAngleFunction(usedDistance);
@@ -259,6 +262,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         RobotController.telemetry.addData("robot rotation", robot.getCurrentPose().getHeading());
         RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
         RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
+        RobotController.telemetry.addData("is outtake Overriden", robot.getMotorComponent("TurretSpinMotor").isOverriden());
         RobotController.telemetry.addData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity());
         RobotController.telemetry.addData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower());
     }
@@ -353,8 +357,8 @@ public class MainTeleOPBlue extends LinearOpMode {
         Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
         Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
 
-        actualLeftSensorDetectedBall = BallColorSet_Decode.getColor(leftSensorColors);
-        actualRightSensorDetectedBall = BallColorSet_Decode.getColor(rightSensorColors);
+        actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors);
+        actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
         if(!shouldRemoveBalls){ // when not moving balls out of chambers they dont have permission to change to no ball
             if(actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
@@ -368,8 +372,11 @@ public class MainTeleOPBlue extends LinearOpMode {
             calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
         }
 
+         if(actualLeftSensorDetectedBall == null) actualLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
+         if(actualRightSensorDetectedBall == null) actualRightSensorDetectedBall = BallColorSet_Decode.NoBall;
+
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
-        hasBallInRightChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
+        hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
         RobotController.telemetry.addData("LEFT_RED",(double)leftSensorColors.red * 10000.0);
         RobotController.telemetry.addData("LEFT_BLUE",(double)leftSensorColors.blue * 10000.0);
@@ -441,10 +448,6 @@ public class MainTeleOPBlue extends LinearOpMode {
 
 
     // ============================ Weird Stuff ============================
-    public double getEncoderReadingFormatted() {
-        double reading = robot.getMotorComponent("TurretRotateMotor").getPosition() * -1 / 123.37;
-        return reading;
-    }
     public Pose passPose() {
         globalRobotPose = robot.getFollowerInstance().instance().getPose();
         return globalRobotPose;

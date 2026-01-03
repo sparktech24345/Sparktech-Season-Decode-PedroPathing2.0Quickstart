@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
+
 import java.util.HashMap;
 
 @Config
@@ -20,10 +22,10 @@ public class MotorComponent extends Component {
     protected HashMap<String, DcMotorEx> motorMap = new HashMap<>();
     protected DcMotorEx mainMotor = null;
     protected PIDFCoefficients VelocityCoefficients = null;
-    protected PIDFCoefficients PositionCoefficients = null;
-    protected double positionTolerance = 0;
+    protected PIDcontroller pidControllerForPosition;
     protected MotorModes motorCurrentMode = MotorModes.Power;
     protected double velocity = 0;
+    protected double zeroVelocityMultiplier = 0;
     protected boolean isOverriden = false;
     
     public MotorComponent addMotor(String hardwareMapName) {
@@ -72,11 +74,10 @@ public class MotorComponent extends Component {
         if (motorCurrentMode == mode) return this;
         switch (mode) {
             case Position:
-                if (PositionCoefficients == null)
-                    PositionCoefficients = new PIDFCoefficients(0, 0, 0, 0);
+                if (pidControllerForPosition == null)
+                    pidControllerForPosition = new PIDcontroller(0, 0, 0);
                 for (DcMotorEx motor : motorMap.values()) {
-                    motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PositionCoefficients);
-                    motor.setTargetPositionTolerance((int)positionTolerance);
+                    motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
                 break;
             case Velocity:
@@ -99,13 +100,15 @@ public class MotorComponent extends Component {
 
     // ================== Set PID Coefficients ==================
 
-    public MotorComponent setPositionCoefficients(double p, double i, double d, double f, double positionTolerance) {
-        PositionCoefficients = new PIDFCoefficients(p, i, d, f);
+    public MotorComponent setPositionCoefficients(double p, double i, double d, double zeroVelocityMultiplier) {
+        if(pidControllerForPosition == null)
+            pidControllerForPosition = new PIDcontroller(p, i, d);
+        else pidControllerForPosition.setConstants(p,i,d);
+
         for (DcMotorEx motor : motorMap.values()) {
-            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PositionCoefficients);
-            motor.setTargetPositionTolerance((int) positionTolerance);
+            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
-        this.positionTolerance = positionTolerance;
+        this.zeroVelocityMultiplier = zeroVelocityMultiplier;
         return this;
     }
     public MotorComponent setVelocityCoefficients(double p, double i, double d, double f) {
@@ -127,7 +130,7 @@ public class MotorComponent extends Component {
         return this.motorCurrentMode;
     }
     public double getPosition() {
-        return mainMotor.getCurrentPosition();
+        return mainMotor.getCurrentPosition() / resolution;
     }
     public double getPower() {
         return mainMotor.getPower();
@@ -156,8 +159,8 @@ public class MotorComponent extends Component {
                 break;
 
             case Position:
-                mainMotor.setTargetPosition((int)target);
-                targetPower = mainMotor.getPower();
+                targetPower = pidControllerForPosition.calculate(target,mainMotor.getCurrentPosition() / resolution);
+                if(Math.abs(mainMotor.getVelocity()) < 0.0001) targetPower *= zeroVelocityMultiplier;
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;

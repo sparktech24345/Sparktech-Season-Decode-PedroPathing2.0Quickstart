@@ -74,7 +74,7 @@ public class DriveTrain {
 
     public void loop() {
 
-        double vertical     = - gamepad.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
+        double vertical     = gamepad.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
         double horizontal   = gamepad.get("LEFT_STICK_X1").raw();
         double pivot        = -gamepad.get("RIGHT_STICK_X1").raw();
 
