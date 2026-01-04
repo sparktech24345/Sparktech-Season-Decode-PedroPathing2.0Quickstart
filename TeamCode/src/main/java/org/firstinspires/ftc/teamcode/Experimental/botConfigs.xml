@@ -6,7 +6,6 @@
             <goBILDA5202SeriesMotor name="frontgreen" port="1" />
             <goBILDA5202SeriesMotor name="backpurple" port="2" />
             <goBILDA5202SeriesMotor name="backgreen" port="3" />
-            <AnalogInput name="laserAnalogInput" port="0" />
             <RevColorSensorV3 name="colorSensorLeft" port="0" bus="0" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
@@ -18,6 +17,7 @@
             <Servo name="leftGateServo" port="1" />
             <Servo name="intakeServo" port="2" />
             <Servo name="turretAngleServo" port="3" />
+            <AnalogInput name="laserAnalogInput" port="0" />
             <goBILDAPinpoint name="pinpoint" port="0" bus="3" />
             <RevColorSensorV3 name="colorSensorRight" port="0" bus="2" />
         </LynxModule>

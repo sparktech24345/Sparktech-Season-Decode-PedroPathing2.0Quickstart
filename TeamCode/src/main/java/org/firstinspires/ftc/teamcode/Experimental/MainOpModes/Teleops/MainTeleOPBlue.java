@@ -25,6 +25,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -34,6 +35,7 @@ import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
@@ -62,9 +64,12 @@ public class MainTeleOPBlue extends LinearOpMode {
     protected BallColorSet_Decode calculatedRightSensorDetectedBall;
     protected BallColorSet_Decode actualLeftSensorDetectedBall;
     protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
+    protected BallColorSet_Decode ballToFire;
     public static boolean hasBallInRightChamber = false;
     public static boolean hasBallInLeftChamber = false;
     public static boolean shouldRemoveBalls = false;
+    public static boolean shouldPullFromQueue = false;
+    BallColorQueue ballColorQueue = new BallColorQueue();
 
     /// ----------------- Limelight Stuff -----------------
     protected Limelight3A limelight3A = null;
@@ -73,23 +78,32 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double cameraErrorMultiplier = 1;
     public static double encoderMultiplier = 1;
     public static double cameraAdder = 0;
-    public static double farZoneCameraAdder = 2;
+    public static double farZoneCameraAdder = -2;
     public static boolean shouldShootOnCamera = false;
+
+    /// ----------------- Limelight Stuff -----------------
+    private AnalogInput laserAnalog; // if < 110 then has ball
+    private static final double MAX_VOLTS = 3.3;
+    private static final double MAX_DISTANCE_MM = 1000.0;
 
     /// ----------------- Odometry Stuff -----------------
     public static double distanceToWallOdometry = 0;
     public static double rotationToWallOdometry = 0;
 
     /// ----------------- Intake Priorities -----------------
-
+    protected ElapsedTime sortingShootTimer = new ElapsedTime();
     public static boolean wantsToIntakeDriver = false;
-    public static boolean wantsToIntakeLaunching = false;
     public static boolean wantsToFireWithIntake = false;
+    public static boolean wantsToFireSortingWithIntake = false;
     public static boolean wantsToOutput = false;
+    public static int gateState = 0;
 
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
+    public static double timer1 = 800;
+    public static double timer2 = 600;
+    public static double timer3 = 500;
 
     public static boolean isTryingToFire = false;
     public static boolean needsToLowerGates = true;
@@ -100,6 +114,11 @@ public class MainTeleOPBlue extends LinearOpMode {
         processCameraStuff();
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
         rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
+        RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
+
+        //if(rotationDegreesMeasuredCamera < 5 && rotationDegreesMeasuredCamera != 0) gamepad1.setLedColor(0,254,0,250);
+        //else gamepad1.setLedColor(254,0,0,250);
+
 
         //colors
         HandleColors();
@@ -126,7 +145,9 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // Driver preparing for shooting
         isTryingToFire = robot.getControllerKey("Y1").IsToggledOnPress;
-        wantsToIntakeLaunching = isTryingToFire;
+
+        // Driver actual firing with sorting
+        wantsToFireSortingWithIntake = robot.getControllerKey("B1").IsToggledOnPress;
 
         // Driver Actual Shooting
         wantsToFireWithIntake = robot.getControllerKey("X1").IsToggledOnPress;
@@ -134,6 +155,21 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // Driver Outputting
         wantsToOutput = robot.getControllerKey("RIGHT_BUMPER1").IsToggledOnPress;
+
+        // ====================== Sorting Stuff ======================
+
+        if(robot.getControllerKey("RIGHT_BUMPER2").ExecuteOnPress){
+            ballColorQueue.add(BallColorSet_Decode.Purple);
+            gamepad2.setLedColor(254,0,254,1000000);
+        }
+        if(robot.getControllerKey("LEFT_BUMPER2").ExecuteOnPress){
+            ballColorQueue.add(BallColorSet_Decode.Green);
+            gamepad2.setLedColor(0,254,0,1000000);
+        }
+        if(robot.getControllerKey("B2").ExecuteOnPress){
+            ballColorQueue.clearQueue();
+            gamepad2.setLedColor(254,254,254,1000000);
+        }
 
         // Enable / Disable camera
 
@@ -148,30 +184,30 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
-        if(wantsToOutput || wantsToFireWithIntake) // only actually affect balls when you can output balls so you can count them even if they are stying on the hole and are undetected for a time
+        if(wantsToOutput || wantsToFireWithIntake || wantsToFireSortingWithIntake) // only actually affect balls when you can output balls so you can count them even if they are stying on the hole and are undetected for a time
             shouldRemoveBalls = true;
         else shouldRemoveBalls = false;
 
 
         // Intake stuff
         int intakeState = 0; // if -1 then output if 0 then do nothing if 1 then intake
-        int gateState = 0; // if -1 then gate To The Left if 0 then do block if 1 then to the right
-        if (!wantsToIntakeDriver && !wantsToIntakeLaunching && !wantsToFireWithIntake && !wantsToOutput) {
+        ; // if -1 then gate To The Left if 0 then do block if 1 then to the right
+        if (!wantsToIntakeDriver  && !wantsToFireWithIntake && !wantsToOutput && !wantsToFireSortingWithIntake) {
             intakeState = 0;
-            gateState = 0; // if doing nothing
+            //gateState = 0; // if doing nothing
         }
         if (wantsToOutput) {
-            wantsToIntakeDriver = wantsToIntakeLaunching = wantsToFireWithIntake = false; // make all of them false for override
+            wantsToIntakeDriver = wantsToFireSortingWithIntake = wantsToFireWithIntake = false; // make all of them false for override
             intakeState = -1;
             if (hasBallInRightChamber) gateState = 1; // open to the right so you can outtake
             else if (hasBallInLeftChamber) gateState = -1; // left is lower priority but checked
-            else gateState = 0; // output last one fast
+            //else gateState = 0; // output last one fast
         }
-        if (wantsToIntakeDriver || wantsToIntakeLaunching || wantsToFireWithIntake) { // for now keep them in the same bucket
+        if (wantsToIntakeDriver  || wantsToFireWithIntake || wantsToFireSortingWithIntake) { // for now keep them in the same bucket
             intakeState = 1;
-            if (!hasBallInRightChamber) gateState = 1; // first fill up right
-            else if (!hasBallInLeftChamber) gateState = -1; // then left
-            else gateState = 1; // then continue pointing to right for when you fire
+            if (!hasBallInLeftChamber) gateState = -1; // first fill up left
+            else if (!hasBallInRightChamber) gateState = 1; // then right
+            else gateState = -  1; // then continue pointing to right for when you fire
         }
 
         switch (intakeState) {
@@ -202,20 +238,82 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
         //firing logic
-        if (wantsToFireWithIntake) {
-            if (needsToLowerGates) {
-                needsToLowerGates = false; // to not infi repeat
-                robot.executeNow(new ActionSequence(
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(200),
-                        new StateAction("LeftGateServo", "OPEN")
-                ));
+        if(!wantsToFireSortingWithIntake){
+            if (wantsToFireWithIntake) { // if normal is active
+                if (needsToLowerGates) {
+                    if(usedDistance > 2.9){
+                        needsToLowerGates = false; // to not infi repeat
+                        robot.executeNow(new ActionSequence(
+                                new StateAction("LeftGateServo", "OPEN"),
+                                new DelayAction(200),
+                                new StateAction("LeftGateServo", "CLOSED"),
+
+                                new DelayAction(timer1),
+
+                                new StateAction("LeftGateServo", "OPEN"),
+
+                                new DelayAction(timer2),
+
+                                new StateAction("RightGateServo", "OPEN")
+                        ));
+                    }
+                    else{
+                        needsToLowerGates = false; // to not infi repeat
+                        robot.executeNow(new ActionSequence(
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer3),
+                        new StateAction("RightGateServo", "OPEN")
+                        ));
+                    }
+
+                }
+            }
+            else if (!needsToLowerGates) { // if neither is active
+                needsToLowerGates = true; // to not infi repeat, will not trigger the one above due to wantToFireWithIntake
+                if(wantsToOutput){
+                    robot.executeNow(new StateAction("RightGateServo", "OPEN"));
+                    robot.executeNow(new StateAction("LeftGateServo", "OPEN"));
+                }
+                else{
+                    robot.executeNow(new StateAction("RightGateServo", "CLOSED"));
+                    robot.executeNow(new StateAction("LeftGateServo", "CLOSED"));
+                }
             }
         }
-        else if (!needsToLowerGates) {
-            needsToLowerGates = true; // to not infi repeat, will not trigger the one above due to wantToFireWithIntake
-            robot.executeNow(new StateAction("RightGateServo", "CLOSED"));
-            robot.executeNow(new StateAction("LeftGateServo", "CLOSED"));
+        else{
+            if(wantsToFireWithIntake){// wtf why are they both active
+                gamepad1.rumble(1,1,200);
+            }
+            else{ // if sorting firing is active
+
+                if(sortingShootTimer.milliseconds() > 800){
+                    shouldPullFromQueue = true;
+                    sortingShootTimer.reset();
+                }
+
+                if(shouldPullFromQueue){
+                    ballToFire = ballColorQueue.pull();
+
+                    if(ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
+                        robot.executeNow(new ActionSequence(
+                                new StateAction("RightGateServo", "OPEN"),
+                                new DelayAction(500),
+                                new StateAction("RightGateServo", "CLOSED")
+                        ));
+                    }
+                    else if(ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
+                        robot.executeNow(new ActionSequence(
+                                new StateAction("LeftGateServo", "OPEN"),
+                                new DelayAction(500),
+                                new StateAction("LeftGateServo", "CLOSED")
+                        ));
+                    }
+                    ballToFire = BallColorSet_Decode.NoBall;
+
+                }
+
+
+            }
         }
 
         // Outtake Stuff
@@ -237,7 +335,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
 
             // ----------------------- Rotation Stuff -----------------------
-
+            if(usedDistance > 2.9) neededAngleForTurretRotation += farZoneCameraAdder;
             robot.getMotorComponent("TurretRotateMotor")
                     .setTarget(neededAngleForTurretRotation);
             
@@ -312,6 +410,11 @@ public class MainTeleOPBlue extends LinearOpMode {
         ballCounter = 0;
         shouldShootOnCamera = false;
         shouldRemoveBalls = false;
+        shouldPullFromQueue = false;
+        if(ballColorQueue == null) ballColorQueue = new BallColorQueue();
+        ballColorQueue.clearQueue();
+        ballToFire = BallColorSet_Decode.NoBall;
+        sortingShootTimer.reset();
 
         /// ----------------- Odometry Stuff -----------------
         distanceToWallOdometry = 0;
@@ -320,7 +423,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         /// ----------------- Intake Priorities -----------------
 
         wantsToIntakeDriver = false;
-        wantsToIntakeLaunching = false;
+        wantsToFireSortingWithIntake = false;
         wantsToFireWithIntake = false;
         wantsToOutput = false;
 
@@ -345,6 +448,9 @@ public class MainTeleOPBlue extends LinearOpMode {
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class,"Control Hub");
+
+        gamepad1.setLedColor(254,254,254,1000000);
+        gamepad2.setLedColor(254,0,0,1000000);
     }
 
 
@@ -374,6 +480,9 @@ public class MainTeleOPBlue extends LinearOpMode {
 
          if(actualLeftSensorDetectedBall == null) actualLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
          if(actualRightSensorDetectedBall == null) actualRightSensorDetectedBall = BallColorSet_Decode.NoBall;
+
+         if(calculatedLeftSensorDetectedBall == null) calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
+         if(calculatedRightSensorDetectedBall == null) calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
 
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
