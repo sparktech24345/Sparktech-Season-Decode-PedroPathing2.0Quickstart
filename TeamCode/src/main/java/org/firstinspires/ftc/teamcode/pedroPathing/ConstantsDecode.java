@@ -35,15 +35,20 @@ public class ConstantsDecode {
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03, 0, 0.001, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
-            .leftFrontMotorName(GlobalStorage.frontRightName)
-            .rightFrontMotorName(GlobalStorage.frontLeftName)
-            .leftRearMotorName(GlobalStorage.backRightName)
-            .rightRearMotorName(GlobalStorage.backLeftName)
+//            .leftFrontMotorName(GlobalStorage.frontRightName)
+//            .rightFrontMotorName(GlobalStorage.frontLeftName)
+//            .leftRearMotorName(GlobalStorage.backRightName)
+//            .rightRearMotorName(GlobalStorage.backLeftName)
 
-            .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .leftFrontMotorName(GlobalStorage.frontLeftName)
+            .rightFrontMotorName(GlobalStorage.frontRightName)
+            .leftRearMotorName(GlobalStorage.backLeftName)
+            .rightRearMotorName(GlobalStorage.backRightName)
+
+            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
 
             .xVelocity(78.261926752421046666666666666667) // copiate direct din exemplul Pedro, de verificat / corectat
             .yVelocity(61.494551922189565); // copiate direct din exemplul Pedro, de verificat / corectat
