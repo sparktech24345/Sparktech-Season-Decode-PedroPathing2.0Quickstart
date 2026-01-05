@@ -26,13 +26,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyThreeW
 
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(14) // ?????
-            .forwardZeroPowerAcceleration(-34.62719) // copiate direct din exemplul Pedro, de verificat / corectat
-            .lateralZeroPowerAcceleration(-78.15554) // copiate direct din exemplul Pedro, de verificat / corectat
-            .centripetalScaling(0.0005) // copiate direct din exemplul Pedro, de verificat / corectat
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0.004, 0))//(0.67, 0, 0.45, 0.023))
-            .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.04, 0))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03, 0, 0.001, 0.6,0));
+            .mass(12) // ?????
+            .forwardZeroPowerAcceleration(-33.82717174182185)
+            .lateralZeroPowerAcceleration(-66.38979558701307)
+            .centripetalScaling(0.005)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.05, 0.0001, 0.002, 0.019))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.7, 0, 0.04, 0.0005))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.015, 0, 0, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
 //            .leftFrontMotorName(GlobalStorage.frontRightName)
@@ -45,13 +45,13 @@ public class ConstantsDecode {
             .leftRearMotorName(GlobalStorage.backLeftName)
             .rightRearMotorName(GlobalStorage.backRightName)
 
-            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
 
-            .xVelocity(78.261926752421046666666666666667) // copiate direct din exemplul Pedro, de verificat / corectat
-            .yVelocity(61.494551922189565); // copiate direct din exemplul Pedro, de verificat / corectat
+            .xVelocity(76.40856597179503)
+            .yVelocity(62.0495009534941);
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()
             .hardwareMapName("pinpoint")

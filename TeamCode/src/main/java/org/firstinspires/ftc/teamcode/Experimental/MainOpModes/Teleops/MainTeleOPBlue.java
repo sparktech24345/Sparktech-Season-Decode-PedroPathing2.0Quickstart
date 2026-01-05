@@ -101,7 +101,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 800;
+    public static double timer1 = 600;
     public static double timer2 = 600;
     public static double timer3 = 500;
 
@@ -244,17 +244,17 @@ public class MainTeleOPBlue extends LinearOpMode {
                     if(usedDistance > 2.9){
                         needsToLowerGates = false; // to not infi repeat
                         robot.executeNow(new ActionSequence(
-                                new StateAction("LeftGateServo", "OPEN"),
+                                new StateAction("RightGateServo", "OPEN"),
                                 new DelayAction(200),
-                                new StateAction("LeftGateServo", "CLOSED"),
+                                new StateAction("RightGateServo", "CLOSED"),
 
                                 new DelayAction(timer1),
 
-                                new StateAction("LeftGateServo", "OPEN"),
+                                new StateAction("RightGateServo", "OPEN"),
 
                                 new DelayAction(timer2),
 
-                                new StateAction("RightGateServo", "OPEN")
+                                new StateAction("LeftGateServo", "OPEN")
                         ));
                     }
                     else{
