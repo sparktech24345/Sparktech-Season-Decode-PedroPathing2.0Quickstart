@@ -48,9 +48,24 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 public class MainTeleOPBlue extends LinearOpMode {
     protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
+    public static Pose farStart = new Pose(120, 24, Math.toRadians(90)); // no more reversing X
+
+    /// ----------------- Target Pose Stuff ------------------
+
     public static double targetX = 125;
     public static double targetY = 46;
-    public static Pose farStart = new Pose(120, 24, Math.toRadians(90)); // no more reversing X
+    public static double targetXCenter = 125;
+    public static double targetYCenter = 46;
+
+    public static double targetXRightPanel = 131; // about +6 cuz thats a tyle
+    public static double targetYRightPanel = 48; // a 3 bias for y
+
+    public static double targetXLeftPanel = 128; // and ofc a 3 bias on X for that one
+    public static double targetYLeftPanel = 55; // about +6 but on y
+
+    public static double usedTargetX = 125;
+    public static double usedTargetY = 46;
+
 
     /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
@@ -75,10 +90,11 @@ public class MainTeleOPBlue extends LinearOpMode {
     protected Limelight3A limelight3A = null;
     public static double distanceMeasuredCamera =0;
     public static double rotationDegreesMeasuredCamera =0;
+    public static double lastRotationDegreesMeasuredCamera =0;
     public static double cameraErrorMultiplier = 1;
     public static double encoderMultiplier = 1;
     public static double cameraAdder = 0;
-    public static double farZoneCameraAdder = -2;
+    public static double farZoneCameraAdder = -1;
     public static boolean shouldShootOnCamera = false;
 
     /// ----------------- Limelight Stuff -----------------
@@ -104,6 +120,12 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double timer1 = 600;
     public static double timer2 = 600;
     public static double timer3 = 500;
+    public static double timer12 = 400;
+
+    public static double TurretP = 0.025;
+    public static double TurretD = 0.0015;
+    public static double TurretZero = 3;
+    public static double rotationAdder = 0;
 
     public static boolean isTryingToFire = false;
     public static boolean needsToLowerGates = true;
@@ -112,8 +134,11 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // processing
         processCameraStuff();
+        processTargetStuff(robot.getCurrentPose(), targetX, targetY);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
-        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), targetX, targetY);
+
+        // this uses the processed target values
+        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), usedTargetX, usedTargetY);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
 
         //if(rotationDegreesMeasuredCamera < 5 && rotationDegreesMeasuredCamera != 0) gamepad1.setLedColor(0,254,0,250);
@@ -124,37 +149,52 @@ public class MainTeleOPBlue extends LinearOpMode {
         HandleColors();
 
         // Choosing which values to use
-        double usedDistance;
+        double usedDistance = 0;
         double neededAngleForTurretRotation = 0;
-        if (shouldShootOnCamera) {
-            usedDistance = distanceMeasuredCamera;
-            neededAngleForTurretRotation += cameraAdder - rotationDegreesMeasuredCamera * cameraErrorMultiplier - robot.getMotorComponent("TurretRotateMotor").getPosition() * encoderMultiplier;
+        if (shouldShootOnCamera && false) {
+            //usedDistance = distanceMeasuredCamera;
+            //neededAngleForTurretRotation += cameraAdder - rotationDegreesMeasuredCamera * cameraErrorMultiplier - robot.getMotorComponent("TurretRotateMotor").getPosition() * encoderMultiplier;
         }
         else {
             usedDistance = distanceToWallOdometry;
             neededAngleForTurretRotation -= rotationToWallOdometry; /// TODO this might be to be reversed in some ways
         }
+
+
+        if(usedDistance > 2.9) neededAngleForTurretRotation += farZoneCameraAdder;
+        if(shouldShootOnCamera){
+            if(Math.abs(robot.getMotorComponent("TurretRotateMotor").getVelocity()) < 0.2)
+                rotationAdder += rotationDegreesMeasuredCamera;
+
+            neededAngleForTurretRotation += rotationAdder;
+        }
+
         if(neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
         // pose resets
-        if (gamepad1.dpad_up && gamepad1.dpad_right) robot.getFollowerInstance().instance().setPose(farStart);
-        if (gamepad1.dpad_down && gamepad1.dpad_left) robot.getFollowerInstance().instance().setPose(new Pose(0,0,0));
+        if (gamepad1.dpad_right) robot.getFollowerInstance().instance().setPose(farStart);
+        if (gamepad1.dpad_left) robot.getFollowerInstance().instance().setPose(new Pose(0,0,0));
 
         // Driver Intake
-        wantsToIntakeDriver = robot.getControllerKey("A1").IsToggledOnPress;
+        if(robot.getControllerKey("A1").ExecuteOnPress) wantsToIntakeDriver = !wantsToIntakeDriver;
 
         // Driver preparing for shooting
-        isTryingToFire = robot.getControllerKey("Y1").IsToggledOnPress;
+        if(robot.getControllerKey("Y1").ExecuteOnPress) isTryingToFire = !isTryingToFire;
 
         // Driver actual firing with sorting
-        wantsToFireSortingWithIntake = robot.getControllerKey("B1").IsToggledOnPress;
+        if(robot.getControllerKey("B1").ExecuteOnPress) wantsToFireSortingWithIntake = !wantsToFireSortingWithIntake;
 
         // Driver Actual Shooting
-        wantsToFireWithIntake = robot.getControllerKey("X1").IsToggledOnPress;
+        if(robot.getControllerKey("X1").ExecuteOnPress) wantsToFireWithIntake = !wantsToFireWithIntake;
         needsToLowerGates = robot.getControllerKey("X1").ExecuteOnPress;
 
         // Driver Outputting
-        wantsToOutput = robot.getControllerKey("RIGHT_BUMPER1").IsToggledOnPress;
+        if(robot.getControllerKey("RIGHT_BUMPER1").ExecuteOnPress) wantsToOutput = !wantsToOutput;
+
+        if(robot.getControllerKey("DPAD_UP1").IsToggledOnPress)
+            robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Power)
+                    .setTarget(1);
 
         // ====================== Sorting Stuff ======================
 
@@ -205,9 +245,11 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
         if (wantsToIntakeDriver  || wantsToFireWithIntake || wantsToFireSortingWithIntake) { // for now keep them in the same bucket
             intakeState = 1;
-            if (!hasBallInLeftChamber) gateState = -1; // first fill up left
-            else if (!hasBallInRightChamber) gateState = 1; // then right
-            else gateState = -  1; // then continue pointing to right for when you fire
+            if(wantsToIntakeDriver){
+                if (!hasBallInRightChamber) gateState = 1; // first fill up left
+                else if (!hasBallInLeftChamber) gateState = -1; // then right
+                else gateState = -  1; // then continue pointing to right for when you fire
+            }
         }
 
         switch (intakeState) {
@@ -245,7 +287,7 @@ public class MainTeleOPBlue extends LinearOpMode {
                         needsToLowerGates = false; // to not infi repeat
                         robot.executeNow(new ActionSequence(
                                 new StateAction("RightGateServo", "OPEN"),
-                                new DelayAction(200),
+                                new DelayAction(timer12),
                                 new StateAction("RightGateServo", "CLOSED"),
 
                                 new DelayAction(timer1),
@@ -317,10 +359,11 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
         // Outtake Stuff
+        double targetVelocity = 0;
         if (isTryingToFire) {
             // ----------------------- Power Stuff -----------------------
 
-            double targetVelocity = distanceToVelocityFunction(usedDistance);
+            targetVelocity = distanceToVelocityFunction(usedDistance);
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Velocity)
                     .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity));
@@ -335,16 +378,22 @@ public class MainTeleOPBlue extends LinearOpMode {
 
 
             // ----------------------- Rotation Stuff -----------------------
-            if(usedDistance > 2.9) neededAngleForTurretRotation += farZoneCameraAdder;
+
+            if(robot.getControllerKey("DPAD_DOWN1").IsToggledOnPress) neededAngleForTurretRotation = 0;
             robot.getMotorComponent("TurretRotateMotor")
-                    .setTarget(neededAngleForTurretRotation);
+                    .setTarget(neededAngleForTurretRotation)
+                    .setPositionCoefficients(TurretP,0,TurretD,TurretZero)
+            ;
             
         }
         else {
-            double targetVelocity = distanceToVelocityFunction(usedDistance);
-            robot.getMotorComponent("TurretSpinMotor")
-                    .setOperationMode(MotorComponent.MotorModes.Power)
-                    .setTarget(0);
+            rotationAdder = 0;
+
+            if(!(robot.getControllerKey("DPAD_UP1").IsToggledOnPress)){
+                robot.getMotorComponent("TurretSpinMotor")
+                        .setOperationMode(MotorComponent.MotorModes.Power)
+                        .setTarget(0);
+            }
 
             double turretAngleVal = distanceToAngleFunction(usedDistance);
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
@@ -357,12 +406,15 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
-        RobotController.telemetry.addData("robot rotation", robot.getCurrentPose().getHeading());
+        RobotController.telemetry.addData("robot rotation in degrees", Math.toDegrees(robot.getCurrentPose().getHeading()));
         RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
         RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
         RobotController.telemetry.addData("is outtake Overriden", robot.getMotorComponent("TurretSpinMotor").isOverriden());
+        RobotController.telemetry.addData("target velocity", targetVelocity);
         RobotController.telemetry.addData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity());
         RobotController.telemetry.addData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower());
+        RobotController.telemetry.addData("Current Rotation", robot.getMotorComponent("TurretRotateMotor").getPosition());
+        RobotController.telemetry.addData("Target Rotation",neededAngleForTurretRotation);
     }
 
 
@@ -419,6 +471,8 @@ public class MainTeleOPBlue extends LinearOpMode {
         /// ----------------- Odometry Stuff -----------------
         distanceToWallOdometry = 0;
         rotationToWallOdometry = 0;
+        rotationAdder = 0;
+        lastRotationDegreesMeasuredCamera = 0;
 
         /// ----------------- Intake Priorities -----------------
 
@@ -505,8 +559,12 @@ public class MainTeleOPBlue extends LinearOpMode {
     public void processCameraStuff() {
         LLResult llResult = limelight3A.getLatestResult();
 
+        double tempRotation = llResult.getTx();
         // rotation
-        rotationDegreesMeasuredCamera = llResult.getTx();
+        if(tempRotation == 0 || Math.abs(tempRotation) > 30)
+            rotationDegreesMeasuredCamera = lastRotationDegreesMeasuredCamera;
+        else rotationDegreesMeasuredCamera = tempRotation;
+        lastRotationDegreesMeasuredCamera = rotationDegreesMeasuredCamera;
 
         // distance
 
@@ -549,6 +607,47 @@ public class MainTeleOPBlue extends LinearOpMode {
         // Positive = target to the robot's right (clockwise turn), negative = to the left
 
         return angleDiff;
+    }
+    // pure angle not accounting for robot direction, DO NOT use for turret, use for target selection degrees
+    public static double angleFromTargetToRobot(Pose pose, double targetX, double targetY) {
+        // from pose to point
+        double robotX = pose.getX();
+        double robotY = pose.getY();
+
+        double dx = robotX - targetX;
+        double dy = robotY - targetY;
+
+        // atan2(dx, dy) gives an angle in radians in the range [-PI, PI]
+        // matching:
+        // same X -> 0 or 180
+        // same Y -> +90 or -90
+        // left negative, right positive
+        double angleRadians = Math.atan2(dx, dy);
+
+        return Math.toDegrees(angleRadians) + 90;
+    }
+
+    public static void processTargetStuff(Pose pose, double targetX, double targetY){
+        double degrees = Math.abs(angleFromTargetToRobot(pose,targetX,targetY)); // Abs value so that it works for red and blue
+
+        if(degrees < 30){ // is lower part of scorer
+            usedTargetX = targetXRightPanel;
+            usedTargetY = targetYRightPanel;
+        }
+        else if(degrees > 60){  // is right upper part of scorer
+            usedTargetX = targetXLeftPanel;
+            usedTargetY = targetYLeftPanel;
+        }
+        else{ // is in the middle or somewhere weird
+            usedTargetX = targetXCenter;
+            usedTargetY = targetYCenter;
+        }
+
+
+        usedTargetX = targetXCenter;
+        usedTargetY = targetYCenter;
+
+        RobotController.telemetry.addData("Calculated Rotation From Robot",degrees);
     }
 
     public static double calculateDistanceToWallInMeters(Pose robotPose, double targetX, double targetY) {

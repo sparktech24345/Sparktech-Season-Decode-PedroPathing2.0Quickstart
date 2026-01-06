@@ -36,7 +36,7 @@ public class ComponentMakerMethods {
 
         robot.makeComponent("TurretRotateMotor", new MotorComponent()
                 .addMotor(turretRotationMotorName)
-                .setPositionCoefficients(0.025,0,0.0015,3)
+                .setPositionCoefficients(0.027,0,0.0015,3)
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0) // default middle point should be 0
                 .setResolution(2.62)
@@ -104,10 +104,10 @@ public class ComponentMakerMethods {
 
         robot.getComponent("RightGateServo")
                 .addState("OPEN", 180) // 0.5
-                .addState("CLOSED", 75,true); // 0.21
+                .addState("CLOSED", 33,true); // 0.09
 
         robot.getComponent("LeftGateServo")
-                .addState("CLOSED", 130, true) // 0.36
+                .addState("CLOSED", 155, true) // 0.43
                 .addState("OPEN", 36); // 0.1
 
         robot.getComponent("IntakeSorterServo")
