@@ -160,7 +160,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
         // this uses the processed target values
-        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), fakeRotation, usedTargetX, usedTargetY);
+        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), fakeRotation, targetX, targetY);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
         RobotController.telemetry.addData("fakeRotation", fakeRotation);
 
@@ -364,14 +364,14 @@ public class MainTeleOPBlue extends LinearOpMode {
                     if(ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
                         robot.executeNow(new ActionSequence(
                                 new StateAction("RightGateServo", "OPEN"),
-                                new DelayAction(500),
+                                new DelayAction(400),
                                 new StateAction("RightGateServo", "CLOSED")
                         ));
                     }
                     else if(ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
                         robot.executeNow(new ActionSequence(
                                 new StateAction("LeftGateServo", "OPEN"),
-                                new DelayAction(500),
+                                new DelayAction(400),
                                 new StateAction("LeftGateServo", "CLOSED")
                         ));
                     }

@@ -111,9 +111,9 @@ public class ComponentMakerMethods {
                 .addState("OPEN", 36); // 0.1
 
         robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_RIGHT", 61) // 61
+                .addState("REDIRECT_TO_RIGHT", 61,true) // 61
                 .addState("REDIRECT_TO_LEFT", 154.8) // 154.8
-                .addState("BLOCK", 108, true); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
+                .addState("BLOCK", 108); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
 
         robot.getComponent("TurretAngle")
                 .addState("DOWN_MAX", 262.8)
