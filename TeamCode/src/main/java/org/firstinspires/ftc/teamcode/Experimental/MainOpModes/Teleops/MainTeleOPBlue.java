@@ -23,14 +23,19 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
@@ -102,6 +107,16 @@ public class MainTeleOPBlue extends LinearOpMode {
     private static final double MAX_VOLTS = 3.3;
     private static final double MAX_DISTANCE_MM = 1000.0;
 
+    /// ----------------- Imu Stuff -----------------
+
+    IMU imu;
+    int logoFacingDirectionPosition;
+    int usbFacingDirectionPosition;
+    boolean orientationIsValid = true;
+    static RevHubOrientationOnRobot.LogoFacingDirection[] logoFacingDirections
+            = RevHubOrientationOnRobot.LogoFacingDirection.values();
+    static RevHubOrientationOnRobot.UsbFacingDirection[] usbFacingDirections
+            = RevHubOrientationOnRobot.UsbFacingDirection.values();
     /// ----------------- Odometry Stuff -----------------
     public static double distanceToWallOdometry = 0;
     public static double rotationToWallOdometry = 0;
@@ -129,6 +144,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
     public static boolean isTryingToFire = false;
     public static boolean needsToLowerGates = true;
+    public static double fakeRotation = 0;
     protected void robotMainLoop() {
         // all of the code
 
@@ -137,9 +153,16 @@ public class MainTeleOPBlue extends LinearOpMode {
         processTargetStuff(robot.getCurrentPose(), targetX, targetY);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
 
+        if (orientationIsValid) {
+            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+            //AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
+            fakeRotation = orientation.getYaw(AngleUnit.DEGREES) ;
+        }
+
         // this uses the processed target values
-        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), usedTargetX, usedTargetY);
+        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), fakeRotation, usedTargetX, usedTargetY);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
+        RobotController.telemetry.addData("fakeRotation", fakeRotation);
 
         //if(rotationDegreesMeasuredCamera < 5 && rotationDegreesMeasuredCamera != 0) gamepad1.setLedColor(0,254,0,250);
         //else gamepad1.setLedColor(254,0,0,250);
@@ -172,8 +195,10 @@ public class MainTeleOPBlue extends LinearOpMode {
         if(neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
         // pose resets
-        if (gamepad1.dpad_right) robot.getFollowerInstance().instance().setPose(farStart);
-        if (gamepad1.dpad_left) robot.getFollowerInstance().instance().setPose(new Pose(0,0,0));
+        if (gamepad1.dpadLeftWasPressed()) {
+            robot.getFollowerInstance().instance().setPose(new Pose(0,0,0));
+            imu.resetYaw();
+        }
 
         // Driver Intake
         if(robot.getControllerKey("A1").ExecuteOnPress) wantsToIntakeDriver = !wantsToIntakeDriver;
@@ -245,7 +270,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
         if (wantsToIntakeDriver  || wantsToFireWithIntake || wantsToFireSortingWithIntake) { // for now keep them in the same bucket
             intakeState = 1;
-            if(wantsToIntakeDriver){
+            if(wantsToIntakeDriver || wantsToFireSortingWithIntake){
                 if (!hasBallInRightChamber) gateState = 1; // first fill up left
                 else if (!hasBallInLeftChamber) gateState = -1; // then right
                 else gateState = -  1; // then continue pointing to right for when you fire
@@ -286,17 +311,17 @@ public class MainTeleOPBlue extends LinearOpMode {
                     if(usedDistance > 2.9){
                         needsToLowerGates = false; // to not infi repeat
                         robot.executeNow(new ActionSequence(
-                                new StateAction("RightGateServo", "OPEN"),
+                                new StateAction("LeftGateServo", "OPEN"),
                                 new DelayAction(timer12),
-                                new StateAction("RightGateServo", "CLOSED"),
+                                new StateAction("LeftGateServo", "CLOSED"),
 
                                 new DelayAction(timer1),
 
-                                new StateAction("RightGateServo", "OPEN"),
+                                new StateAction("LeftGateServo", "OPEN"),
 
                                 new DelayAction(timer2),
 
-                                new StateAction("LeftGateServo", "OPEN")
+                                new StateAction("RightGateServo", "OPEN")
                         ));
                     }
                     else{
@@ -445,6 +470,7 @@ public class MainTeleOPBlue extends LinearOpMode {
             robot.init_loop();
         }
         robot.getFollowerInstance().setStartingPose(globalRobotPose);
+        imu.resetYaw();
 
         while (opModeIsActive()) {
             // loop
@@ -505,6 +531,11 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         gamepad1.setLedColor(254,254,254,1000000);
         gamepad2.setLedColor(254,0,0,1000000);
+
+        imu = hardwareMap.get(IMU.class, "imu");
+        logoFacingDirectionPosition = 5; // Right
+        usbFacingDirectionPosition = 0; /// up now
+        updateOrientation();
     }
 
 
@@ -579,7 +610,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
     // ============================ Odometry Stuff ============================
 
-    public static double calculateHeadingAdjustment(Pose robotPose, double targetX, double targetY) {
+    public static double calculateHeadingAdjustment(Pose robotPose,double robotHeadingDeg, double targetX, double targetY) {
         // Current robot position
         double x = robotPose.getX();
         double y = robotPose.getY(); // don'// invert Y unless your coordinate system specifically requires it
@@ -595,7 +626,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // Robot heading in degrees
         // Assuming robotPose.getHeading() is in radians, 0° = facing +X, increases counterclockwise
-        double robotHeadingDeg = Math.toDegrees(robotPose.getHeading());
+        //double robotHeadingDeg = Math.toDegrees(robotPose.getHeading());
 
         // Normalize to [0, 360)
         if (robotHeadingDeg<0) robotHeadingDeg += 360;
@@ -673,6 +704,17 @@ public class MainTeleOPBlue extends LinearOpMode {
         if(!isFlashing){
             robot.getColorSensorComponent("colorSensorRight").useSensorLight(true);
             robot.getColorSensorComponent("colorSensorLeft").useSensorLight(true);
+        }
+    }
+    void updateOrientation() {
+        RevHubOrientationOnRobot.LogoFacingDirection logo = logoFacingDirections[logoFacingDirectionPosition];
+        RevHubOrientationOnRobot.UsbFacingDirection usb = usbFacingDirections[usbFacingDirectionPosition];
+        try {
+            RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logo, usb);
+            imu.initialize(new IMU.Parameters(orientationOnRobot));
+            orientationIsValid = true;
+        } catch (IllegalArgumentException e) {
+            orientationIsValid = false;
         }
     }
 }

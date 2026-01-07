@@ -56,7 +56,7 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("RightGateServo", new ServoComponent()
+        robot.makeComponent("LeftGateServo", new ServoComponent()
                 .addMotor(rightGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
@@ -64,7 +64,7 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("LeftGateServo", new ServoComponent()
+        robot.makeComponent("RightGateServo", new ServoComponent()
                 .addMotor(leftGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
@@ -102,11 +102,11 @@ public class ComponentMakerMethods {
         // Servos
 
 
-        robot.getComponent("RightGateServo")
+        robot.getComponent("LeftGateServo")
                 .addState("OPEN", 180) // 0.5
                 .addState("CLOSED", 33,true); // 0.09
 
-        robot.getComponent("LeftGateServo")
+        robot.getComponent("RightGateServo")
                 .addState("CLOSED", 155, true) // 0.43
                 .addState("OPEN", 36); // 0.1
 
