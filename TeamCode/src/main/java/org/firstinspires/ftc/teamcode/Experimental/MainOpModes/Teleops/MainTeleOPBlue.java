@@ -65,7 +65,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double targetXRightPanel = 131; // about +6 cuz thats a tyle
     public static double targetYRightPanel = 48; // a 3 bias for y
 
-    public static double targetXLeftPanel = 128; // and ofc a 3 bias on X for that one
+    public static double targetXLeftPanel = 126; // and ofc a 3 bias on X for that one
     public static double targetYLeftPanel = 55; // about +6 but on y
 
     public static double usedTargetX = 125;
@@ -134,7 +134,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double turretVelocityOverride = 0;
     public static double timer1 = 600;
     public static double timer2 = 600;
-    public static double timer3 = 500;
+    public static double timer3 = 800;
     public static double timer12 = 400;
 
     public static double TurretP = 0.025;
@@ -160,7 +160,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
         // this uses the processed target values
-        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), fakeRotation, targetX, targetY);
+        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, usedTargetY);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
         RobotController.telemetry.addData("fakeRotation", fakeRotation);
 
@@ -480,6 +480,13 @@ public class MainTeleOPBlue extends LinearOpMode {
     }
 
     public void teamSensitiveStuff() {
+        if(targetY < 0){
+            farZoneCameraAdder = - farZoneCameraAdder;
+            targetY = -targetY;
+            targetYCenter = -targetYCenter;
+            usedTargetY = -usedTargetY;
+            targetYLeftPanel = -targetYLeftPanel;
+        }
         teamPipeline = 0;
         currentTeamColor = TeamColor.Blue;
     }
@@ -675,8 +682,8 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
 
-        usedTargetX = targetXCenter;
-        usedTargetY = targetYCenter;
+        //usedTargetX = targetXCenter;
+        //usedTargetY = targetYCenter;
 
         RobotController.telemetry.addData("Calculated Rotation From Robot",degrees);
     }

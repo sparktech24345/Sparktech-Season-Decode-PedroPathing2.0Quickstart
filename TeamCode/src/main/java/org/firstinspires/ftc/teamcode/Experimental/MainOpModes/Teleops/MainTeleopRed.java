@@ -23,6 +23,10 @@ public class MainTeleopRed extends MainTeleOPBlue {
         teamPipeline = 1;
         farZoneCameraAdder = - farZoneCameraAdder;
         targetY = -targetY;
+        targetYCenter = -targetYCenter;
+        usedTargetY = -usedTargetY;
+        targetYLeftPanel = -targetYLeftPanel;
+        targetYRightPanel = -targetYRightPanel;
         currentTeamColor = TeamColor.Red;
     }
 }

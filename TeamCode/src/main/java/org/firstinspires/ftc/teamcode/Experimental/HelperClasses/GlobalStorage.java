@@ -161,10 +161,34 @@ public class GlobalStorage {
     public static double distanceToAngleFunction(double distance) {
         if( distance > 2.9) return 280;
         if(distance < 1.05) return 310;
-        else return 280; // TODO: Change this
+        else return 270; // TODO: Change this
+
+        /*
+        if( distance > Measurements.P5.distance()) return 280;
+        if(distance < Measurements.P1.distance()) return 310;
+        Pair<Measurements, Measurements> closest = Measurements.getClosestFromDistance(distance);
+        if (closest.first.equals(closest.second)) return 0;
+        return interpolate(distance, closest.first.distance(), closest.second.distance(), closest.first.angle(), closest.second.angle());
+        //if( distance > 2.9) return 280;
+        //if(distance < 1.05) return 310;
+        //else return 280; // TODO: Change this*/
     }
     public static double distanceToVelocityFunction(double distance) {
         if( distance > 2.9) return 1240;
-        return 176.88679 * distance + 640; // TODO: Change this
+        return 176.88679 * distance + 680; // TODO: Change this
+
+        /*
+        if(distance > Measurements.P5.distance()) return 1240;
+        if (distance < Measurements.P1.distance()) return 800;
+        Pair<Measurements, Measurements> closest = Measurements.getClosestFromDistance(distance);
+        if (closest.first.equals(closest.second)) return 0;
+        return interpolate(distance, closest.first.distance(), closest.second.distance(), closest.first.velocity(), closest.second.velocity());
+        // return 176.88679 * distance + 640; // TODO: Change this*/
+    }
+
+    public static double interpolate(double x, double x1, double x2, double y1, double y2){
+        double tangent = (y2 - y1) / (x2 - x1);
+        double bias = y1;
+        return (bias + tangent * (x - x1));
     }
 }

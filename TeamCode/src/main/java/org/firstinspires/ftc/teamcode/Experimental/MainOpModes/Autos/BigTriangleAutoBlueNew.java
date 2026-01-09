@@ -1,8 +1,14 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateDistanceToWallInMeters;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateHeadingAdjustment;
 
 import android.graphics.Color;
 
@@ -40,8 +46,8 @@ public class BigTriangleAutoBlueNew extends OpMode {
     private boolean startAuto = false;
     public static boolean isMoving;
     public static double fakeActionCounter = 0;
-    public static double targetX = 125;
-    public static double targetY = 46;
+    public static double targetX = 127;
+    public static double targetY = 48;
     public static double ballsLaunched = 0;
     public static double publicAngleConstantThingTemp = 20;
     ElapsedTime timer = new ElapsedTime();
@@ -72,25 +78,23 @@ public class BigTriangleAutoBlueNew extends OpMode {
     public static double velocity = 800;
     public static double angle = 310;
     public static double rotation = 25;
+    public static boolean shouldFire = false;
     /// --------------------------------------------------------
-    private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose small_triangle_shoot = new Pose(10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = new Pose(20, 0, 0); // Pose1: shooting position small triangle
-    private Pose parkPose = new Pose(10, 15, 0);
-    private Pose HP_collect = new Pose(38.6, -5.56, 0); // Pose3: HP collect
-    private Pose first_row_ready = new Pose(15, 52, 0); // Pose4: collect first row right
-    private Pose first_row_done = new Pose(30, 52, 0); // Pose5: collect first row left
-    private Pose lever = new Pose(38.31, -62.65, 0); // Pose6: lever pose
-    private Pose second_row_ready = new Pose(15, 77, 0); // Pose7: collect second row right
-    private Pose second_row_done = new Pose(30, 77, 0); // Pose8: colect second row left
-    private Pose big_triangle_shoot = new Pose(1, -90, 0); // Pose9: shooting big triangle pose
-    private Pose big_triangle_offset = new Pose(1, -70, 0); // Pose9: shooting big triangle pose
-    private Pose third_row_ready = new Pose(15, 100, 0); // Pose10: collect third row right
-    private Pose third_row_done = new Pose(30, 100, 0); // Pose11: collect third row left
-    private Pose third_row_firing = new Pose(30, 100, 0);
-    private Pose classifier_starter = new Pose(130, 43.32, 90);
-    private Pose classifier_shooter = new Pose(130, 36, 90);
-    private Pose classifier_park = new Pose(130, 30, 90);
+    private Pose starter = new Pose(0.0, 0.0, 0.0); // Default Start Position (p0)
+    private Pose first_row_ready = new Pose(28, 15.5, 90); // Pose4: collect first row right
+    private Pose first_row_done = new Pose(28, 45.2, 90); // Pose5: collect first row left
+    private Pose second_row_ready = new Pose(53, 13, 90); // Pose7: collect second row right
+    private Pose second_row_done = new Pose(52, 45.5, 90); // Pose8: colect second row left
+    private Pose big_triangle_shoot_third_collect = new Pose(80, 0, -144); // Pose9: shooting big triangle pose
+    private Pose big_triangle_shoot_any_collect = new Pose(80, 0, 90); // Pose9: shooting big triangle pose
+    private Pose third_row_ready = new Pose(86.2, 37, -173); // Pose10: collect third row right
+    private Pose third_row_intermediate = new Pose(115, 36, -173); // Pose10: collect third row right
+    private Pose third_row_done = new Pose(78, 29, -144); // Pose11: collect third row left
+    private Pose classifier_starter = new Pose(120, 43.32, 90);
+    private Pose classifier_shooter = new Pose(117, 38, 90);
+    private Pose classifier_park = new Pose(120, 29, 90);
+    public static double distanceToWallOdometry;
+    public static double rotationToWallOdometry;
 
     @Override
     public void init() {
@@ -106,15 +110,23 @@ public class BigTriangleAutoBlueNew extends OpMode {
                         RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
                         RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
                         RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+                        RobotController.telemetry.addData("is moving",isMoving);
                         }
 
             private void controls() { // this will happen in a loop
-                isMoving = robot.getFollowerInstance().instance().isBusy();
+                isMoving = RobotController.follower.instance().isBusy();
                 HandleColors();
-                if(startAuto){
-                    startAuto = false;
-                    makeAuto();
-                }
+                firingTurret(shouldFire);
+                bigIffMethod();
+
+                distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
+                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), targetX, targetY);
+                if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
+
+//                if (startAuto) {
+//                    startAuto = false;
+//                    makeAuto();
+//                }
             }
         };
         ComponentMakerMethods.MakeComponents(robot);
@@ -124,7 +136,11 @@ public class BigTriangleAutoBlueNew extends OpMode {
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         fakeActionCounter = 0;
+        shouldFire = false;
         movingTimer.reset();
+        bIf1 = bIf2 = bIf3 = bIf4 = bIf5 = bIf6 = bIf7 = bIf8 = bIf9 = bIf10 =
+                bIf11 = bIf12 = bIf13 = bIf14 = bIf15 = bIf16 = bIf17 = bIf18 = bIf19 = bIf20 =
+                        bIf21 = bIf22 = bIf23 = bIf24 = bIf25 = bIf26 = bIf27 = bIf28 = bIf29 = bIf30 = true;
     }
 
     @Override
@@ -154,84 +170,35 @@ public class BigTriangleAutoBlueNew extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    private void makeAuto(){
+    private void makeAuto() {
         robot.addToQueue(
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        robot.executeNow(new MoveAction(classifier_shooter));
-                        movingTimer.reset();
-                    }
-                }).setDoneCondition(supplyIsDoneMoving),
-                new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(turnStuffOff),
-
-                /// collecting the closest row after firing
-
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        robot.executeNow(new MoveAction(third_row_ready));
-                        movingTimer.reset();
-                    }
-                }).setDoneCondition(supplyIsDoneMoving),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        robot.executeNow(new MoveAction(third_row_done));
-                        movingTimer.reset();
-                    }
-                }).setDoneCondition(supplyIsDoneMoving),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        robot.executeNow(new MoveAction(third_row_firing));
-                        movingTimer.reset();
-                    }
-                }).setDoneCondition(supplyIsDoneMoving),
-
-                /// fire the balls
-                new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(turnStuffOff),
-                new MoveAction(parkPose)
+//                new GeneralAction(() -> {
+//
+////                    movingTimer.reset();
+////                }),//.setDoneCondition(supplyIsDoneMoving),
+//                //.setExecutionCondition(supplyIsDoneMoving),
+//                new DelayAction(1000),
+//
+//                /// collecting the closest row after firing
+//
+//                ,
+//                new DelayAction(1000),
+//                ,
+//                new DelayAction(800),
+//                ,
+//                new DelayAction(500),
+//                ,
+//                new DelayAction(1500),
+//                /// fire the balls
+//
         );
     }
     /// Runnables
-    Runnable prepToFireSortedBall = new Runnable() {
-        @Override
-        public void run() {
-            robot.getMotorComponent("TurretSpinMotor")
-                    .setOperationMode(MotorComponent.MotorModes.Velocity)
-                    .setTarget(velocity);
-            // ----------------------- Angle Stuff -----------------------
-            robot.getServoComponent("TurretAngle")
-                    .setTarget(angle);
-            // ----------------------- Rotation Stuff -----------------------
-            robot.getMotorComponent("TurretRotateMotor")
-                    .setTarget(rotation)
-            ;
-            ballColorQueue.clearQueue();
-            int motifID=1; /// TODO DETECTION OF MOTIF
-            switch (motifID){
+    Runnable prepToFireSortedBallClose = () -> {
+        shouldFire = true;
+        ballColorQueue.clearQueue();
+            int motifID = 1; /// TODO DETECTION OF MOTIF
+            switch (motifID) {
                 case 1:
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     ballColorQueue.add(BallColorSet_Decode.Purple);
@@ -249,22 +216,79 @@ public class BigTriangleAutoBlueNew extends OpMode {
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     break;
-            }}
+            }
+    };
+    public void firingTurret(boolean shouldFire){
+        if(shouldFire){
+            // ----------------------- Power Stuff -----------------------
+
+            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
+            robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Velocity)
+                    .setTarget(targetVelocity);
+
+
+            // ----------------------- Angle Stuff -----------------------
+
+            double turretAngleVal = 280;
+            turretAngleVal = clamp(turretAngleVal,262,324);
+            robot.getServoComponent("TurretAngle")
+                    .setTarget(turretAngleVal);
+
+
+            // ----------------------- Rotation Stuff -----------------------
+
+
+            robot.getMotorComponent("TurretRotateMotor")
+                    .setTarget(rotationToWallOdometry)
+            ;
+        }
+    }
+    Runnable prepToFireSortedBallFarPose = () -> {
+        robot.getMotorComponent("TurretSpinMotor")
+                .setOperationMode(MotorComponent.MotorModes.Velocity)
+                .setTarget(velocity);
+        // ----------------------- Angle Stuff -----------------------
+        robot.getServoComponent("TurretAngle")
+                .setTarget(angle);
+        // ----------------------- Rotation Stuff -----------------------
+        robot.getMotorComponent("TurretRotateMotor")
+                .setTarget(rotation);
+        ballColorQueue.clearQueue();
+        int motifID = 1; /// TODO DETECTION OF MOTIF
+        switch (motifID) {
+            case 1:
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Green);
+                break;
+
+            case 2:
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Green);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                break;
+
+            case 3:
+                ballColorQueue.add(BallColorSet_Decode.Green);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                break;
+        }
     };
 
-    Runnable fireSortedBall = new Runnable() {
-        @Override
-        public void run() {
+
+    Runnable fireSortedBall = () -> {
             ballToFire = ballColorQueue.pull();
 
-            if(ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
+            if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
                 robot.executeNow(new ActionSequence(
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(300),
                         new StateAction("RightGateServo", "CLOSED")
                 ));
             }
-            else if(ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
+            else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
                 robot.executeNow(new ActionSequence(
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(300),
@@ -280,39 +304,177 @@ public class BigTriangleAutoBlueNew extends OpMode {
                 ));
             }
             ballToFire = BallColorSet_Decode.NoBall;
-        }
     };
 
-    Runnable turnStuffOff = new Runnable() {
-        @Override
-        public void run() {
-            robot.getMotorComponent("TurretSpinMotor")
-                    .setOperationMode(MotorComponent.MotorModes.Power)
-                    .setTarget(0);
+    Runnable turnStuffOff = () -> {
+        shouldFire = false;
+
+        robot.getMotorComponent("TurretSpinMotor")
+                .setOperationMode(MotorComponent.MotorModes.Power)
+                .setTarget(0);
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
             robot.getMotorComponent("TurretRotateMotor").setTarget(0);
-        }
     };
 
-    Runnable fakeAction = new Runnable() {
-        @Override
-        public void run() {
-            fakeActionCounter++;
+    Runnable fakeAction = () -> ++fakeActionCounter;
+    BooleanSupplier supplyIsDoneMoving = () -> !isMoving && movingTimer.milliseconds() > 20; // if not moving and not just began moving
+
+    public static boolean bIf1, bIf2, bIf3, bIf4, bIf5, bIf6, bIf7, bIf8, bIf9, bIf10,
+            bIf11, bIf12, bIf13, bIf14, bIf15, bIf16, bIf17, bIf18, bIf19, bIf20,
+            bIf21, bIf22, bIf23, bIf24, bIf25, bIf26, bIf27, bIf28, bIf29, bIf30;
+
+    public void bigIffMethod(){
+
+        if(startAuto && bIf1){
+            robot.executeNow(new MoveAction(classifier_shooter));
+            robot.executeNow(new GeneralAction(prepToFireSortedBallFarPose));
+            startAuto = false;
+            bIf1 = false;
         }
-    };
-    BooleanSupplier supplyIsDoneMoving = new BooleanSupplier() {
-        @Override
-        public boolean getAsBoolean() {
-            return (!isMoving && movingTimer.milliseconds() > 20); // if not moving and not just began moving
+        if (bIf2 && !bIf1 && !isMoving) {
+            robot.addToQueue(new ActionSequence(
+                    new StateAction("IntakeMotor","FULL"),
+                    new DelayAction(2000),
+                    new GeneralAction(fireSortedBall),
+                    new DelayAction(1000),
+                    new GeneralAction(fireSortedBall),
+                    new DelayAction(1000),
+                    new GeneralAction(fireSortedBall),
+                    new DelayAction(1000),
+                    new StateAction("IntakeMotor","OFF"),
+                    new GeneralAction(turnStuffOff),
+                    new GeneralAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            bIf2 = false;
+                        }
+                    }),
+                    new StateAction("IntakeMotor","FULL")
+            ));
         }
-    };
+        if (bIf3 && !bIf2) {
+            robot.executeNow(new GeneralAction(() -> {
+                robot.getFollowerInstance().interrupt();
+                robot.executeNow(new MoveAction(third_row_intermediate));
+                movingTimer.reset();
+                bIf3 = false;
+            })
+            );
+        }
+        if (bIf4 && !bIf3 && !isMoving) {
+            robot.executeNow(
+            new GeneralAction(() -> {
+                robot.getFollowerInstance().interrupt();
+                robot.executeNow(new MoveAction(third_row_ready));
+                movingTimer.reset();
+                bIf4 = false;
+            })
+            );
+        }
+        if (bIf5 && !bIf4 && !isMoving) {
+            robot.executeNow(new GeneralAction(() -> {
+                robot.getFollowerInstance().interrupt();
+                robot.executeNow(new MoveAction(big_triangle_shoot_third_collect));
+                movingTimer.reset();
+                bIf5 = false;
+            }));
+        }
+        if (bIf6 && !bIf5 && !isMoving) {
+            robot.getFollowerInstance().interrupt();
+            robot.executeNow(new GeneralAction(() -> {
+                robot.executeNow(new MoveAction(third_row_done));
+                movingTimer.reset();
+                bIf6 = false;
+            }));
+        }
+        if (bIf7 && !bIf6  && !isMoving) {
+            robot.addToQueue(new ActionSequence(
+                    new GeneralAction(prepToFireSortedBallFarPose),
+                    new StateAction("IntakeMotor","FULL"),
+                    new DelayAction(1000),
+                    new GeneralAction(fireSortedBall),
+                    new DelayAction(1000),
+                    new GeneralAction(fireSortedBall),
+                    new DelayAction(1000),
+                    new GeneralAction(fireSortedBall),
+                    new DelayAction(1000),
+                    new StateAction("IntakeMotor","OFF"),
+                    new GeneralAction(turnStuffOff),
+                    new MoveAction(classifier_park)
+            ));
+            bIf7 = false;
+        }
+        if (bIf8 && !bIf7) {
+            bIf8 = false;
+        }
+        if (bIf9 && !bIf8) {
+            bIf9 = false;
+        }
+        if (bIf10 && !bIf9) {
+            bIf10 = false;
+        }
+        if (bIf11 && !bIf10) {
+            bIf11 = false;
+        }
+        if (bIf12 && !bIf11) {
+            bIf12 = false;
+        }
+        if (bIf13 && !bIf12) {
+            bIf13 = false;
+        }
+        if (bIf14 && !bIf13) {
+            bIf14 = false;
+        }
+        if (bIf15 && !bIf14) {
+            bIf15 = false;
+        }
+        if (bIf16 && !bIf15) {
+            bIf16 = false;
+        }
+        if (bIf17 && !bIf16) {
+            bIf17 = false;
+        }
+        if (bIf18 && !bIf17) {
+            bIf18 = false;
+        }
+        if (bIf19 && !bIf18) {
+            bIf19 = false;
+        }
+        if (bIf20 && !bIf19) {
+            bIf20 = false;
+        }
+        if (bIf21 && !bIf20) {
+            bIf21 = false;
+        }
+        if (bIf22 && !bIf21) {
+            bIf22 = false;
+        }
+        if (bIf23 && !bIf22) {
+            bIf23 = false;
+        }
+        if (bIf24 && !bIf23) {
+            bIf24 = false;
+        }
+        if (bIf25 && !bIf24) {
+            bIf25 = false;
+        }
+        if (bIf26 && !bIf25) {
+            bIf26 = false;
+        }
+        if (bIf27 && !bIf26) {
+            bIf27 = false;
+        }
+        if (bIf28 && !bIf27) {
+            bIf28 = false;
+        }
+        if (bIf29 && !bIf28) {
+            bIf29 = false;
+        }
+        if (bIf30 && !bIf29) {
+            bIf30 = false;
+        }
 
-
-
-
-
-
-
+    }
 
 
 
@@ -339,23 +501,23 @@ public class BigTriangleAutoBlueNew extends OpMode {
         actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors);
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
-        if(!shouldRemoveBalls){ // when not moving balls out of chambers they dont have permission to change to no ball
-            if(actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
+        if (!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
+            if (actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
 
-            if(actualRightSensorDetectedBall != BallColorSet_Decode.NoBall)
+            if (actualRightSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
         }
-        else{
+        else {
             calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
             calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
         }
 
-        if(actualLeftSensorDetectedBall == null) actualLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
-        if(actualRightSensorDetectedBall == null) actualRightSensorDetectedBall = BallColorSet_Decode.NoBall;
+        if (actualLeftSensorDetectedBall == null) actualLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
+        if (actualRightSensorDetectedBall == null) actualRightSensorDetectedBall = BallColorSet_Decode.NoBall;
 
-        if(calculatedLeftSensorDetectedBall == null) calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
-        if(calculatedRightSensorDetectedBall == null) calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
+        if (calculatedLeftSensorDetectedBall == null) calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
+        if (calculatedRightSensorDetectedBall == null) calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
 
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);

@@ -11,6 +11,6 @@ public class MoveAction extends Action {
 
     public MoveAction(Pose moveTargetPos) {
         this.OnStart = () -> follower.follow(moveTargetPos);
-        this.DoneCondition = () -> start && !follower.isMoving();
+        this.DoneCondition = () -> /*start &&*/ !follower.isMoving();
     }
 }
