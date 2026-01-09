@@ -30,6 +30,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 import java.io.IOException;
+import java.util.function.BooleanSupplier;
 
 @Config
 @Autonomous(name = "NEW BIG triangle BLUE", group = "Tests")
@@ -37,16 +38,14 @@ public class BigTriangleAutoBlueNew extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     private boolean startAuto = false;
-    private boolean hasShooted = false;
-    private boolean isShooting = false;
-    private boolean turretHasBall = false;
-    private boolean timeToFire, canSequence3, canSequence4,ballIsStuck,isMoving;
+    public static boolean isMoving;
+    public static double fakeActionCounter = 0;
     public static double targetX = 125;
     public static double targetY = 46;
     public static double ballsLaunched = 0;
     public static double publicAngleConstantThingTemp = 20;
     ElapsedTime timer = new ElapsedTime();
-    ElapsedTime shootTimer = new ElapsedTime();
+    ElapsedTime movingTimer = new ElapsedTime();
     ElapsedTime isFiringTimer = new ElapsedTime();
     ElapsedTime shouldJiggle = new ElapsedTime();
     ElapsedTime shouldFinish = new ElapsedTime();
@@ -88,9 +87,10 @@ public class BigTriangleAutoBlueNew extends OpMode {
     private Pose big_triangle_offset = new Pose(1, -70, 0); // Pose9: shooting big triangle pose
     private Pose third_row_ready = new Pose(15, 100, 0); // Pose10: collect third row right
     private Pose third_row_done = new Pose(30, 100, 0); // Pose11: collect third row left
-    private Pose classifier_starter = new Pose(130, 43.32, 90); // Pose12: start position from sorter
-    private Pose classifier_shooter = new Pose(130, 36, 90); // Pose12: start position from sorter
-    private Pose classifier_park = new Pose(130, 30, 90); // Pose12: start position from sorter
+    private Pose third_row_firing = new Pose(30, 100, 0);
+    private Pose classifier_starter = new Pose(130, 43.32, 90);
+    private Pose classifier_shooter = new Pose(130, 36, 90);
+    private Pose classifier_park = new Pose(130, 30, 90);
 
     @Override
     public void init() {
@@ -123,6 +123,8 @@ public class BigTriangleAutoBlueNew extends OpMode {
         recorder = new AutoRecorder(true);
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
+        fakeActionCounter = 0;
+        movingTimer.reset();
     }
 
     @Override
@@ -153,67 +155,102 @@ public class BigTriangleAutoBlueNew extends OpMode {
         }
     }
     private void makeAuto(){
-        robot.executeNow(new MoveAction(classifier_shooter));
         robot.addToQueue(
                 new GeneralAction(new Runnable() {
                     @Override
                     public void run() {
-                        robot.getMotorComponent("TurretSpinMotor")
-                                .setOperationMode(MotorComponent.MotorModes.Velocity)
-                                .setTarget(velocity);
-                        // ----------------------- Angle Stuff -----------------------
-                        robot.getServoComponent("TurretAngle")
-                                .setTarget(angle);
-                        // ----------------------- Rotation Stuff -----------------------
-                        robot.getMotorComponent("TurretRotateMotor")
-                                .setTarget(rotation)
-                        ;
-                        ballColorQueue.clearQueue();
-                        int motifID=1; /// TODO DETECTION OF MOTIF
-                        switch (motifID){
-                            case 1:
-                                ballColorQueue.add(BallColorSet_Decode.Purple);
-                                ballColorQueue.add(BallColorSet_Decode.Purple);
-                                ballColorQueue.add(BallColorSet_Decode.Green);
-                                break;
+                        robot.executeNow(new MoveAction(classifier_shooter));
+                        movingTimer.reset();
+                    }
+                }).setDoneCondition(supplyIsDoneMoving),
+                new GeneralAction(prepToFireSortedBall),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
 
-                            case 2:
-                                ballColorQueue.add(BallColorSet_Decode.Purple);
-                                ballColorQueue.add(BallColorSet_Decode.Green);
-                                ballColorQueue.add(BallColorSet_Decode.Purple);
-                                break;
+                /// collecting the closest row after firing
 
-                            case 3:
-                                ballColorQueue.add(BallColorSet_Decode.Green);
-                                ballColorQueue.add(BallColorSet_Decode.Purple);
-                                ballColorQueue.add(BallColorSet_Decode.Purple);
-                                break;
-                        }}
-                }),
-                        new StateAction("IntakeMotor","FULL"),
-                        new DelayAction(1000),
-                        new GeneralAction(fireSortedBall),
-                        new DelayAction(1000),
-                        new GeneralAction(fireSortedBall),
-                        new DelayAction(1000),
-                        new GeneralAction(fireSortedBall),
-                        new DelayAction(1000),
-                        new StateAction("IntakeMotor","OFF"),
-                        new GeneralAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                robot.getMotorComponent("TurretSpinMotor")
-                                        .setOperationMode(MotorComponent.MotorModes.Power)
-                                        .setTarget(0);
-                                robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+                new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        robot.executeNow(new MoveAction(third_row_ready));
+                        movingTimer.reset();
+                    }
+                }).setDoneCondition(supplyIsDoneMoving),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        robot.executeNow(new MoveAction(third_row_done));
+                        movingTimer.reset();
+                    }
+                }).setDoneCondition(supplyIsDoneMoving),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        robot.executeNow(new MoveAction(third_row_firing));
+                        movingTimer.reset();
+                    }
+                }).setDoneCondition(supplyIsDoneMoving),
 
-                                robot.getMotorComponent("TurretRotateMotor").setTarget(0);
-                            }
-                        }),
-                        new MoveAction(classifier_park)
+                /// fire the balls
+                new GeneralAction(prepToFireSortedBall),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
+                new MoveAction(parkPose)
         );
     }
     /// Runnables
+    Runnable prepToFireSortedBall = new Runnable() {
+        @Override
+        public void run() {
+            robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Velocity)
+                    .setTarget(velocity);
+            // ----------------------- Angle Stuff -----------------------
+            robot.getServoComponent("TurretAngle")
+                    .setTarget(angle);
+            // ----------------------- Rotation Stuff -----------------------
+            robot.getMotorComponent("TurretRotateMotor")
+                    .setTarget(rotation)
+            ;
+            ballColorQueue.clearQueue();
+            int motifID=1; /// TODO DETECTION OF MOTIF
+            switch (motifID){
+                case 1:
+                    ballColorQueue.add(BallColorSet_Decode.Purple);
+                    ballColorQueue.add(BallColorSet_Decode.Purple);
+                    ballColorQueue.add(BallColorSet_Decode.Green);
+                    break;
+
+                case 2:
+                    ballColorQueue.add(BallColorSet_Decode.Purple);
+                    ballColorQueue.add(BallColorSet_Decode.Green);
+                    ballColorQueue.add(BallColorSet_Decode.Purple);
+                    break;
+
+                case 3:
+                    ballColorQueue.add(BallColorSet_Decode.Green);
+                    ballColorQueue.add(BallColorSet_Decode.Purple);
+                    ballColorQueue.add(BallColorSet_Decode.Purple);
+                    break;
+            }}
+    };
 
     Runnable fireSortedBall = new Runnable() {
         @Override
@@ -246,6 +283,29 @@ public class BigTriangleAutoBlueNew extends OpMode {
         }
     };
 
+    Runnable turnStuffOff = new Runnable() {
+        @Override
+        public void run() {
+            robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Power)
+                    .setTarget(0);
+            robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+            robot.getMotorComponent("TurretRotateMotor").setTarget(0);
+        }
+    };
+
+    Runnable fakeAction = new Runnable() {
+        @Override
+        public void run() {
+            fakeActionCounter++;
+        }
+    };
+    BooleanSupplier supplyIsDoneMoving = new BooleanSupplier() {
+        @Override
+        public boolean getAsBoolean() {
+            return (!isMoving && movingTimer.milliseconds() > 20); // if not moving and not just began moving
+        }
+    };
 
 
 
