@@ -6,23 +6,40 @@ public abstract class Action {
 
     protected boolean start = false;
     protected boolean done = false;
+    protected String name = "";
 
-    protected BooleanSupplier ExecutionCondition = () -> true;
-    protected BooleanSupplier DoneCondition = () -> true;
-    protected Runnable Execution = () -> {};
-    protected Runnable OnStart = () -> {};
-    protected Runnable OnDone = () -> {};
+    protected BooleanSupplier StartCondition;
+    protected BooleanSupplier DoneCondition;
+    protected Runnable Execution;
+    protected Runnable OnStart;
+    protected Runnable OnDone;
+
+    public Action() {
+        StartCondition = () -> true;
+        DoneCondition = () -> true;
+        Execution = () -> {};
+        OnStart = () -> {};
+        OnDone = () -> {};
+    }
+
+    public Action setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public boolean finished() {
-        return DoneCondition.getAsBoolean();
+        return done;
     }
 
     public boolean started() {
         return start;
     }
 
-    public Action setExecutionCondition(BooleanSupplier exec) {
-        this.ExecutionCondition = exec;
+    public Action setStartCondition(BooleanSupplier start) {
+        this.StartCondition = start;
         return this;
     }
 
@@ -32,18 +49,18 @@ public abstract class Action {
     }
 
     public Action setOnStart(Runnable onStart) {
-        OnStart = onStart;
+        this.OnStart = onStart;
         return this;
     }
 
     public Action setOnDone(Runnable onDone) {
-        OnDone = onDone;
+        this.OnDone = onDone;
         return this;
     }
 
     public void update() {
         if (!start) {
-            start = ExecutionCondition.getAsBoolean();
+            start = StartCondition.getAsBoolean();
             if (start) OnStart.run();
         }
         if (!done && start) {

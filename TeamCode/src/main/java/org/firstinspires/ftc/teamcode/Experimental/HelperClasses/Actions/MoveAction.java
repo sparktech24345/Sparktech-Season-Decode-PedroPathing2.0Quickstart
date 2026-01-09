@@ -10,7 +10,11 @@ import java.util.function.BooleanSupplier;
 public class MoveAction extends Action {
 
     public MoveAction(Pose moveTargetPos) {
-        this.OnStart = () -> follower.follow(moveTargetPos);
+        super();
+        this.OnStart = () -> {
+            follower.interrupt();
+            follower.follow(moveTargetPos);
+        };
         this.DoneCondition = () -> /*start &&*/ !follower.isMoving();
     }
 }

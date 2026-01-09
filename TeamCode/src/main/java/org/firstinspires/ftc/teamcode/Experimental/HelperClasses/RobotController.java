@@ -35,14 +35,9 @@ public abstract class RobotController implements RobotControllerInterface {
     
     private double tickMS = 0;
     private ElapsedTime tickTimer = new ElapsedTime();
-    private ColorSet_ITD currentColor = ColorSet_ITD.Undefined;
     private HashMap<String, RobotState> states = new HashMap<>();
     private HashMap<String, Component> components = new HashMap<>();
-    private boolean useDefaultMovement = false;
     private DriveTrain movement = null;
-    private ArrayList<Pair<BooleanSupplier, Runnable>> callbacks = new ArrayList<>();
-    private HashMap<String, Object> telemetryList = new HashMap<>();
-    private HashMap<String, Pose> autoPositions = new HashMap<>();
 
     private void init_all() {
         follower = new ComplexFollower(hardwareMap);
@@ -75,22 +70,6 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public RobotController setState(String robotState) {
-        RobotState state = states.get(robotState);
-        HashMap<String, String> poses = state.getPositions();
-        Component comp = null;
-        for (String s : poses.keySet()) {
-            comp = components.get(s);
-            comp.loadState(poses.get(s));
-        }
-        return this;
-    }
-
-    public RobotController addRobotState(String stateName, RobotState state) {
-        states.put(stateName, state);
-        return this;
-    }
-
     public RobotController executeNow(Action... actions) {
         for (Action action : actions)
             queuer.executeNow(action);
@@ -105,15 +84,6 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public Button getControllerKey(String name) {
         return gamepad.get(name);
-    }
-
-    public Pose getAutoPose(String name) {
-        return autoPositions.get(name);
-    }
-
-    public RobotController addCallback(BooleanSupplier exec, Runnable run) {
-        callbacks.add(new Pair<>(exec, run));
-        return this;
     }
 
     public <T extends Component> T getComponent(String componentName) {
@@ -148,21 +118,6 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public RobotController addAutoPosition(String name, double x, double y, double headingInDegrees) {
-        autoPositions.put(name, new Pose(x, y, Math.toRadians(headingInDegrees)));
-        return this;
-    }
-
-    public RobotController addAutoPosition(String name, Pose position) {
-        autoPositions.put(name, position);
-        return this;
-    }
-
-    public RobotController setAutoStartingPos(String name) {
-        follower.instance().setStartingPose(autoPositions.get(name));
-        return this;
-    }
-
     public RobotController loadRobotState(String robotState) {
         RobotState state = states.get(robotState);
         HashMap<String, String> positions = state.getPositions();
@@ -189,6 +144,7 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     public void init_loop() {
+        tickTimer.reset();
         gamepad.update();
         follower.update();
         for (Component c : components.values()) {
@@ -196,7 +152,8 @@ public abstract class RobotController implements RobotControllerInterface {
                 c.update();
             }
         }
-        showTelemetry();
+        telemetry.update();
+        tickMS = tickTimer.milliseconds();
     }
 
     private void runUpdates() {
@@ -207,31 +164,15 @@ public abstract class RobotController implements RobotControllerInterface {
             c.update();
         } // aprox 40 milisec tends to 45 / 50
         if (movement != null) movement.loop();
-        showTelemetry(); // up to here about 60 milis
+        telemetry.update();
     }
 
     public void loop() {
         tickTimer.reset();
         runUpdates();
         main_loop();
-        if (currentOpModes == OpModes.TeleOP) {
-            for (Pair<BooleanSupplier, Runnable> pair : callbacks) {
-                if (pair.first.getAsBoolean()) {
-                    pair.second.run();
-                }
-            }
-        }
         tickMS = tickTimer.milliseconds();
     }
 
     public double getExecMS() { return tickMS; }
-
-    private void showTelemetry() {
-        for (Map.Entry<String, Object> entry : telemetryList.entrySet()) {
-            if (entry.getValue() instanceof Supplier<?>)
-                telemetry.addData(entry.getKey(), ((Supplier<?>)entry.getValue()).get());
-            else telemetry.addData(entry.getKey(), entry.getValue());
-        }
-        telemetry.update();
-    }
 }

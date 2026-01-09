@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 public class StateAction extends Action {
 
     public StateAction(String ComponentName, String PositionName) {
+        super();
         this.Execution = () -> robotControllerInstance.getComponent(ComponentName).loadState(PositionName);
     }
 }

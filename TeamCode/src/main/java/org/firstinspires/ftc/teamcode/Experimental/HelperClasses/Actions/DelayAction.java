@@ -9,14 +9,15 @@ public class DelayAction extends Action {
     private final double waitTimeMS;
 
     public DelayAction(double milliseconds) {
+        super();
         this.waitTimeMS = milliseconds;
         timer = new ElapsedTime();
         this.OnStart = timer::reset;
         this.DoneCondition = () -> timer.milliseconds() >= waitTimeMS;
     }
 
-    public DelayAction setExecutionCondition(BooleanSupplier exec) {
-        this.ExecutionCondition = exec;
+    public DelayAction setStartCondition(BooleanSupplier exec) {
+        this.StartCondition = exec;
         return this;
     }
 }

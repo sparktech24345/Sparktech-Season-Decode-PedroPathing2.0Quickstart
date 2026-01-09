@@ -7,14 +7,12 @@ import com.pedropathing.geometry.*;
 import com.pedropathing.paths.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 import java.text.MessageFormat;
 
 public class ComplexFollower {
 
-    private boolean shouldContinue = true;
     private boolean isDone = true;
 
     private double currentX;
@@ -25,12 +23,19 @@ public class ComplexFollower {
     private Pose currentPos;
     private Path pathToFollow;
 
-    private final Follower follower;
-
+    private Follower follower;
 
     public ComplexFollower(HardwareMap hardwareMap) {
+        init(hardwareMap, new Pose(0, 0, 0));
+    }
+
+    public ComplexFollower(HardwareMap hardwareMap, Pose startingPose) {
+        init(hardwareMap, startingPose);
+    }
+
+    private void init(HardwareMap hardwareMap, Pose startingPose) {
         this.follower = ConstantsDecode.createFollowerDecode(hardwareMap);
-        follower.setStartingPose(startPose);
+        follower.setStartingPose(startingPose);
         follower.update();
         currentPos = startPose;
         currentX = currentPos.getX();
@@ -56,13 +61,17 @@ public class ComplexFollower {
         follower.followPath(pathToFollow);
     }
 
-    public Follower instance() { return follower; }
+    public Follower instance() {
+        return follower;
+    }
     public Pose getTarget() {
         return currentTargetPos;
     }
-    public boolean done() { return isDone; }
+    public boolean done() {
+        return isDone;
+    }
     public boolean isMoving() {
-        return !isDone || currentPos.minus(currentTargetPos).getAsVector().getMagnitude() >= 0.01 || follower.getVelocity().getMagnitude() >= 0.01;
+        return follower.isBusy() || follower.getVelocity().getMagnitude() >= 0.01;
     }
 
     public void update() {
@@ -78,11 +87,11 @@ public class ComplexFollower {
         if (follower.isBusy()) follower.breakFollowing();
     }
 
-    public void telemetry(Telemetry tel) {
-        tel.addData("Follower is busy:", follower.isBusy());
-        tel.addData("Current pose:", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, currentHeading));
-        tel.addData("Target pose:", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), currentTargetPos.getHeading()));
-        tel.addData("Should continue?", shouldContinue);
-        tel.addData("Is done?", isDone);
+    public void telemetry() {
+        RobotController.telemetry.addData("Follower is busy", follower.isBusy());
+        RobotController.telemetry.addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, currentHeading));
+        RobotController.telemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), currentTargetPos.getHeading()));
+        RobotController.telemetry.addData("Follower velocity", follower.getVelocity().getMagnitude());
+        RobotController.telemetry.addData("Is done?", isDone);
     }
 }

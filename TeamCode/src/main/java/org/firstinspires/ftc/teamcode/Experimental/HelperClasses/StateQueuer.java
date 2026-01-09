@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
+
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 
 import java.util.ArrayDeque;
@@ -10,9 +13,9 @@ import java.util.Vector;
 
 public class StateQueuer {
 
-    private final Queue<Action> actionQueue = new ArrayDeque();
+    private final Vector<Action> actionQueue = new Vector<>();
     private final Vector<Action> instantActions = new Vector<>();
-    private boolean prevDone;
+    private boolean isDone;
 
     public int getLen() {
         return actionQueue.size();
@@ -28,7 +31,7 @@ public class StateQueuer {
         return this;
     }
 
-    public boolean isEmpty() { return actionQueue.isEmpty(); }
+    public boolean isEmpty() { return actionQueue.isEmpty() && instantActions.isEmpty(); }
 
     public void update() {
         for (int i = 0; i < instantActions.size();) {
@@ -38,38 +41,23 @@ public class StateQueuer {
             else ++i;
         }
 
-        for (Action action : actionQueue) {
+        for (int i = 0; i < 100 && !actionQueue.isEmpty(); ++i) {
+            Action action = actionQueue.get(0);
             action.update();
-            prevDone = action.finished();
-            if (!prevDone) break;
-        }
-
-        while (!actionQueue.isEmpty()) {
-            Action lastAction = actionQueue.peek();
-            if (lastAction != null && lastAction.finished()) actionQueue.poll();
+            isDone = action.finished();
+            if (isDone) actionQueue.remove(0);
             else break;
         }
     }
+
+    public void telemetry() {
+        telemetry.addData("queue len", actionQueue.size());
+        telemetry.addData("instants len", instantActions.size());
+        telemetry.addData("isEmpty", isEmpty());
+        Action act = actionQueue.get(0);
+        if (act == null) return;
+        telemetry.addData("is at action with name", act.getName());
+        telemetry.addData("action started", act.started());
+        telemetry.addData("action finished", act.finished());
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//          if (actionQueue.peek().finished()) actionQueue.poll();

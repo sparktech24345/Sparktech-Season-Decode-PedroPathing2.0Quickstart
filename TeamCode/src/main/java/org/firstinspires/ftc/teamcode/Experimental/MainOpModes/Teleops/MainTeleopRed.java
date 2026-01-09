@@ -21,7 +21,7 @@ public class MainTeleopRed extends MainTeleOPBlue {
     @Override
     public void teamSensitiveStuff(){
         teamPipeline = 1;
-        farZoneCameraAdder = - farZoneCameraAdder;
+        farZoneCameraAdder = -farZoneCameraAdder;
         targetY = -targetY;
         targetYCenter = -targetYCenter;
         usedTargetY = -usedTargetY;

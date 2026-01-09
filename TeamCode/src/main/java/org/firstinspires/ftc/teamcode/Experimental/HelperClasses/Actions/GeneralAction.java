@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 public class GeneralAction extends Action {
 
     public GeneralAction(Runnable exec) {
+        super();
         this.Execution = exec;
     }
 }
