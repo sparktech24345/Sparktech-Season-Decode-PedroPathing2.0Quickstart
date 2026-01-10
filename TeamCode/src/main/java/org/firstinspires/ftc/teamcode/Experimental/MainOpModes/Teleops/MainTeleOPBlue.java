@@ -49,7 +49,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 @Config
-@TeleOp(name="Main TeleOP Blue", group="Main")
+@TeleOp(name="Main TeleOP Blue", group="AAA")
 public class MainTeleOPBlue extends LinearOpMode {
     protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
@@ -145,6 +145,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static boolean isTryingToFire = false;
     public static boolean needsToLowerGates = true;
     public static double fakeRotation = 0;
+    public static Pose farPark = new Pose(117, 12, Math.toRadians(90));
     protected void robotMainLoop() {
         // all of the code
 
@@ -197,6 +198,10 @@ public class MainTeleOPBlue extends LinearOpMode {
         // pose resets
         if (gamepad1.dpadLeftWasPressed()) {
             robot.getFollowerInstance().instance().setPose(new Pose(0,0,0));
+            imu.resetYaw();
+        }
+        if (gamepad1.dpadRightWasPressed()) {
+            robot.getFollowerInstance().instance().setPose(farPark);
             imu.resetYaw();
         }
 
@@ -276,6 +281,10 @@ public class MainTeleOPBlue extends LinearOpMode {
                 else gateState = -  1; // then continue pointing to right for when you fire
             }
         }
+
+        if((robot.getControllerKey("X2").IsHeld)) gateState = -1; // left
+        if((robot.getControllerKey("Y2").IsHeld)) gateState = 1; // right
+        if((robot.getControllerKey("A2").IsHeld)) gateState = 0; // right
 
         switch (intakeState) {
             case -1:
@@ -364,14 +373,14 @@ public class MainTeleOPBlue extends LinearOpMode {
                     if(ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
                         robot.executeNow(new ActionSequence(
                                 new StateAction("RightGateServo", "OPEN"),
-                                new DelayAction(400),
+                                new DelayAction(375),
                                 new StateAction("RightGateServo", "CLOSED")
                         ));
                     }
                     else if(ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
                         robot.executeNow(new ActionSequence(
                                 new StateAction("LeftGateServo", "OPEN"),
-                                new DelayAction(400),
+                                new DelayAction(375),
                                 new StateAction("LeftGateServo", "CLOSED")
                         ));
                     }
@@ -469,6 +478,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         while (opModeInInit()) {
             robot.init_loop();
         }
+        robot.getFollowerInstance().instance().setPose(globalRobotPose);
         robot.getFollowerInstance().setStartingPose(globalRobotPose);
         imu.resetYaw();
 
@@ -489,6 +499,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
         teamPipeline = 0;
         currentTeamColor = TeamColor.Blue;
+        farPark = new Pose(120, 14, Math.toRadians(90));
     }
 
     public void setStuffToDefault() { // occasionally copy paste declarations here so we don't have surprises
@@ -695,7 +706,8 @@ public class MainTeleOPBlue extends LinearOpMode {
 
     // ============================ Weird Stuff ============================
     public Pose passPose() {
-        globalRobotPose = robot.getFollowerInstance().instance().getPose();
+        Pose tempPose = robot.getFollowerInstance().instance().getPose();
+        globalRobotPose = new Pose(tempPose.getX(),tempPose.getY(),Math.toRadians(tempPose.getHeading())); //Math.toRadians
         return globalRobotPose;
     }
     protected ElapsedTime flashingTimer = new ElapsedTime();

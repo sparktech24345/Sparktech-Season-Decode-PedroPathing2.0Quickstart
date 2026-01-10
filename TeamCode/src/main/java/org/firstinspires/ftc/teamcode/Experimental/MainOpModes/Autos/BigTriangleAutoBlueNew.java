@@ -3,10 +3,12 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateHeadingAdjustment;
 
@@ -16,6 +18,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -32,17 +37,20 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 
 @Config
-@Autonomous(name = "NEW BIG triangle BLUE", group = "Tests")
+@Autonomous(name = "NEW BIG triangle BLUE", group = "AAA")
 public class BigTriangleAutoBlueNew extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
+    private Limelight3A limelight3A;
     private boolean startAuto = false;
     public static boolean isMoving;
     public static double fakeActionCounter = 0;
@@ -75,9 +83,10 @@ public class BigTriangleAutoBlueNew extends OpMode {
     public static boolean shouldRemoveBalls = false;
     public static boolean shouldPullFromQueue = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
-    public static double velocity = 800;
-    public static double angle = 310;
+    public static double velocity = 780;
+    public static double angle = 300;
     public static double rotation = 25;
+    public static double rotationForInit = 145;
     public static boolean shouldFire = false;
     /// --------------------------------------------------------
     private Pose starter = new Pose(0.0, 0.0, 0.0); // Default Start Position (p0)
@@ -90,11 +99,12 @@ public class BigTriangleAutoBlueNew extends OpMode {
     private Pose third_row_ready = new Pose(86.2, 37, -173); // Pose10: collect third row right
     private Pose third_row_intermediate = new Pose(115, 36, -173); // Pose10: collect third row right
     private Pose third_row_done = new Pose(78, 29, -144); // Pose11: collect third row left
-    private Pose classifier_starter = new Pose(120, 43.32, 90);
-    private Pose classifier_shooter = new Pose(117, 38, 90);
-    private Pose classifier_park = new Pose(120, 29, 90);
+    private Pose classifier_starter = new Pose(117, 26, 90);
+    private Pose classifier_shooter = new Pose(114, 21, 90);
+    private Pose classifier_park = new Pose(117, 12, 90);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
+    public static int camId = 23;
 
     @Override
     public void init() {
@@ -141,11 +151,16 @@ public class BigTriangleAutoBlueNew extends OpMode {
         bIf1 = bIf2 = bIf3 = bIf4 = bIf5 = bIf6 = bIf7 = bIf8 = bIf9 = bIf10 =
                 bIf11 = bIf12 = bIf13 = bIf14 = bIf15 = bIf16 = bIf17 = bIf18 = bIf19 = bIf20 =
                         bIf21 = bIf22 = bIf23 = bIf24 = bIf25 = bIf26 = bIf27 = bIf28 = bIf29 = bIf30 = true;
+        convertPoses();
+        teamSensitiveStuff();
     }
 
     @Override
     public void init_loop() {
         robot.init_loop();
+        robot.getMotorComponent("TurretRotateMotor").setTarget(rotationForInit);
+        useCamera();
+        RobotController.telemetry.addData("id",camId);
     }
 
     @Override
@@ -197,31 +212,34 @@ public class BigTriangleAutoBlueNew extends OpMode {
     Runnable prepToFireSortedBallClose = () -> {
         shouldFire = true;
         ballColorQueue.clearQueue();
-            int motifID = 1; /// TODO DETECTION OF MOTIF
-            switch (motifID) {
-                case 1:
+            //int motifID = 1; /// TODO DETECTION OF MOTIF
+            switch (camId) {
+                case 23:
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     ballColorQueue.add(BallColorSet_Decode.Green);
                     break;
 
-                case 2:
+                case 22:
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     ballColorQueue.add(BallColorSet_Decode.Green);
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     break;
 
-                case 3:
+                case 21:
                     ballColorQueue.add(BallColorSet_Decode.Green);
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     ballColorQueue.add(BallColorSet_Decode.Purple);
                     break;
             }
     };
-    public void firingTurret(boolean shouldFire){
+    public static double FAR_TARGET_VELOCITY = 1240;
+    public static double FAR_TARGET_ANGLE = 280;
+    public void firingTurret(boolean shouldFire) {
         if(shouldFire){
             // ----------------------- Power Stuff -----------------------
 
+            //double targetVelocity = FAR_TARGET_VELOCITY;
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Velocity)
@@ -230,7 +248,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
 
             // ----------------------- Angle Stuff -----------------------
 
-            double turretAngleVal = 280;
+            double turretAngleVal = FAR_TARGET_ANGLE;
             turretAngleVal = clamp(turretAngleVal,262,324);
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
@@ -255,21 +273,21 @@ public class BigTriangleAutoBlueNew extends OpMode {
         robot.getMotorComponent("TurretRotateMotor")
                 .setTarget(rotation);
         ballColorQueue.clearQueue();
-        int motifID = 1; /// TODO DETECTION OF MOTIF
-        switch (motifID) {
-            case 1:
+        //int motifID = 1; /// TODO DETECTION OF MOTIF
+        switch (camId) {
+            case 23:
                 ballColorQueue.add(BallColorSet_Decode.Purple);
                 ballColorQueue.add(BallColorSet_Decode.Purple);
                 ballColorQueue.add(BallColorSet_Decode.Green);
                 break;
 
-            case 2:
+            case 22:
                 ballColorQueue.add(BallColorSet_Decode.Purple);
                 ballColorQueue.add(BallColorSet_Decode.Green);
                 ballColorQueue.add(BallColorSet_Decode.Purple);
                 break;
 
-            case 3:
+            case 21:
                 ballColorQueue.add(BallColorSet_Decode.Green);
                 ballColorQueue.add(BallColorSet_Decode.Purple);
                 ballColorQueue.add(BallColorSet_Decode.Purple);
@@ -330,8 +348,9 @@ public class BigTriangleAutoBlueNew extends OpMode {
             robot.executeNow(new GeneralAction(prepToFireSortedBallFarPose));
             startAuto = false;
             bIf1 = false;
+            movingTimer.reset();
         }
-        if (bIf2 && !bIf1 && !isMoving) {
+        if (bIf2 && !bIf1 && !isMoving && movingTimer.milliseconds() > 1000) {
             robot.addToQueue(new ActionSequence(
                     new StateAction("IntakeMotor","FULL"),
                     new DelayAction(2000),
@@ -346,10 +365,11 @@ public class BigTriangleAutoBlueNew extends OpMode {
                     new GeneralAction(new Runnable() {
                         @Override
                         public void run() {
-                            bIf2 = false;
+                            //bIf2 = false;
                         }
                     }),
-                    new StateAction("IntakeMotor","FULL")
+                    new MoveAction(classifier_park)
+                    //new StateAction("IntakeMotor","FULL")
             ));
         }
         if (bIf3 && !bIf2) {
@@ -380,8 +400,8 @@ public class BigTriangleAutoBlueNew extends OpMode {
             }));
         }
         if (bIf6 && !bIf5 && !isMoving) {
-            robot.getFollowerInstance().interrupt();
             robot.executeNow(new GeneralAction(() -> {
+                robot.getFollowerInstance().interrupt();
                 robot.executeNow(new MoveAction(third_row_done));
                 movingTimer.reset();
                 bIf6 = false;
@@ -533,8 +553,50 @@ public class BigTriangleAutoBlueNew extends OpMode {
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
+    public void teamSensitiveStuff(){
+        if(targetY < 0){
+            targetY = -targetY;
+        }
+        teamPipeline = 0;
+        currentTeamColor = TeamColor.Blue;
+    }
+    public void convertPoses(){
+        starter = convertPose(starter);
+        first_row_ready = convertPose(first_row_ready);
+        first_row_done = convertPose(first_row_done);
+        second_row_ready = convertPose(second_row_ready);
+        second_row_done = convertPose(second_row_done);
+        big_triangle_shoot_third_collect = convertPose(big_triangle_shoot_third_collect);
+        big_triangle_shoot_any_collect = convertPose(big_triangle_shoot_any_collect);
+        third_row_ready = convertPose(third_row_ready);
+        third_row_intermediate = convertPose(third_row_intermediate);
+        third_row_done = convertPose(third_row_done);
+        classifier_starter = convertPose(classifier_starter);
+        classifier_shooter = convertPose(classifier_shooter);
+        classifier_park = convertPose(classifier_park);
+    }
+    public void useCamera(){
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(2);
+        limelight3A.reloadPipeline();
+        limelight3A.setPollRateHz(100); // poll 100 times per second
+        limelight3A.start();
+
+        LLResult llResult = limelight3A.getLatestResult();
+        llResult.getFiducialResults();
+        List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+        for (LLResultTypes.FiducialResult fr : fiducialResults) {
+            camId = fr.getFiducialId();
+            //telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f",, fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+        }
+        if(camId < 21 || camId > 23) camId = 23;
+    }
+    public Pose convertPose(Pose pose){
+        return pose;
+    }
     public Pose passPose() {
-        globalRobotPose = robot.getFollowerInstance().instance().getPose();
+        Pose tempPose = robot.getFollowerInstance().instance().getPose();
+        globalRobotPose = new Pose(tempPose.getX(),tempPose.getY(),Math.toRadians(tempPose.getHeading())); //Math.toRadians
         return globalRobotPose;
     }
 }
