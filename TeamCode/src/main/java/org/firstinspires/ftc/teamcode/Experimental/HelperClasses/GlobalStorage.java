@@ -111,6 +111,7 @@ public class GlobalStorage {
     public static double grade1Far = 325;
     public static Pose globalRobotPose = new Pose();
     public static int teamPipeline = 0;
+    public static double redThreshold = 35;
     public static double normalizeTurretRotationForServo(double targetDegrees) {
         targetDegrees  = clamp(targetDegrees,-121.5,121.5);
         return - targetDegrees + 121.5;
@@ -174,7 +175,7 @@ public class GlobalStorage {
         //else return 280; // TODO: Change this*/
     }
     public static double distanceToVelocityFunction(double distance) {
-        if( distance > 2.9) return 1240;
+        if( distance > 2.9) return 1500;
         return 176.88679 * distance + 680; // TODO: Change this
 
         /*

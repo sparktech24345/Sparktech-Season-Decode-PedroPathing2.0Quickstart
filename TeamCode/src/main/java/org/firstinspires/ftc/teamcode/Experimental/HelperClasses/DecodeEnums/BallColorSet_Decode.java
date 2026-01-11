@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.redThreshold;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
@@ -34,7 +36,7 @@ public enum BallColorSet_Decode {
         return getColorForStorage(colors.red * 10000.0, colors.green * 10000.0, colors.blue * 10000.0);
     }
     public static BallColorSet_Decode getColorForStorage(double r, double g, double b) {
-        if(r < 20) return NoBall;
+        if(g < 60 && b < 60) return NoBall;
         else
         if(b > g) return Purple;
         else return Green;
