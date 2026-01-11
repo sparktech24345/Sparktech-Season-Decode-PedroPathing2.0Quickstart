@@ -33,6 +33,11 @@ public abstract class Component {
         return (T) this;
     }
 
+    public <T extends Component> T setTarget(double target) {
+        this.target = target;
+        return (T) this;
+    }
+
     public boolean hasStateOfName(String state_name) {
         if (!states.containsKey(state_name)) return false;
         return target == states.get(state_name);

@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+
 import java.util.function.BooleanSupplier;
 
 public abstract class Action {
 
     protected boolean start = false;
     protected boolean done = false;
-    protected String name = "";
+    protected String name = "ACTION_NAME";
 
     protected BooleanSupplier StartCondition;
     protected BooleanSupplier DoneCondition;
@@ -24,6 +27,7 @@ public abstract class Action {
 
     public Action setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getName() {
@@ -36,6 +40,31 @@ public abstract class Action {
 
     public boolean started() {
         return start;
+    }
+
+    public void telemetry() {
+        MultipleTelemetry tel = RobotController.telemetry;
+        tel.addData("at action", name);
+        tel.addData("started", start);
+        tel.addData("finished", done);
+        tel.addData("type of action", () -> {
+           if (this instanceof MoveAction) {
+               return "Move action";
+           }
+           if (this instanceof StateAction) {
+               return "State action";
+           }
+           if (this instanceof DelayAction) {
+               return "Delay action";
+           }
+           if (this instanceof GeneralAction) {
+               return "General action";
+           }
+           if (this instanceof ActionSequence) {
+               return "Action sequence";
+           }
+           return "Action (shouldn't be possible)";
+        });
     }
 
     public Action setStartCondition(BooleanSupplier start) {

@@ -29,14 +29,14 @@ public class ComponentMakerMethods {
                 .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
                 .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setVelocityCoefficients(180, 0,18,15)
+                .setVelocityCoefficients(180, 0, 18, 15)
                 .setTarget(0)
                 .setRange(-1,3000)
         );
 
         robot.makeComponent("TurretRotateMotor", new MotorComponent()
                 .addMotor(turretRotationMotorName)
-                .setPositionCoefficients(0.027,0,0.0015,3)
+                .setPositionCoefficients(0.027, 0, 0.0015, 3)
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0) // default middle point should be 0
                 .setResolution(2.62)
@@ -82,8 +82,8 @@ public class ComponentMakerMethods {
 
         // color sensor stuff
 
-        robot.makeComponent("colorSensorRight",new ColorSensorComponent(colorSensorRightName));
-        robot.makeComponent("colorSensorLeft",new ColorSensorComponent(colorSensorLeftName));
+        robot.makeComponent("colorSensorRight", new ColorSensorComponent(colorSensorRightName));
+        robot.makeComponent("colorSensorLeft", new ColorSensorComponent(colorSensorLeftName));
     }
 
     public static void MakeStates(RobotController robot) {

@@ -116,6 +116,11 @@ public class GlobalStorage {
         targetDegrees  = clamp(targetDegrees,-121.5,121.5);
         return - targetDegrees + 121.5;
     }
+
+    public static Pose pose(double x, double y, double degrees) {
+        return new Pose(x, y, Math.toRadians(degrees));
+    }
+
     public static double degreesToOuttakeTurretServo(double degrees) {
         double realDown = 76; // unghi real, masurate in cad, a nu se schimba
         double realUp = 58; // tot areal, unghi pana la blocker mecanic
@@ -123,7 +128,7 @@ public class GlobalStorage {
         double servoDown = 136.8; // servo down * 360 actually 0.38
         double servoUp = 36; // servo up * 360 actually 0.1
 
-        clamp(degrees,realUp, realDown); // maxing it out
+        clamp(degrees, realUp, realDown); // maxing it out
 
         //interpolation
         return servoDown + (degrees - realDown) * (servoUp - servoDown) / (realUp - realDown);

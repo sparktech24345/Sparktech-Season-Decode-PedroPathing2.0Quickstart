@@ -13,28 +13,24 @@ import java.text.MessageFormat;
 
 public class ComplexFollower {
 
-    private boolean isDone = true;
+    private static boolean isDone = true;
 
-    private double currentX;
-    private double currentY;
-    private double currentHeading;
+    private static double currentX;
+    private static double currentY;
+    private static double currentHeading;
 
-    private Pose currentTargetPos;
-    private Pose currentPos;
-    private Path pathToFollow;
+    private static Pose currentTargetPos;
+    private static Pose currentPos;
+    private static Path pathToFollow;
 
-    private Follower follower;
+    private static Follower follower;
 
-    public ComplexFollower(HardwareMap hardwareMap) {
-        init(hardwareMap, new Pose(0, 0, 0));
+    public static void init(HardwareMap hardwareMap) {
+        init(hardwareMap, pose(0, 0, 0));
     }
 
-    public ComplexFollower(HardwareMap hardwareMap, Pose startingPose) {
-        init(hardwareMap, startingPose);
-    }
-
-    private void init(HardwareMap hardwareMap, Pose startingPose) {
-        this.follower = ConstantsDecode.createFollowerDecode(hardwareMap);
+    public static void init(HardwareMap hardwareMap, Pose startingPose) {
+        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
         follower.setStartingPose(startingPose);
         follower.update();
         currentPos = startPose;
@@ -44,16 +40,18 @@ public class ComplexFollower {
         currentTargetPos = startPose;
     }
 
-    public void setStartingPose(Pose start) {
+    public static void setStartingPose(Pose start) {
         if (follower == null) return;
         follower.setStartingPose(start);
     }
 
-    public void follow(Pose targetPos) {
+    public static void follow(Pose targetPos) {
+        if (follower == null) return;
         follow(targetPos, null);
     }
 
-    public void follow(Pose targetPos, PathConstraints pathConstraints) {
+    public static void follow(Pose targetPos, PathConstraints pathConstraints) {
+        if (follower == null) return;
         currentTargetPos = targetPos;
         pathToFollow = new Path(new BezierLine(currentPos, currentTargetPos));
         pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
@@ -61,20 +59,24 @@ public class ComplexFollower {
         follower.followPath(pathToFollow);
     }
 
-    public Follower instance() {
+    public static Follower instance() {
         return follower;
     }
-    public Pose getTarget() {
+    public static Pose getTarget() {
+        if (follower == null) return pose(0, 0, 0);
         return currentTargetPos;
     }
-    public boolean done() {
+    public static boolean done() {
+        if (follower == null) return true;
         return isDone;
     }
-    public boolean isMoving() {
+    public static boolean isMoving() {
+        if (follower == null) return false;
         return follower.isBusy() || follower.getVelocity().getMagnitude() >= 0.01;
     }
 
-    public void update() {
+    public static void update() {
+        if (follower == null) return;
         follower.update();
         isDone = !follower.isBusy();
         currentPos = follower.getPose();
@@ -83,11 +85,16 @@ public class ComplexFollower {
         currentHeading = currentPos.getHeading();
     }
 
-    public void interrupt() {
+    public static void interrupt() {
+        if (follower == null) return;
         if (follower.isBusy()) follower.breakFollowing();
     }
 
-    public void telemetry() {
+    public static void telemetry() {
+        if (follower == null) {
+            RobotController.telemetry.addData("[ERROR] Follower", "Follower instance is null!");
+            return;
+        }
         RobotController.telemetry.addData("Follower is busy", follower.isBusy());
         RobotController.telemetry.addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, currentHeading));
         RobotController.telemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), currentTargetPos.getHeading()));

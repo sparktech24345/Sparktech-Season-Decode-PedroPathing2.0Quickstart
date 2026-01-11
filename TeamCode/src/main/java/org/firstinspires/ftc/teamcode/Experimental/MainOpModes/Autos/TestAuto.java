@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
@@ -8,7 +10,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
@@ -31,33 +35,52 @@ public class TestAuto extends OpMode {
             }
 
             private void telemetry() {
-                follower.telemetry(telemetry);
+                follower.telemetry();
+                queuer.telemetry();
                 telemetry.update();
+                telemetry.addData("AAA_controls: A1", "move fata spate");
+                telemetry.addData("AAA_controls: B1", "move patrat");
+                telemetry.addData("AAA_controls: X1", "move triunghi");
+                telemetry.addData("AAA_controls: DPAD UP1", "move fata spate + hood movement");
+                telemetry.addData("AAA_controls: DPAD DOWN1", "move patrat + hood movement");
             }
 
             private void controls() {
                 if (gamepad.get("A1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(new Pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(new Pose(0, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
                 }
-
-                if (gamepad.get("B1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(new Pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(new Pose(20, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(new Pose(0, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(new Pose(0, 0, 0)));
+                else if (gamepad.get("B1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(20, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(0, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
                 }
-
-                if (gamepad.get("X1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(new Pose(10, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(new Pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(new Pose(0, 0, 0)));
+                else if (gamepad.get("X1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(pose(10, 20, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
+                }
+                else if (gamepad.get("DPAD_UP1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
+                    robotTester.addToQueue(new StateAction("TurretAngle", 270));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
+                    robotTester.addToQueue(new StateAction("TurretAngle", 280));
+                }
+                else if (gamepad.get("DPAD_DOWN1").ExecuteOnPress) {
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 90)));
+                    robotTester.addToQueue(new StateAction("TurretAngle", 270));
+                    robotTester.addToQueue(new MoveAction(pose(20, 20, 180)));
+                    robotTester.addToQueue(new StateAction("TurretAngle", 280));
+                    robotTester.addToQueue(new MoveAction(pose(0, 20, 270)));
+                    robotTester.addToQueue(new StateAction("TurretAngle", 270));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
+                    robotTester.addToQueue(new StateAction("TurretAngle", 280));
                 }
             }
         };
-        MakeComponents();
-        MakeStates();
-        MakeAutoStates();
+        ComponentMakerMethods.MakeComponents(robotTester);
+        ComponentMakerMethods.MakeStates(robotTester);
         robotTester.init(OpModes.Autonomous);
         recorder = new AutoRecorder(true);
     }
@@ -85,16 +108,5 @@ public class TestAuto extends OpMode {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void MakeAutoStates() {
-        robotTester.addAutoPosition("p1", 0, 0, 0);
-        robotTester.addAutoPosition("p2", 30, 10, 120);
-    }
-
-    private void MakeComponents() {
-    }
-
-    private void MakeStates() {
     }
 }

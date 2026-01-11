@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 
 public abstract class RobotController implements RobotControllerInterface {
 
-    public static ComplexFollower follower = null;
     public static ComplexGamepad gamepad = null;
     public static HardwareMap hardwareMap = null;
     public static MultipleTelemetry telemetry = null;
@@ -40,9 +39,9 @@ public abstract class RobotController implements RobotControllerInterface {
     private DriveTrain movement = null;
 
     private void init_all() {
-        follower = new ComplexFollower(hardwareMap);
-        follower.setStartingPose(globalRobotPose);
-        follower.update();
+        ComplexFollower.init(hardwareMap);
+        ComplexFollower.setStartingPose(globalRobotPose);
+        ComplexFollower.update();
         queuer = new StateQueuer();
         robotControllerInstance = this;
     }
@@ -101,7 +100,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
         return (T) components.get(componentName);
     }
-    public Pose getCurrentPose(){ return follower.instance().getPose();
+    public Pose getCurrentPose(){ return ComplexFollower.instance().getPose();
 //        return new Pose (- followerInstance.getInstance().getPose().getX(), no more reversing X due to Pedro beeing fixed
 //                followerInstance.getInstance().getPose().getY(),
 //                followerInstance.getInstance().getPose().getHeading());
@@ -146,7 +145,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public void init_loop() {
         tickTimer.reset();
         gamepad.update();
-        follower.update();
+        ComplexFollower.update();
         for (Component c : components.values()) {
             if (c.moveDuringInit()) {
                 c.update();
@@ -158,7 +157,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     private void runUpdates() {
         gamepad.update(); // up to here about 0.5 milis
-        follower.update(); // up to here about 20 milis
+        ComplexFollower.update(); // up to here about 20 milis
         queuer.update(); // up to here also 20 milis
         for (Component c : components.values()) {
             c.update();

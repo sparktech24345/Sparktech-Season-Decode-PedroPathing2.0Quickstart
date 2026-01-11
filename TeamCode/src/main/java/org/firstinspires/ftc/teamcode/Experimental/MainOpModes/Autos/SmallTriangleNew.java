@@ -1,19 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.launchSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall1;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall2;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.robotControllerInstance;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import android.graphics.Color;
 
@@ -92,21 +79,21 @@ public class SmallTriangleNew extends OpMode {
     public static double rotation = -20;
     public static int camId =23;
     /// --------------------------------------------------------
-    private Pose starter = new Pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose small_triangle_shoot = new Pose(10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = new Pose(20, 0, 0); // Pose1: shooting position small triangle
-    private Pose parkPose = new Pose(10, 15, 0);
-    private Pose HP_collect = new Pose(38.6, -5.56, 0); // Pose3: HP collect
-    private Pose first_row_ready = new Pose(15, 52, 0); // Pose4: collect first row right
-    private Pose first_row_done = new Pose(30, 52, 0); // Pose5: collect first row left
-    private Pose lever = new Pose(38.31, -62.65, 0); // Pose6: lever pose
-    private Pose second_row_ready = new Pose(15, 77, 0); // Pose7: collect second row right
-    private Pose second_row_done = new Pose(30, 77, 0); // Pose8: colect second row left
-    private Pose big_triangle_shoot = new Pose(1, -90, 0); // Pose9: shooting big triangle pose
-    private Pose big_triangle_offset = new Pose(1, -70, 0); // Pose9: shooting big triangle pose
-    private Pose third_row_ready = new Pose(15, 100, 0); // Pose10: collect third row right
-    private Pose third_row_done = new Pose(30, 100, 0); // Pose11: collect third row left
-    private Pose classifier_starter = new Pose(28.355210672213335, 119.64113250492127, 0); // Pose12: start position from sorter
+    private Pose starter = pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
+    private Pose small_triangle_shoot = pose(10, 0, 0); // Pose1: shooting position small triangle
+    private Pose unstuckPose = pose(20, 0, 0); // Pose1: shooting position small triangle
+    private Pose parkPose = pose(10, 15, 0);
+    private Pose HP_collect = pose(38.6, -5.56, 0); // Pose3: HP collect
+    private Pose first_row_ready = pose(15, 52, 0); // Pose4: collect first row right
+    private Pose first_row_done = pose(30, 52, 0); // Pose5: collect first row left
+    private Pose lever = pose(38.31, -62.65, 0); // Pose6: lever pose
+    private Pose second_row_ready = pose(15, 77, 0); // Pose7: collect second row right
+    private Pose second_row_done = pose(30, 77, 0); // Pose8: colect second row left
+    private Pose big_triangle_shoot = pose(1, -90, 0); // Pose9: shooting big triangle pose
+    private Pose big_triangle_offset = pose(1, -70, 0); // Pose9: shooting big triangle pose
+    private Pose third_row_ready = pose(15, 100, 0); // Pose10: collect third row right
+    private Pose third_row_done = pose(30, 100, 0); // Pose11: collect third row left
+    private Pose classifier_starter = pose(28.355210672213335, 119.64113250492127, 0); // Pose12: start position from sorter
 
     @Override
     public void init() {
@@ -122,15 +109,11 @@ public class SmallTriangleNew extends OpMode {
                         RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
                         RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
                         RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
-                        }
+            }
 
             private void controls() { // this will happen in a loop
                 isMoving = robot.getFollowerInstance().instance().isBusy();
                 HandleColors();
-                if(startAuto){
-                    startAuto = false;
-                    makeAuto();
-                }
             }
         };
         ComponentMakerMethods.MakeComponents(robot);
@@ -154,7 +137,7 @@ public class SmallTriangleNew extends OpMode {
     public void start() {
         robot.getFollowerInstance().setStartingPose(starter);
         timer.reset();
-        startAuto = true;
+        makeAuto();
     }
 
     @Override
@@ -172,7 +155,7 @@ public class SmallTriangleNew extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    private void makeAuto(){
+    private void makeAuto() {
         robot.addToQueue(
                 new GeneralAction(() -> {
                     robot.getMotorComponent("TurretSpinMotor")
@@ -204,35 +187,31 @@ public class SmallTriangleNew extends OpMode {
                             ballColorQueue.add(BallColorSet_Decode.Purple);
                             ballColorQueue.add(BallColorSet_Decode.Purple);
                             break;
-                    }}),
-                        new StateAction("IntakeMotor","FULL"),
-                        new DelayAction(3000),
-                        new GeneralAction(fireSortedBall),
-                        new DelayAction(5000),
-                        new GeneralAction(fireSortedBall),
-                        new DelayAction(2000),
-                        new GeneralAction(fireSortedBall),
-                        new DelayAction(2000),
-                        new StateAction("IntakeMotor","OFF"),
-                        new GeneralAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                robot.getMotorComponent("TurretSpinMotor")
-                                        .setOperationMode(MotorComponent.MotorModes.Power)
-                                        .setTarget(0);
-                                robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+                    }
+                }),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(3000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(5000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(2000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(2000),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(() -> {
+                    robot.getMotorComponent("TurretSpinMotor")
+                            .setOperationMode(MotorComponent.MotorModes.Power)
+                            .setTarget(0);
+                    robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
 
-                                robot.getMotorComponent("TurretRotateMotor").setTarget(0);
-                            }
-                        }),
-                        new MoveAction(parkPose)
+                    robot.getMotorComponent("TurretRotateMotor").setTarget(0);
+                }),
+                new MoveAction(parkPose)
         );
     }
     /// Runnables
 
-    Runnable fireSortedBall = new Runnable() {
-        @Override
-        public void run() {
+    Runnable fireSortedBall = () -> {
             ballToFire = ballColorQueue.pull();
 
             if(ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
@@ -258,18 +237,7 @@ public class SmallTriangleNew extends OpMode {
                 ));
             }
             ballToFire = BallColorSet_Decode.NoBall;
-        }
-    };
-
-
-
-
-
-
-
-
-
-
+        };
 
     private void AutoPark() {
 //        robot.addToQueue(new MoveAction(false, parkPose));
@@ -284,6 +252,7 @@ public class SmallTriangleNew extends OpMode {
 //                .setPowerOverride(0);
 //
     }
+
     protected void HandleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
         rightSensorColors = colorSensorRight.getNormalizedColors();
@@ -294,14 +263,14 @@ public class SmallTriangleNew extends OpMode {
         actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors);
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
-        if(!shouldRemoveBalls){ // when not moving balls out of chambers they dont have permission to change to no ball
+        if(!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
             if(actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
 
             if(actualRightSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
         }
-        else{
+        else {
             calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
             calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
         }
@@ -326,15 +295,16 @@ public class SmallTriangleNew extends OpMode {
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
-    public void teamSensitiveStuff(){
-        if(targetY < 0){
+    public void teamSensitiveStuff() {
+        if(targetY < 0) {
             targetY = -targetY;
         }
         teamPipeline = 0;
         currentTeamColor = TeamColor.Blue;
         rotation = -21.5;
     }
-    public void useCamera(){
+
+    public void useCamera() {
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(2);
         limelight3A.reloadPipeline();
@@ -342,7 +312,7 @@ public class SmallTriangleNew extends OpMode {
         limelight3A.start();
 
         LLResult llResult = limelight3A.getLatestResult();
-        llResult.getFiducialResults();
+        //llResult.getFiducialResults();
         List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
         for (LLResultTypes.FiducialResult fr : fiducialResults) {
             camId = fr.getFiducialId();
@@ -350,16 +320,17 @@ public class SmallTriangleNew extends OpMode {
         }
         if(camId < 21 || camId > 23) camId = 23;
     }
-    public void convertPoses(){
+    public void convertPoses() {
         starter = convertPose(starter);
         parkPose = convertPose(parkPose);
     }
-    public Pose convertPose(Pose pose){
+
+    public Pose convertPose(Pose pose) {
         return pose;
     }
+
     public Pose passPose() {
-        Pose tempPose = robot.getFollowerInstance().instance().getPose();
-        globalRobotPose = new Pose(tempPose.getX(),tempPose.getY(),Math.toRadians(tempPose.getHeading())); //Math.toRadians
+        globalRobotPose = robot.getFollowerInstance().instance().getPose(); //Math.toRadians
         return globalRobotPose;
     }
 }

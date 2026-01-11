@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class ServoComponent extends Component {
 
-    public static enum ServoModes {
+    public enum ServoModes {
         Position
     }
     protected HashMap<String, Servo> motorMap = new HashMap<>();

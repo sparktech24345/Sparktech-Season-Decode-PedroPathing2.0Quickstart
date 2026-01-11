@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.function.BooleanSupplier;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+
+import java.text.MessageFormat;
 
 public class DelayAction extends Action {
     private final ElapsedTime timer;
@@ -15,9 +18,12 @@ public class DelayAction extends Action {
         this.OnStart = timer::reset;
         this.DoneCondition = () -> timer.milliseconds() >= waitTimeMS;
     }
-
-    public DelayAction setStartCondition(BooleanSupplier exec) {
-        this.StartCondition = exec;
-        return this;
+    public void telemetry() {
+        MultipleTelemetry tel = RobotController.telemetry;
+        tel.addData("at action", name);
+        tel.addData("started", start);
+        tel.addData("finished", done);
+        tel.addData("type of action", "Delay action");
+        tel.addData("Timer ms", MessageFormat.format("{0}ms", timer.milliseconds()));
     }
 }

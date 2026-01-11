@@ -56,8 +56,6 @@ public class StateQueuer {
         telemetry.addData("isEmpty", isEmpty());
         Action act = actionQueue.get(0);
         if (act == null) return;
-        telemetry.addData("is at action with name", act.getName());
-        telemetry.addData("action started", act.started());
-        telemetry.addData("action finished", act.finished());
+        act.telemetry();
     }
 }

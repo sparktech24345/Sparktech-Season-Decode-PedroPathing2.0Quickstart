@@ -18,7 +18,7 @@ public class SmallTriangleAutoRedNew extends SmallTriangleNew {
         rotation = 19;
     }
     @Override
-    public Pose convertPose(Pose pose){
-        return new Pose(pose.getX(),-pose.getY(),- pose.getHeading());
+    public Pose convertPose(Pose pose) {
+        return new Pose(pose.getX(), -pose.getY(), -pose.getHeading());
     }
 }
