@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
@@ -50,8 +51,8 @@ public class AutoParkOnly extends OpMode {
             }
         };
         robot.init(OpModes.Autonomous);
-        recorder = new AutoRecorder(true);
-        robot.getFollowerInstance().setStartingPose(getStartingPose());
+        recorder = new AutoRecorder();
+        ComplexFollower.setStartingPose(getStartingPose());
     }
 
     @Override

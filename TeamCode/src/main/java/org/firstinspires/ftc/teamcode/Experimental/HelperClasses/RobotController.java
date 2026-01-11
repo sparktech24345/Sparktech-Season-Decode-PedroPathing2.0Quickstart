@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
-import android.util.Pair;
-
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.*;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -17,16 +15,12 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Comp
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 
 public abstract class RobotController implements RobotControllerInterface {
 
-    public static ComplexGamepad gamepad = null;
     public static HardwareMap hardwareMap = null;
     public static MultipleTelemetry telemetry = null;
     public static StateQueuer queuer = null;
@@ -43,24 +37,17 @@ public abstract class RobotController implements RobotControllerInterface {
         ComplexFollower.setStartingPose(globalRobotPose);
         ComplexFollower.update();
         queuer = new StateQueuer();
-        robotControllerInstance = this;
+        robotController = this;
     }
 
     public RobotController() {
         init_all();
     }
 
-    public RobotController(HardwareMap hmap, MultipleTelemetry telemetry, ComplexGamepad gamepad) {
-        hardwareMap = hmap;
-        RobotController.telemetry = telemetry;
-        RobotController.gamepad = gamepad;
-        init_all();
-    }
-
     public RobotController(HardwareMap hmap, MultipleTelemetry telemetry, Gamepad gpad1, Gamepad gpad2) {
         hardwareMap = hmap;
         RobotController.telemetry = telemetry;
-        gamepad = new ComplexGamepad(gpad1, gpad2);
+        ComplexGamepad.init(gpad1, gpad2);
         init_all();
     }
 
@@ -81,39 +68,41 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public Button getControllerKey(String name) {
-        return gamepad.get(name);
+    public Button getKey(String name) {
+        return ComplexGamepad.get(name);
     }
 
-    public <T extends Component> T getComponent(String componentName) {
-        return (T) components.get(componentName);
+    public Component getComponent(String componentName) {
+         return components.get(componentName);
     }
-    public <T extends MotorComponent> T getMotorComponent(String componentName) {
-        return (T) components.get(componentName);
+
+    public MotorComponent getMotorComponent(String componentName) {
+        return (MotorComponent) components.get(componentName);
     }
-    public <T extends ServoComponent> T getServoComponent(String componentName) {
-        return (T) components.get(componentName);
+
+    public ServoComponent getServoComponent(String componentName) {
+        return (ServoComponent) components.get(componentName);
     }
-    public <T extends ColorSensorComponent> T getColorSensorComponent(String componentName) {
-        return (T) components.get(componentName);
+
+    public ColorSensorComponent getColorSensorComponent(String componentName) {
+        return (ColorSensorComponent) components.get(componentName);
     }
-    public <T extends CRServoComponent> T getCRServoComponent(String componentName) {
-        return (T) components.get(componentName);
+
+    public CRServoComponent getCRServoComponent(String componentName) {
+        return (CRServoComponent) components.get(componentName);
     }
-    public Pose getCurrentPose(){ return ComplexFollower.instance().getPose();
-//        return new Pose (- followerInstance.getInstance().getPose().getX(), no more reversing X due to Pedro beeing fixed
-//                followerInstance.getInstance().getPose().getY(),
-//                followerInstance.getInstance().getPose().getHeading());
+
+    public Pose getCurrentPose() {
+        return ComplexFollower.instance().getPose();
     }
-    public ComplexFollower getFollowerInstance(){return follower;}
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {
-        movement = new DriveTrain(frontLeftName, frontRightName, backLeftName, backLeftName);
+        DriveTrain.init(frontLeftName, frontRightName, backLeftName, backLeftName);
         return this;
     }
 
     public RobotController UseDefaultMovement() {
-        movement = new DriveTrain();
+        DriveTrain.init();
         return this;
     }
 
@@ -126,25 +115,13 @@ public abstract class RobotController implements RobotControllerInterface {
         return this;
     }
 
-    public RobotController setDriveTrainSlowdown(double slowdown) {
-        if (movement != null) movement.setSlowdown(slowdown);
-        return this;
-    }
-    public RobotController setDirectionFlip(boolean shouldFlip) {
-        if (movement != null) movement.setDirectionFlip(shouldFlip);
-        return this;
-    }
-    public boolean getDirectionFlip() {
-        return movement.getDirectionFlip();
-    }
-
     public void init(OpModes mode) {
         currentOpModes = mode;
     }
 
     public void init_loop() {
         tickTimer.reset();
-        gamepad.update();
+        ComplexGamepad.update();
         ComplexFollower.update();
         for (Component c : components.values()) {
             if (c.moveDuringInit()) {
@@ -156,13 +133,13 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     private void runUpdates() {
-        gamepad.update(); // up to here about 0.5 milis
+        ComplexGamepad.update(); // up to here about 0.5 milis
         ComplexFollower.update(); // up to here about 20 milis
         queuer.update(); // up to here also 20 milis
         for (Component c : components.values()) {
             c.update();
         } // aprox 40 milisec tends to 45 / 50
-        if (movement != null) movement.loop();
+        if (DriveTrain.wasInitialized()) DriveTrain.loop();
         telemetry.update();
     }
 

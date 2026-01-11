@@ -35,6 +35,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAct
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
@@ -124,7 +125,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
                         }
 
             private void controls() { // this will happen in a loop
-                isMoving = RobotController.follower.instance().isBusy();
+                isMoving = ComplexFollower.instance().isBusy();
                 HandleColors();
                 firingTurret(shouldFire);
                 bigIffMethod();
@@ -142,7 +143,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
-        recorder = new AutoRecorder(true);
+        recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         fakeActionCounter = 0;
@@ -165,7 +166,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
 
     @Override
     public void start() {
-        robot.getFollowerInstance().setStartingPose(classifier_starter);
+        ComplexFollower.setStartingPose(classifier_starter);
         timer.reset();
         startAuto = true;
     }
@@ -374,7 +375,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         }
         if (bIf3 && !bIf2) {
             robot.executeNow(new GeneralAction(() -> {
-                robot.getFollowerInstance().interrupt();
+                ComplexFollower.interrupt();
                 robot.executeNow(new MoveAction(third_row_intermediate));
                 movingTimer.reset();
                 bIf3 = false;
@@ -384,7 +385,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         if (bIf4 && !bIf3 && !isMoving) {
             robot.executeNow(
             new GeneralAction(() -> {
-                robot.getFollowerInstance().interrupt();
+                ComplexFollower.interrupt();
                 robot.executeNow(new MoveAction(third_row_ready));
                 movingTimer.reset();
                 bIf4 = false;
@@ -393,7 +394,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         }
         if (bIf5 && !bIf4 && !isMoving) {
             robot.executeNow(new GeneralAction(() -> {
-                robot.getFollowerInstance().interrupt();
+                ComplexFollower.interrupt();
                 robot.executeNow(new MoveAction(big_triangle_shoot_third_collect));
                 movingTimer.reset();
                 bIf5 = false;
@@ -401,7 +402,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         }
         if (bIf6 && !bIf5 && !isMoving) {
             robot.executeNow(new GeneralAction(() -> {
-                robot.getFollowerInstance().interrupt();
+                ComplexFollower.interrupt();
                 robot.executeNow(new MoveAction(third_row_done));
                 movingTimer.reset();
                 bIf6 = false;
@@ -595,7 +596,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         return pose;
     }
     public Pose passPose() {
-        Pose tempPose = robot.getFollowerInstance().instance().getPose();
+        Pose tempPose = ComplexFollower.instance().getPose();
         globalRobotPose = new Pose(tempPose.getX(),tempPose.getY(),Math.toRadians(tempPose.getHeading())); //Math.toRadians
         return globalRobotPose;
     }

@@ -6,24 +6,23 @@ import java.util.HashMap;
 
 public class ComplexGamepad {
 
-    private Gamepad gamepad1;
-    private Gamepad gamepad2;
+    private static Gamepad gamepad1;
+    private static Gamepad gamepad2;
 
-    private HashMap<String, Button> controlMap = null;
+    private static HashMap<String, Button> controlMap = null;
 
-    private void put(String name, Button button) {
+    private static void put(String name, Button button) {
         controlMap.put(name, button);
     }
 
-    private ComplexGamepad() {}
-    public ComplexGamepad(Gamepad gpad1, Gamepad gpad2) {
+    public static void init(Gamepad gpad1, Gamepad gpad2) {
         SetGamepads(gpad1, gpad2);
     }
 
-    public void SetGamepads(Gamepad gpad1, Gamepad gpad2) {
+    public static void SetGamepads(Gamepad gpad1, Gamepad gpad2) {
         gamepad1 = gpad1;
         gamepad2 = gpad2;
-        controlMap = new HashMap<String, Button>(36);
+        controlMap = new HashMap<>(36);
 
         if (gamepad1 != null) {
             put("A1", new Button(() -> gamepad1.a));
@@ -80,12 +79,12 @@ public class ComplexGamepad {
         }
     }
 
-    public Button get(String str) {
+    public static Button get(String str) {
         return controlMap.get(str);
     }
 
     // MUST BE INCLUDED IN MAIN LOOP FOR THE BOOLEANS TO WORK
-    public void update() {
+    public static void update() {
         for (Button button : controlMap.values()) {
             button.update();
         }

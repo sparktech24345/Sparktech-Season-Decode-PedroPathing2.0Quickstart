@@ -20,22 +20,20 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class DriveTrain {
 
-    private DcMotor RFDrive;
-    private DcMotor LFDrive;
-    private DcMotor RBDrive;
-    private DcMotor LBDrive;
-    private boolean directionFlip = false; //configured for Decode
-    private String frontLeft  = frontLeftName;
-    private String frontRight = frontRightName;
-    private String backLeft   = backLeftName;
-    private String backRight  = backRightName;
-    private double slowdownMultiplier = 1;
+    private static DcMotor RFDrive;
+    private static DcMotor LFDrive;
+    private static DcMotor RBDrive;
+    private static DcMotor LBDrive;
+    private static boolean directionFlip = false; //configured for Decode
+    private static String frontLeft  = frontLeftName;
+    private static String frontRight = frontRightName;
+    private static String backLeft   = backLeftName;
+    private static String backRight  = backRightName;
+    private static double slowdownMultiplier = 1;
+    private static boolean init_ = false;
 
-    public DriveTrain() {
-        init();
-    }
 
-    public DriveTrain(String LeftFront, String RightFront, String LeftBack, String RightBack) {
+    public static void init(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         frontLeft = LeftFront;
         frontRight = RightFront;
         backLeft = LeftBack;
@@ -43,18 +41,21 @@ public class DriveTrain {
         init();
     }
 
-    public void setSlowdown(double slowdownMultiplier) {
-        this.slowdownMultiplier = slowdownMultiplier;
+    public static boolean wasInitialized() { return init_; }
+
+    public static void setSlowdown(double slowdownMultiplier) {
+        DriveTrain.slowdownMultiplier = slowdownMultiplier;
     }
-    public void setDirectionFlip(boolean shouldFlip) {
-        this.directionFlip = shouldFlip;
+    public static void setDirectionFlip(boolean shouldFlip) {
+        DriveTrain.directionFlip = shouldFlip;
     }
-    public boolean getDirectionFlip() {
-        return this.directionFlip;
+    public static boolean getDirectionFlip() {
+        return DriveTrain.directionFlip;
     }
 
-    public void init() {
+    public static void init() {
         if (currentOpModes == OpModes.TeleOP) {
+            init_ = true;
             RFDrive = hardwareMap.get(DcMotor.class, frontRight);
             LFDrive = hardwareMap.get(DcMotor.class, frontLeft);
             RBDrive = hardwareMap.get(DcMotor.class, backRight);
@@ -70,17 +71,13 @@ public class DriveTrain {
         }
     }
 
-    public void start() {}
+    public static void loop() {
 
-    public void loop() {
+        double vertical     = -ComplexGamepad.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
+        double horizontal   = -ComplexGamepad.get("LEFT_STICK_X1").raw();
+        double pivot        = ComplexGamepad.get("RIGHT_STICK_X1").raw();
 
-        double vertical     = -gamepad.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
-        double horizontal   = -gamepad.get("LEFT_STICK_X1").raw();
-        double pivot        = gamepad.get("RIGHT_STICK_X1").raw();
-
-        /// SOMETHING WEIRD HAPPENED WHEN FIXING PEDRO
-
-        if(directionFlip) {
+        if (directionFlip) {
             horizontal = - horizontal;
             vertical = - vertical;
         }
@@ -96,8 +93,5 @@ public class DriveTrain {
         LBDrive.setPower(BackLeftPow * slowdownMultiplier);
     }
 
-    public void stop() {}
-
-    public void telemetry() {
-    }
+    public void telemetry() {}
 }

@@ -35,7 +35,7 @@ public class GlobalStorage {
     public static <Tx, Ty> Pair<Tx, Ty> make_pair(Tx arg1, Ty arg2) { return new Pair<>(arg1, arg2); }
 
     // INSTANCES
-    public static RobotController robotControllerInstance = null;
+    public static RobotController robotController = null;
 
 
     // CONSTANTS
@@ -89,8 +89,6 @@ public class GlobalStorage {
     public static String colorSensorRightName = "colorSensorRight";
     public static String colorSensorLeftName = "colorSensorLeft";
 
-    // OTHER S(TUFF)
-    public static double slowdownConstant       = 1;
     public static OpModes currentOpModes = OpModes.TeleOP;
     public static TeamColor currentTeamColor = TeamColor.TeamNotSet;
     public static MotifSequence currentMotifSequence = MotifSequence.Undefined;
@@ -102,16 +100,12 @@ public class GlobalStorage {
 
     //function for firing stuff
 
-    public static double grade0 = 605.276311;
-    public static double grade1 = 3.37452358;
-    public static double grade2 = -0.0064362671;
-    public static double grade3 = 0.0000058014683;
-
     public static double grade0Far = 610;
     public static double grade1Far = 325;
     public static Pose globalRobotPose = new Pose();
     public static int teamPipeline = 0;
     public static double redThreshold = 35;
+
     public static double normalizeTurretRotationForServo(double targetDegrees) {
         targetDegrees  = clamp(targetDegrees,-121.5,121.5);
         return - targetDegrees + 121.5;
@@ -133,6 +127,7 @@ public class GlobalStorage {
         //interpolation
         return servoDown + (degrees - realDown) * (servoUp - servoDown) / (realUp - realDown);
     }
+
     public static double voltageMultiplierForMotor(double voltage){
         voltage = clamp(voltage,11,14);
         //set points for function
@@ -144,6 +139,7 @@ public class GlobalStorage {
 
         return multiplierA + (voltage - voltajA) * (multiplierB - multiplierA) / (voltajB - voltajA);
     }
+
     public static double calculateDistance(Pose pose1, Pose pose2, boolean convertToMeters) {
 
         double dx = pose2.getX() - pose1.getX();
@@ -170,7 +166,7 @@ public class GlobalStorage {
         else return 270; // TODO: Change this
 
         /*
-        if( distance > Measurements.P5.distance()) return 280;
+        if(distance > Measurements.P5.distance()) return 280;
         if(distance < Measurements.P1.distance()) return 310;
         Pair<Measurements, Measurements> closest = Measurements.getClosestFromDistance(distance);
         if (closest.first.equals(closest.second)) return 0;
@@ -180,7 +176,7 @@ public class GlobalStorage {
         //else return 280; // TODO: Change this*/
     }
     public static double distanceToVelocityFunction(double distance) {
-        if( distance > 2.9) return 1500;
+        if (distance > 2.9) return 1500;
         return 176.88679 * distance + 680; // TODO: Change this
 
         /*
@@ -192,9 +188,8 @@ public class GlobalStorage {
         // return 176.88679 * distance + 640; // TODO: Change this*/
     }
 
-    public static double interpolate(double x, double x1, double x2, double y1, double y2){
+    public static double interpolate(double x, double x1, double x2, double y1, double y2) {
         double tangent = (y2 - y1) / (x2 - x1);
-        double bias = y1;
-        return (bias + tangent * (x - x1));
+        return (y1 + tangent * (x - x1));
     }
 }

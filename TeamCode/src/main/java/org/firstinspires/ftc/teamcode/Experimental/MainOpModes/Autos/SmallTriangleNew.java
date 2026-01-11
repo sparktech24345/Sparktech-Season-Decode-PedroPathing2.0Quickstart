@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAct
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
@@ -112,14 +113,14 @@ public class SmallTriangleNew extends OpMode {
             }
 
             private void controls() { // this will happen in a loop
-                isMoving = robot.getFollowerInstance().instance().isBusy();
+                isMoving = ComplexFollower.instance().isBusy();
                 HandleColors();
             }
         };
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
-        recorder = new AutoRecorder(true);
+        recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         convertPoses();
@@ -130,12 +131,12 @@ public class SmallTriangleNew extends OpMode {
     public void init_loop() {
         robot.init_loop();
         useCamera();
-        RobotController.telemetry.addData("id",camId);
+        RobotController.telemetry.addData("id", camId);
     }
 
     @Override
     public void start() {
-        robot.getFollowerInstance().setStartingPose(starter);
+        ComplexFollower.setStartingPose(starter);
         timer.reset();
         makeAuto();
     }
@@ -330,7 +331,7 @@ public class SmallTriangleNew extends OpMode {
     }
 
     public Pose passPose() {
-        globalRobotPose = robot.getFollowerInstance().instance().getPose(); //Math.toRadians
+        globalRobotPose = ComplexFollower.instance().getPose(); //Math.toRadians
         return globalRobotPose;
     }
 }

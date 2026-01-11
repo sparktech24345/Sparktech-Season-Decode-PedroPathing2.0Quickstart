@@ -5,14 +5,10 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.degreesToOuttakeTurretServo;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.greenSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.launchSensorBall;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.purpleSensorBall1;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 
 import android.graphics.Color;
@@ -34,7 +30,6 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
@@ -43,9 +38,9 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAc
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
@@ -198,46 +193,46 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // pose resets
         if (gamepad1.dpadLeftWasPressed()) {
-            robot.getFollowerInstance().instance().setPose(new Pose(0, 0, 0));
+            ComplexFollower.instance().setPose(new Pose(0, 0, 0));
             imu.resetYaw();
         }
         if (gamepad1.dpadRightWasPressed()) {
-            robot.getFollowerInstance().instance().setPose(farPark);
+            ComplexFollower.instance().setPose(farPark);
             imu.resetYaw();
         }
 
         // Driver Intake
-        if (robot.getControllerKey("A1").ExecuteOnPress) wantsToIntakeDriver = !wantsToIntakeDriver;
+        if (robot.getKey("A1").ExecuteOnPress) wantsToIntakeDriver = !wantsToIntakeDriver;
 
         // Driver preparing for shooting
-        if (robot.getControllerKey("Y1").ExecuteOnPress) isTryingToFire = !isTryingToFire;
+        if (robot.getKey("Y1").ExecuteOnPress) isTryingToFire = !isTryingToFire;
 
         // Driver actual firing with sorting
-        if (robot.getControllerKey("B1").ExecuteOnPress) wantsToFireSortingWithIntake = !wantsToFireSortingWithIntake;
+        if (robot.getKey("B1").ExecuteOnPress) wantsToFireSortingWithIntake = !wantsToFireSortingWithIntake;
 
         // Driver Actual Shooting
-        if (robot.getControllerKey("X1").ExecuteOnPress) wantsToFireWithIntake = !wantsToFireWithIntake;
-        needsToLowerGates = robot.getControllerKey("X1").ExecuteOnPress;
+        if (robot.getKey("X1").ExecuteOnPress) wantsToFireWithIntake = !wantsToFireWithIntake;
+        needsToLowerGates = robot.getKey("X1").ExecuteOnPress;
 
         // Driver Outputting
-        if (robot.getControllerKey("RIGHT_BUMPER1").ExecuteOnPress) wantsToOutput = !wantsToOutput;
+        if (robot.getKey("RIGHT_BUMPER1").ExecuteOnPress) wantsToOutput = !wantsToOutput;
 
-        if (robot.getControllerKey("DPAD_UP1").IsToggledOnPress)
+        if (robot.getKey("DPAD_UP1").IsToggledOnPress)
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Power)
                     .setTarget(1);
 
         // ====================== Sorting Stuff ======================
 
-        if (robot.getControllerKey("RIGHT_BUMPER2").ExecuteOnPress) {
+        if (robot.getKey("RIGHT_BUMPER2").ExecuteOnPress) {
             ballColorQueue.add(BallColorSet_Decode.Purple);
             gamepad2.setLedColor(254, 0, 254, 1000000);
         }
-        if (robot.getControllerKey("LEFT_BUMPER2").ExecuteOnPress) {
+        if (robot.getKey("LEFT_BUMPER2").ExecuteOnPress) {
             ballColorQueue.add(BallColorSet_Decode.Green);
             gamepad2.setLedColor(0, 254, 0, 1000000);
         }
-        if (robot.getControllerKey("B2").ExecuteOnPress) {
+        if (robot.getKey("B2").ExecuteOnPress) {
             ballColorQueue.clearQueue();
             gamepad2.setLedColor(254, 254, 254, 1000000);
         }
@@ -247,10 +242,10 @@ public class MainTeleOPBlue extends LinearOpMode {
         flashSensors(gamepad1.right_trigger > 0.4);
 
         // Slowdown
-        if (robot.getControllerKey("LEFT_BUMPER1").ExecuteOnPress) {
-            if (robot.getControllerKey("LEFT_BUMPER1").IsToggledOnPress) {
-                robot.setDriveTrainSlowdown(0.3);
-            } else robot.setDriveTrainSlowdown(1);
+        if (robot.getKey("LEFT_BUMPER1").ExecuteOnPress) {
+            if (robot.getKey("LEFT_BUMPER1").IsToggledOnPress) {
+                DriveTrain.setSlowdown(0.3);
+            } else DriveTrain.setSlowdown(1);
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
@@ -283,9 +278,9 @@ public class MainTeleOPBlue extends LinearOpMode {
             }
         }
 
-        if ((robot.getControllerKey("X2").IsHeld)) gateState = -1; // left
-        if ((robot.getControllerKey("Y2").IsHeld)) gateState = 1; // right
-        if ((robot.getControllerKey("A2").IsHeld)) gateState = 0; // right
+        if ((robot.getKey("X2").IsHeld)) gateState = -1; // left
+        if ((robot.getKey("Y2").IsHeld)) gateState = 1; // right
+        if ((robot.getKey("A2").IsHeld)) gateState = 0; // right
 
         switch (intakeState) {
             case -1:
@@ -414,7 +409,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
             // ----------------------- Rotation Stuff -----------------------
 
-            if (robot.getControllerKey("DPAD_DOWN1").IsToggledOnPress) neededAngleForTurretRotation = 0;
+            if (robot.getKey("DPAD_DOWN1").IsToggledOnPress) neededAngleForTurretRotation = 0;
             robot.getMotorComponent("TurretRotateMotor")
                     .setTarget(neededAngleForTurretRotation)
                     .setPositionCoefficients(TurretP, 0, TurretD, TurretZero)
@@ -424,7 +419,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         else {
             rotationAdder = 0;
 
-            if (!(robot.getControllerKey("DPAD_UP1").IsToggledOnPress)) {
+            if (!(robot.getKey("DPAD_UP1").IsToggledOnPress)) {
                 robot.getMotorComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Power)
                         .setTarget(0);
@@ -479,8 +474,8 @@ public class MainTeleOPBlue extends LinearOpMode {
         while (opModeInInit()) {
             robot.init_loop();
         }
-        robot.getFollowerInstance().instance().setPose(globalRobotPose);
-        robot.getFollowerInstance().setStartingPose(globalRobotPose);
+        ComplexFollower.instance().setPose(globalRobotPose);
+        ComplexFollower.setStartingPose(globalRobotPose);
         imu.resetYaw();
 
         while (opModeIsActive()) {

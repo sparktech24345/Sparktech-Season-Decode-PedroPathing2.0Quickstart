@@ -8,9 +8,11 @@ public enum Measurements {
     P3(1.805, 990, 270),
     P4(1.917, 1000, 267),
     P5(2.618, 1150, 263);
+
     public double distance;
     public double velocity;
     public double angle;
+
     Measurements(double distance, double velocity, double angle) {
         this.distance = distance;
         this.velocity = velocity;
@@ -22,7 +24,6 @@ public enum Measurements {
     public double distance() { return distance; }
 
     public static Pair<Measurements, Measurements> getClosestFromDistance(double distance) {
-        Measurements lower, higher;
         if (distance >= P1.distance && distance <= P2.distance) {
             return new Pair<>(P1, P2);
         } else if (distance >= P2.distance && distance <= P3.distance) {
