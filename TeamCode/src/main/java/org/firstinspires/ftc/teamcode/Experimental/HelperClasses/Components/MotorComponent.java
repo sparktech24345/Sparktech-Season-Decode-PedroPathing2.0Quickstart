@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 
 import java.util.HashMap;
@@ -135,6 +136,7 @@ public class MotorComponent extends Component {
     public double getPower() {
         return mainMotor.getPower();
     }
+    public double getCurrent(){return mainMotor.getCurrent(CurrentUnit.AMPS);}
     public DcMotorEx getMotor(String name) {
         return motorMap.get(name);
     }

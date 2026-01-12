@@ -39,12 +39,12 @@ public class TestAuto extends OpMode {
             private void telemetry() {
                 ComplexFollower.telemetry();
                 queuer.telemetry();
-                telemetry.update();
                 telemetry.addData("AAA_controls: A1", "move fata spate");
                 telemetry.addData("AAA_controls: B1", "move patrat");
                 telemetry.addData("AAA_controls: X1", "move triunghi");
                 telemetry.addData("AAA_controls: DPAD UP1", "move fata spate + hood movement");
                 telemetry.addData("AAA_controls: DPAD DOWN1", "move patrat + hood movement");
+                telemetry.update();
             }
 
             private void controls() {
