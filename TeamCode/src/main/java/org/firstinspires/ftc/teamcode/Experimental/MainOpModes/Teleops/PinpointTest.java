@@ -25,7 +25,6 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentOpModes;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.frontLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.frontRightName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.gamepad;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.hardwareMap;
 
 import com.acmerobotics.dashboard.FtcDashboard;

@@ -9,6 +9,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 
 import android.graphics.Color;
@@ -43,30 +44,18 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Tea
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 @Config
 @TeleOp(name="Main TeleOP Blue", group="AAA")
 public class MainTeleOPBlue extends LinearOpMode {
     protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
-    public static Pose farStart = new Pose(120, 24, Math.toRadians(90)); // no more reversing X
+    public static Pose farStart = pose(120, 24, 90); // no more reversing X
+
+    public static final MainConfig cfg = new MainConfig(MainConfig.Configs.Blue);
 
     /// ----------------- Target Pose Stuff ------------------
-
-    public static double targetX = 125;
-    public static double targetY = 46;
-    public static double targetXCenter = 125;
-    public static double targetYCenter = 46;
-
-    public static double targetXRightPanel = 131; // about +6 cuz thats a tyle
-    public static double targetYRightPanel = 48; // a 3 bias for y
-
-    public static double targetXLeftPanel = 126; // and ofc a 3 bias on X for that one
-    public static double targetYLeftPanel = 55; // about +6 but on y
-
-    public static double usedTargetX = 125;
-    public static double usedTargetY = 46;
-
 
     /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
@@ -92,10 +81,6 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double distanceMeasuredCamera = 0;
     public static double rotationDegreesMeasuredCamera = 0;
     public static double lastRotationDegreesMeasuredCamera = 0;
-    public static double cameraErrorMultiplier = 1;
-    public static double encoderMultiplier = 1;
-    public static double cameraAdder = 0;
-    public static double farZoneCameraAdder = -1;
     public static boolean shouldShootOnCamera = false;
 
     /// ----------------- Limelight Stuff -----------------
@@ -141,14 +126,15 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static boolean isTryingToFire = false;
     public static boolean needsToLowerGates = true;
     public static double fakeRotation = 0;
-    public static Pose farPark = new Pose(117, 12, Math.toRadians(90));
+    public static Pose farPark = pose(117, 12, 90);
+
     protected void robotMainLoop() {
         // all of the code
 
         // processing
         processCameraStuff();
-        processTargetStuff(robot.getCurrentPose(), targetX, targetY);
-        distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
+        processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
+        distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
 
         if (orientationIsValid) {
             YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
@@ -157,7 +143,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
         // this uses the processed target values
-        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, usedTargetY);
+        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.usedTargetX, cfg.usedTargetY);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
         RobotController.telemetry.addData("fakeRotation", fakeRotation);
 
@@ -181,7 +167,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
 
-        if (usedDistance > 2.9) neededAngleForTurretRotation += farZoneCameraAdder;
+        if (usedDistance > 2.9) neededAngleForTurretRotation += cfg.farZoneCameraAdder;
         if (shouldShootOnCamera) {
             if (Math.abs(robot.getMotorComponent("TurretRotateMotor").getVelocity()) < 0.2)
                 rotationAdder += rotationDegreesMeasuredCamera;
@@ -193,7 +179,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         // pose resets
         if (gamepad1.dpadLeftWasPressed()) {
-            ComplexFollower.instance().setPose(new Pose(0, 0, 0));
+            ComplexFollower.instance().setPose(pose(0, 0, 0));
             imu.resetYaw();
         }
         if (gamepad1.dpadRightWasPressed()) {
@@ -455,7 +441,6 @@ public class MainTeleOPBlue extends LinearOpMode {
     public void runOpMode() {
         // init
         setStuffToDefault();
-        teamSensitiveStuff();
 
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
             @Override
@@ -483,19 +468,6 @@ public class MainTeleOPBlue extends LinearOpMode {
             robot.loop();
         }
         passPose();
-    }
-
-    public void teamSensitiveStuff() {
-        if (targetY < 0) {
-            farZoneCameraAdder = - farZoneCameraAdder;
-            targetY = -targetY;
-            targetYCenter = -targetYCenter;
-            usedTargetY = -usedTargetY;
-            targetYLeftPanel = -targetYLeftPanel;
-        }
-        teamPipeline = 0;
-        currentTeamColor = TeamColor.Blue;
-        farPark = new Pose(120, 14, Math.toRadians(90));
     }
 
     public void setStuffToDefault() { // occasionally copy paste declarations here so we don't have surprises
@@ -676,16 +648,16 @@ public class MainTeleOPBlue extends LinearOpMode {
         double degrees = Math.abs(angleFromTargetToRobot(pose, targetX, targetY)); // Abs value so that it works for red and blue
 
         if (degrees < 30) { // is lower part of scorer
-            usedTargetX = targetXRightPanel;
-            usedTargetY = targetYRightPanel;
+            cfg.usedTargetX = cfg.targetXRightPanel;
+            cfg.usedTargetY = cfg.targetYRightPanel;
         }
         else if (degrees > 60) {  // is right upper part of scorer
-            usedTargetX = targetXLeftPanel;
-            usedTargetY = targetYLeftPanel;
+            cfg.usedTargetX = cfg.targetXLeftPanel;
+            cfg.usedTargetY = cfg.targetYLeftPanel;
         }
         else { // is in the middle or somewhere weird
-            usedTargetX = targetXCenter;
-            usedTargetY = targetYCenter;
+            cfg.usedTargetX = cfg.targetXCenter;
+            cfg.usedTargetY = cfg.targetYCenter;
         }
 
 

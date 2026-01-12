@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 @Config
 public class MotorComponent extends Component {
-    public static enum MotorModes {
+    public enum MotorModes {
         Power,
         Velocity,
         Position
