@@ -13,14 +13,16 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StolenMotorClass.Motor;
 
 @Config
-@TeleOp(name="Test_PIDF_HomemadePID" ,group="LinearOpMode")
+@TeleOp(name="Test_Weird_Motor_PIDF" ,group="LinearOpMode")
 public class Test_Weird_Motor_PIDF extends LinearOpMode {
     Motor fancyMotorL;
     Motor fancyMotorR;
     public static double P = 180;
     public static double D = 18;
     public static double I = 0;
-    public static double F = 0;
+    public static double ks = 0;
+    public static double kv = 1;
+    public static double ka = 0;
     public static double currentVelLeft;
     public static double currentVelRight;
     public static double targetVel;
@@ -43,6 +45,7 @@ public class Test_Weird_Motor_PIDF extends LinearOpMode {
 
 
             fancyMotorL.setVeloCoefficients(P,I,D);
+            fancyMotorL.setFeedforwardCoefficients(ks,kv,ka);
             fancyMotorL.set(targetVel / magicDevideNumber);
             double power = fancyMotorL.get();
             fancyMotorR.set(power);
@@ -65,7 +68,6 @@ public class Test_Weird_Motor_PIDF extends LinearOpMode {
             tele.addData("P" , P);
             tele.addData("I" , I);
             tele.addData("D" , D);
-            tele.addData("F" , F);
             tele.update();
         }
     }
