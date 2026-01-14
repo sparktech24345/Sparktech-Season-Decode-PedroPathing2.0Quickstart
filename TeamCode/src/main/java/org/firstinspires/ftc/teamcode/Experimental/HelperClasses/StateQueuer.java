@@ -41,7 +41,7 @@ public class StateQueuer {
             else ++i;
         }
 
-        for (int i = 0; i < 100 && !actionQueue.isEmpty(); ++i) {
+        for (int i = 0; i < 1000 && !actionQueue.isEmpty(); ++i) {
             Action action = actionQueue.get(0);
             action.update();
             isDone = action.finished();
@@ -54,8 +54,7 @@ public class StateQueuer {
         telemetry.addData("queue len", actionQueue.size());
         telemetry.addData("instants len", instantActions.size());
         telemetry.addData("isEmpty", isEmpty());
-        Action act = actionQueue.get(0);
-        if (act == null) return;
-        act.telemetry();
+        if (actionQueue.isEmpty()) return;
+        actionQueue.get(0).telemetry();
     }
 }
