@@ -19,5 +19,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 @TeleOp(name = "Main TeleOp Red", group = "AAA")
 public class MainTeleopRed extends MainTeleOPBlue {
-    public static MainConfig cfg = new MainConfig(MainConfig.Configs.Red);
+    public void makeConfig(){
+        cfg = new MainConfig(MainConfig.Configs.Red);
+    }
 }

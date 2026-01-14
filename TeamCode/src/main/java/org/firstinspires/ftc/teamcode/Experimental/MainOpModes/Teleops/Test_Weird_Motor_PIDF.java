@@ -17,16 +17,17 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StolenMotorClas
 public class Test_Weird_Motor_PIDF extends LinearOpMode {
     Motor fancyMotorL;
     Motor fancyMotorR;
-    public static double P = 180;
-    public static double D = 18;
+    public static double P = 8;
+    public static double D = 0.03;
     public static double I = 0;
     public static double ks = 0;
-    public static double kv = 1;
-    public static double ka = 0;
+    public static double kv = 1.2;
+    public static double ka = 0.08;
     public static double currentVelLeft;
     public static double currentVelRight;
     public static double targetVel;
-    public static double magicDevideNumber = 1;
+    public static double magicDevideNumber = 2800;
+    public static double buffer = 1;
 
     @Override
     public void runOpMode(){
@@ -37,12 +38,15 @@ public class Test_Weird_Motor_PIDF extends LinearOpMode {
 
         fancyMotorL.setRunMode(Motor.RunMode.VelocityControl);
         fancyMotorR.setRunMode(Motor.RunMode.RawPower);
+        fancyMotorR.setInverted(true);
 
 
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {
 
+            fancyMotorL.setBuffer(buffer);
+            fancyMotorR.setBuffer(buffer);
 
             fancyMotorL.setVeloCoefficients(P,I,D);
             fancyMotorL.setFeedforwardCoefficients(ks,kv,ka);

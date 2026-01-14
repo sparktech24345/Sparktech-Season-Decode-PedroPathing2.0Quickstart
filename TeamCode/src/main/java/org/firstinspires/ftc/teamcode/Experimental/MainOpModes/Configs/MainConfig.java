@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs;
 
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
+import com.acmerobotics.dashboard.config.Config;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
+@Config
 public class MainConfig {
 
     public enum Configs {
@@ -9,26 +11,26 @@ public class MainConfig {
         Red
     }
 
-    public int teamPipeline;
+    public static int teamPipeline;
 
-    public double farZoneCameraAdder;
+    public static double farZoneCameraAdder;
 
-    public double targetX;
-    public double targetY;
+    public static double targetX;
+    public static double targetY;
 
-    public double targetXCenter;
-    public double targetYCenter;
+    public static double targetXCenter;
+    public static double targetYCenter;
 
-    public double targetXRightPanel; // about +6 cuz thats a tyle
-    public double targetYRightPanel; // a 3 bias for y
+    public static double targetXRightPanel; // about +6 cuz thats a tyle
+    public static double targetYRightPanel; // a 3 bias for y
 
-    public double targetXLeftPanel; // and ofc a 3 bias on X for that one
-    public double targetYLeftPanel; // about +6 but on y
+    public static double targetXLeftPanel; // and ofc a 3 bias on X for that one
+    public static double targetYLeftPanel; // about +6 but on y
 
-    public double usedTargetX;
-    public double usedTargetY;
+    public static double usedTargetX;
+    public static double usedTargetY;
 
-    public TeamColor currentTeamColor;
+    public static TeamColor currentTeamColor;
 
     public MainConfig() {}
 
@@ -39,20 +41,20 @@ public class MainConfig {
 
                 farZoneCameraAdder = -1;
 
-                targetX = 125;
+                targetX = 131;
                 targetY = 46;
 
-                targetXCenter = 125;
-                targetYCenter = 46;
+                targetXCenter = 131;
+                targetYCenter = 40;
 
                 targetXRightPanel = 131;
-                targetYRightPanel = 48;
+                targetYRightPanel = 45;
 
-                targetXLeftPanel = 126;
+                targetXLeftPanel = 135;
                 targetYLeftPanel = 55;
 
-                usedTargetX = 125;
-                usedTargetY = 46;
+                usedTargetX = 131;
+                usedTargetY = 40;
 
                 currentTeamColor = TeamColor.Blue;
                 break;

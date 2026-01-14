@@ -15,11 +15,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StolenMotorClass.SimpleMotorFeedforward;
 
 @Config
 @TeleOp(name="Test_PIDF_HomemadePID" ,group="LinearOpMode")
 public class Test_PIDF_HomemadePID extends LinearOpMode {
+    SimpleMotorFeedforward feedforward;
     DcMotorEx turretSpinL;
     DcMotorEx turretSpinR;
     PIDcontroller piDcontroller;
@@ -82,6 +86,9 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
             tele.addData("currentVelocityRight" , currentVelRight);
             tele.addData("left motor power" , turretSpinL.getPower());
             tele.addData("right motor power" , turretSpinR.getPower());
+            tele.addData("left motor velocity smth" , turretSpinR.getVelocity(AngleUnit.DEGREES));
+            tele.addData("amperaj R" , turretSpinR.getCurrent(CurrentUnit.AMPS));
+            tele.addData("amperaj L" , turretSpinL.getCurrent(CurrentUnit.AMPS));
             tele.addData("P" , P);
             tele.addData("I" , I);
             tele.addData("D" , D);

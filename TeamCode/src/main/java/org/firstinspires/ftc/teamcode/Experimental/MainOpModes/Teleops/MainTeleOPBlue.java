@@ -55,7 +55,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double vd = 18;
     public static double vf = 15;
 
-    public static final MainConfig cfg = new MainConfig(MainConfig.Configs.Blue);
+    public static MainConfig cfg;
 
     /// ----------------- Target Pose Stuff ------------------
 
@@ -451,6 +451,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         ComponentMakerMethods.MakeStates(robot);
         InitOtherStuff(teamPipeline);
         robot.UseDefaultMovement();
+        makeConfig();
 
         while (opModeInInit()) {
             robot.init_loop();
@@ -669,6 +670,9 @@ public class MainTeleOPBlue extends LinearOpMode {
     }
     
     protected ElapsedTime flashingTimer = new ElapsedTime();
+    public void makeConfig(){
+        cfg = new MainConfig(MainConfig.Configs.Blue);
+    }
     public void flashSensors(boolean isFlashing) {
         if (flashingTimer.milliseconds() % 200 > 100) {
             robot.getColorSensorComponent("colorSensorRight").useSensorLight(false);
