@@ -199,7 +199,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         if (robot.getKey("DPAD_UP1").IsToggledOnPress)
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Power)
-                    .setTarget(1);
+                    .setTarget(-1);
 
         // ====================== Sorting Stuff ======================
 
@@ -457,7 +457,7 @@ public class MainTeleOPBlue extends LinearOpMode {
             robot.init_loop();
         }
         ComplexFollower.instance().setPose(globalRobotPose);
-        ComplexFollower.setStartingPose(globalRobotPose);
+        //ComplexFollower.setStartingPose(globalRobotPose);
 
         while (opModeIsActive()) {
             // loop
@@ -638,11 +638,11 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static void processTargetStuff(Pose pose, double targetX, double targetY) {
         double degrees = Math.abs(angleFromTargetToRobot(pose, targetX, targetY)); // Abs value so that it works for red and blue
 
-        if (degrees < 30) { // is lower part of scorer
+        if (degrees < 25) { // is lower part of scorer
             cfg.usedTargetX = cfg.targetXRightPanel;
             cfg.usedTargetY = cfg.targetYRightPanel;
         }
-        else if (degrees > 60) {  // is right upper part of scorer
+        else if (degrees > 70) {  // is right upper part of scorer
             cfg.usedTargetX = cfg.targetXLeftPanel;
             cfg.usedTargetY = cfg.targetYLeftPanel;
         }
