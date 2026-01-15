@@ -5,11 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StolenMotorClass.Motor;
 
 @Config
@@ -26,7 +22,7 @@ public class Test_Weird_Motor_PIDF extends LinearOpMode {
     public static double currentVelLeft;
     public static double currentVelRight;
     public static double targetVel;
-    public static double magicDevideNumber = 2800;
+    public static double magicDivideNumber = 2800;
     public static double buffer = 1;
 
     @Override
@@ -50,7 +46,7 @@ public class Test_Weird_Motor_PIDF extends LinearOpMode {
 
             fancyMotorL.setVeloCoefficients(P,I,D);
             fancyMotorL.setFeedforwardCoefficients(ks,kv,ka);
-            fancyMotorL.set(targetVel / magicDevideNumber);
+            fancyMotorL.set(targetVel / magicDivideNumber);
             double power = fancyMotorL.get();
             fancyMotorR.set(power);
 

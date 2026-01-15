@@ -113,10 +113,10 @@ public class MainTeleOPBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 600;
-    public static double timer2 = 600;
+    public static double timer1 = 550;
+    public static double timer2 = 550;
     public static double timer3 = 800;
-    public static double timer12 = 400;
+    public static double timer12 = 350;
 
     public static double TurretP = 0.025;
     public static double TurretD = 0.0015;
@@ -181,16 +181,32 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
 
         // Driver Intake
-        if (robot.getKey("A1").ExecuteOnPress) wantsToIntakeDriver = !wantsToIntakeDriver;
+        if (robot.getKey("A1").ExecuteOnPress){
+            wantsToIntakeDriver = !wantsToIntakeDriver;
+
+            wantsToFireWithIntake = false;
+            wantsToFireSortingWithIntake = false;
+        }
 
         // Driver preparing for shooting
         if (robot.getKey("Y1").ExecuteOnPress) isTryingToFire = !isTryingToFire;
 
         // Driver actual firing with sorting
-        if (robot.getKey("B1").ExecuteOnPress) wantsToFireSortingWithIntake = !wantsToFireSortingWithIntake;
+        if (robot.getKey("B1").ExecuteOnPress){
+            wantsToFireSortingWithIntake = !wantsToFireSortingWithIntake;
+
+            wantsToFireWithIntake = false;
+            wantsToIntakeDriver = false;
+        }
 
         // Driver Actual Shooting
-        if (robot.getKey("X1").ExecuteOnPress) wantsToFireWithIntake = !wantsToFireWithIntake;
+        if (robot.getKey("X1").ExecuteOnPress){
+            wantsToFireWithIntake = !wantsToFireWithIntake;
+
+            wantsToFireSortingWithIntake = false;
+            wantsToIntakeDriver = false;
+
+        }
         needsToLowerGates = robot.getKey("X1").ExecuteOnPress;
 
         // Driver Outputting

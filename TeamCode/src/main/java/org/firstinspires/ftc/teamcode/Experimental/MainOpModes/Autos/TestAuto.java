@@ -49,35 +49,31 @@ public class TestAuto extends OpMode {
 
             private void controls() {
                 if (ComplexGamepad.get("A1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)).setName("Line p1"));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Line p2"));
                 }
                 else if (ComplexGamepad.get("B1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(pose(20, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(pose(0, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)).setName("Square p1"));
+                    robotTester.addToQueue(new MoveAction(pose(20, 20, 0)).setName("Square p2"));
+                    robotTester.addToQueue(new MoveAction(pose(0, 20, 0)).setName("Square p3"));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Square p4"));
                 }
                 else if (ComplexGamepad.get("X1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(10, 20, 0)));
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
-                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
+                    robotTester.addToQueue(new MoveAction(pose(10, 20, 0)).setName("Triangle p1"));
+                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)).setName("Triangle p2"));
+                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Triangle p3"));
                 }
                 else if (ComplexGamepad.get("DPAD_UP1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)));
-                    robotTester.addToQueue(new StateAction("TurretAngle", 270));
-                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
-                    robotTester.addToQueue(new StateAction("TurretAngle", 280));
+                    ComplexFollower.follow(ComplexFollower.getCurrentPose().plus(new Pose(5, 0, 0)));
                 }
                 else if (ComplexGamepad.get("DPAD_DOWN1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 90)));
-                    robotTester.addToQueue(new StateAction("TurretAngle", 270));
-                    robotTester.addToQueue(new MoveAction(pose(20, 20, 180)));
-                    robotTester.addToQueue(new StateAction("TurretAngle", 280));
-                    robotTester.addToQueue(new MoveAction(pose(0, 20, 270)));
-                    robotTester.addToQueue(new StateAction("TurretAngle", 270));
-                    robotTester.addToQueue(new MoveAction(pose(0, 0, 0)));
-                    robotTester.addToQueue(new StateAction("TurretAngle", 280));
+                    ComplexFollower.follow(ComplexFollower.getCurrentPose().plus(new Pose(-5, 0, 0)));
+                }
+                else if (ComplexGamepad.get("DPAD_RIGHT1").ExecuteOnPress) {
+                    ComplexFollower.follow(ComplexFollower.getCurrentPose().plus(new Pose(0, 5, 0)));
+                }
+                else if (ComplexGamepad.get("DPAD_LEFT1").ExecuteOnPress) {
+                    ComplexFollower.follow(ComplexFollower.getCurrentPose().plus(new Pose(0 ,-5, 0)));
                 }
             }
         };

@@ -47,24 +47,7 @@ public abstract class Action {
         tel.addData("at action", name);
         tel.addData("started", start);
         tel.addData("finished", done);
-        tel.addData("type of action", () -> {
-           if (this instanceof MoveAction) {
-               return "Move action";
-           }
-           if (this instanceof StateAction) {
-               return "State action";
-           }
-           if (this instanceof DelayAction) {
-               return "Delay action";
-           }
-           if (this instanceof GeneralAction) {
-               return "General action";
-           }
-           if (this instanceof ActionSequence) {
-               return "Action sequence";
-           }
-           return "Action (shouldn't be possible)";
-        });
+        tel.addData("name", name);
     }
 
     public Action setStartCondition(BooleanSupplier start) {

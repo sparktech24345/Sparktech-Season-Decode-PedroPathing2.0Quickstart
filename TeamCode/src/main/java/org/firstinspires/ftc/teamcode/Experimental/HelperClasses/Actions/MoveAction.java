@@ -8,6 +8,6 @@ public class MoveAction extends Action {
     public MoveAction(Pose moveTargetPos) {
         super();
         this.OnStart = () -> ComplexFollower.follow(moveTargetPos);
-        this.DoneCondition = ComplexFollower::done;
+        this.DoneCondition = () -> ComplexFollower.done();
     }
 }

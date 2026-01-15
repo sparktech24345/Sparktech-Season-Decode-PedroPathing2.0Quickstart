@@ -39,7 +39,7 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
     public static double powerOverride = 0;
 
     @Override
-    public void runOpMode(){
+    public void runOpMode() {
         MultipleTelemetry tele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         turretSpinL = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorLeft");
         turretSpinL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -49,12 +49,12 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
         //turretSpinR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turretSpinR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        piDcontroller = new PIDcontroller(P,I,D);
+        piDcontroller = new PIDcontroller(P, I, D);
 
 
         Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName); // 0.9 is max down and 0.73 is max up
-        servo2.setPosition(turretAngle/360);
-        DcMotorSimple intakeMotor = hardwareMap.get(DcMotorSimple.class,intakeMotorName);
+        servo2.setPosition(turretAngle / 360);
+        DcMotorSimple intakeMotor = hardwareMap.get(DcMotorSimple.class, intakeMotorName);
 
 
         waitForStart();
@@ -69,7 +69,7 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
             double errorRight = targetVel - currentVelRight;
 
             double power = piDcontroller.calculate(targetVel,currentVelLeft) + targetVel * F;
-            piDcontroller.setConstants(P,I,D);
+            piDcontroller.setConstants(P, I, D);
 
             if(powerOverride != 0) power = powerOverride;
 

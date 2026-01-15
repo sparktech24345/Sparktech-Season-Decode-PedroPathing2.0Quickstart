@@ -4,10 +4,10 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateHeadingAdjustment;
@@ -44,7 +44,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 
 @Config
 @Autonomous(name = "NEW BIG triangle BLUE", group = "AAA")
@@ -89,20 +88,34 @@ public class BigTriangleAutoBlueNew extends OpMode {
     public static double rotation = 25;
     public static double rotationForInit = 145;
     public static boolean shouldFire = false;
+    public static boolean shouldFireFar = false;
     /// --------------------------------------------------------
-    private Pose starter = new Pose(0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose first_row_ready = new Pose(28, 15.5, 90); // Pose4: collect first row right
-    private Pose first_row_done = new Pose(28, 45.2, 90); // Pose5: collect first row left
-    private Pose second_row_ready = new Pose(53, 13, 90); // Pose7: collect second row right
-    private Pose second_row_done = new Pose(52, 45.5, 90); // Pose8: colect second row left
-    private Pose big_triangle_shoot_third_collect = new Pose(80, 0, -144); // Pose9: shooting big triangle pose
-    private Pose big_triangle_shoot_any_collect = new Pose(80, 0, 90); // Pose9: shooting big triangle pose
-    private Pose third_row_ready = new Pose(86.2, 37, -173); // Pose10: collect third row right
-    private Pose third_row_intermediate = new Pose(115, 36, -173); // Pose10: collect third row right
-    private Pose third_row_done = new Pose(78, 29, -144); // Pose11: collect third row left
-    private Pose classifier_starter = new Pose(117, 26, 90);
-    private Pose classifier_shooter = new Pose(114, 21, 90);
-    private Pose classifier_park = new Pose(117, 12, 90);
+    /*
+private final Pose pose1 = new Pose(50.71300116110975, 15.411673718550073, Math.toRadians(90.11418277683327));
+private final Pose pose2 = new Pose(50.31208669106792, 42.289693036417326, Math.toRadians(89.62438308126248));
+
+private final Pose pose3 = new Pose(74.27231675996555, 15.024040402389888, Math.toRadians(89.96480653968509));
+private final Pose pose4 = new Pose(73.85308693713091, 36.43503023883489, Math.toRadians(90.43687506417052));
+
+private final Pose pose5 = new Pose(27.75532639871432, 15.633838082861715, Math.toRadians(89.57556088907523));
+private final Pose pose6 = new Pose(27.75600403312623, 45.11518343227117, Math.toRadians(89.49693175135005));
+
+private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math.toRadians(90.3724663802973));*/
+    private Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
+    private Pose first_row_ready = pose(28, 15.5, 90); // Pose4: collect first row right
+    private Pose first_row_done = pose(28, 45.2, 90); // Pose5: collect first row left
+    private Pose second_row_ready = pose(51, 15.5, 90); // Pose7: collect second row right
+    private Pose second_row_done = pose(51, 42.5, 90); // Pose8: colect second row left
+
+    private Pose big_triangle_shoot_third_collect = pose(80, 0, -144); // Pose9: shooting big triangle pose
+    private Pose big_triangle_shoot_any_collect = pose(80, 0, 90); // Pose9: shooting big triangle pose
+    private Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
+    private Pose third_row_intermediate = pose(75, 15, 90); // Pose10: collect third row right
+    private Pose third_row_done = pose(75, 36, 90); // Pose11: collect third row left
+
+    private Pose classifier_starter = pose(120, 27, 90);
+    private Pose classifier_shooter = pose(117, 22, 90);
+    private Pose classifier_park = pose(120, 13, 90);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
     public static int camId = 23;
@@ -127,17 +140,17 @@ public class BigTriangleAutoBlueNew extends OpMode {
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
                 HandleColors();
-                firingTurret(shouldFire);
-                bigIffMethod();
+                firingTurret(shouldFire,shouldFireFar);
+                //bigIffMethod();
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
                 rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), targetX, targetY);
                 if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
 
-//                if (startAuto) {
-//                    startAuto = false;
-//                    makeAuto();
-//                }
+                if (startAuto) {
+                    startAuto = false;
+                    makeAuto();
+                }
             }
         };
         ComponentMakerMethods.MakeComponents(robot);
@@ -147,7 +160,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         fakeActionCounter = 0;
-        shouldFire = false;
+        shouldFire = false; shouldFireFar = false;
         movingTimer.reset();
         bIf1 = bIf2 = bIf3 = bIf4 = bIf5 = bIf6 = bIf7 = bIf8 = bIf9 = bIf10 =
                 bIf11 = bIf12 = bIf13 = bIf14 = bIf15 = bIf16 = bIf17 = bIf18 = bIf19 = bIf20 =
@@ -166,7 +179,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
 
     @Override
     public void start() {
-        ComplexFollower.setStartingPose(classifier_starter);
+        ComplexFollower.setPose(classifier_starter);
         timer.reset();
         startAuto = true;
     }
@@ -186,58 +199,62 @@ public class BigTriangleAutoBlueNew extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    private void makeAuto() {
+    private void makeAuto(){
         robot.addToQueue(
-//                new GeneralAction(() -> {
-//
-////                    movingTimer.reset();
-////                }),//.setDoneCondition(supplyIsDoneMoving),
-//                //.setExecutionCondition(supplyIsDoneMoving),
-//                new DelayAction(1000),
-//
-//                /// collecting the closest row after firing
-//
-//                ,
-//                new DelayAction(1000),
-//                ,
-//                new DelayAction(800),
-//                ,
-//                new DelayAction(500),
-//                ,
-//                new DelayAction(1500),
-//                /// fire the balls
-//
+                new MoveAction(classifier_shooter),
+                new GeneralAction(prepToFireSortedBall),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        shouldFireFar = true;
+                    }
+                }),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
+
+                /// collecting the closest row after firing
+
+                new StateAction("IntakeMotor","FULL"),
+                new MoveAction(third_row_ready),
+                new MoveAction(third_row_intermediate),
+                new MoveAction(third_row_done),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        shouldFire = true;
+                    }
+                }),
+                new MoveAction(big_triangle_shoot_third_collect),
+
+
+                /// fire the balls
+                new GeneralAction(prepToFireSortedBall),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
+                new MoveAction(classifier_park)
         );
     }
     /// Runnables
-    Runnable prepToFireSortedBallClose = () -> {
-        shouldFire = true;
-        ballColorQueue.clearQueue();
-            //int motifID = 1; /// TODO DETECTION OF MOTIF
-            switch (camId) {
-                case 23:
-                    ballColorQueue.add(BallColorSet_Decode.Purple);
-                    ballColorQueue.add(BallColorSet_Decode.Purple);
-                    ballColorQueue.add(BallColorSet_Decode.Green);
-                    break;
-
-                case 22:
-                    ballColorQueue.add(BallColorSet_Decode.Purple);
-                    ballColorQueue.add(BallColorSet_Decode.Green);
-                    ballColorQueue.add(BallColorSet_Decode.Purple);
-                    break;
-
-                case 21:
-                    ballColorQueue.add(BallColorSet_Decode.Green);
-                    ballColorQueue.add(BallColorSet_Decode.Purple);
-                    ballColorQueue.add(BallColorSet_Decode.Purple);
-                    break;
-            }
-    };
     public static double FAR_TARGET_VELOCITY = 1240;
     public static double FAR_TARGET_ANGLE = 280;
-    public void firingTurret(boolean shouldFire) {
-        if(shouldFire){
+    public void firingTurret(boolean shouldFire, boolean shouldFireFar) {
+        if(shouldFire && !shouldFireFar){
             // ----------------------- Power Stuff -----------------------
 
             //double targetVelocity = FAR_TARGET_VELOCITY;
@@ -254,27 +271,28 @@ public class BigTriangleAutoBlueNew extends OpMode {
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
-
             // ----------------------- Rotation Stuff -----------------------
-
 
             robot.getMotorComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
             ;
+            return;
+        }
+        if(shouldFireFar){
+            robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Velocity)
+                    .setTarget(velocity);
+            // ----------------------- Angle Stuff -----------------------
+            robot.getServoComponent("TurretAngle")
+                    .setTarget(angle);
+            // ----------------------- Rotation Stuff -----------------------
+            robot.getMotorComponent("TurretRotateMotor")
+                    .setTarget(rotation);
+            ballColorQueue.clearQueue();
+            //int motifID = 1; /// TODO DETECTION OF MOTIF
         }
     }
-    Runnable prepToFireSortedBallFarPose = () -> {
-        robot.getMotorComponent("TurretSpinMotor")
-                .setOperationMode(MotorComponent.MotorModes.Velocity)
-                .setTarget(velocity);
-        // ----------------------- Angle Stuff -----------------------
-        robot.getServoComponent("TurretAngle")
-                .setTarget(angle);
-        // ----------------------- Rotation Stuff -----------------------
-        robot.getMotorComponent("TurretRotateMotor")
-                .setTarget(rotation);
-        ballColorQueue.clearQueue();
-        //int motifID = 1; /// TODO DETECTION OF MOTIF
+    Runnable prepToFireSortedBall = () -> {
         switch (camId) {
             case 23:
                 ballColorQueue.add(BallColorSet_Decode.Purple);
@@ -295,8 +313,6 @@ public class BigTriangleAutoBlueNew extends OpMode {
                 break;
         }
     };
-
-
     Runnable fireSortedBall = () -> {
             ballToFire = ballColorQueue.pull();
 
@@ -324,8 +340,8 @@ public class BigTriangleAutoBlueNew extends OpMode {
             }
             ballToFire = BallColorSet_Decode.NoBall;
     };
-
     Runnable turnStuffOff = () -> {
+        shouldFireFar = false;
         shouldFire = false;
 
         robot.getMotorComponent("TurretSpinMotor")
@@ -334,10 +350,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
             robot.getMotorComponent("TurretRotateMotor").setTarget(0);
     };
-
     Runnable fakeAction = () -> ++fakeActionCounter;
-    BooleanSupplier supplyIsDoneMoving = () -> !isMoving && movingTimer.milliseconds() > 20; // if not moving and not just began moving
-
     public static boolean bIf1, bIf2, bIf3, bIf4, bIf5, bIf6, bIf7, bIf8, bIf9, bIf10,
             bIf11, bIf12, bIf13, bIf14, bIf15, bIf16, bIf17, bIf18, bIf19, bIf20,
             bIf21, bIf22, bIf23, bIf24, bIf25, bIf26, bIf27, bIf28, bIf29, bIf30;
@@ -346,7 +359,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
 
         if(startAuto && bIf1){
             robot.executeNow(new MoveAction(classifier_shooter));
-            robot.executeNow(new GeneralAction(prepToFireSortedBallFarPose));
+            robot.executeNow(new GeneralAction(prepToFireSortedBall));
             startAuto = false;
             bIf1 = false;
             movingTimer.reset();
@@ -410,7 +423,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
         }
         if (bIf7 && !bIf6  && !isMoving) {
             robot.addToQueue(new ActionSequence(
-                    new GeneralAction(prepToFireSortedBallFarPose),
+                    new GeneralAction(prepToFireSortedBall),
                     new StateAction("IntakeMotor","FULL"),
                     new DelayAction(1000),
                     new GeneralAction(fireSortedBall),
@@ -495,22 +508,6 @@ public class BigTriangleAutoBlueNew extends OpMode {
             bIf30 = false;
         }
 
-    }
-
-
-
-    private void AutoPark() {
-//        robot.addToQueue(new MoveAction(false, parkPose));
-//        canSequence4 = false;
-//        robot.addToQueue(new StateAction("IntakeMotor", "OFF"));
-//        robot.getServoComponent("TurretRotateServo")
-//                .setOverrideTarget_bool(true)
-//                .setOverrideTargetPos(normalizeTurretRotationForServo(0));
-//
-//        robot.getMotorComponent("TurretSpinMotor")
-//                .setOverrideCondition(true)
-//                .setPowerOverride(0);
-//
     }
     protected void HandleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
@@ -597,7 +594,7 @@ public class BigTriangleAutoBlueNew extends OpMode {
     }
     public Pose passPose() {
         Pose tempPose = ComplexFollower.instance().getPose();
-        globalRobotPose = new Pose(tempPose.getX(),tempPose.getY(),Math.toRadians(tempPose.getHeading())); //Math.toRadians
+        globalRobotPose = tempPose;//new Pose(tempPose.getX(),tempPose.getY(),Math.toRadians(tempPose.getHeading())); //Math.toRadians
         return globalRobotPose;
     }
 }

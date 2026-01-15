@@ -87,6 +87,7 @@ public class ComplexFollower {
         pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
         if (pathConstraints != null) pathToFollow.setConstraints(pathConstraints);
         follower.followPath(pathToFollow);
+        isDone = false;
     }
 
     public static Follower instance() {
@@ -104,7 +105,9 @@ public class ComplexFollower {
 
     public static boolean isMoving() {
         if (follower == null) return false;
-        return follower.isBusy() || follower.getVelocity().getMagnitude() >= 0.01;
+        return follower.isBusy()
+        //        || follower.getVelocity().getMagnitude() >= 0.01
+        ;
     }
 
     public static void update() {
