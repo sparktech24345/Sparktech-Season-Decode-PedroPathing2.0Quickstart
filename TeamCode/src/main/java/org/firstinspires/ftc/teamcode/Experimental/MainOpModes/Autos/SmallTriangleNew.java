@@ -11,6 +11,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -84,8 +85,8 @@ public class SmallTriangleNew extends OpMode {
     private Pose starter = pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
     private Pose small_triangle_shoot = pose(1, 0, 90); // Pose1: shooting position small triangle
     private Pose parkPose = pose(10, 15, 90);
-    private Pose prepHPCollectPose = pose(15,39,145);
-    private Pose fininshHPCollectPose = pose(2,46,90);
+    private Pose prepHPCollectPose = pose(15,39,150);
+    private Pose fininshHPCollectPose = pose(1,46,90);
     private Pose halfTheWayHPCollectPose = pose(2,23,90);
     private Pose first_row_ready = pose(15, 52, 0); // Pose4: collect first row right
     private Pose first_row_done = pose(30, 52, 0); // Pose5: collect first row left
@@ -130,7 +131,7 @@ public class SmallTriangleNew extends OpMode {
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         convertPoses();
-        shouldFire = false;
+        shouldFire = false; lastGateState = 1;
         //teamSensitiveStuff();
     }
 
@@ -163,17 +164,13 @@ public class SmallTriangleNew extends OpMode {
             throw new RuntimeException(e);
         }
     }
+
     private void makeAuto() {
         robot.addToQueue(
                 new GeneralAction(prepQueueToFireSortedBall),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        shouldFire = true;
-                    }
-                }),
+                new GeneralAction(() -> shouldFire = true),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(2000),
+                new DelayAction(2500),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(700),
                 new GeneralAction(fireSortedBall),
@@ -190,17 +187,14 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(prepHPCollectPose),
                 new DelayAction(150),
                 new MoveAction(fininshHPCollectPose),
-                new MoveAction(small_triangle_shoot),
                 new GeneralAction(prepQueueToFireSortedBall),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        shouldFire = true;
-                        shouldMoveIntakeServo = false;
-                    }
+                new GeneralAction(() -> {
+                    shouldFire = true;
+                    shouldMoveIntakeServo = false;
                 }),
+                new MoveAction(small_triangle_shoot),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1500),
+                new DelayAction(2000),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(1200),
                 new GeneralAction(fireSortedBall),
@@ -216,17 +210,16 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(halfTheWayHPCollectPose),
                 new DelayAction(500),
                 new MoveAction(fininshHPCollectPose),
-                new MoveAction(small_triangle_shoot),
                 new GeneralAction(prepQueueToFireSortedBall),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        shouldFire = true;
-                        shouldMoveIntakeServo = false;
-                    }
+                new GeneralAction(() -> {
+                    shouldFire = true;
+                    shouldMoveIntakeServo = false;
                 }),
+                new MoveAction(small_triangle_shoot),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1500),
+                new DelayAction(2000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
@@ -390,14 +383,16 @@ public class SmallTriangleNew extends OpMode {
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
+    public static int lastGateState = 1;
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
         if(shouldCheck) {
-            if (!hasBallInRightChamber) gateState = 1; // first fill up left
-            else if (!hasBallInLeftChamber) gateState = -1; // then right
-            else gateState = -1; // then continue pointing to right for when you fire
+            if (!hasBallInRightChamber) gateState = 1; // first fill up right
+            else if (!hasBallInLeftChamber) gateState = -1; // then left
+            else gateState = 1; // then continue pointing to right for when you fire
         }
-        else gateState = 1;
+        else gateState = lastGateState;
+        lastGateState = gateState;
         switch (gateState) {
             case -1:
                 robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));

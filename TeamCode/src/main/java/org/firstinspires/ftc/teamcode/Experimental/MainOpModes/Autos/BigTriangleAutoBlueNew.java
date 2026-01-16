@@ -163,7 +163,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         fakeActionCounter = 0;
-        shouldFire = false; shouldMoveIntakeServo = false;
+        shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 1;
         movingTimer.reset();
         bIf1 = bIf2 = bIf3 = bIf4 = bIf5 = bIf6 = bIf7 = bIf8 = bIf9 = bIf10 =
                 bIf11 = bIf12 = bIf13 = bIf14 = bIf15 = bIf16 = bIf17 = bIf18 = bIf19 = bIf20 =
@@ -598,14 +598,16 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
+    public static int lastGateState = 1;
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
-        if(shouldCheck){
-            if (!hasBallInRightChamber) gateState = 1; // first fill up left
-            else if (!hasBallInLeftChamber) gateState = -1; // then right
-            else gateState = -1; // then continue pointing to right for when you fire
+        if(shouldCheck) {
+            if (!hasBallInRightChamber) gateState = 1; // first fill up right
+            else if (!hasBallInLeftChamber) gateState = -1; // then left
+            else gateState = 1; // then continue pointing to right for when you fire
         }
-        else gateState = 1;
+        else gateState = lastGateState;
+        lastGateState = gateState;
         switch (gateState) {
             case -1:
                 robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
