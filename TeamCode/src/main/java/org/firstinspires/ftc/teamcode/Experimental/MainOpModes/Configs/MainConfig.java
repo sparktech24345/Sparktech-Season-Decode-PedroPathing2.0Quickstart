@@ -14,9 +14,14 @@ public class MainConfig {
     public static int teamPipeline;
 
     public static double farZoneCameraAdder;
+    public static double autoZoneAdderFar;
+    public static double rotationForInitClsoeZone;
 
     public static double targetX;
     public static double targetY;
+
+    public static double targetXAutoClose;
+    public static double targetYAutoClose;
 
     public static double targetXCenter;
     public static double targetYCenter;
@@ -39,10 +44,17 @@ public class MainConfig {
             case Blue:
                 teamPipeline = 0;
 
-                farZoneCameraAdder = 0.5;
+                farZoneCameraAdder = 0;
+                autoZoneAdderFar = 0.5;
+
+                rotationForInitClsoeZone = 145;
 
                 targetX = 131;
                 targetY = 46;
+
+
+                targetXAutoClose = 127;
+                targetYAutoClose = 48;
 
                 targetXCenter = 131;
                 targetYCenter = 48;
@@ -61,22 +73,28 @@ public class MainConfig {
             case Red:
                 teamPipeline = 1;
 
-                farZoneCameraAdder = 1;
+                farZoneCameraAdder = 0;
+                autoZoneAdderFar = -0.5;
+                rotationForInitClsoeZone = 200;
 
-                targetX = 125;
+                targetX = 131;
                 targetY = -46;
 
-                targetXCenter = 125;
-                targetYCenter = -46;
+
+                targetXAutoClose = 127;
+                targetYAutoClose = -48;
+
+                targetXCenter = 131;
+                targetYCenter = -48;
 
                 targetXRightPanel = 131;
-                targetYRightPanel = -48;
+                targetYRightPanel = -45;
 
-                targetXLeftPanel = 126;
+                targetXLeftPanel = 135;
                 targetYLeftPanel = -55;
 
-                usedTargetX = 125;
-                usedTargetY = -46;
+                usedTargetX = 131;
+                usedTargetY = -40;
 
                 currentTeamColor = TeamColor.Red;
                 break;

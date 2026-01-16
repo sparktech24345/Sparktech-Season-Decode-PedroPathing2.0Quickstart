@@ -314,7 +314,7 @@ public class SmallTriangleNew extends OpMode {
     public void firingTurret(boolean shouldFire) {
         double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXLeftPanel, cfg.targetYLeftPanel);
-        rotationToWallOdometry += cfg.farZoneCameraAdder;
+        rotationToWallOdometry += cfg.autoZoneAdderFar;
         if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
 
         if(shouldFire){
@@ -443,6 +443,21 @@ public class SmallTriangleNew extends OpMode {
     public void convertPoses() {
         starter = convertPose(starter);
         parkPose = convertPose(parkPose);
+        small_triangle_shoot = convertPose(small_triangle_shoot);
+        prepHPCollectPose = convertPose(prepHPCollectPose);
+        fininshHPCollectPose = convertPose(fininshHPCollectPose);
+        halfTheWayHPCollectPose = convertPose(halfTheWayHPCollectPose);
+        first_row_ready = convertPose(first_row_ready);
+        first_row_done = convertPose(first_row_done);
+        lever = convertPose(lever);
+        second_row_ready = convertPose(second_row_ready);
+        second_row_done = convertPose(second_row_done);
+        big_triangle_shoot = convertPose(big_triangle_shoot);
+        big_triangle_offset = convertPose(big_triangle_offset);
+        third_row_ready = convertPose(third_row_ready);
+        third_row_done = convertPose(third_row_done);
+        classifier_starter = convertPose(classifier_starter);
+
     }
     public Pose convertPose(Pose pose) {
         return pose;

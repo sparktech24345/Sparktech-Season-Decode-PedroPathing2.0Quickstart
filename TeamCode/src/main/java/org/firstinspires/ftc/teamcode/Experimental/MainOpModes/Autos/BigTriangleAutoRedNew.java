@@ -7,16 +7,20 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 @Autonomous(group="AAA", name="NEW BIG triangle RED")
 public class BigTriangleAutoRedNew extends BigTriangleAutoBlueNew {
     @Override
-    public void teamSensitiveStuff(){
-        targetY = -targetY;
-        teamPipeline = 1;
-        currentTeamColor = TeamColor.Red;
-        rotation = - rotation;
-        rotationForInit  = 210;
+//    public void teamSensitiveStuff(){
+//        targetY = -targetY;
+//        teamPipeline = 1;
+//        currentTeamColor = TeamColor.Red;
+//        rotation = - rotation;
+//        rotationForInit  = 210;
+//    }
+    public void makeConfig(){
+        cfg = new MainConfig(MainConfig.Configs.Red);
     }
     @Override
     public Pose convertPose(Pose pose){

@@ -41,6 +41,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,13 +52,9 @@ public class BigTriangleAutoBlueNew extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     private Limelight3A limelight3A;
+    public static MainConfig cfg;
     private boolean startAuto = false;
     public static boolean isMoving;
-    public static double fakeActionCounter = 0;
-    public static double targetX = 127;
-    public static double targetY = 48;
-    public static double ballsLaunched = 0;
-    public static double publicAngleConstantThingTemp = 20;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime movingTimer = new ElapsedTime();
     ElapsedTime isFiringTimer = new ElapsedTime();
@@ -83,10 +80,6 @@ public class BigTriangleAutoBlueNew extends OpMode {
     public static boolean shouldRemoveBalls = false;
     public static boolean shouldPullFromQueue = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
-    public static double velocity = 780;
-    public static double angle = 300;
-    public static double rotation = 25;
-    public static double rotationForInit = 145;
     public static boolean shouldFire = false;
     public static boolean shouldMoveIntakeServo = false;
     /// --------------------------------------------------------
@@ -146,8 +139,8 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 firingTurret(shouldFire);
                 //bigIffMethod();
 
-                distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), targetX, targetY);
-                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), targetX, targetY);
+                distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
+                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXAutoClose, cfg.targetYAutoClose);
                 if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
 
                 if (startAuto) {
@@ -156,26 +149,26 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 }
             }
         };
+        makeConfig();
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
         recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
-        fakeActionCounter = 0;
         shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 1;
         movingTimer.reset();
         bIf1 = bIf2 = bIf3 = bIf4 = bIf5 = bIf6 = bIf7 = bIf8 = bIf9 = bIf10 =
                 bIf11 = bIf12 = bIf13 = bIf14 = bIf15 = bIf16 = bIf17 = bIf18 = bIf19 = bIf20 =
                         bIf21 = bIf22 = bIf23 = bIf24 = bIf25 = bIf26 = bIf27 = bIf28 = bIf29 = bIf30 = true;
         convertPoses();
-        teamSensitiveStuff();
+        //teamSensitiveStuff();
     }
 
     @Override
     public void init_loop() {
         robot.init_loop();
-        robot.getMotorComponent("TurretRotateMotor").setTarget(rotationForInit);
+        robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitClsoeZone);
         useCamera();
         RobotController.telemetry.addData("id",camId);
     }
@@ -397,7 +390,6 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
             robot.getMotorComponent("TurretRotateMotor").setTarget(0);
     };
-    Runnable fakeAction = () -> ++fakeActionCounter;
     public static boolean bIf1, bIf2, bIf3, bIf4, bIf5, bIf6, bIf7, bIf8, bIf9, bIf10,
             bIf11, bIf12, bIf13, bIf14, bIf15, bIf16, bIf17, bIf18, bIf19, bIf20,
             bIf21, bIf22, bIf23, bIf24, bIf25, bIf26, bIf27, bIf28, bIf29, bIf30;
@@ -628,26 +620,38 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
     Runnable turnOffIntakeServo = () -> {
         shouldMoveIntakeServo = false;
     };
-    public void teamSensitiveStuff(){
-        if(targetY < 0){
-            targetY = -targetY;
-        }
-        teamPipeline = 0;
-        currentTeamColor = TeamColor.Blue;
-    }
+//    public void teamSensitiveStuff(){
+//        if(targetY < 0){
+//            targetY = -targetY;
+//        }
+//        teamPipeline = 0;
+//        currentTeamColor = TeamColor.Blue;
+//    }
+    public void makeConfig(){
+    cfg = new MainConfig(MainConfig.Configs.Blue);
+}
     public void convertPoses(){
         starter = convertPose(starter);
+
         first_row_ready = convertPose(first_row_ready);
         first_row_done = convertPose(first_row_done);
+
         second_row_ready = convertPose(second_row_ready);
+        second_row_intermediate = convertPose(second_row_intermediate);
+        second_row_VERYintermediate = convertPose(second_row_VERYintermediate);
         second_row_done = convertPose(second_row_done);
+
         big_triangle_shoot_third_collect = convertPose(big_triangle_shoot_third_collect);
+
         third_row_ready = convertPose(third_row_ready);
         third_row_intermediate = convertPose(third_row_intermediate);
+        third_row_VERYintermediate = convertPose(third_row_VERYintermediate);
         third_row_done = convertPose(third_row_done);
+
         classifier_starter = convertPose(classifier_starter);
         classifier_shooter = convertPose(classifier_shooter);
         classifier_park = convertPose(classifier_park);
+
     }
     public void useCamera(){
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
