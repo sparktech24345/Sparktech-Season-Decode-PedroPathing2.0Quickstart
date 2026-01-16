@@ -6,6 +6,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.*;
 import com.pedropathing.paths.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
@@ -26,6 +27,8 @@ public class ComplexFollower {
 
     private static Follower follower;
     private static HardwareMap hmap;
+
+    private static ElapsedTime follow_timer;
 
     public static void init(HardwareMap hardwareMap) {
         init(hardwareMap, startPos);
@@ -60,6 +63,11 @@ public class ComplexFollower {
         init(hmap);
     }
 
+    public static double followingForMS() {
+        if (follow_timer == null) return 0;
+        return follow_timer.milliseconds();
+    }
+
     public static void setStartingPose(Pose start) {
         startPos = start;
         if (follower == null) return;
@@ -82,6 +90,8 @@ public class ComplexFollower {
 
     public static void follow(Pose targetPos, PathConstraints pathConstraints) {
         if (follower == null) return;
+        if (follow_timer == null) follow_timer = new ElapsedTime();
+        else follow_timer.reset();
         currentTargetPos = targetPos;
         pathToFollow = new Path(new BezierLine(currentPos, currentTargetPos));
         pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());

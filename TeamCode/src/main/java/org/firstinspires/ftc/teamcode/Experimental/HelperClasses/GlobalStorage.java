@@ -105,7 +105,7 @@ public class GlobalStorage {
     public static double grade1Far = 325;
     public static Pose globalRobotPose = new Pose();
     public static int teamPipeline = 0;
-    public static double redThreshold = 25;
+    public static double redThreshold = 40;
 
     public static double normalizeTurretRotationForServo(double targetDegrees) {
         targetDegrees  = clamp(targetDegrees,-121.5,121.5);

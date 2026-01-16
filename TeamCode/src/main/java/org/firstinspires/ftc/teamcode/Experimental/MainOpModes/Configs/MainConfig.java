@@ -39,7 +39,7 @@ public class MainConfig {
             case Blue:
                 teamPipeline = 0;
 
-                farZoneCameraAdder = -1;
+                farZoneCameraAdder = 0;
 
                 targetX = 131;
                 targetY = 46;

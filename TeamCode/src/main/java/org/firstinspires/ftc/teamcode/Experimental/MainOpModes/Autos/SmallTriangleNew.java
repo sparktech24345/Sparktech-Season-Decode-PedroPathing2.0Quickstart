@@ -117,6 +117,7 @@ public class SmallTriangleNew extends OpMode {
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
                 HandleColors();
+                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 firingTurret(shouldFire);
                 intakeChecks(shouldMoveIntakeServo);
             }
@@ -391,12 +392,12 @@ public class SmallTriangleNew extends OpMode {
     }
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
-        if(shouldCheck){
+        if(shouldCheck) {
             if (!hasBallInRightChamber) gateState = 1; // first fill up left
             else if (!hasBallInLeftChamber) gateState = -1; // then right
-            else gateState = -  1; // then continue pointing to right for when you fire
+            else gateState = -1; // then continue pointing to right for when you fire
         }
-        else gateState = -1;
+        else gateState = 1;
         switch (gateState) {
             case -1:
                 robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));

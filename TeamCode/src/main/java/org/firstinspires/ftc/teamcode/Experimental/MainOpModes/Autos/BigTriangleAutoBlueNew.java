@@ -603,9 +603,9 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         if(shouldCheck){
             if (!hasBallInRightChamber) gateState = 1; // first fill up left
             else if (!hasBallInLeftChamber) gateState = -1; // then right
-            else gateState = -  1; // then continue pointing to right for when you fire
+            else gateState = -1; // then continue pointing to right for when you fire
         }
-        else gateState = -1;
+        else gateState = 1;
         switch (gateState) {
             case -1:
                 robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
