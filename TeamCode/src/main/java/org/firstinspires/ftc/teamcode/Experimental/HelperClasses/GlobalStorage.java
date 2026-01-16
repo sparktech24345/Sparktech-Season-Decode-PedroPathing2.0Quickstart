@@ -62,6 +62,7 @@ public class GlobalStorage {
     public static String backLeftName           = "backgreen";
     public static String colorSensorName        = "sensorColor";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
+    public static double ballColorTreshold = 35;
 
     public static String __frontLeftName        = "frontleft";
     public static String __frontRightName       = "frontright";
@@ -104,7 +105,7 @@ public class GlobalStorage {
     public static double grade1Far = 325;
     public static Pose globalRobotPose = new Pose();
     public static int teamPipeline = 0;
-    public static double redThreshold = 35;
+    public static double redThreshold = 25;
 
     public static double normalizeTurretRotationForServo(double targetDegrees) {
         targetDegrees  = clamp(targetDegrees,-121.5,121.5);
@@ -176,8 +177,8 @@ public class GlobalStorage {
         //if(distance < 1.05) return 310;
         //else return 280; // TODO: Change this*/
     }
-    public static double grade0VeloClose = 680;
-    public static double grade1VeloClose = 171; // meet was 176.88679
+    public static double grade0VeloClose = 860;
+    public static double grade1VeloClose = 178; // meet was 176.88679
     public static double distanceToVelocityFunction(double distance) {
         if (distance > 2.9) return 1460;
         return grade1VeloClose * distance + grade0VeloClose; // TODO: Change this

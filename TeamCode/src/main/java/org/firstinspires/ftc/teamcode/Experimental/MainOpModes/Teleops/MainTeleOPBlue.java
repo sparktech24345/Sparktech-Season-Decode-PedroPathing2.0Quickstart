@@ -113,10 +113,10 @@ public class MainTeleOPBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 550;
-    public static double timer2 = 550;
+    public static double timer1 = 500;
+    public static double timer2 = 500;
     public static double timer3 = 800;
-    public static double timer12 = 350;
+    public static double timer12 = 300;
 
     public static double TurretP = 0.025;
     public static double TurretD = 0.0015;
@@ -311,15 +311,15 @@ public class MainTeleOPBlue extends LinearOpMode {
                     if (usedDistance > 2.9) {
                         needsToLowerGates = false; // to not infi repeat
                         robot.executeNow(new ActionSequence(
-                                new StateAction("LeftGateServo", "OPEN"), 
-                                new DelayAction(timer12), 
-                                new StateAction("LeftGateServo", "CLOSED"), 
+                                new StateAction("LeftGateServo", "OPEN"),
+                                new DelayAction(timer12),
+                                new StateAction("LeftGateServo", "CLOSED"),
 
-                                new DelayAction(timer1), 
+                                new DelayAction(timer1),
 
-                                new StateAction("LeftGateServo", "OPEN"), 
+                                new StateAction("LeftGateServo", "OPEN"),
 
-                                new DelayAction(timer2), 
+                                new DelayAction(timer2),
 
                                 new StateAction("RightGateServo", "OPEN")
                         ));
@@ -327,8 +327,8 @@ public class MainTeleOPBlue extends LinearOpMode {
                     else {
                         needsToLowerGates = false; // to not infi repeat
                         robot.executeNow(new ActionSequence(
-                        new StateAction("LeftGateServo", "OPEN"), 
-                        new DelayAction(timer3), 
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer3),
                         new StateAction("RightGateServo", "OPEN")
                         ));
                     }
@@ -363,15 +363,15 @@ public class MainTeleOPBlue extends LinearOpMode {
 
                     if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
                         robot.executeNow(new ActionSequence(
-                                new StateAction("RightGateServo", "OPEN"), 
-                                new DelayAction(375), 
+                                new StateAction("RightGateServo", "OPEN"),
+                                new DelayAction(375),
                                 new StateAction("RightGateServo", "CLOSED")
                         ));
                     }
                     else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
                         robot.executeNow(new ActionSequence(
-                                new StateAction("LeftGateServo", "OPEN"), 
-                                new DelayAction(375), 
+                                new StateAction("LeftGateServo", "OPEN"),
+                                new DelayAction(375),
                                 new StateAction("LeftGateServo", "CLOSED")
                         ));
                     }
@@ -410,7 +410,7 @@ public class MainTeleOPBlue extends LinearOpMode {
                     .setTarget(neededAngleForTurretRotation)
                     .setPositionCoefficients(TurretP, 0, TurretD, TurretZero)
             ;
-            
+
         }
         else {
             rotationAdder = 0;

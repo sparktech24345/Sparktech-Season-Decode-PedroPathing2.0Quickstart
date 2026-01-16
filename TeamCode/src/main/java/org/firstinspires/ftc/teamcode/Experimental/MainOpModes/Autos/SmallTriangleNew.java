@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.farZoneCameraAdder;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateDistanceToWallInMeters;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateHeadingAdjustment;
 
 import android.graphics.Color;
 
@@ -31,6 +34,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,21 +45,18 @@ public class SmallTriangleNew extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     private Limelight3A limelight3A;
-    private boolean startAuto = false;
-    private boolean hasShooted = false;
-    private boolean isShooting = false;
-    private boolean turretHasBall = false;
-    private boolean timeToFire, canSequence3, canSequence4,ballIsStuck,isMoving;
-    public static double targetX = 125;
-    public static double targetY = 46;
-    public static double ballsLaunched = 0;
-    public static double publicAngleConstantThingTemp = 20;
+    public static MainConfig cfg;
+    private boolean timeToFire, canSequence3, canSequence4,ballIsStuck;
+    private boolean shouldFire;
+    public static boolean isMoving;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime shootTimer = new ElapsedTime();
     ElapsedTime isFiringTimer = new ElapsedTime();
     ElapsedTime shouldJiggle = new ElapsedTime();
     ElapsedTime shouldFinish = new ElapsedTime();
     private boolean had_balls = false;
+
+    public static boolean shouldMoveIntakeServo = false;
 
     /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
@@ -75,16 +76,17 @@ public class SmallTriangleNew extends OpMode {
     public static boolean shouldRemoveBalls = false;
     public static boolean shouldPullFromQueue = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
-    public static double velocity = 1300;
-    public static double angle = 280;
+    public static double velocity = 1480;
+    public static double angle = 266;
     public static double rotation = -20;
     public static int camId =23;
     /// --------------------------------------------------------
     private Pose starter = pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose small_triangle_shoot = pose(10, 0, 0); // Pose1: shooting position small triangle
-    private Pose unstuckPose = pose(20, 0, 0); // Pose1: shooting position small triangle
-    private Pose parkPose = pose(10, 15, 0);
-    private Pose HP_collect = pose(38.6, -5.56, 0); // Pose3: HP collect
+    private Pose small_triangle_shoot = pose(1, 0, 90); // Pose1: shooting position small triangle
+    private Pose parkPose = pose(10, 15, 90);
+    private Pose prepHPCollectPose = pose(15,39,145);
+    private Pose fininshHPCollectPose = pose(2,46,90);
+    private Pose halfTheWayHPCollectPose = pose(2,23,90);
     private Pose first_row_ready = pose(15, 52, 0); // Pose4: collect first row right
     private Pose first_row_done = pose(30, 52, 0); // Pose5: collect first row left
     private Pose lever = pose(38.31, -62.65, 0); // Pose6: lever pose
@@ -115,8 +117,11 @@ public class SmallTriangleNew extends OpMode {
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
                 HandleColors();
+                firingTurret(shouldFire);
+                intakeChecks(shouldMoveIntakeServo);
             }
         };
+        makeConfig();
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
@@ -124,7 +129,8 @@ public class SmallTriangleNew extends OpMode {
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         convertPoses();
-        teamSensitiveStuff();
+        shouldFire = false;
+        //teamSensitiveStuff();
     }
 
     @Override
@@ -136,7 +142,7 @@ public class SmallTriangleNew extends OpMode {
 
     @Override
     public void start() {
-        ComplexFollower.setStartingPose(starter);
+        ComplexFollower.setPose(starter);
         timer.reset();
         makeAuto();
     }
@@ -158,102 +164,189 @@ public class SmallTriangleNew extends OpMode {
     }
     private void makeAuto() {
         robot.addToQueue(
-                new GeneralAction(() -> {
-                    robot.getMotorComponent("TurretSpinMotor")
-                            .setOperationMode(MotorComponent.MotorModes.Velocity)
-                            .setTarget(velocity);
-                    // ----------------------- Angle Stuff -----------------------
-                    robot.getServoComponent("TurretAngle")
-                            .setTarget(angle);
-                    // ----------------------- Rotation Stuff -----------------------
-                    robot.getMotorComponent("TurretRotateMotor")
-                            .setTarget(rotation)
-                    ;
-                    ballColorQueue.clearQueue();
-                    switch (camId) {
-                        case 23:
-                            ballColorQueue.add(BallColorSet_Decode.Purple);
-                            ballColorQueue.add(BallColorSet_Decode.Purple);
-                            ballColorQueue.add(BallColorSet_Decode.Green);
-                            break;
-
-                        case 22:
-                            ballColorQueue.add(BallColorSet_Decode.Purple);
-                            ballColorQueue.add(BallColorSet_Decode.Green);
-                            ballColorQueue.add(BallColorSet_Decode.Purple);
-                            break;
-
-                        case 21:
-                            ballColorQueue.add(BallColorSet_Decode.Green);
-                            ballColorQueue.add(BallColorSet_Decode.Purple);
-                            ballColorQueue.add(BallColorSet_Decode.Purple);
-                            break;
+                new GeneralAction(prepQueueToFireSortedBall),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        shouldFire = true;
                     }
                 }),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(3000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(5000),
-                new GeneralAction(fireSortedBall),
                 new DelayAction(2000),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(2000),
+                new DelayAction(700),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(700),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(700),
                 new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(() -> {
-                    robot.getMotorComponent("TurretSpinMotor")
-                            .setOperationMode(MotorComponent.MotorModes.Power)
-                            .setTarget(0);
-                    robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+                new GeneralAction(turnStuffOff),
 
-                    robot.getMotorComponent("TurretRotateMotor").setTarget(0);
+                //second row of stuff
+                new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(turnOnIntakeServo),
+                new MoveAction(parkPose),
+                new MoveAction(prepHPCollectPose),
+                new DelayAction(150),
+                new MoveAction(fininshHPCollectPose),
+                new MoveAction(small_triangle_shoot),
+                new GeneralAction(prepQueueToFireSortedBall),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        shouldFire = true;
+                        shouldMoveIntakeServo = false;
+                    }
                 }),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(1500),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1200),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1200),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1200),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
+
+                // mystery pick up
+                new GeneralAction(turnOnIntakeServo),
+                new StateAction("IntakeMotor","FULL"),
+                new MoveAction(halfTheWayHPCollectPose),
+                new DelayAction(500),
+                new MoveAction(fininshHPCollectPose),
+                new MoveAction(small_triangle_shoot),
+                new GeneralAction(prepQueueToFireSortedBall),
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        shouldFire = true;
+                        shouldMoveIntakeServo = false;
+                    }
+                }),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(1500),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
+
                 new MoveAction(parkPose)
         );
     }
     /// Runnables
+    Runnable prepQueueToFireSortedBall = () -> {
+        ballColorQueue.clearQueue();
+        switch (camId) {
+            case 23:
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Green);
+                break;
 
+            case 22:
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Green);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                break;
+
+            case 21:
+                ballColorQueue.add(BallColorSet_Decode.Green);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                ballColorQueue.add(BallColorSet_Decode.Purple);
+                break;
+        }
+    };
     Runnable fireSortedBall = () -> {
-            ballToFire = ballColorQueue.pull();
+        ballToFire = ballColorQueue.pull();
 
-            if(ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
+        if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
+            robot.executeNow(new ActionSequence(
+                    new StateAction("RightGateServo", "OPEN"),
+                    new DelayAction(300),
+                    new StateAction("RightGateServo", "CLOSED")
+            ));
+        }
+        else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
+            robot.executeNow(new ActionSequence(
+                    new StateAction("LeftGateServo", "OPEN"),
+                    new DelayAction(300),
+                    new StateAction("LeftGateServo", "CLOSED")
+            ));
+        }
+        else // if cant sort
+        {
+            if(calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall){
+                robot.executeNow(new ActionSequence(
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(300),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+            }
+            else if(calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall){
                 robot.executeNow(new ActionSequence(
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(300),
                         new StateAction("RightGateServo", "CLOSED")
                 ));
             }
-            else if(ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall){
+            else{ // IF REAAALLLYYY no ball
                 robot.executeNow(new ActionSequence(
+                        new StateAction("RightGateServo", "OPEN"),
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(300),
+                        new DelayAction(500),
+                        new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
             }
-            else // if cant sort
-            {
-                robot.executeNow(new ActionSequence(
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(300),
-                        new StateAction("LeftGateServo", "CLOSED")
-                ));
-            }
-            ballToFire = BallColorSet_Decode.NoBall;
-        };
 
-    private void AutoPark() {
-//        robot.addToQueue(new MoveAction(false, parkPose));
-//        canSequence4 = false;
-//        robot.addToQueue(new StateAction("IntakeMotor", "OFF"));
-//        robot.getServoComponent("TurretRotateServo")
-//                .setOverrideTarget_bool(true)
-//                .setOverrideTargetPos(normalizeTurretRotationForServo(0));
-//
-//        robot.getMotorComponent("TurretSpinMotor")
-//                .setOverrideCondition(true)
-//                .setPowerOverride(0);
-//
+        }
+        ballToFire = BallColorSet_Decode.NoBall;
+    };
+    Runnable turnStuffOff = () -> {
+        shouldFire = false;
+        shouldMoveIntakeServo = false;
+
+        robot.getMotorComponent("TurretSpinMotor")
+                .setOperationMode(MotorComponent.MotorModes.Power)
+                .setTarget(0);
+        robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+        robot.getMotorComponent("TurretRotateMotor").setTarget(0);
+    };
+    public void firingTurret(boolean shouldFire) {
+        double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
+        double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXLeftPanel, cfg.targetYLeftPanel);
+        rotationToWallOdometry += cfg.farZoneCameraAdder;
+        if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
+
+        if(shouldFire){
+            // ----------------------- Power Stuff -----------------------
+
+            //double targetVelocity = FAR_TARGET_VELOCITY;
+            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
+            robot.getMotorComponent("TurretSpinMotor")
+                    .setOperationMode(MotorComponent.MotorModes.Velocity)
+                    .setTarget(targetVelocity);
+
+
+            // ----------------------- Angle Stuff -----------------------
+
+            double turretAngleVal = angle;
+            turretAngleVal = clamp(turretAngleVal,262,324);
+            robot.getServoComponent("TurretAngle")
+                    .setTarget(turretAngleVal);
+
+            // ----------------------- Rotation Stuff -----------------------
+
+            robot.getMotorComponent("TurretRotateMotor")
+                    .setTarget(rotationToWallOdometry)
+            ;
+        }
     }
-
     protected void HandleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
         rightSensorColors = colorSensorRight.getNormalizedColors();
@@ -264,7 +357,7 @@ public class SmallTriangleNew extends OpMode {
         actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors);
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
-        if(!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
+        if(!shouldRemoveBalls  && false) { // when not moving balls out of chambers they dont have permission to change to no ball
             if(actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
 
@@ -296,15 +389,45 @@ public class SmallTriangleNew extends OpMode {
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
-    public void teamSensitiveStuff() {
-        if(targetY < 0) {
-            targetY = -targetY;
+    protected void intakeChecks(boolean shouldCheck){
+        int gateState = 0;
+        if(shouldCheck){
+            if (!hasBallInRightChamber) gateState = 1; // first fill up left
+            else if (!hasBallInLeftChamber) gateState = -1; // then right
+            else gateState = -  1; // then continue pointing to right for when you fire
         }
-        teamPipeline = 0;
-        currentTeamColor = TeamColor.Blue;
-        rotation = -21.5;
-    }
+        else gateState = -1;
+        switch (gateState) {
+            case -1:
+                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
+                break;
 
+            case 0:
+                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
+                break;
+
+            case 1:
+                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
+                break;
+        }
+    }
+    Runnable turnOnIntakeServo = () -> {
+        shouldMoveIntakeServo = true;
+    };
+    Runnable turnOffIntakeServo = () -> {
+        shouldMoveIntakeServo = false;
+    };
+//    public void teamSensitiveStuff() {
+//        if(targetY < 0) {
+//            targetY = -targetY;
+//        }
+//        teamPipeline = 0;
+//        currentTeamColor = TeamColor.Blue;
+//        rotation = -21.5;
+//    }
+    public void makeConfig(){
+        cfg = new MainConfig(MainConfig.Configs.Blue);
+    }
     public void useCamera() {
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(2);
@@ -325,11 +448,9 @@ public class SmallTriangleNew extends OpMode {
         starter = convertPose(starter);
         parkPose = convertPose(parkPose);
     }
-
     public Pose convertPose(Pose pose) {
         return pose;
     }
-
     public Pose passPose() {
         globalRobotPose = ComplexFollower.instance().getPose(); //Math.toRadians
         return globalRobotPose;
