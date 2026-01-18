@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ColorSensorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 public class ComponentMakerMethods {
@@ -34,14 +35,14 @@ public class ComponentMakerMethods {
                 .setRange(-1,3000)
         );
 
-        robot.makeComponent("TurretRotateMotor", new MotorComponent()
+        robot.makeComponent("TurretRotateMotor", new TurretComponent()
+                .setFeedforwardCoefficients(0, 0, 0)
                 .addMotor(turretRotationMotorName)
                 .setPositionCoefficients(0.027, 0, 0.0015, 3)
                 .setOperationMode(MotorComponent.MotorModes.Position)
-                .setTarget(0) // default middle point should be 0
+                .setTarget(0)
                 .setResolution(2.62)
-                .setRange(-30,330)
-                .moveDuringInit(true)
+                .setRange(-30, 330)
         );
 
 

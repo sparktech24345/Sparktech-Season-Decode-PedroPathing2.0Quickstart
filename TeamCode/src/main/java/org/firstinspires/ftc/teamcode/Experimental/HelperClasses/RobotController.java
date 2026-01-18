@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Colo
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Component;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,6 +79,9 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public MotorComponent getMotorComponent(String componentName) {
         return (MotorComponent) components.get(componentName);
+    }
+    public TurretComponent getTurretComponent(String componentName) {
+        return (TurretComponent) components.get(componentName);
     }
 
     public ServoComponent getServoComponent(String componentName) {

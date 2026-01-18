@@ -4,7 +4,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 
 public class BallColorQueue {
 
-    private static final int MAX_SIZE = 3;
+    private static final int MAX_SIZE = 15;
     private final BallColorSet_Decode[] queue = new BallColorSet_Decode[MAX_SIZE];
 
     public BallColorQueue() {
@@ -65,6 +65,27 @@ public class BallColorQueue {
                     queue[i]
             );
         }
+    }
+
+    /**
+     * Pushes a color to the front of the queue,
+     * shifting all existing elements one position back.
+     * The last element is discarded if the queue is full.
+     */
+    public boolean push(BallColorSet_Decode color) {
+        if (color == BallColorSet_Decode.NoBall) {
+            return false; // do not push NoBall
+        }
+
+        // Shift everything back (from end to start)
+        for (int i = MAX_SIZE - 1; i > 0; i--) {
+            queue[i] = queue[i - 1];
+        }
+
+        // Insert at the front
+        queue[0] = color;
+
+        return true;
     }
 
 }

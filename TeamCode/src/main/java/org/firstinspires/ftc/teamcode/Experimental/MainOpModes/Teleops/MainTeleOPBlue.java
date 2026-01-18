@@ -9,6 +9,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 
@@ -104,11 +105,16 @@ public class MainTeleOPBlue extends LinearOpMode {
 
     /// ----------------- Intake Priorities -----------------
     protected ElapsedTime sortingShootTimer = new ElapsedTime();
+    protected ElapsedTime hasBeganShootingTimer = new ElapsedTime();
+    protected ElapsedTime loweredGatesTimer = new ElapsedTime();
     public static boolean wantsToIntakeDriver = false;
+    public static boolean shouldPassOneBallFor3InARow = false;
+    public static boolean hasBallInOuttake = false;
     public static boolean wantsToFireWithIntake = false;
     public static boolean wantsToFireSortingWithIntake = false;
     public static boolean wantsToOutput = false;
     public static int gateState = 0;
+    public static int lastGateState = 0;
 
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
@@ -116,10 +122,15 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double timer1 = 500;
     public static double timer2 = 500;
     public static double timer3 = 800;
-    public static double timer12 = 300;
+    public static double revUpTime = 1400;
+    public static double timerToCloseGate = 300;
+    public static double shootSortedTime = 1000;
 
     public static double TurretP = 0.025;
     public static double TurretD = 0.0015;
+    public static double kVTurret = 0;
+    public static double kATurret = 0;
+    public static double kSTurret = 0;
     public static double TurretZero = 3;
     public static double rotationAdder = 0;
 
@@ -190,14 +201,20 @@ public class MainTeleOPBlue extends LinearOpMode {
         // Driver Intake
         if (robot.getKey("A1").ExecuteOnPress){
             wantsToIntakeDriver = !wantsToIntakeDriver;
+            shouldPassOneBallFor3InARow = wantsToIntakeDriver; // true if true and will be then turned false, false if false
 
             wantsToFireWithIntake = false;
             wantsToFireSortingWithIntake = false;
         }
 
         // Driver preparing for shooting
-        if (robot.getKey("Y1").ExecuteOnPress) isTryingToFire = !isTryingToFire;
+        if (robot.getKey("Y1").ExecuteOnPress){
+            isTryingToFire = !isTryingToFire;
 
+            shouldPullFromQueue = false;
+            sortingShootTimer.reset();
+            hasBeganShootingTimer.reset();
+        }
         // Driver actual firing with sorting
         if (robot.getKey("B1").ExecuteOnPress){
             wantsToFireSortingWithIntake = !wantsToFireSortingWithIntake;
@@ -209,6 +226,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         // Driver Actual Shooting
         if (robot.getKey("X1").ExecuteOnPress){
             wantsToFireWithIntake = !wantsToFireWithIntake;
+            hasBallInOuttake = false;
 
             wantsToFireSortingWithIntake = false;
             wantsToIntakeDriver = false;
@@ -278,7 +296,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
-        if (wantsToOutput || wantsToFireWithIntake || wantsToFireSortingWithIntake) // only actually affect balls when you can output balls so you can count them even if they are stying on the hole and are undetected for a time
+        if (wantsToOutput || wantsToFireWithIntake || (wantsToFireSortingWithIntake && isTryingToFire)) // only actually affect balls when you can output balls so you can count them even if they are stying on the hole and are undetected for a time
             shouldRemoveBalls = true;
         else shouldRemoveBalls = false;
 
@@ -299,12 +317,27 @@ public class MainTeleOPBlue extends LinearOpMode {
         }
         if (wantsToIntakeDriver  || wantsToFireWithIntake || wantsToFireSortingWithIntake) { // for now keep them in the same bucket
             intakeState = 1;
-            if (wantsToIntakeDriver || wantsToFireSortingWithIntake) {
-                if (!hasBallInRightChamber) gateState = 1; // first fill up left
-                else if (!hasBallInLeftChamber) gateState = -1; // then right
-                else gateState = -  1; // then continue pointing to right for when you fire
+            if (wantsToFireSortingWithIntake) {
+                if (!hasBallInRightChamber) gateState = 1; // first fill up right
+                else if (!hasBallInLeftChamber) gateState = -1; // then left
+                else gateState = 0; // only for sorted
+                //else gateState = lastGateState;
+            }
+            if(wantsToIntakeDriver){
+                gateState = 1 ;// redirect to right;
+                if(shouldPassOneBallFor3InARow && hasBallInRightChamber && !hasBallInOuttake){
+                    shouldPassOneBallFor3InARow = false;
+                    hasBallInOuttake = true;
+                    loweredGatesTimer.reset();
+                    robot.executeNow(new ActionSequence(
+                            new StateAction("RightGateServo", "OPEN"),
+                            new DelayAction(timerToCloseGate),
+                            new StateAction("RightGateServo", "CLOSED")
+                    ));
+                }
             }
         }
+        lastGateState = gateState;
 
         if ((robot.getKey("X2").IsHeld)) gateState = -1; // left
         if ((robot.getKey("Y2").IsHeld)) gateState = 1; // right
@@ -345,7 +378,7 @@ public class MainTeleOPBlue extends LinearOpMode {
                         needsToLowerGates = false; // to not infi repeat
                         robot.executeNow(new ActionSequence(
                                 new StateAction("LeftGateServo", "OPEN"),
-                                new DelayAction(timer12),
+                                new DelayAction(timerToCloseGate),
                                 new StateAction("LeftGateServo", "CLOSED"),
 
                                 new DelayAction(timer1),
@@ -360,9 +393,9 @@ public class MainTeleOPBlue extends LinearOpMode {
                     else {
                         needsToLowerGates = false; // to not infi repeat
                         robot.executeNow(new ActionSequence(
-                        new StateAction("LeftGateServo", "OPEN"),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timer3),
-                        new StateAction("RightGateServo", "OPEN")
+                        new StateAction("LeftGateServo", "OPEN")
                         ));
                     }
 
@@ -374,7 +407,7 @@ public class MainTeleOPBlue extends LinearOpMode {
                     robot.executeNow(new StateAction("RightGateServo", "OPEN"));
                     robot.executeNow(new StateAction("LeftGateServo", "OPEN"));
                 }
-                else {
+                else if(loweredGatesTimer.milliseconds() > 500){
                     robot.executeNow(new StateAction("RightGateServo", "CLOSED"));
                     robot.executeNow(new StateAction("LeftGateServo", "CLOSED"));
                 }
@@ -386,30 +419,33 @@ public class MainTeleOPBlue extends LinearOpMode {
             }
             else { // if sorting firing is active
 
-                if (sortingShootTimer.milliseconds() > 800) {
+                if (sortingShootTimer.milliseconds() > shootSortedTime && isTryingToFire && hasBeganShootingTimer.milliseconds() > revUpTime) { // D2 failsafe
                     shouldPullFromQueue = true;
                     sortingShootTimer.reset();
                 }
 
-                if (shouldPullFromQueue) {
+                if (shouldPullFromQueue && isTryingToFire) {
                     ballToFire = ballColorQueue.pull();
+                    shouldPullFromQueue = false;
 
                     if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
                         robot.executeNow(new ActionSequence(
                                 new StateAction("RightGateServo", "OPEN"),
-                                new DelayAction(375),
+                                new DelayAction(timerToCloseGate),
                                 new StateAction("RightGateServo", "CLOSED")
                         ));
                     }
                     else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
                         robot.executeNow(new ActionSequence(
                                 new StateAction("LeftGateServo", "OPEN"),
-                                new DelayAction(375),
+                                new DelayAction(timerToCloseGate),
                                 new StateAction("LeftGateServo", "CLOSED")
                         ));
                     }
-                    ballToFire = BallColorSet_Decode.NoBall;
-
+                    else
+                        if((calculatedRightSensorDetectedBall  != ballToFire && calculatedLeftSensorDetectedBall != ballToFire))
+                            ballToFire = BallColorSet_Decode.NoBall; // that means that both thins have the same ball or no ball case in wich no problem
+                    else ballColorQueue.push(ballToFire); // add it back if it was a fake call
                 }
 
 
@@ -438,10 +474,11 @@ public class MainTeleOPBlue extends LinearOpMode {
 
             // ----------------------- Rotation Stuff -----------------------
 
-            if (robot.getKey("DPAD_DOWN1").IsToggledOnPress) neededAngleForTurretRotation = 0;
-            robot.getMotorComponent("TurretRotateMotor")
+            if (robot.getKey("DPAD_DOWN1").IsToggledOnPress) neededAngleForTurretRotation = 0; // stop rotation if ododmetry dies bad
+            robot.getTurretComponent("TurretRotateMotor")
+                    .setFeedforwardCoefficients(kVTurret,kATurret,kSTurret)
                     .setTarget(neededAngleForTurretRotation)
-                    .setPositionCoefficients(TurretP, 0, TurretD, TurretZero)
+                    .setPositionCoefficients(TurretP, 0, TurretD, TurretZero) // only enable for tunning porposes
             ;
 
         }
@@ -478,6 +515,10 @@ public class MainTeleOPBlue extends LinearOpMode {
         RobotController.telemetry.addData("Target Rotation", neededAngleForTurretRotation);
         RobotController.telemetry.addData("D2 velocity adder", D2_velocityAdder * D2_velocityAdderMulti);
         RobotController.telemetry.addData("D2 rotation adder", D2_rotationAdder * D2_rotationAdderMulti);
+        RobotController.telemetry.addData("shouldPassOneBallFor3InARow",shouldPassOneBallFor3InARow);
+        RobotController.telemetry.addData("hasBallInRightChamber",hasBallInRightChamber);
+        RobotController.telemetry.addData("hasBallInOuttake",hasBallInOuttake);
+        ballColorQueue.spitOutQueueInTelemetry();
     }
 
 
@@ -522,10 +563,14 @@ public class MainTeleOPBlue extends LinearOpMode {
         shouldShootOnCamera = false;
         shouldRemoveBalls = false;
         shouldPullFromQueue = false;
+        shouldPassOneBallFor3InARow = false;
+        hasBallInOuttake = false;
         if (ballColorQueue == null) ballColorQueue = new BallColorQueue();
         ballColorQueue.clearQueue();
         ballToFire = BallColorSet_Decode.NoBall;
         sortingShootTimer.reset();
+        loweredGatesTimer.reset();
+        hasBeganShootingTimer.reset();
 
         /// ----------------- Odometry Stuff -----------------
         distanceToWallOdometry = 0;
@@ -579,7 +624,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
         Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
 
-        actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors);
+        actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors,true);
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
         if (!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
@@ -603,9 +648,9 @@ public class MainTeleOPBlue extends LinearOpMode {
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
-        RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0);
-        RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0);
-        RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0);
+        RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+        RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+        RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
         RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
         RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);

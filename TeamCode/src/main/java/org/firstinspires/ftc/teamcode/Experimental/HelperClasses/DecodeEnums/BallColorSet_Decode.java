@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballColorTreshold;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballColorTresholdBlue;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballColorTresholdGreen;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.redThreshold;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -36,8 +38,12 @@ public enum BallColorSet_Decode {
     public static BallColorSet_Decode getColorForStorage(NormalizedRGBA colors) {
         return getColorForStorage(colors.red * 10000.0, colors.green * 10000.0, colors.blue * 10000.0);
     }
+    public static BallColorSet_Decode getColorForStorage(NormalizedRGBA colors,boolean isLeft) {
+        if(isLeft) return getColorForStorage(colors.red * 10000.0 * leftSensorColorMultiplier, colors.green * 10000.0 * leftSensorColorMultiplier, colors.blue * 10000.0 * leftSensorColorMultiplier);
+        else return getColorForStorage(colors.red * 10000.0, colors.green * 10000.0, colors.blue * 10000.0);
+    }
     public static BallColorSet_Decode getColorForStorage(double r, double g, double b) {
-        if(g < ballColorTreshold && b < ballColorTreshold) return NoBall;
+        if(g < ballColorTresholdGreen && b < ballColorTresholdBlue) return NoBall;
         else
         if(b > g) return Purple;
         else return Green;
