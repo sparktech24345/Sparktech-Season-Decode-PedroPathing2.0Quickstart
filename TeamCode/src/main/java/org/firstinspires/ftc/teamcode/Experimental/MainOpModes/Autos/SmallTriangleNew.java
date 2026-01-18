@@ -83,7 +83,7 @@ public class SmallTriangleNew extends OpMode {
     public static int camId =23;
     /// --------------------------------------------------------
     private Pose starter = pose( 0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose small_triangle_shoot = pose(1, 0, 90); // Pose1: shooting position small triangle
+    private Pose small_triangle_shoot = pose(1, 3, 90); // Pose1: shooting position small triangle
     private Pose parkPose = pose(10, 15, 90);
     private Pose prepHPCollectPose = pose(15,39,150);
     private Pose fininshHPCollectPose = pose(1,46,90);

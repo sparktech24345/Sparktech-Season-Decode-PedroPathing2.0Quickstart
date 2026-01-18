@@ -128,6 +128,12 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double fakeRotation = 0;
     public static Pose farPark = pose(117, 12, 90);
 
+    public static double D2_velocityAdder = 0;
+    public static double D2_rotationAdder = 0;
+
+    public static double D2_velocityAdderMulti = 1;
+    public static double D2_rotationAdderMulti = 1;
+
     protected void robotMainLoop() {
         // all of the code
 
@@ -170,6 +176,7 @@ public class MainTeleOPBlue extends LinearOpMode {
             neededAngleForTurretRotation += rotationAdder;
         }
 
+        neededAngleForTurretRotation += D2_rotationAdder * D2_rotationAdderMulti;
         if (neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
         // pose resets
@@ -215,7 +222,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         if (robot.getKey("DPAD_UP1").IsToggledOnPress)
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Power)
-                    .setTarget(-1);
+                    .setTarget(1);
 
         // ====================== Sorting Stuff ======================
 
@@ -241,6 +248,32 @@ public class MainTeleOPBlue extends LinearOpMode {
             if (robot.getKey("LEFT_BUMPER1").IsToggledOnPress) {
                 DriveTrain.setSlowdown(0.3);
             } else DriveTrain.setSlowdown(1);
+        }
+
+        // Adders
+
+        if (robot.getKey("DPAD_UP2").ExecuteOnPress) {
+            D2_velocityAdder += 10;
+        }
+
+        if (robot.getKey("DPAD_DOWN2").ExecuteOnPress) {
+            D2_velocityAdder -= 10;
+        }
+
+        if (robot.getKey("DPAD_DOWN2").IsHeld && robot.getKey("DPAD_UP2").IsHeld) {
+            D2_velocityAdder = 0;
+        }
+
+        if (robot.getKey("DPAD_RIGHT2").ExecuteOnPress) {
+            D2_rotationAdder += 1;
+        }
+
+        if (robot.getKey("DPAD_LEFT2").ExecuteOnPress) {
+            D2_rotationAdder -= 1;
+        }
+
+        if (robot.getKey("DPAD_RIGHT2").IsHeld && robot.getKey("DPAD_LEFT2").IsHeld) {
+            D2_rotationAdder = 0;
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
@@ -443,6 +476,8 @@ public class MainTeleOPBlue extends LinearOpMode {
         RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
         RobotController.telemetry.addData("Current Rotation", robot.getMotorComponent("TurretRotateMotor").getPosition());
         RobotController.telemetry.addData("Target Rotation", neededAngleForTurretRotation);
+        RobotController.telemetry.addData("D2 velocity adder", D2_velocityAdder * D2_velocityAdderMulti);
+        RobotController.telemetry.addData("D2 rotation adder", D2_rotationAdder * D2_rotationAdderMulti);
     }
 
 
@@ -511,6 +546,9 @@ public class MainTeleOPBlue extends LinearOpMode {
 
         isTryingToFire = false;
         needsToLowerGates = true;
+        // ------------------ Driver 2 adders --------------------
+        D2_velocityAdder = 0;
+        D2_rotationAdder = 0;
     }
 
     public void InitOtherStuff(int limelightPipeline) {

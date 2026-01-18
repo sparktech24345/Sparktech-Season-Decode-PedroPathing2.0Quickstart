@@ -3,12 +3,9 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentTeamColor;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOPBlue.calculateHeadingAdjustment;
 
@@ -18,6 +15,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -38,7 +36,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
@@ -47,8 +44,8 @@ import java.io.IOException;
 import java.util.List;
 
 @Config
-@Autonomous(name = "NEW BIG triangle BLUE", group = "AAA")
-public class BigTriangleAutoBlueNew extends OpMode {
+@Autonomous(name = "BigTriangle12ArtefactPushAuto", group = "BBB")
+public class BigTriangle12ArtefactPushAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
     private Limelight3A limelight3A;
@@ -96,16 +93,19 @@ private final Pose pose6 = new Pose(27.75600403312623, 45.11518343227117, Math.t
 
 private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math.toRadians(90.3724663802973));*/
     private Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose first_row_ready = pose(28, 15.5, 90); // Pose4: collect first row right
+    private Pose first_row_ready = pose(28, 0, 90); // Pose4: collect first row right
+    private Pose first_row_intermediate = pose(28, 12, 90); // Pose4: collect first row right
     private Pose first_row_done = pose(28, 45.2, 90); // Pose5: collect first row left
     private Pose second_row_ready = pose(53, 0, 90); // Pose7: collect second row right
-    private Pose second_row_intermediate = pose(53, 11.5, 90); // Pose7: collect second row right
+    private Pose second_row_intermediate = pose(52, 9, 90); // Pose7: collect second row right
     private Pose second_row_VERYintermediate = pose(53, 20, 90); // Pose7: collect second row right
-    private Pose second_row_done = pose(51, 44, 90); // Pose8: colect second row left
+    private Pose second_row_done = pose(52, 44, 90); // Pose8: colect second row left
+    private Pose leverPose = pose(54, 45, 125); // Pose8: colect second row left
 
     private Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
+    private Pose big_triangle_shoot_third_collect_with_park = pose(95, 0, 90); // Pose9: shooting big triangle pose
     private Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
-    private Pose third_row_intermediate = pose(75, 13, 90); // Pose10: collect third row right
+    private Pose third_row_intermediate = pose(75, 12, 90); // Pose10: collect third row right
     private Pose third_row_VERYintermediate = pose(75, 15, 90); // Pose10: collect third row right
     private Pose third_row_done = pose(75, 36, 90); // Pose11: collect third row left
 
@@ -138,6 +138,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 HandleColors();
                 intakeChecks(shouldMoveIntakeServo);
                 firingTurret(shouldFire);
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(leverPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 //bigIffMethod();
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
@@ -158,9 +159,9 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 1;
+        collectNumber = 0;
         movingTimer.reset();
         convertPoses();
-        collectNumber = 0;
         //teamSensitiveStuff();
     }
 
@@ -194,29 +195,68 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
             throw new RuntimeException(e);
         }
     }
+    PathConstraints collect_constraints = new PathConstraints(
+            PathConstraints.defaultConstraints.getTValueConstraint(),
+            PathConstraints.defaultConstraints.getVelocityConstraint(),
+            PathConstraints.defaultConstraints.getTranslationalConstraint(),
+            PathConstraints.defaultConstraints.getHeadingConstraint(),
+            PathConstraints.defaultConstraints.getTimeoutConstraint(),
+            0.65,
+            PathConstraints.defaultConstraints.getBEZIER_CURVE_SEARCH_LIMIT(),
+            2
+    );
+
     private void makeAuto(){
         robot.addToQueue(
                 new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        shouldFire = true;
-                        shouldMoveIntakeServo = false;
-                    }
+                new GeneralAction(() -> {
+                    shouldFire = true;
+                    shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
                 new GeneralAction(prepToFireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(800),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new StateAction("IntakeMotor","OFF"),
                 new GeneralAction(turnStuffOff),
 
-                /// collecting the closest row after firing
+
+                /// second row + lever
+                new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(increaseCollectNumber),
+                new GeneralAction(turnOnIntakeServo),
+                new MoveAction(second_row_ready),
+                new MoveAction(second_row_intermediate, collect_constraints),
+                new DelayAction(450),
+                //new MoveAction(second_row_VERYintermediate),
+                //new DelayAction(100),
+                new MoveAction(second_row_done, collect_constraints),
+                new DelayAction(300),
+                //new MoveAction(leverPose), no mor lever
+                new GeneralAction(() -> {
+                    shouldFire = true;
+                    shouldMoveIntakeServo = false;
+                }),
+                new MoveAction(big_triangle_shoot_third_collect),
+                new GeneralAction(prepToFireSortedBall),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(800),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(600),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(600),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(800),
+                /// end of second row firing
+
+
+
+                /// collecting the closest row second now
 
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
@@ -225,9 +265,9 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 new MoveAction(third_row_intermediate),
                 //new DelayAction(100),
                 //new MoveAction(third_row_VERYintermediate),
-                new DelayAction(400),
+                new DelayAction(250),
                 new MoveAction(third_row_done),
-                new DelayAction(500),
+                new DelayAction(300),
                 new GeneralAction(new Runnable() {
                     @Override
                     public void run() {
@@ -236,53 +276,48 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                     }
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
-
-
                 /// fire the balls
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1000),
+                new DelayAction(800),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(800),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(800),
+                // end of first row firing
 
 
-                /// second row
+                /// beginning of third row collect
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                new MoveAction(second_row_ready),
-                new MoveAction(second_row_intermediate),
-                new DelayAction(400),
-                //new MoveAction(second_row_VERYintermediate),
-               // new DelayAction(100),
-                new MoveAction(second_row_done),
-                new DelayAction(500),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        shouldFire = true;
-                        shouldMoveIntakeServo = false;
-                    }
+                new MoveAction(first_row_ready),
+                new MoveAction(first_row_intermediate,collect_constraints),
+                new DelayAction(250),
+                new MoveAction(first_row_done,collect_constraints),
+                new DelayAction(300),
+                ///firing the 12th ball firing
+                new GeneralAction(() -> {
+                    shouldFire = true;
+                    shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_third_collect),
+                new MoveAction(big_triangle_shoot_third_collect_with_park),
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1000),
+                new DelayAction(800),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(800),
+                /// end of 12 nall  row firing
 
 
                 new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(turnStuffOff),
-                new MoveAction(classifier_park)
+                new GeneralAction(turnStuffOff)
         );
     }
     /// Runnables
@@ -381,9 +416,6 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
             }
             ballToFire = BallColorSet_Decode.NoBall;
     };
-    Runnable increaseCollectNumber = () -> {
-        collectNumber++;
-    };
     Runnable turnStuffOff = () -> {
         shouldFire = false;
         shouldMoveIntakeServo = false;
@@ -394,6 +426,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
             robot.getMotorComponent("TurretRotateMotor").setTarget(0);
     };
+
     protected void HandleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
         rightSensorColors = colorSensorRight.getNormalizedColors();
@@ -477,6 +510,9 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 break;
         }
     }
+    Runnable increaseCollectNumber = () -> {
+        collectNumber++;
+    };
     Runnable turnOnIntakeServo = () -> {
         shouldMoveIntakeServo = true;
     };
@@ -497,14 +533,17 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         starter = convertPose(starter);
 
         first_row_ready = convertPose(first_row_ready);
+        first_row_intermediate = convertPose(first_row_intermediate);
         first_row_done = convertPose(first_row_done);
 
         second_row_ready = convertPose(second_row_ready);
         second_row_intermediate = convertPose(second_row_intermediate);
         second_row_VERYintermediate = convertPose(second_row_VERYintermediate);
         second_row_done = convertPose(second_row_done);
+        leverPose = convertPose(leverPose);
 
         big_triangle_shoot_third_collect = convertPose(big_triangle_shoot_third_collect);
+        big_triangle_shoot_third_collect_with_park = convertPose(big_triangle_shoot_third_collect_with_park);
 
         third_row_ready = convertPose(third_row_ready);
         third_row_intermediate = convertPose(third_row_intermediate);

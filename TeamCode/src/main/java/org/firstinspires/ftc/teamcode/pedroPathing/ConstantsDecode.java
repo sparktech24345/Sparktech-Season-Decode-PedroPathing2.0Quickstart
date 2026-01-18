@@ -154,7 +154,7 @@ public class ConstantsDecode {
             0.1,
             0.009,
             50,
-            1.25,
+            1,
             10,
             1
     );
