@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ServoMultiple0s extends LinearOpMode {
     public static double rightGatePos = 0.09;
     public static double leftGatePos = 0.43;
-    public static double angleServoPos = 0.8;
+    public static double angleServoPos = 0.9;
     public static double intakeServoPos = 0.3;
     public static double motorPow = 0;
 

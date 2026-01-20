@@ -52,9 +52,10 @@ public class MainTeleOPBlue extends LinearOpMode {
     protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
-    public static double vp = 180;
-    public static double vd = 18;
+    public static double vp = 195;
+    public static double vd = 25;
     public static double vf = 15;
+    public static double vMultiplier = 1.43;
 
     public static MainConfig cfg;
 
@@ -85,6 +86,7 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double rotationDegreesMeasuredCamera = 0;
     public static double lastRotationDegreesMeasuredCamera = 0;
     public static boolean shouldShootOnCamera = false;
+    public static double angleDecreaseValue = 10;
 
     /// ----------------- Limelight Stuff -----------------
     private AnalogInput laserAnalog; // if < 110 then has ball
@@ -457,7 +459,7 @@ public class MainTeleOPBlue extends LinearOpMode {
         if (isTryingToFire) {
             // ----------------------- Power Stuff -----------------------
 
-            targetVelocity = distanceToVelocityFunction(usedDistance);
+            targetVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier;
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Velocity)
                     .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
@@ -465,9 +467,10 @@ public class MainTeleOPBlue extends LinearOpMode {
 
 
             // ----------------------- Angle Stuff -----------------------
-
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            turretAngleVal = clamp(turretAngleVal, 262, 324);
+            if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + 100 <= targetVelocity)
+                turretAngleVal += angleDecreaseValue;
+            turretAngleVal = clamp(turretAngleVal, 262, 315);
             robot.getServoComponent("TurretAngle")
                     .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
