@@ -86,7 +86,8 @@ public class MainTeleOPBlue extends LinearOpMode {
     public static double rotationDegreesMeasuredCamera = 0;
     public static double lastRotationDegreesMeasuredCamera = 0;
     public static boolean shouldShootOnCamera = false;
-    public static double angleDecreaseValue = 10;
+    public static double angleDecreaseValue = 12;
+    public static double velocityDeltaCompensation = 60;
 
     /// ----------------- Limelight Stuff -----------------
     private AnalogInput laserAnalog; // if < 110 then has ball
@@ -197,7 +198,7 @@ public class MainTeleOPBlue extends LinearOpMode {
             ComplexFollower.instance().setPose(pose(0, 0, 0));
         }
         if (gamepad1.dpadRightWasPressed()) {
-            ComplexFollower.instance().setPose(farPark);
+            hasBallInOuttake = false;
         }
 
         // Driver Intake
@@ -468,7 +469,7 @@ public class MainTeleOPBlue extends LinearOpMode {
 
             // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + 100 <= targetVelocity)
+            if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity)
                 turretAngleVal += angleDecreaseValue;
             turretAngleVal = clamp(turretAngleVal, 262, 315);
             robot.getServoComponent("TurretAngle")
@@ -478,8 +479,8 @@ public class MainTeleOPBlue extends LinearOpMode {
             // ----------------------- Rotation Stuff -----------------------
 
             if (robot.getKey("DPAD_DOWN1").IsToggledOnPress) neededAngleForTurretRotation = 0; // stop rotation if ododmetry dies bad
-            robot.getTurretComponent("TurretRotateMotor")
-                    .setFeedforwardCoefficients(kVTurret,kATurret,kSTurret)
+            robot.getMotorComponent("TurretRotateMotor")
+                    //.setFeedforwardCoefficients(kVTurret,kATurret,kSTurret)
                     .setTarget(neededAngleForTurretRotation)
                     .setPositionCoefficients(TurretP, 0, TurretD, TurretZero) // only enable for tunning porposes
             ;
