@@ -17,8 +17,8 @@ import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfi
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
-@TeleOp(name = "Main TeleOp Red", group = "AAA")
-public class MainTeleopRed extends MainTeleOPBlue {
+@TeleOp(name = "OLD Main TeleOP Red", group = "BBB")
+public class OldMainTeleopRed extends OldMainTeleOPBlue {
     public void makeConfig(){
         cfg = new MainConfig(MainConfig.Configs.Red);
     }

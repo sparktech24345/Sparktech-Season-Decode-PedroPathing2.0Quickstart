@@ -29,6 +29,9 @@ public class GlobalStorage {
     public static boolean eval(double val) {
         return val != 0;
     }
+    public static boolean evalForTrigger(double val) {
+        return val >= 0.4;
+    }
     public static boolean TriggerEval(double val) {
         return val > 0.4;
     }

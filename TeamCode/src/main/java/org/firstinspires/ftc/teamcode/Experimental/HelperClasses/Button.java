@@ -54,7 +54,7 @@ public class Button {
     }
 
     public void update() {
-        boolean GamepadInput = (condB == null ? eval((condD == null ? 0 : condD.getAsDouble())) : condB.getAsBoolean());
+        boolean GamepadInput = (condB == null ? evalForTrigger((condD == null ? 0 : condD.getAsDouble())) : condB.getAsBoolean()); /// TODO this might be risky change for triggers
         ExecuteOnPress = false;
         ExecuteAfterPress = false;
 
