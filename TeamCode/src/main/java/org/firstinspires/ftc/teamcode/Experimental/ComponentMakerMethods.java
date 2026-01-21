@@ -110,7 +110,7 @@ public class ComponentMakerMethods {
 
         robot.getComponent("RightGateServo")
                 .addState("CLOSED", 155, true) // 0.43
-                .addState("OPEN", 36); // 0.1
+                .addState("OPEN", 30); // 0.08333
 
         robot.getComponent("IntakeSorterServo")
                 .addState("REDIRECT_TO_RIGHT", 61,true) // 61

@@ -53,7 +53,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double vp = 195;
     public static double vd = 25;
     public static double vf = 15;
-    public static double vMultiplier = 1.43;
+    public static double vMultiplier = 1.21;
 
     public static MainConfig cfg;
     public static Drivers driver = Drivers.Teo;
@@ -202,7 +202,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
         // Driver Outputting
-        if (robot.getKey("RIGHT_BUMPER1").ExecuteOnPress){
+        if (robot.getKey("LEFT_BUMPER1").ExecuteOnPress){
             wantsToOutput = !wantsToOutput;
 
             wantsToFireWithIntake = false;
@@ -211,7 +211,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             hasSwitchedIntakeState = true;
         }
         // Driver Intake
-        if (robot.getKey("LEFT_BUMPER1").ExecuteOnPress){
+        if (robot.getKey("RIGHT_BUMPER1").ExecuteOnPress){
             wantsToIntakeDriver = !wantsToIntakeDriver;
 
             wantsToFireWithIntake = false;
@@ -239,6 +239,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         if (robot.getKey("Y1").ExecuteOnPress){
             isInSortedMode = !isInSortedMode;
         }
+        if(isInSortedMode) gamepad1.setLedColor(0,0,255,30000);
+        else gamepad1.setLedColor(255,0,0,30000);
         // Driver fire unsorted in sorted mode
         if (robot.getKey("X1").ExecuteOnPress){
             wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
@@ -338,7 +340,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             }
 
             //shooting
-            if(wantsToFireWithIntake && hasSwitchedIntakeState){ // hasSwitchedIntakeState for do once logic
+            if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && hasSwitchedIntakeState){ // hasSwitchedIntakeState for do once logic
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
                 if (usedDistance > 2.9) {
                     robot.executeNow(new ActionSequence(
@@ -477,6 +479,8 @@ public class MainTeleOpBlue extends LinearOpMode {
             }
         }
 
+        shouldRemoveBalls = wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode || wantsToOutput ;
+
 
 
         /// ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == End of logic code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
@@ -499,9 +503,11 @@ public class MainTeleOpBlue extends LinearOpMode {
                         .setTarget(forcedOuttakeSpeed);
             }
 
+            if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
+                gamepad1.rumble(0.4,0.4,100);
 
 
-            // ----------------------- Angle Stuff -----------------------
+                // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
             if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity)
                 turretAngleVal += angleDecreaseValue;
@@ -526,7 +532,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             if(!shouldForceOuttake){
                 robot.getMotorComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Velocity)
-                        .setTarget(0);
+                        .setTarget(-20); // temp
             }
             else{
                 robot.getMotorComponent("TurretSpinMotor")

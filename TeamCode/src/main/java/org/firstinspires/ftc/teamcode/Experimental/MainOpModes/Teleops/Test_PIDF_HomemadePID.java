@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.intakeMotorName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.intakeSorterServoName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.turretAngleServoName;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -55,7 +56,8 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
         Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName); // 0.9 is max down and 0.73 is max up
         servo2.setPosition(turretAngle / 360);
         DcMotorSimple intakeMotor = hardwareMap.get(DcMotorSimple.class, intakeMotorName);
-
+        Servo servo3 = hardwareMap.get(Servo.class, intakeSorterServoName); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
+        servo3.setPosition(0.17);
 
         waitForStart();
         if (isStopRequested()) return;
