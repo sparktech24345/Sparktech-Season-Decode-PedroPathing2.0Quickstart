@@ -50,9 +50,9 @@ public class MainTeleOpBlue extends LinearOpMode {
     protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
-    public static double vp = 195;
-    public static double vd = 25;
-    public static double vf = 15;
+    public static double vp = 0.0055;//195;
+    public static double vd =0;//25;
+    public static double vf = 0.00045;//15;
     public static double vMultiplier = 1.21;
 
     public static MainConfig cfg;
@@ -532,7 +532,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             if(!shouldForceOuttake){
                 robot.getMotorComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Velocity)
-                        .setTarget(-20); // temp
+                        .setTarget(0); // temp
             }
             else{
                 robot.getMotorComponent("TurretSpinMotor")

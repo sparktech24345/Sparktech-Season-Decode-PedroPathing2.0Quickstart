@@ -30,7 +30,8 @@ public class ComponentMakerMethods {
                 .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
                 .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setVelocityCoefficients(180, 0, 18, 15)
+                //.setVelocityCoefficients(180, 0, 18, 15)
+                .setVelocityCoefficients(0.0055,0,0,0.00045)
                 .setTarget(0)
                 .setRange(-1,3000)
         );

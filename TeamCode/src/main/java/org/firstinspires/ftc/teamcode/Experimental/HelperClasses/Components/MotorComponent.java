@@ -24,6 +24,8 @@ public class MotorComponent extends Component {
     protected DcMotorEx mainMotor = null;
     protected PIDFCoefficients VelocityCoefficients = null;
     protected PIDcontroller pidControllerForPosition;
+    protected PIDcontroller VPIDController;
+    protected double vpidF = 0;
     protected MotorModes motorCurrentMode = MotorModes.Power;
     protected double velocity = 0;
     protected double zeroVelocityMultiplier = 0;
@@ -82,10 +84,11 @@ public class MotorComponent extends Component {
                 }
                 break;
             case Velocity:
-                if (VelocityCoefficients == null)
-                    VelocityCoefficients = new PIDFCoefficients(0, 0, 0, 0);
+//                if (VelocityCoefficients == null)
+//                    VelocityCoefficients = new PIDFCoefficients(0, 0, 0, 0);
+                if(VPIDController == null) VPIDController = new PIDcontroller(0,0,0);
                 for (DcMotorEx motor : motorMap.values())
-                    motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
+                    motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 break;
         }
         motorCurrentMode = mode;
@@ -113,9 +116,13 @@ public class MotorComponent extends Component {
         return this;
     }
     public MotorComponent setVelocityCoefficients(double p, double i, double d, double f) {
-        VelocityCoefficients = new PIDFCoefficients(p, i, d, f);
-        for (DcMotorEx motor : motorMap.values())
-            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
+//        VelocityCoefficients = new PIDFCoefficients(p, i, d, f);
+//        for (DcMotorEx motor : motorMap.values())
+//            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
+//        return this;
+        if(VPIDController == null) VPIDController = new PIDcontroller(p,i,d);
+        VPIDController.setConstants(p,i,d);
+        vpidF = f;
         return this;
     }
 
@@ -167,9 +174,14 @@ public class MotorComponent extends Component {
                     motor.setPower(targetPower);
                 break;
 
+//            case Velocity:
+//                mainMotor.setVelocity(target); // this is so that we can have only 1 encoder per system of 1 or more engines on the same shaft
+//                targetPower = mainMotor.getPower();
+//                for (DcMotorEx motor : motorMap.values())
+//                    motor.setPower(targetPower);
+//                break;
             case Velocity:
-                mainMotor.setVelocity(target); // this is so that we can have only 1 encoder per system of 1 or more engines on the same shaft
-                targetPower = mainMotor.getPower();
+                targetPower = VPIDController.calculate(target,mainMotor.getVelocity()) + target * vpidF;
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
