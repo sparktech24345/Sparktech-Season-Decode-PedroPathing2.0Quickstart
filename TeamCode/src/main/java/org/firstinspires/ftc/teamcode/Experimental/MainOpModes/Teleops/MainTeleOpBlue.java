@@ -56,7 +56,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double veld =25;
     public static double vf = 0.00045;//15;
     public static double velf = 15;
-    public static double vMultiplier = 1.21;
+    public static double vMultiplier = 1;
 
     public static MainConfig cfg;
     public static Drivers driver = Drivers.Teo;
@@ -80,6 +80,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean hasBallInLeftChamber = false;
     public static boolean shouldRemoveBalls = false;
     public static boolean shouldPullFromQueue = false;
+    public static boolean wantsToTempOutputIntake = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
 
     /// ----------------- Limelight Stuff -----------------
@@ -137,7 +138,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double kVTurret = 0;
     public static double kATurret = 0;
     public static double kSTurret = 0;
-    public static double TurretZero = 3;
+    public static double TurretZero = 0.8;
     public static double rotationAdder = 0;
     public static boolean isTryingToFire = false;
     public static boolean isMovingOuttakeGates = false;
@@ -157,6 +158,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean shouldForceOuttake = false;
     public static boolean wantsToFireWithIntakeUnsortedInSortingMode = false;
     public static double forcedOuttakeSpeed = 0.7;
+    public static double oneTunnelDistance = 1.65;
 
     protected void robotMainLoop() {
         // all of the code
@@ -333,6 +335,16 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             //just one channel logic
             intakeGateState = 1; // always point to the right
+            if(hasBallInRightChamber && hasBallInOuttake) intakeGateState = 0;
+            if(wantsToFireWithIntake){
+                if(usedDistance < oneTunnelDistance) intakeGateState = 1;
+                else{
+                    intakeGateState = -1;
+                }
+            }
+
+
+
             if(wantsToIntakeDriver){
                 if(hasBallInRightChamber && !hasBallInOuttake){
                     hasBallInOuttake = true;
@@ -350,6 +362,10 @@ public class MainTeleOpBlue extends LinearOpMode {
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
                 if (usedDistance > 2.9) {
                     robot.executeNow(new ActionSequence(
+                            new DelayAction(500),
+                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
+                            new DelayAction(300),
+                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate),
                             new StateAction("RightGateServo", "CLOSED"),
@@ -363,12 +379,23 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("LeftGateServo", "OPEN")
                     ));
                 }
-                else {
+                else if(usedDistance > oneTunnelDistance){
                     robot.executeNow(new ActionSequence(
+                            new DelayAction(500),
+                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
+                            new DelayAction(300),
+                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timer3),
                             new StateAction("LeftGateServo", "OPEN")
                     ));
+                }
+                else{
+                    robot.executeNow(new ActionSequence(
+                            new StateAction("RightGateServo", "OPEN"),
+                            new DelayAction(timer3),
+                            new StateAction("LeftGateServo", "OPEN")
+                            ));
                 }
             }
 
@@ -436,6 +463,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         else if(wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) intakeState = 2;
         else intakeState = 0;
 
+        if(wantsToTempOutputIntake)
+            intakeState = -1;
+
         hasSwitchedIntakeState = false;
 
 
@@ -489,7 +519,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             }
         }
 
-        shouldRemoveBalls = wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode || wantsToOutput ;
+        shouldRemoveBalls = wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode || wantsToOutput || wantsToIntakeDriver;
 
 
 
@@ -530,7 +560,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             double turretAngleVal = distanceToAngleFunction(usedDistance);
             if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity)
                 turretAngleVal += angleDecreaseValue;
-            turretAngleVal = clamp(turretAngleVal, 262, 315);
+            turretAngleVal = clamp(turretAngleVal, 255, 315);
             robot.getServoComponent("TurretAngle")
                     .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
@@ -634,6 +664,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         shouldRemoveBalls = false;
         shouldPullFromQueue = false;
         hasBallInOuttake = false;
+        wantsToTempOutputIntake = false;
         if (ballColorQueue == null) ballColorQueue = new BallColorQueue();
         ballColorQueue.clearQueue();
         ballToFire = BallColorSet_Decode.NoBall;
