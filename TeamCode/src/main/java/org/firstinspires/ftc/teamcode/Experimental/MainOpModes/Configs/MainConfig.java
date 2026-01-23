@@ -60,9 +60,9 @@ public class MainConfig {
                 targetYCenter = 48;
 
                 targetXRightPanel = 131;
-                targetYRightPanel = 45;
+                targetYRightPanel = 47;
 
-                targetXLeftPanel = 135;
+                targetXLeftPanel = 129;
                 targetYLeftPanel = 55;
 
                 usedTargetX = 131;
@@ -88,9 +88,9 @@ public class MainConfig {
                 targetYCenter = -48;
 
                 targetXRightPanel = 131;
-                targetYRightPanel = -45;
+                targetYRightPanel = -47;
 
-                targetXLeftPanel = 135;
+                targetXLeftPanel = 129;
                 targetYLeftPanel = -55;
 
                 usedTargetX = 131;

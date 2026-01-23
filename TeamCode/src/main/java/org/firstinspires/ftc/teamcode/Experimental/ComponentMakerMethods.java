@@ -28,10 +28,10 @@ public class ComponentMakerMethods {
                 .addMotor(turretFlyWheelMotorLeftName)
                 .addMotor(turretFlyWheelMotorRightName)
                 .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
-                .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                //.setVelocityCoefficients(180, 0, 18, 15)
-                .setVelocityCoefficients(0.0055,0,0,0.00045)
+                .setVelocityCoefficients(180, 0, 18, 15)
+                .setAccelerationVelocityCoefficients(0.0055,0,0,0.00045)
+                .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setTarget(0)
                 .setRange(-1,3000)
         );
@@ -94,6 +94,7 @@ public class ComponentMakerMethods {
                 .addState("OFF", 0, true)
                 .addState("SLOW", 0.5)
                 .addState("FULL", 1)
+                .addState("FIRING_POWER", 0.93)
                 .addState("FULL_REVERSE", -1)
                 .addState("SLOW_REVERSE", -0.5);
 

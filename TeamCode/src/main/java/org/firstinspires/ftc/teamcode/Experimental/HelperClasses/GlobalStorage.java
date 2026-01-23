@@ -165,11 +165,15 @@ public class GlobalStorage {
         return distance;
     }
 
+    public static double farAngle = 266;
+    public static double normalAngle = 270;
+    public static double closeAngle = 310;
+    public static double almostCloseAngle = 295;
     public static double distanceToAngleFunction(double distance) {
-        if( distance > 2.9) return 266;
-        if(distance < 0.95) return 310;
-        if(distance < 1.25) return 285;
-        else return 270; // TODO: Change this
+        if( distance > 2.9) return farAngle;
+        if(distance < 0.95) return closeAngle;
+        if(distance < 1.25) return almostCloseAngle;
+        else return normalAngle; // TODO: Change this
 
         /*
         if(distance > Measurements.P5.distance()) return 280;
@@ -183,8 +187,9 @@ public class GlobalStorage {
     }
     public static double grade0VeloClose = 860;
     public static double grade1VeloClose = 178; // meet was 176.88679
+    public static double farVelo = 1480;
     public static double distanceToVelocityFunction(double distance) {
-        if (distance > 2.9) return 1460;
+        if (distance > 2.9) return farVelo;
         return grade1VeloClose * distance + grade0VeloClose; // TODO: Change this
 
         /*

@@ -51,8 +51,11 @@ public class MainTeleOpBlue extends LinearOpMode {
     protected VoltageSensor controlHubVoltageSensor;
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
     public static double vp = 0.0055;//195;
+    public static double velp = 195;
     public static double vd =0;//25;
+    public static double veld =25;
     public static double vf = 0.00045;//15;
+    public static double velf = 15;
     public static double vMultiplier = 1.21;
 
     public static MainConfig cfg;
@@ -85,8 +88,9 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double rotationDegreesMeasuredCamera = 0;
     public static double lastRotationDegreesMeasuredCamera = 0;
     public static boolean shouldShootOnCamera = false;
-    public static double angleDecreaseValue = 12;
-    public static double velocityDeltaCompensation = 60;
+    public static double angleDecreaseValue = 10;
+    public static double rightSideAngleBias = -1.5;
+    public static double velocityDeltaCompensation = 80;
 
     /// ----------------- Limelight Stuff -----------------
     private AnalogInput laserAnalog; // if < 110 then has ball
@@ -122,7 +126,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double turretVelocityOverride = 0;
     public static double timer1 = 500;
     public static double timer2 = 500;
-    public static double timer3 = 800;
+    public static double timer3 = 1000;
     public static double timer4 = 1000;
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
@@ -186,6 +190,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         neededAngleForTurretRotation += D2_rotationAdder * D2_rotationAdderMulti;
+        if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
+        if(Math.abs(neededAngleForTurretRotation - 30) < 0.3) neededAngleForTurretRotation -= 0.5; // so that it stops the vibrations
         if (neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
 
@@ -426,7 +432,8 @@ public class MainTeleOpBlue extends LinearOpMode {
             if (hasBallInRightChamber) intakeGateState = 1; // open to the right so you can outtake
             else if (hasBallInLeftChamber) intakeGateState = -1; // left is lower priority but checked
         }
-        else if(wantsToIntakeDriver || wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) intakeState = 1;
+        else if(wantsToIntakeDriver) intakeState = 1;
+        else if(wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) intakeState = 2;
         else intakeState = 0;
 
         hasSwitchedIntakeState = false;
@@ -447,6 +454,9 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             case 1:
                 robot.executeNow(new StateAction("IntakeMotor", "FULL"));
+                break;
+            case 2:
+                robot.executeNow(new StateAction("IntakeMotor", "FIRING_POWER"));
                 break;
         }
         switch (intakeGateState) {
@@ -492,10 +502,19 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             targetVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier;
             if(!shouldForceOuttake){
-                robot.getMotorComponent("TurretSpinMotor")
-                        .setOperationMode(MotorComponent.MotorModes.Velocity)
-                        .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-                        .setVelocityCoefficients(vp,0,vd,vf);
+                if(Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= 80){
+                    robot.getMotorComponent("TurretSpinMotor")
+                            .setOperationMode(MotorComponent.MotorModes.Velocity)
+                            .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                            .setVelocityCoefficients(velp,0,veld,velf);
+                }
+                else{
+                    robot.getMotorComponent("TurretSpinMotor")
+                            .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
+                            .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                            .setAccelerationVelocityCoefficients(vp,0,vd,vf);;
+                }
+
             }
             else{
                 robot.getMotorComponent("TurretSpinMotor")
@@ -531,8 +550,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             if(!shouldForceOuttake){
                 robot.getMotorComponent("TurretSpinMotor")
-                        .setOperationMode(MotorComponent.MotorModes.Velocity)
-                        .setTarget(0); // temp
+                        .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
+                        .setTarget(0);
             }
             else{
                 robot.getMotorComponent("TurretSpinMotor")
@@ -568,6 +587,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         RobotController.telemetry.addData("D2 rotation adder", D2_rotationAdder * D2_rotationAdderMulti);
         RobotController.telemetry.addData("hasBallInRightChamber",hasBallInRightChamber);
         RobotController.telemetry.addData("hasBallInOuttake",hasBallInOuttake);
+        RobotController.telemetry.addData(" Spin Motor Mode ",robot.getMotorComponent("TurretSpinMotor").getOperationMode());
         ballColorQueue.spitOutQueueInTelemetry();
     }
 
