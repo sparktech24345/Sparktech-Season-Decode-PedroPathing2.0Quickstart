@@ -45,6 +45,7 @@ public class ComponentMakerMethods {
                 .setTarget(0)
                 .setResolution(2.62)
                 .setRange(-30, 330)
+                .moveDuringInit(true)
         );
 
 

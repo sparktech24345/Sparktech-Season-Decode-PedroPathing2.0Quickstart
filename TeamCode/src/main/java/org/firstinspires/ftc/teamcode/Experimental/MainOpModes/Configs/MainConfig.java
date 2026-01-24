@@ -16,6 +16,7 @@ public class MainConfig {
     public static double farZoneCameraAdder;
     public static double autoZoneAdderFar;
     public static double rotationForInitClsoeZone;
+    public static double rotationForInitSmallTriangle;
 
     public static double targetX;
     public static double targetY;
@@ -45,9 +46,10 @@ public class MainConfig {
                 teamPipeline = 0;
 
                 farZoneCameraAdder = 0;
-                autoZoneAdderFar = 0.5;
+                autoZoneAdderFar = 1;
 
                 rotationForInitClsoeZone = 145;
+                rotationForInitSmallTriangle = 90;
 
                 targetX = 131;
                 targetY = 46;
@@ -74,8 +76,9 @@ public class MainConfig {
                 teamPipeline = 1;
 
                 farZoneCameraAdder = 0;
-                autoZoneAdderFar = -0.5;
+                autoZoneAdderFar = -1;
                 rotationForInitClsoeZone = 200;
+                rotationForInitSmallTriangle = 270;
 
                 targetX = 131;
                 targetY = -46;

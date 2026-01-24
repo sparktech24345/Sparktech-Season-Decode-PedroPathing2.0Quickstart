@@ -5,9 +5,13 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.normalAngle;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.OldMainTeleOPBlue.calculateDistanceToWallInMeters;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.OldMainTeleOPBlue.calculateHeadingAdjustment;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.angleDecreaseValue;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.velocityDeltaCompensation;
 
 import android.graphics.Color;
 
@@ -44,7 +48,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Config
-@Autonomous(name = "BigTriangle12ArtefactPushAuto", group = "BBB")
+@Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
 public class BigTriangle12ArtefactPushAuto extends OpMode {
     private RobotController robot;
     private AutoRecorder recorder;
@@ -81,23 +85,11 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
     public static boolean shouldFire = false;
     public static boolean shouldMoveIntakeServo = false;
     /// --------------------------------------------------------
-    /*
-private final Pose pose1 = new Pose(50.71300116110975, 15.411673718550073, Math.toRadians(90.11418277683327));
-private final Pose pose2 = new Pose(50.31208669106792, 42.289693036417326, Math.toRadians(89.62438308126248));
-
-private final Pose pose3 = new Pose(74.27231675996555, 15.024040402389888, Math.toRadians(89.96480653968509));
-private final Pose pose4 = new Pose(73.85308693713091, 36.43503023883489, Math.toRadians(90.43687506417052));
-
-private final Pose pose5 = new Pose(27.75532639871432, 15.633838082861715, Math.toRadians(89.57556088907523));
-private final Pose pose6 = new Pose(27.75600403312623, 45.11518343227117, Math.toRadians(89.49693175135005));
-
-private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math.toRadians(90.3724663802973));*/
     private Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
-    private Pose first_row_ready = pose(28, 0, 90); // Pose4: collect first row right
-    private Pose first_row_intermediate = pose(28, 12, 90); // Pose4: collect first row right
-    private Pose first_row_done = pose(28, 45.2, 90); // Pose5: collect first row left
-    private Pose second_row_ready = pose(53, 0, 90); // Pose7: collect second row right
-    private Pose second_row_intermediate = pose(52, 9, 90); // Pose7: collect second row right
+    private Pose first_row_ready = pose(29, 0, 90); // Pose4: collect first row right
+    private Pose first_row_intermediate = pose(29, 13, 90); // Pose4: collect first row right
+    private Pose first_row_done = pose(29, 45.2, 90); // Pose5: collect first row left
+    private Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
     private Pose second_row_VERYintermediate = pose(53, 20, 90); // Pose7: collect second row right
     private Pose second_row_done = pose(52, 44, 90); // Pose8: colect second row left
     private Pose leverPose = pose(54, 45, 125); // Pose8: colect second row left
@@ -158,7 +150,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
-        shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 1;
+        shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 0;
         collectNumber = 0;
         movingTimer.reset();
         convertPoses();
@@ -169,6 +161,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
     public void init_loop() {
         robot.init_loop();
         robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitClsoeZone);
+        robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
         useCamera();
         RobotController.telemetry.addData("id",camId);
     }
@@ -201,9 +194,9 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
             PathConstraints.defaultConstraints.getTranslationalConstraint(),
             PathConstraints.defaultConstraints.getHeadingConstraint(),
             PathConstraints.defaultConstraints.getTimeoutConstraint(),
-            0.65,
+            0.5,
             PathConstraints.defaultConstraints.getBEZIER_CURVE_SEARCH_LIMIT(),
-            2
+            4
     );
 
     private void makeAuto(){
@@ -211,7 +204,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    shouldMoveIntakeServo = false;
+                    shouldMoveIntakeServo = true;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
                 new GeneralAction(prepToFireSortedBall),
@@ -222,16 +215,16 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 new DelayAction(600),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
-                new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(turnStuffOff),
+                //new StateAction("IntakeMotor","OFF"),
+                //new GeneralAction(turnStuffOff),
 
 
                 /// second row + lever
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
-                new GeneralAction(turnOnIntakeServo),
-                new MoveAction(second_row_ready),
-                new MoveAction(second_row_intermediate, collect_constraints),
+                //new GeneralAction(turnOnIntakeServo),
+                new MoveAction(second_row_ready,collect_constraints),
+                //new MoveAction(second_row_intermediate, collect_constraints),
                 new DelayAction(450),
                 //new MoveAction(second_row_VERYintermediate),
                 //new DelayAction(100),
@@ -240,7 +233,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 //new MoveAction(leverPose), no mor lever
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    shouldMoveIntakeServo = false;
+                    //shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
                 new GeneralAction(prepToFireSortedBall),
@@ -260,7 +253,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
 
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
-                new GeneralAction(turnOnIntakeServo),
+                //new GeneralAction(turnOnIntakeServo),
                 new MoveAction(third_row_ready),
                 new MoveAction(third_row_intermediate),
                 //new DelayAction(100),
@@ -272,7 +265,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                     @Override
                     public void run() {
                         shouldFire = true;
-                        shouldMoveIntakeServo = false;
+                        //shouldMoveIntakeServo = false;
                     }
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
@@ -292,7 +285,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 /// beginning of third row collect
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
-                new GeneralAction(turnOnIntakeServo),
+                //new GeneralAction(turnOnIntakeServo),
                 new MoveAction(first_row_ready),
                 new MoveAction(first_row_intermediate,collect_constraints),
                 new DelayAction(250),
@@ -301,7 +294,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    shouldMoveIntakeServo = false;
+                    //shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect_with_park),
                 new GeneralAction(prepToFireSortedBall),
@@ -312,7 +305,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(800),
+                new DelayAction(400),
                 /// end of 12 nall  row firing
 
 
@@ -336,8 +329,11 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
 
             // ----------------------- Angle Stuff -----------------------
 
-            double turretAngleVal = FAR_TARGET_ANGLE;
+            double turretAngleVal = normalAngle;
             turretAngleVal = clamp(turretAngleVal,262,324);
+
+            if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity) // +0.15 for safety
+                turretAngleVal += angleDecreaseValue;
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
@@ -371,50 +367,56 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         }
     };
     Runnable fireSortedBall = () -> {
-            ballToFire = ballColorQueue.pull();
+        ballToFire = ballColorQueue.pull();
 
-            if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
-                robot.executeNow(new ActionSequence(
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(300),
-                        new StateAction("RightGateServo", "CLOSED")
-                ));
-            }
-            else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
+        if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
+            robot.executeNow(new ActionSequence(
+                    new StateAction("RightGateServo", "OPEN"),
+                    new DelayAction(300),
+                    new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
+                    new StateAction("RightGateServo", "CLOSED")
+            ));
+        }
+        else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
+            robot.executeNow(new ActionSequence(
+                    new StateAction("LeftGateServo", "OPEN"),
+                    new DelayAction(300),
+                    new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
+                    new StateAction("LeftGateServo", "CLOSED")
+            ));
+        }
+        else // if cant sort
+        {
+            if(calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall){
                 robot.executeNow(new ActionSequence(
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(300),
+                        new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
             }
-            else // if cant sort
-            {
-                if(calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall){
-                    robot.executeNow(new ActionSequence(
-                            new StateAction("LeftGateServo", "OPEN"),
-                            new DelayAction(300),
-                            new StateAction("LeftGateServo", "CLOSED")
-                    ));
-                }
-                else if(calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall){
-                    robot.executeNow(new ActionSequence(
-                            new StateAction("RightGateServo", "OPEN"),
-                            new DelayAction(300),
-                            new StateAction("RightGateServo", "CLOSED")
-                    ));
-                }
-                else{ // IF REAAALLLYYY no ball
-                    robot.executeNow(new ActionSequence(
-                            new StateAction("RightGateServo", "OPEN"),
-                            new StateAction("LeftGateServo", "OPEN"),
-                            new DelayAction(500),
-                            new StateAction("RightGateServo", "CLOSED"),
-                            new StateAction("LeftGateServo", "CLOSED")
-                    ));
-                }
-
+            else if(calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall){
+                robot.executeNow(new ActionSequence(
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(300),
+                        new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
+                        new StateAction("RightGateServo", "CLOSED")
+                ));
             }
-            ballToFire = BallColorSet_Decode.NoBall;
+            else{ // IF REAAALLLYYY no ball
+                robot.executeNow(new ActionSequence(
+                        new StateAction("RightGateServo", "OPEN"),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(500),
+                        new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
+                        new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+            }
+
+        }
+        ballToFire = BallColorSet_Decode.NoBall;
     };
     Runnable turnStuffOff = () -> {
         shouldFire = false;
@@ -434,10 +436,10 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
         Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
 
-        actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors);
+        actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors,true);
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
-        if (!shouldRemoveBalls && false) { // when not moving balls out of chambers they dont have permission to change to no ball
+        if (!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
             if (actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
 
@@ -458,30 +460,28 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
-        RobotController.telemetry.addData("LEFT_RED",(double)leftSensorColors.red * 10000.0);
-        RobotController.telemetry.addData("LEFT_BLUE",(double)leftSensorColors.blue * 10000.0);
-        RobotController.telemetry.addData("LEFT_GREEN",(double)leftSensorColors.green * 10000.0);
+        RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+        RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+        RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-        RobotController.telemetry.addData("RIGHT_RED",(double)rightSensorColors.red * 10000.0);
-        RobotController.telemetry.addData("RIGHT_BLUE",(double)rightSensorColors.blue * 10000.0);
-        RobotController.telemetry.addData("RIGHT_GREEN",(double)rightSensorColors.green * 10000.0);
+        RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+        RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+        RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
-    public static int lastGateState = 1;
+    public static int lastGateState = 0;
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
-        if(!(collectNumber == 2 && camId == 23) || true){
+        if(/*!(collectNumber == 2 && camId == 23) || true*/ true){
             if(shouldCheck) {
-                if (!hasBallInLeftChamber) gateState = -1; // first fill up left
-                else if (!hasBallInRightChamber) gateState = 1; // then right
-                else gateState = 1; // then continue pointing to right for when you fire
-                //else gateState = lastGateState;
+                    if (!hasBallInRightChamber) gateState = 1; // first fill up right
+                    else if (!hasBallInLeftChamber) gateState = -1; // then left
+                    else gateState = 0; // then point middle cuz new sorting logic
             }
             else gateState = lastGateState;
             lastGateState = gateState;
-
         }
         else{
             if(shouldCheck) {
@@ -537,7 +537,7 @@ private final Pose pose7 = new Pose(119.99206062376969, 26.829886849470963, Math
         first_row_done = convertPose(first_row_done);
 
         second_row_ready = convertPose(second_row_ready);
-        second_row_intermediate = convertPose(second_row_intermediate);
+        //second_row_intermediate = convertPose(second_row_intermediate);
         second_row_VERYintermediate = convertPose(second_row_VERYintermediate);
         second_row_done = convertPose(second_row_done);
         leverPose = convertPose(leverPose);
