@@ -185,9 +185,9 @@ public class GlobalStorage {
         //if(distance < 1.05) return 310;
         //else return 280; // TODO: Change this*/
     }
-    public static double grade0VeloClose = 860;
-    public static double grade1VeloClose = 178; // meet was 176.88679
-    public static double farVelo = 1480;
+    public static double grade0VeloClose = 900;
+    public static double grade1VeloClose = 181;
+    public static double farVelo = 1460;
     public static double distanceToVelocityFunction(double distance) {
         if (distance > 2.9) return farVelo;
         return grade1VeloClose * distance + grade0VeloClose; // TODO: Change this
