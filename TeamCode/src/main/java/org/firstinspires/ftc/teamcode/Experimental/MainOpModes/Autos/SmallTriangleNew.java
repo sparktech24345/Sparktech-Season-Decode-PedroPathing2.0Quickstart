@@ -80,8 +80,8 @@ public class SmallTriangleNew extends OpMode {
     private Pose small_triangle_shoot = pose(1, 3, 90); // Pose1: shooting position small triangle
     private Pose parkPose = pose(10, 15, 90);
     private Pose prepHPCollectPose = pose(15,39,150);
-    private Pose fininshHPCollectPose = pose(0,46,90);
-    private Pose weirdHpCollectPose = pose(7,45,115);
+    private Pose fininshHPCollectPose = pose(0,45.5,110);
+    private Pose weirdHpCollectPose = pose(7,43,130);
     private Pose halfTheWayHPCollectPose = pose(12,39,130);
     @Override
     public void init() {

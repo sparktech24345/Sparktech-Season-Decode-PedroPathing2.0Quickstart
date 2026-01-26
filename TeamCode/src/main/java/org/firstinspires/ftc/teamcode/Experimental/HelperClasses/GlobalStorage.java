@@ -65,9 +65,9 @@ public class GlobalStorage {
     public static String backLeftName           = "backgreen";
     public static String colorSensorName        = "sensorColor";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
-    public static double ballColorTresholdBlue = 18.5;
-    public static double ballColorTresholdGreen = 18.5;
-    public static double leftSensorColorMultiplier = 1.3;
+    public static double ballColorTresholdBlue = 15;
+    public static double ballColorTresholdGreen = 15;
+    public static double leftSensorColorMultiplier = 1.5;
     public static String __frontLeftName        = "frontleft";
     public static String __frontRightName       = "frontright";
     public static String __backLeftName         = "backleft";
@@ -185,8 +185,8 @@ public class GlobalStorage {
         //if(distance < 1.05) return 310;
         //else return 280; // TODO: Change this*/
     }
-    public static double grade0VeloClose = 900;
-    public static double grade1VeloClose = 181;
+    public static double grade0VeloClose = 860;
+    public static double grade1VeloClose = 180;
     public static double farVelo = 1460;
     public static double distanceToVelocityFunction(double distance) {
         if (distance > 2.9) return farVelo;

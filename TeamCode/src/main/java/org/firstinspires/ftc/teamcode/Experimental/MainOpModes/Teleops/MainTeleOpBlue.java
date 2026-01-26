@@ -359,18 +359,22 @@ public class MainTeleOpBlue extends LinearOpMode {
             // UNSORTED MODE
 
             //just one channel logic
-            intakeGateState = 1; // always point to the right
-            if(hasBallInRightChamber && hasBallInOuttake) intakeGateState = 0; // should be 1 is 1 for temp
-            if(wantsToFireWithIntake){
-                if(usedDistance < oneTunnelDistance) intakeGateState = 1;
-                else{
-                    intakeGateState = -1;
-                }
-            }
-
-
-
             if(wantsToIntakeDriver){
+                intakeGateState = 1; // always point to the right
+                if(hasBallInRightChamber /*&& hasBallInOuttake*/) intakeGateState = -1; // should be 1 is -1 for temp
+            }
+            else intakeGateState = lastGateState;
+            lastGateState = intakeGateState;
+//            if(wantsToFireWithIntake){
+//                if(usedDistance < oneTunnelDistance) intakeGateState = 1;
+//                else{
+//                    intakeGateState = -1;
+//                }
+//            }
+
+
+
+            if(wantsToIntakeDriver && false){
                 if(hasBallInRightChamber && !hasBallInOuttake){
                     hasBallInOuttake = true;
                     isMovingOuttakeGates = true;
@@ -391,17 +395,17 @@ public class MainTeleOpBlue extends LinearOpMode {
             }
 
             //shooting
-            if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && hasJustBeganFiring){ // hasSwitchedIntakeState for do once logic
+            if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) /*&& hasBallInLeftChamber*/){ // hasSwitchedIntakeState for do once logic
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
                 if (usedDistance > 2.9 && hasBallInLeftChamber) {
                     robot.executeNow(new ActionSequence(
-                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
-                            new DelayAction(outtakeReversingTime),
-                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
-                            new DelayAction(timer5),
-                            new StateAction("RightGateServo", "OPEN"),
+                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
+                            //new DelayAction(outtakeReversingTime),
+                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
+                            //new DelayAction(timer5),
+                            new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate),
-                            new StateAction("RightGateServo", "CLOSED"),
+                            new StateAction("LeftGateServo", "CLOSED"),
 
                             new DelayAction(timer1),
 
@@ -413,15 +417,15 @@ public class MainTeleOpBlue extends LinearOpMode {
                     ));
                     hasJustBeganFiring = false;
                 }
-                else if(usedDistance > oneTunnelDistance && hasBallInLeftChamber){
+                else if(usedDistance > oneTunnelDistance /*&& hasBallInLeftChamber*/){
                     robot.executeNow(new ActionSequence(
-                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
-                            new DelayAction(outtakeReversingTime),
-                            new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
-                            new DelayAction(timer6),
-                            new StateAction("RightGateServo", "OPEN"),
+                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
+                            //new DelayAction(outtakeReversingTime),
+                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
+                            //new DelayAction(timer6),
+                            new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer3),
-                            new StateAction("LeftGateServo", "OPEN")
+                            new StateAction("RightGateServo", "OPEN")
                     ));
                     hasJustBeganFiring = false;
                 }

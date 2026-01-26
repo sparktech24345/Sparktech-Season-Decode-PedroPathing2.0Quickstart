@@ -78,8 +78,11 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
     protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
     protected BallColorSet_Decode ballToFire;
     public static boolean hasBallInRightChamber = false;
+    public static boolean hadBallInRightChamberInPast = false;
     public static boolean hasBallInLeftChamber = false;
+    public static boolean hadBallInLeftChamberInPast = false;
     public static boolean shouldRemoveBalls = false;
+    public static boolean shouldReverse = false;
     public static boolean shouldPullFromQueue = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
@@ -95,7 +98,7 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
     private Pose leverPose = pose(54, 45, 125); // Pose8: colect second row left
 
     private Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
-    private Pose big_triangle_shoot_third_collect_with_park = pose(95, 0, 90); // Pose9: shooting big triangle pose
+    private Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
     private Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
     private Pose third_row_intermediate = pose(75, 12, 90); // Pose10: collect third row right
     private Pose third_row_VERYintermediate = pose(75, 15, 90); // Pose10: collect third row right
@@ -123,6 +126,7 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
                         RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
                         RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
                         RobotController.telemetry.addData("is moving",isMoving);
+                        RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
                         }
 
             private void controls() { // this will happen in a loop
@@ -130,6 +134,7 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
                 HandleColors();
                 intakeChecks(shouldMoveIntakeServo);
                 firingTurret(shouldFire);
+                reversingChecks(shouldReverse);
                 if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(leverPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 //bigIffMethod();
 
@@ -150,7 +155,9 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
         recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
-        shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 0;
+        shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 1;
+        hadBallInRightChamberInPast = false; hadBallInLeftChamberInPast = false;
+        shouldReverse = false;
         collectNumber = 0;
         movingTimer.reset();
         convertPoses();
@@ -161,7 +168,7 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
     public void init_loop() {
         robot.init_loop();
         robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitClsoeZone);
-        robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
+        robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
         useCamera();
         RobotController.telemetry.addData("id",camId);
     }
@@ -194,9 +201,9 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
             PathConstraints.defaultConstraints.getTranslationalConstraint(),
             PathConstraints.defaultConstraints.getHeadingConstraint(),
             PathConstraints.defaultConstraints.getTimeoutConstraint(),
-            0.5,
+            0.6,
             PathConstraints.defaultConstraints.getBEZIER_CURVE_SEARCH_LIMIT(),
-            4
+            3
     );
 
     private void makeAuto(){
@@ -204,7 +211,7 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    shouldMoveIntakeServo = true;
+                    shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
                 new GeneralAction(prepToFireSortedBall),
@@ -221,23 +228,25 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
 
                 /// second row + lever
                 new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(() -> shouldReverse = true),
                 new GeneralAction(increaseCollectNumber),
-                //new GeneralAction(turnOnIntakeServo),
+                new GeneralAction(turnOnIntakeServo),
                 new MoveAction(second_row_ready,collect_constraints),
                 //new MoveAction(second_row_intermediate, collect_constraints),
-                new DelayAction(450),
+                new DelayAction(300),
                 //new MoveAction(second_row_VERYintermediate),
                 //new DelayAction(100),
                 new MoveAction(second_row_done, collect_constraints),
-                new DelayAction(300),
+                new DelayAction(150),
                 //new MoveAction(leverPose), no mor lever
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    //shouldMoveIntakeServo = false;
+                    shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(() -> shouldReverse = false),
                 new DelayAction(800),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
@@ -252,8 +261,9 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
                 /// collecting the closest row second now
 
                 new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(() -> shouldReverse = true),
                 new GeneralAction(increaseCollectNumber),
-                //new GeneralAction(turnOnIntakeServo),
+                new GeneralAction(turnOnIntakeServo),
                 new MoveAction(third_row_ready),
                 new MoveAction(third_row_intermediate),
                 //new DelayAction(100),
@@ -265,13 +275,14 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
                     @Override
                     public void run() {
                         shouldFire = true;
-                        //shouldMoveIntakeServo = false;
+                        shouldMoveIntakeServo = false;
                     }
                 }),
                 new MoveAction(big_triangle_shoot_third_collect),
                 /// fire the balls
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(() -> shouldReverse = false),
                 new DelayAction(800),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(800),
@@ -284,17 +295,19 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
 
                 /// beginning of third row collect
                 new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(() -> shouldReverse = true),
                 new GeneralAction(increaseCollectNumber),
-                //new GeneralAction(turnOnIntakeServo),
+                new GeneralAction(turnOnIntakeServo),
                 new MoveAction(first_row_ready),
                 new MoveAction(first_row_intermediate,collect_constraints),
                 new DelayAction(250),
                 new MoveAction(first_row_done,collect_constraints),
                 new DelayAction(300),
+                new GeneralAction(() -> shouldReverse = false),
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    //shouldMoveIntakeServo = false;
+                    shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect_with_park),
                 new GeneralAction(prepToFireSortedBall),
@@ -471,15 +484,33 @@ public class BigTriangle12ArtefactPushAuto extends OpMode {
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
-    public static int lastGateState = 0;
+    public static int lastGateState = 1;
+    protected void reversingChecks(boolean shouldReverse){
+        if(!hadBallInRightChamberInPast && hasBallInRightChamber && shouldReverse && false){
+            robot.executeNow(new ActionSequence( // reverse for a bit
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(60),
+                    new StateAction("IntakeMotor","FULL")
+            ));
+        }
+        if(!hadBallInLeftChamberInPast && hasBallInLeftChamber && shouldReverse){
+            robot.executeNow(new ActionSequence( // reverse for a bit
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(60),
+                    new StateAction("IntakeMotor","FULL")
+            ));
+        }
+        hadBallInRightChamberInPast = hasBallInRightChamber;
+        hadBallInLeftChamberInPast = hasBallInLeftChamber;
+    }
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
         if(/*!(collectNumber == 2 && camId == 23) || true*/ true){
             if(shouldCheck) {
-                    if (!hasBallInRightChamber) gateState = 1; // first fill up right
-                    else if (!hasBallInLeftChamber) gateState = -1; // then left
-                    else gateState = 0; // then point middle cuz new sorting logic
-            }
+                    if (!hasBallInRightChamber) gateState = -1; // first fill up left
+                    else if (!hasBallInLeftChamber) gateState = 1; // then right
+                    else gateState = 1; // then point middle cuz new sorting logic
+            } // yet another logic
             else gateState = lastGateState;
             lastGateState = gateState;
         }

@@ -95,7 +95,7 @@ public class ComponentMakerMethods {
                 .addState("OFF", 0, true)
                 .addState("SLOW", 0.5)
                 .addState("FULL", 1)
-                .addState("FIRING_POWER", 0.93)
+                .addState("FIRING_POWER", 1)
                 .addState("FULL_REVERSE", -1)
                 .addState("SLOW_REVERSE", -0.5);
 
@@ -117,7 +117,7 @@ public class ComponentMakerMethods {
 
         robot.getComponent("IntakeSorterServo")
                 .addState("REDIRECT_TO_RIGHT", 61,true) // 61
-                .addState("REDIRECT_TO_LEFT", 154.8) // 154.8
+                .addState("REDIRECT_TO_LEFT", 170) // 154.8
                 .addState("BLOCK", 108); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
 
         robot.getComponent("TurretAngle")
