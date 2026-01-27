@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 @Autonomous(name="Big Triangle Auto RED", group = "AAA")
-public class BigTriangle12ArtefactPushAutoRED extends BigTriangle12ArtefactPushAuto {
+public class BigTriangle12ArtefactAutoRED extends BigTriangle12ArtefactAuto {
     public void makeConfig(){
         cfg = new MainConfig(MainConfig.Configs.Red);
     }

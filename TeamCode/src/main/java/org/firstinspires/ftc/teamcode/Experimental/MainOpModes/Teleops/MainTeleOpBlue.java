@@ -198,8 +198,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         neededAngleForTurretRotation += D2_rotationAdder * D2_rotationAdderMulti;
-        if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
-        if(Math.abs(neededAngleForTurretRotation - 30) < 0.3) neededAngleForTurretRotation -= 0.5; // so that it stops the vibrations
+        /// if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
+        /// if(Math.abs(neededAngleForTurretRotation - 30) < 0.3) neededAngleForTurretRotation -= 0.5; // so that it stops the vibrations MIGHT BE FAULTY
         if (neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
 
