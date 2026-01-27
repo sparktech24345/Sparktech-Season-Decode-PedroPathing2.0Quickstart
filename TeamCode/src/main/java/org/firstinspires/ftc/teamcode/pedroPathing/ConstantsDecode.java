@@ -32,13 +32,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyThreeW
 
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(12) // ?????
-            .forwardZeroPowerAcceleration(-33.82717174182185)
-            .lateralZeroPowerAcceleration(-66.38979558701307)
+            .mass(11.5) // ?????
+            .forwardZeroPowerAcceleration(-28)
+            .lateralZeroPowerAcceleration(-65)
             .centripetalScaling(0.005)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.05, 0.0001, 0.002, 0.019))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0.002, 0))
             .headingPIDFCoefficients(new PIDFCoefficients(0.7, 0, 0.04, 0.0005))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.015, 0, 0, 0.6,0));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.015, 0, 0.0005, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
 //            .leftFrontMotorName(GlobalStorage.frontRightName)
@@ -56,8 +56,8 @@ public class ConstantsDecode {
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
 
-            .xVelocity(76.40856597179503)
-            .yVelocity(62.0495009534941);
+            .xVelocity(82)
+            .yVelocity(65);
 
     public static PinpointConstants pinpointConstants = new PinpointConstants()
             .hardwareMapName("pinpoint")
@@ -154,9 +154,9 @@ public class ConstantsDecode {
             0.1,
             0.009,
             50,
-            1,
+            0.9,
             10,
-            1
+            2
     );
 
     public static Follower createFollowerDecode(HardwareMap hardwareMap) {

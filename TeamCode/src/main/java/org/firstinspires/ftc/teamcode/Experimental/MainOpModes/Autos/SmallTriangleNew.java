@@ -79,10 +79,10 @@ public class SmallTriangleNew extends OpMode {
     private Pose starter = pose( 0.0, 6.12, 90); // Weird starting position wo that we are closer to balls
     private Pose small_triangle_shoot = pose(1, 3, 90); // Pose1: shooting position small triangle
     private Pose parkPose = pose(10, 15, 90);
-    private Pose prepHPCollectPose = pose(15,39,150);
-    private Pose fininshHPCollectPose = pose(0,45.5,110);
-    private Pose weirdHpCollectPose = pose(7,43,130);
-    private Pose halfTheWayHPCollectPose = pose(12,39,130);
+    //private Pose prepHPCollectPose = pose(15,39,150);
+    private Pose fininshHPCollectPose = pose(0,46,90);
+    //private Pose weirdHpCollectPose = pose(7,43,130);
+    //private Pose halfTheWayHPCollectPose = pose(12,39,130);
     @Override
     public void init() {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -151,16 +151,6 @@ public class SmallTriangleNew extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    PathConstraints collect_constraints = new PathConstraints(
-            PathConstraints.defaultConstraints.getTValueConstraint(),
-            PathConstraints.defaultConstraints.getVelocityConstraint(),
-            PathConstraints.defaultConstraints.getTranslationalConstraint(),
-            PathConstraints.defaultConstraints.getHeadingConstraint(),
-            PathConstraints.defaultConstraints.getTimeoutConstraint(),
-            0.5,
-            PathConstraints.defaultConstraints.getBEZIER_CURVE_SEARCH_LIMIT(),
-            4
-    );
     private void makeAuto() {
         robot.addToQueue(
                 new GeneralAction(prepQueueToFireSortedBall),
@@ -179,16 +169,16 @@ public class SmallTriangleNew extends OpMode {
 
                 //second row of stuff
                 new StateAction("IntakeMotor","FULL"),
-                new MoveAction(weirdHpCollectPose,collect_constraints),
-                new DelayAction(300),
-                new MoveAction(fininshHPCollectPose,collect_constraints),
+                //new MoveAction(weirdHpCollectPose,collect_constraints),
+                //new DelayAction(300),
+                new MoveAction(fininshHPCollectPose),
                 new DelayAction(300),
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     //shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(small_triangle_shoot,collect_constraints),
+                new MoveAction(small_triangle_shoot),
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(800),
                 new GeneralAction(fireSortedBall),
@@ -203,8 +193,8 @@ public class SmallTriangleNew extends OpMode {
                 // mystery pick up
                 new GeneralAction(turnOnIntakeServo),
                 new StateAction("IntakeMotor","FULL"),
-                new MoveAction(halfTheWayHPCollectPose),
-                new DelayAction(500),
+                //new MoveAction(halfTheWayHPCollectPose),
+                //new DelayAction(500),
                 new MoveAction(fininshHPCollectPose),
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
@@ -222,9 +212,34 @@ public class SmallTriangleNew extends OpMode {
                 new DelayAction(800),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(800),
+
+                /// WARNING THIS IS 12th BALL CYCLE
+
+
+                new MoveAction(fininshHPCollectPose),
+                new GeneralAction(prepQueueToFireSortedBall),
+                new GeneralAction(() -> {
+                    shouldFire = true;
+                    //shouldMoveIntakeServo = false;
+                }),
+                new MoveAction(small_triangle_shoot),
+                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(800),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(1000),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(800),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(800),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(800),
+
+
+
+                /// WARNING THIS IS 12th BALL CYCLE
+
                 new StateAction("IntakeMotor","OFF"),
                 new GeneralAction(turnStuffOff),
-
                 new MoveAction(parkPose)
         );
     }
@@ -445,10 +460,10 @@ public class SmallTriangleNew extends OpMode {
         starter = convertPose(starter);
         parkPose = convertPose(parkPose);
         small_triangle_shoot = convertPose(small_triangle_shoot);
-        prepHPCollectPose = convertPose(prepHPCollectPose);
+        //prepHPCollectPose = convertPose(prepHPCollectPose);
         fininshHPCollectPose = convertPose(fininshHPCollectPose);
-        halfTheWayHPCollectPose = convertPose(halfTheWayHPCollectPose);
-        weirdHpCollectPose = convertPose(weirdHpCollectPose);
+        //halfTheWayHPCollectPose = convertPose(halfTheWayHPCollectPose);
+        //weirdHpCollectPose = convertPose(weirdHpCollectPose);
     }
     public Pose convertPose(Pose pose) {
         return pose;
