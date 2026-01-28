@@ -91,7 +91,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double lastRotationDegreesMeasuredCamera = 0;
     public static boolean shouldShootOnCamera = false;
     public static double angleDecreaseValue = 10;
-    public static double rightSideAngleBias = -1.5;
+    public static double rightSideAngleBias = -2;
     public static double velocityDeltaCompensation = 80;
 
     /// ----------------- Limelight Stuff -----------------
@@ -128,11 +128,11 @@ public class MainTeleOpBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 400;
+    public static double timer1 = 550;
     public static double timer5 = 600;
     public static double timer6 = 400;
     public static double outtakeReversingTime = 180;
-    public static double timer2 = 500;
+    public static double timer2 = 700;
     public static double timer3 = 800;
     public static double timer4 = 1000;
     public static double revUpTime = 1400;
@@ -198,7 +198,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         neededAngleForTurretRotation += D2_rotationAdder * D2_rotationAdderMulti;
-        /// if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
+        if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
         /// if(Math.abs(neededAngleForTurretRotation - 30) < 0.3) neededAngleForTurretRotation -= 0.5; // so that it stops the vibrations MIGHT BE FAULTY
         if (neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
@@ -207,15 +207,17 @@ public class MainTeleOpBlue extends LinearOpMode {
         /// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- Driver Buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
         // Special situations stuff
-        if (robot.getKey("DPAD_LEFT1").ExecuteOnPress) {ComplexFollower.instance().setPose(pose(0, 0, 0));}
+        if (robot.getKey("DPAD_LEFT1").ExecuteOnPress) {
+            ComplexFollower.instance().setPose(pose(0, 0, 0));
+        }
         shouldShootWithoutTurret = robot.getKey("DPAD_DOWN1").IsToggledOnPress;
         shouldForceOuttake = robot.getKey("DPAD_UP1").IsToggledOnPress;
 
         if(robot.getKey("DPAD_RIGHT1").ExecuteOnPress){
             robot.executeNow(new ActionSequence( // reverse for a bit
-                    new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
+                    new GeneralAction(() -> wantsToTempOutputIntake = true),
                     new DelayAction(60),
-                    new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}})
+                    new GeneralAction(() -> wantsToTempOutputIntake = false)
                     ));
         }
 
@@ -395,9 +397,9 @@ public class MainTeleOpBlue extends LinearOpMode {
             }
 
             //shooting
-            if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) /*&& hasBallInLeftChamber*/){ // hasSwitchedIntakeState for do once logic
+            if(((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && hasJustBeganFiring) /*&& hasBallInLeftChamber*/){ // hasSwitchedIntakeState for do once logic
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
-                if (usedDistance > 2.9 && hasBallInLeftChamber) {
+                if (usedDistance > 2.9 /* && hasBallInLeftChamber*/) {
                     robot.executeNow(new ActionSequence(
                             //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
                             //new DelayAction(outtakeReversingTime),
@@ -429,7 +431,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                     ));
                     hasJustBeganFiring = false;
                 }
-                else if(usedDistance <=      oneTunnelDistance){
+                else if(usedDistance <= oneTunnelDistance){
                     robot.executeNow(new ActionSequence(
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timer3),

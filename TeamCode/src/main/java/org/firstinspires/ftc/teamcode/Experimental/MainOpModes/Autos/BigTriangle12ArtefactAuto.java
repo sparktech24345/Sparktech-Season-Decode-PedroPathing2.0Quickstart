@@ -90,19 +90,21 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public  Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
     public  Pose first_row_ready = pose(29, 0, 90); // Pose4: collect first row right
     public  Pose first_row_intermediate = pose(29, 13, 90); // Pose4: collect first row right
-    public  Pose first_row_done = pose(29, 45.2, 90); // Pose5: collect first row left
+    public  Pose first_row_done = pose(29, 46, 90); // Pose5: collect first row left
     public  Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
-    public  Pose second_row_done = pose(52, 36, 90); // Pose8: colect second row left
-    public  Pose leverPoseSecondRow = pose(60, 39, 90); // Pose8: colect second row left
-    public  Pose leverPoseThirdRow = pose(62, 39, 90); // Pose8: colect second row left
+    public  Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
+    public  Pose leverPoseSecondRow = pose(65, 38, 120); // Pose8: colect second row left
+    public  Pose leverPoseThirdRow = pose(67, 39.5, 135); // Pose8: colect second row left
     public  Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
-    public  Pose big_triangle_shoot_third_collect_with_park = pose(90, 0, 180); // Pose9: shooting big triangle pose
+    public  Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
+    public  Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
+    public  Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
     public  Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
     public  Pose third_row_done = pose(75, 37, 90); // Pose11: collect third row left
     public Pose classifier_starter = pose(120, 27, 90);
 
-    public  Pose hp_ready = pose(30,25,130);
-    public Pose hp_collect_pose = pose(5,45,180);
+    //public  Pose hp_ready = pose(30,25,130);
+    public Pose hp_collect_pose = pose(4,47,180);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
     public static int camId = 23;
@@ -130,7 +132,8 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 HandleColors();
                 intakeChecks(shouldMoveIntakeServo);
                 firingTurret(shouldFire);
-                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(leverPoseSecondRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseSecondRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseThirdRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 //bigIffMethod();
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
@@ -273,7 +276,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                new MoveAction(third_row_ready),
+                //new MoveAction(third_row_ready),
                 new MoveAction(third_row_done),
                 new GeneralAction(new Runnable() {
                     @Override
@@ -330,7 +333,8 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new MoveAction(third_row_ready),
                 new MoveAction(third_row_done),
                 new DelayAction(350),
-                new MoveAction(leverPoseThirdRow),
+                new MoveAction(leverPoseThirdRow,brutalConstraints),
+                new DelayAction(300),
                 new GeneralAction(new Runnable() {
                     @Override
                     public void run() {
@@ -396,7 +400,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(400),
+                new DelayAction(800),
                 /// end of 12 ball  row firing
 
 
@@ -644,8 +648,10 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         third_row_done = convertPose(third_row_done);
 
         classifier_starter = convertPose(classifier_starter);
-        hp_ready = convertPose(hp_ready);
+        //hp_ready = convertPose(hp_ready);
         hp_collect_pose = convertPose(hp_collect_pose);
+        big_triangle_shoot_third_collect_with_park_180 = convertPose(big_triangle_shoot_third_collect_with_park_180);
+        big_triangle_shoot_second_collect = convertPose(big_triangle_shoot_second_collect);
 
     }
     public void useCamera(){

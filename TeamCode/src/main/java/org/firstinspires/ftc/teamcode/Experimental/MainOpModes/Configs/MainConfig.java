@@ -45,8 +45,8 @@ public class MainConfig {
             case Blue:
                 teamPipeline = 0;
 
-                farZoneCameraAdder = 0;
-                autoZoneAdderFar = 1;
+                farZoneCameraAdder = 5;
+                autoZoneAdderFar = 3;
 
                 rotationForInitClsoeZone = 145;
                 rotationForInitSmallTriangle = 90;
@@ -75,8 +75,8 @@ public class MainConfig {
             case Red:
                 teamPipeline = 1;
 
-                farZoneCameraAdder = 0;
-                autoZoneAdderFar = -1;
+                farZoneCameraAdder = -5;
+                autoZoneAdderFar = -3;
                 rotationForInitClsoeZone = 200;
                 rotationForInitSmallTriangle = 270;
 

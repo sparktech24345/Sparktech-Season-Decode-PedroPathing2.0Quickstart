@@ -3,13 +3,14 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
-
+@Disabled
 @Autonomous(name="Big Triangle 15 Artefact Auto BLUE", group = "BBB")
 public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
     private PathConstraints brutalConstraints = new PathConstraints( // copiate direct din exemplul Pedro, de verificat / corectat
@@ -24,13 +25,13 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
     );
     @Override
     public void makeSortedAuto(){
+        robot.executeNow(new MoveAction(big_triangle_shoot_third_collect));
         robot.addToQueue(
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_third_collect),
                 new GeneralAction(prepToFireSortedBall),
                 new DelayAction(400),
                 new GeneralAction(fireSortedBall),
@@ -48,14 +49,14 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                new MoveAction(third_row_ready),
+                //new MoveAction(third_row_ready),
                 //new MoveAction(third_row_intermediate),
                 //new DelayAction(100),
                 //new MoveAction(third_row_VERYintermediate),
                 //new DelayAction(250),
                 new MoveAction(third_row_done),
-                new DelayAction(200),
-                new MoveAction(leverPoseThirdRow),
+                //new DelayAction(200),
+                //new MoveAction(leverPoseThirdRow),
                 //new DelayAction(300),
                 new GeneralAction(new Runnable() {
                     @Override
@@ -90,7 +91,7 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_third_collect),
+                new MoveAction(big_triangle_shoot_second_collect),
                 new GeneralAction(prepToFireSortedBall),
                 new DelayAction(400),
                 new GeneralAction(fireSortedBall),
@@ -117,7 +118,7 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_third_collect), ///TODO might change to park
+                new MoveAction(big_triangle_shoot_second_collect), ///TODO might change to park
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(400),
@@ -134,13 +135,14 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                new MoveAction(hp_ready,brutalConstraints),
+               // new MoveAction(hp_ready,brutalConstraints),
                 new MoveAction(hp_collect_pose,brutalConstraints),
+                new DelayAction(150),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_third_collect_with_park),
+                new MoveAction(big_triangle_shoot_third_collect_with_park_180),
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(400),
