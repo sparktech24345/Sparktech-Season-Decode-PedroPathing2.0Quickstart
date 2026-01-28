@@ -10,15 +10,8 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAct
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
-@Autonomous(name="Big Triangle 15 Artefact Auto RED", group = "BBB")
-public class BigTriangle15ArtefactAutoRED extends BigTriangle12ArtefactAuto {
-    public void makeConfig(){
-        cfg = new MainConfig(MainConfig.Configs.Red);
-    }
-    @Override
-    public Pose convertPose(Pose pose){
-        return new Pose(pose.getX(),-pose.getY(),- pose.getHeading());
-    }
+@Autonomous(name="Big Triangle 15 Artefact Auto BLUE", group = "BBB")
+public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
     private PathConstraints brutalConstraints = new PathConstraints( // copiate direct din exemplul Pedro, de verificat / corectat
             0.995,
             0.1,
