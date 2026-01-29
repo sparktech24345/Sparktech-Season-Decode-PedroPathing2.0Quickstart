@@ -40,7 +40,7 @@ public class ComponentMakerMethods {
                 //.setFeedforwardCoefficients(0, 0, 0)
                 .addMotor(turretRotationMotorName)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
-                .setPositionCoefficients(0.027, 0, 0.0015, 3)
+                .setPositionCoefficients(0.027, 0, 0.0015, 2)
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0)
                 .setResolution(2.62)

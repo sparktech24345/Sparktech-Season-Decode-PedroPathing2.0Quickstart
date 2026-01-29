@@ -144,7 +144,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double kVTurret = 0;
     public static double kATurret = 0;
     public static double kSTurret = 0;
-    public static double TurretZero = 3;
+    public static double TurretZero = 2;
     public static double rotationAdder = 0;
     public static boolean isTryingToFire = false;
     public static boolean isMovingOuttakeGates = false;

@@ -53,6 +53,7 @@ public class SmallTriangleNew extends OpMode {
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime resetLeftBallColorTimer = new ElapsedTime();
     public static boolean shouldMoveIntakeServo = false;
+    public static boolean doIntakePulse = false;
 
     /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
@@ -105,6 +106,7 @@ public class SmallTriangleNew extends OpMode {
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 firingTurret(shouldFire);
                 intakeChecks(shouldMoveIntakeServo);
+                pulseIntake(doIntakePulse);
             }
         };
         makeConfig();
@@ -116,7 +118,7 @@ public class SmallTriangleNew extends OpMode {
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         convertPoses();
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
-        shouldRemoveBalls = false;shouldResetRightSensorBall = false;
+        shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
         //teamSensitiveStuff();
     }
 
@@ -157,13 +159,13 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(turnOnIntakeServo),
                 new GeneralAction(() -> shouldFire = true),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(3000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+                new DelayAction(3500),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(800),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(400),
+                new DelayAction(800),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(500),
                 new StateAction("IntakeMotor","OFF"),
                 //new GeneralAction(turnStuffOff),
 
@@ -177,16 +179,17 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> {
                     shouldFire = true;
                     //shouldMoveIntakeServo = false;
+                    doIntakePulse = true;
                 }),
                 new MoveAction(small_triangle_shoot),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(800),
+                new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(800),
+                new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(400),
+                new DelayAction(500),
                 new StateAction("IntakeMotor","OFF"),
                 //new GeneralAction(turnStuffOff),
 
@@ -199,17 +202,17 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
                     shouldFire = true;
+                    doIntakePulse = true;
                     //shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(small_triangle_shoot),
+                new GeneralAction(() -> doIntakePulse = true),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(800),
+                new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
+                new DelayAction(1000),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(800),
 
@@ -220,9 +223,11 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
                     shouldFire = true;
+                    doIntakePulse = true;
                     //shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(small_triangle_shoot),
+                new GeneralAction(() -> doIntakePulse = true),
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(800),
                 new GeneralAction(fireSortedBall),
@@ -321,6 +326,7 @@ public class SmallTriangleNew extends OpMode {
     Runnable turnStuffOff = () -> {
         shouldFire = false;
         shouldMoveIntakeServo = false;
+        doIntakePulse = false;
         shouldRemoveBalls = false;
 
         robot.getMotorComponent("TurretSpinMotor")
@@ -339,7 +345,7 @@ public class SmallTriangleNew extends OpMode {
             // ----------------------- Power Stuff -----------------------
 
             //double targetVelocity = FAR_TARGET_VELOCITY;
-            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
+            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) + cfg.autoVelAdder;
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Velocity)
                     .setTarget(targetVelocity);
@@ -408,6 +414,17 @@ public class SmallTriangleNew extends OpMode {
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
     public static int lastGateState = 0;
+    protected void pulseIntake(boolean shouldPulseIntake){
+        if(shouldPulseIntake){
+            doIntakePulse = false;
+            robot.executeNow(new ActionSequence(
+
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(50),
+                    new StateAction("IntakeMotor","FULL")
+            ));
+        }
+    }
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
         if(shouldCheck) {

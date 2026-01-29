@@ -90,11 +90,11 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public  Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
     public  Pose first_row_ready = pose(29, 0, 90); // Pose4: collect first row right
     public  Pose first_row_intermediate = pose(29, 13, 90); // Pose4: collect first row right
-    public  Pose first_row_done = pose(29, 46, 90); // Pose5: collect first row left
+    public  Pose first_row_done = pose(29, 46.5, 90); // Pose5: collect first row left
     public  Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
     public  Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
     public  Pose leverPoseSecondRow = pose(65, 38, 120); // Pose8: colect second row left
-    public  Pose leverPoseThirdRow = pose(67, 39.5, 135); // Pose8: colect second row left
+    public  Pose leverPoseThirdRow = pose(66.5, 39.5, 135); // Pose8: colect second row left
     public  Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
@@ -251,6 +251,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new GeneralAction(increaseCollectNumber),
                 new MoveAction(first_row_ready),
                 new MoveAction(first_row_done),
+                new DelayAction(200),
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
                     shouldFire = true;
