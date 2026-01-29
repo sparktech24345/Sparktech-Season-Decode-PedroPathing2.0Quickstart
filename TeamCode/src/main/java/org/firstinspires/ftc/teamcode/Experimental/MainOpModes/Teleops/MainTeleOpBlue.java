@@ -133,7 +133,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer6 = 400;
     public static double outtakeReversingTime = 180;
     public static double timer2 = 700;
-    public static double timer3 = 800;
+    public static double timer3 = 1000;
     public static double timer4 = 1000;
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
@@ -209,6 +209,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         // Special situations stuff
         if (robot.getKey("DPAD_LEFT1").ExecuteOnPress) {
             ComplexFollower.instance().setPose(pose(0, 0, 0));
+            D2_velocityAdder = 0;
+            D2_rotationAdder = 0;
         }
         shouldShootWithoutTurret = robot.getKey("DPAD_DOWN1").IsToggledOnPress;
         shouldForceOuttake = robot.getKey("DPAD_UP1").IsToggledOnPress;
@@ -405,38 +407,30 @@ public class MainTeleOpBlue extends LinearOpMode {
                             //new DelayAction(outtakeReversingTime),
                             //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
                             //new DelayAction(timer5),
-                            new StateAction("LeftGateServo", "OPEN"),
+                            new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate),
-                            new StateAction("LeftGateServo", "CLOSED"),
+                            new StateAction("RightGateServo", "CLOSED"),
 
                             new DelayAction(timer1),
 
-                            new StateAction("LeftGateServo", "OPEN"),
+                            new StateAction("RightGateServo", "OPEN"),
 
                             new DelayAction(timer2),
 
-                            new StateAction("RightGateServo", "OPEN") // fire alternatevly so that when u fire unsorted u dont wait for the last timer
+                            new StateAction("LeftGateServo", "OPEN") // fire alternatevly so that when u fire unsorted u dont wait for the last timer
                     ));
                     hasJustBeganFiring = false;
                 }
-                else if(usedDistance > oneTunnelDistance /*&& hasBallInLeftChamber*/){
+                else  /*&& hasBallInLeftChamber*/{
                     robot.executeNow(new ActionSequence(
                             //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
                             //new DelayAction(outtakeReversingTime),
                             //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
                             //new DelayAction(timer6),
-                            new StateAction("LeftGateServo", "OPEN"),
-                            new DelayAction(timer3),
-                            new StateAction("RightGateServo", "OPEN")
-                    ));
-                    hasJustBeganFiring = false;
-                }
-                else if(usedDistance <= oneTunnelDistance){
-                    robot.executeNow(new ActionSequence(
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timer3),
                             new StateAction("LeftGateServo", "OPEN")
-                            ));
+                    ));
                     hasJustBeganFiring = false;
                 }
             }
@@ -600,8 +594,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity && usedDistance < oneTunnelDistance + 0.15) // +0.15 for safety
-                turretAngleVal += angleDecreaseValue;
+            //if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity && usedDistance < oneTunnelDistance + 0.15) // +0.15 for safety
+            //    turretAngleVal += angleDecreaseValue;
             turretAngleVal = clamp(turretAngleVal, 262, 315);
             robot.getServoComponent("TurretAngle")
                     .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));

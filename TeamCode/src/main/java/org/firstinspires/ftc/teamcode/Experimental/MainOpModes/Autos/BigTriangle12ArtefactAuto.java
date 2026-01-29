@@ -430,8 +430,8 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             double turretAngleVal = normalAngle;
             turretAngleVal = clamp(turretAngleVal,262,324);
 
-            if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity) // +0.15 for safety
-                turretAngleVal += angleDecreaseValue;
+            //if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity) // +0.15 for safety
+            //    turretAngleVal += angleDecreaseValue;
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
