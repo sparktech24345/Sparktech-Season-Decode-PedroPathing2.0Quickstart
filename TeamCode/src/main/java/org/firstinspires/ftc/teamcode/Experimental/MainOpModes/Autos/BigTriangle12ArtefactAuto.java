@@ -88,19 +88,19 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public static boolean shouldMoveIntakeServo = false;
     /// --------------------------------------------------------
     public  Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
-    public  Pose first_row_ready = pose(29, 0, 90); // Pose4: collect first row right
-    public  Pose first_row_intermediate = pose(29, 13, 90); // Pose4: collect first row right
-    public  Pose first_row_done = pose(29, 46.5, 90); // Pose5: collect first row left
+    public  Pose first_row_ready = pose(35, -2, 120); // Pose4: collect first row right
+    public  Pose first_row_intermediate = pose(31, 13, 90); // Pose4: collect first row right
+    public  Pose first_row_done = pose(31, 46.5, 90); // Pose5: collect first row left
     public  Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
     public  Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
     public  Pose leverPoseSecondRow = pose(65, 38, 120); // Pose8: colect second row left
-    public  Pose leverPoseThirdRow = pose(66.5, 39.5, 135); // Pose8: colect second row left
+    public  Pose leverPoseThirdRow = pose(66.2, 39.5, 120); // Pose8: colect second row left
     public  Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
     public  Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
-    public  Pose third_row_done = pose(75, 37, 90); // Pose11: collect third row left
+    public  Pose third_row_done = pose(75, 35, 90); // Pose11: collect third row left
     public Pose classifier_starter = pose(120, 27, 90);
 
     //public  Pose hp_ready = pose(30,25,130);
@@ -638,7 +638,8 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         //second_row_intermediate = convertPose(second_row_intermediate);
         //second_row_VERYintermediate = convertPose(second_row_VERYintermediate);
         second_row_done = convertPose(second_row_done);
-        //leverPose = convertPose(leverPose);
+        leverPoseSecondRow = convertPose(leverPoseSecondRow);
+        leverPoseThirdRow = convertPose(leverPoseThirdRow);
 
         big_triangle_shoot_third_collect = convertPose(big_triangle_shoot_third_collect);
         big_triangle_shoot_third_collect_with_park = convertPose(big_triangle_shoot_third_collect_with_park);

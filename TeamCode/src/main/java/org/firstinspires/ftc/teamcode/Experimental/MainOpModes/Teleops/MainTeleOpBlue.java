@@ -133,8 +133,8 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer6 = 400;
     public static double outtakeReversingTime = 180;
     public static double timer2 = 700;
-    public static double timer3 = 1000;
-    public static double timer4 = 1000;
+    public static double timer3 = 100;
+    public static double timer4 = 300;
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
     public static double shootSortedTime = 800;
@@ -428,8 +428,12 @@ public class MainTeleOpBlue extends LinearOpMode {
                             //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
                             //new DelayAction(timer6),
                             new StateAction("RightGateServo", "OPEN"),
+                            new DelayAction(timerToCloseGate),
+                            new StateAction("RightGateServo", "CLOSED"),
                             new DelayAction(timer3),
-                            new StateAction("LeftGateServo", "OPEN")
+                            new StateAction("LeftGateServo", "OPEN"),
+                            new DelayAction(timer4),
+                            new StateAction("RightGateServo", "OPEN")
                     ));
                     hasJustBeganFiring = false;
                 }

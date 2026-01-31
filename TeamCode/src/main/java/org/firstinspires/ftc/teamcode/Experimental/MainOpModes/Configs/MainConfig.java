@@ -78,8 +78,8 @@ public class MainConfig {
             case Red:
                 teamPipeline = 1;
 
-                farZoneCameraAdder = -3;
-                autoZoneAdderFar = -1.5;
+                farZoneCameraAdder = 2;
+                autoZoneAdderFar = -0.5;
 
                 autoVelAdder = -20;
 
