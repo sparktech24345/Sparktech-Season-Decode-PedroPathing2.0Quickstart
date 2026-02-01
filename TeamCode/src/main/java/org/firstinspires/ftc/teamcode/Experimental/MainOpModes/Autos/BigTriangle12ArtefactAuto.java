@@ -93,14 +93,14 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public  Pose first_row_done = pose(31, 46.5, 90); // Pose5: collect first row left
     public  Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
     public  Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
-    public  Pose leverPoseSecondRow = pose(65, 38, 120); // Pose8: colect second row left
-    public  Pose leverPoseThirdRow = pose(66.2, 39.5, 120); // Pose8: colect second row left
+    public  Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: colect second row left
+    public  Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: colect second row left
     public  Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
     public  Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
     public  Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
-    public  Pose third_row_done = pose(75, 35, 90); // Pose11: collect third row left
+    public  Pose third_row_done = pose(75, 30, 90); // Pose11: collect third row left
     public Pose classifier_starter = pose(120, 27, 90);
 
     //public  Pose hp_ready = pose(30,25,130);
@@ -142,8 +142,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
 
                 if (startAuto) {
                     startAuto = false;
-                    if(camId == 21) makeSortedAuto();
-                    else makeLeverAuto();
+                    makeLeverAuto();
                 }
             }
         };
@@ -251,6 +250,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new GeneralAction(increaseCollectNumber),
                 new MoveAction(first_row_ready),
                 new MoveAction(first_row_done),
+                new StateAction("IntakeMotor","OFF"),
                 new DelayAction(200),
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
@@ -258,6 +258,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                     shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect), ///TODO might change to park
+                new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(800),
@@ -334,8 +335,8 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new MoveAction(third_row_ready),
                 new MoveAction(third_row_done),
                 new DelayAction(350),
-                new MoveAction(leverPoseThirdRow,brutalConstraints),
-                new DelayAction(300),
+                new MoveAction(leverPoseThirdRow),
+                new DelayAction(500),
                 new GeneralAction(new Runnable() {
                     @Override
                     public void run() {
