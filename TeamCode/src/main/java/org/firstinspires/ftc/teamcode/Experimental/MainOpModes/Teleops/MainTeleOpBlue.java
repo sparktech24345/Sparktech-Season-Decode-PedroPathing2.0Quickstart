@@ -642,23 +642,23 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
-//        RobotController.telemetry.addData("robot rotation in degrees", Math.toDegrees(robot.getCurrentPose().getHeading()));
-//        RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
-//        RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
-//        RobotController.telemetry.addData("is outtake Overriden", robot.getMotorComponent("TurretSpinMotor").isOverriden());
-//        RobotController.telemetry.addData("target velocity", targetVelocity);
-//        RobotController.telemetry.addData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity());
-//        RobotController.telemetry.addData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower());
-//        RobotController.telemetry.addData("CURRENT", robot.getMotorComponent("TurretSpinMotor").getCurrent());
-//        RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
-//        RobotController.telemetry.addData("Current Rotation", robot.getMotorComponent("TurretRotateMotor").getPosition());
-//        RobotController.telemetry.addData("Target Rotation", neededAngleForTurretRotation);
-//        RobotController.telemetry.addData("D2 velocity adder", D2_velocityAdder * D2_velocityAdderMulti);
-//        RobotController.telemetry.addData("D2 rotation adder", D2_rotationAdder * D2_rotationAdderMulti);
-//        RobotController.telemetry.addData("hasBallInRightChamber",hasBallInRightChamber);
-//        RobotController.telemetry.addData("hasBallInOuttake",hasBallInOuttake);
-//        RobotController.telemetry.addData(" Spin Motor Mode ",robot.getMotorComponent("TurretSpinMotor").getOperationMode());
-//        ballColorQueue.spitOutQueueInTelemetry();
+        RobotController.telemetry.addData("robot rotation in degrees", Math.toDegrees(robot.getCurrentPose().getHeading()));
+        RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
+        RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
+        RobotController.telemetry.addData("is outtake Overriden", robot.getMotorComponent("TurretSpinMotor").isOverriden());
+        RobotController.telemetry.addData("target velocity", targetVelocity);
+        RobotController.telemetry.addData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity());
+        RobotController.telemetry.addData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower());
+        RobotController.telemetry.addData("CURRENT", robot.getMotorComponent("TurretSpinMotor").getCurrent());
+        RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
+        RobotController.telemetry.addData("Current Rotation", robot.getMotorComponent("TurretRotateMotor").getPosition());
+        RobotController.telemetry.addData("Target Rotation", neededAngleForTurretRotation);
+        RobotController.telemetry.addData("D2 velocity adder", D2_velocityAdder * D2_velocityAdderMulti);
+        RobotController.telemetry.addData("D2 rotation adder", D2_rotationAdder * D2_rotationAdderMulti);
+        RobotController.telemetry.addData("hasBallInRightChamber",hasBallInRightChamber);
+        RobotController.telemetry.addData("hasBallInOuttake",hasBallInOuttake);
+        RobotController.telemetry.addData(" Spin Motor Mode ",robot.getMotorComponent("TurretSpinMotor").getOperationMode());
+        ballColorQueue.spitOutQueueInTelemetry();
     }
 
 
