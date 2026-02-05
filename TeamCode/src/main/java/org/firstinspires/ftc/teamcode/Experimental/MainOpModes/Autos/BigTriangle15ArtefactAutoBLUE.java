@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfi
 @Disabled
 @Autonomous(name="Big Triangle 15 Artefact Auto BLUE", group = "BBB")
 public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
-    private PathConstraints brutalConstraints = new PathConstraints( // copiate direct din exemplul Pedro, de verificat / corectat
+    private PathConstraints brutalConstraints = new PathConstraints(
             0.995,
             0.1,
             0.1,
@@ -40,24 +40,14 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new DelayAction(500),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(500),
-                //new StateAction("IntakeMotor","OFF"),
-                //new GeneralAction(turnStuffOff),
-
 
                 /// collecting the closest row second now
 
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                //new MoveAction(third_row_ready),
-                //new MoveAction(third_row_intermediate),
-                //new DelayAction(100),
-                //new MoveAction(third_row_VERYintermediate),
-                //new DelayAction(250),
                 new MoveAction(third_row_done),
-                //new DelayAction(200),
-                //new MoveAction(leverPoseThirdRow),
-                //new DelayAction(300),
+
                 new GeneralAction(new Runnable() {
                     @Override
                     public void run() {
@@ -110,9 +100,7 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
                 new MoveAction(first_row_ready),
-                //new MoveAction(first_row_intermediate),
                 new MoveAction(first_row_done,brutalConstraints),
-                //new DelayAction(300),
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
                     shouldFire = true;
@@ -135,7 +123,7 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-               // new MoveAction(hp_ready,brutalConstraints),
+
                 new MoveAction(hp_collect_pose,brutalConstraints),
                 new DelayAction(150),
                 new GeneralAction(() -> {

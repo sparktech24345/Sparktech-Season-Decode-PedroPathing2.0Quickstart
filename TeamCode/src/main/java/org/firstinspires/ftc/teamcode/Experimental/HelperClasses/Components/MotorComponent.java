@@ -122,10 +122,6 @@ public class MotorComponent extends Component {
         return this;
     }
     public MotorComponent setAccelerationVelocityCoefficients(double p, double i, double d, double f) {
-//        VelocityCoefficients = new PIDFCoefficients(p, i, d, f);
-//        for (DcMotorEx motor : motorMap.values())
-//            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
-//        return this;
         if(VPIDController == null) VPIDController = new PIDcontroller(p,i,d);
         VPIDController.setConstants(p,i,d);
         vpidF = f;

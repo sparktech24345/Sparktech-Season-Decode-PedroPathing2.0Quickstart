@@ -37,7 +37,6 @@ public class servoSet0 extends LinearOpMode {
             if(gamepad1.x) servoPos = (double) 30 / 360;
 
             servo1.setPosition(servoPos);
-            //servo1.setPosition(degreesToOuttakeTurretServo(servoPos) / 360);
             tel.addData("position",servoPos);
             tel.addData("position * 360",servoPos*360);
 

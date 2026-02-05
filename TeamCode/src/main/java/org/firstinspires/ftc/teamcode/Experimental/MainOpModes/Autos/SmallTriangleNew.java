@@ -55,7 +55,6 @@ public class SmallTriangleNew extends OpMode {
     public static boolean shouldMoveIntakeServo = false;
     public static boolean doIntakePulse = false;
 
-    /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
     protected NormalizedRGBA rightSensorColors;
@@ -80,10 +79,7 @@ public class SmallTriangleNew extends OpMode {
     private Pose starter = pose( 0.0, 6.12, 90); // Weird starting position wo that we are closer to balls
     private Pose small_triangle_shoot = pose(1, 3, 90); // Pose1: shooting position small triangle
     private Pose parkPose = pose(10, 15, 90);
-    //private Pose prepHPCollectPose = pose(15,39,150);
     private Pose fininshHPCollectPose = pose(0,46,90);
-    //private Pose weirdHpCollectPose = pose(7,43,130);
-    //private Pose halfTheWayHPCollectPose = pose(12,39,130);
     @Override
     public void init() {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -119,14 +115,13 @@ public class SmallTriangleNew extends OpMode {
         convertPoses();
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
         shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
-        //teamSensitiveStuff();
+
     }
 
     @Override
     public void init_loop() {
         robot.init_loop();
         robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitSmallTriangle);
-        robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
         useCamera();
         RobotController.telemetry.addData("id", camId);
     }
@@ -167,18 +162,15 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(fireSortedBall),
                 new DelayAction(500),
                 new StateAction("IntakeMotor","OFF"),
-                //new GeneralAction(turnStuffOff),
 
                 //second row of stuff
                 new StateAction("IntakeMotor","FULL"),
-                //new MoveAction(weirdHpCollectPose,collect_constraints),
-                //new DelayAction(300),
+
                 new MoveAction(fininshHPCollectPose),
                 new DelayAction(300),
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    //shouldMoveIntakeServo = false;
                     doIntakePulse = true;
                 }),
                 new MoveAction(small_triangle_shoot),
@@ -191,19 +183,17 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(fireSortedBall),
                 new DelayAction(500),
                 new StateAction("IntakeMotor","OFF"),
-                //new GeneralAction(turnStuffOff),
 
                 // mystery pick up
                 new GeneralAction(turnOnIntakeServo),
                 new StateAction("IntakeMotor","FULL"),
-                //new MoveAction(halfTheWayHPCollectPose),
-                //new DelayAction(500),
+
                 new MoveAction(fininshHPCollectPose),
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     doIntakePulse = true;
-                    //shouldMoveIntakeServo = false;
+
                 }),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(() -> doIntakePulse = true),
@@ -216,7 +206,7 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(fireSortedBall),
                 new DelayAction(800),
 
-                /// WARNING THIS IS 12th BALL CYCLE
+
 
 
                 new MoveAction(fininshHPCollectPose),
@@ -224,7 +214,6 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> {
                     shouldFire = true;
                     doIntakePulse = true;
-                    //shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(() -> doIntakePulse = true),
@@ -241,7 +230,7 @@ public class SmallTriangleNew extends OpMode {
 
 
 
-                /// WARNING THIS IS 12th BALL CYCLE
+
 
                 new StateAction("IntakeMotor","OFF"),
                 new GeneralAction(turnStuffOff),
@@ -344,7 +333,6 @@ public class SmallTriangleNew extends OpMode {
         if(shouldFire){
             // ----------------------- Power Stuff -----------------------
 
-            //double targetVelocity = FAR_TARGET_VELOCITY;
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) + cfg.autoVelAdder;
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Velocity)
@@ -434,19 +422,6 @@ public class SmallTriangleNew extends OpMode {
         }
         else gateState = lastGateState;
         lastGateState = gateState;
-        switch (gateState) {
-            case -1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
-                break;
-
-            case 0:
-                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
-                break;
-
-            case 1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
-                break;
-        }
     }
     Runnable turnOnIntakeServo = () -> {
         shouldMoveIntakeServo = true;
@@ -465,11 +440,10 @@ public class SmallTriangleNew extends OpMode {
         limelight3A.start();
 
         LLResult llResult = limelight3A.getLatestResult();
-        //llResult.getFiducialResults();
+
         List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
         for (LLResultTypes.FiducialResult fr : fiducialResults) {
             camId = fr.getFiducialId();
-            //telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f",, fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
         }
         if(camId < 21 || camId > 23) camId = 23;
     }
@@ -477,16 +451,13 @@ public class SmallTriangleNew extends OpMode {
         starter = convertPose(starter);
         parkPose = convertPose(parkPose);
         small_triangle_shoot = convertPose(small_triangle_shoot);
-        //prepHPCollectPose = convertPose(prepHPCollectPose);
         fininshHPCollectPose = convertPose(fininshHPCollectPose);
-        //halfTheWayHPCollectPose = convertPose(halfTheWayHPCollectPose);
-        //weirdHpCollectPose = convertPose(weirdHpCollectPose);
     }
     public Pose convertPose(Pose pose) {
         return pose;
     }
     public Pose passPose() {
-        globalRobotPose = ComplexFollower.instance().getPose(); //Math.toRadians
+        globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
 }
