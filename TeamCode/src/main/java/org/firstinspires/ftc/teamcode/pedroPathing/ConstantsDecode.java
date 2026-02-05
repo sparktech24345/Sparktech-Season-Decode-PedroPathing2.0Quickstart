@@ -35,10 +35,18 @@ public class ConstantsDecode {
             .mass(11.5) // ?????
             .forwardZeroPowerAcceleration(-28)
             .lateralZeroPowerAcceleration(-65)
-            .centripetalScaling(0.005)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0.002, 0))
-            .headingPIDFCoefficients(new PIDFCoefficients(0.7, 0, 0.04, 0.0005))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.015, 0, 0.0005, 0.6,0));
+            .centripetalScaling(0.0005)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.045, 0, 0.005, 0.03))
+            .headingPIDFCoefficients(new PIDFCoefficients(0.9, 0, 0.045, 0.0005))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.04,0,0.002,0.6,0.03))
+
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.0002, 0.6,0.02))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.057,0,0.004,0.02))
+
+
+            .useSecondaryDrivePIDF(true)
+            .useSecondaryTranslationalPIDF(true)
+            ;
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
 //            .leftFrontMotorName(GlobalStorage.frontRightName)
