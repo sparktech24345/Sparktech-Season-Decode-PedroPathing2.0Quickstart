@@ -46,15 +46,6 @@ public class ComponentMakerMethods {
         );
 
 
-
-        robot.makeComponent("IntakeSorterServo", new ServoComponent()
-                .addMotor(intakeSorterServoName)
-                .setOperationMode(ServoComponent.ServoModes.Position)
-                .setResolution(360)
-                .setRange(0, 1)
-                .moveDuringInit(true)
-        );
-
         robot.makeComponent("LeftGateServo", new ServoComponent()
                 .addMotor(rightGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
@@ -105,11 +96,6 @@ public class ComponentMakerMethods {
         robot.getComponent("RightGateServo")
                 .addState("CLOSED", 155, true)
                 .addState("OPEN", 30);
-
-        robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_RIGHT", 61,true)
-                .addState("REDIRECT_TO_LEFT", 170)
-                .addState("BLOCK", 108);
 
         robot.getComponent("TurretAngle")
                 .addState("DOWN_MAX", 262.8)

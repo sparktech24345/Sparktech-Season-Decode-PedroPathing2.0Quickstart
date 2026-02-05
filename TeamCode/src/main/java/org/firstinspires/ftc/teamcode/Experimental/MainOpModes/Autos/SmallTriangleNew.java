@@ -121,7 +121,6 @@ public class SmallTriangleNew extends OpMode {
     public void init_loop() {
         robot.init_loop();
         robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitSmallTriangle);
-        robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
         useCamera();
         RobotController.telemetry.addData("id", camId);
     }
@@ -416,19 +415,6 @@ public class SmallTriangleNew extends OpMode {
         }
         else gateState = lastGateState;
         lastGateState = gateState;
-        switch (gateState) {
-            case -1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
-                break;
-
-            case 0:
-                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
-                break;
-
-            case 1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
-                break;
-        }
     }
     Runnable turnOnIntakeServo = () -> {
         shouldMoveIntakeServo = true;

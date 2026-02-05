@@ -449,19 +449,6 @@ public class MainTeleOpBlue extends LinearOpMode {
                 robot.executeNow(new StateAction("IntakeMotor", "FIRING_POWER"));
                 break;
         }
-        switch (intakeGateState) {
-            case -1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
-                break;
-
-            case 0:
-                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
-                break;
-
-            case 1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
-                break;
-        }
         if(!isMovingOuttakeGates){
             switch(outtakeGatesState){
                 case -1:

@@ -160,7 +160,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public void init_loop() {
         robot.init_loop();
         robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitClsoeZone);
-        robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
         useCamera();
         RobotController.telemetry.addData("id",camId);
     }
@@ -556,21 +555,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             }
             else gateState = lastGateState;
             lastGateState = gateState;
-        }
-
-
-        switch (gateState) {
-            case -1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
-                break;
-
-            case 0:
-                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
-                break;
-
-            case 1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
-                break;
         }
     }
     Runnable increaseCollectNumber = () -> {
