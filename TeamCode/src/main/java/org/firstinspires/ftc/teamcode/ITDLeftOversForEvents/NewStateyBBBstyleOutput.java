@@ -44,8 +44,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
 
         OrganizedPositionStorage.resetStuff();
 
-        // Declare our motors
-        // Make sure your ID's match your configuration
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontleft");
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backleft");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontright");
@@ -55,8 +53,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
         DcMotor outakeRightMotor = hardwareMap.dcMotor.get("outakerightmotor");
         DcMotor intakeSpinMotor = hardwareMap.dcMotor.get("intakespin");
 
-
-        //declare servos
         Servo intakeRotateServo = hardwareMap.get(Servo.class, "intakeRotateServo");
         Servo outakeArmServo = hardwareMap.get(Servo.class, "outakeArmServo");
         Servo outakeSampleServo = hardwareMap.get(Servo.class, "outakeSampleServo");
@@ -83,7 +79,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
         intakeControlMotor = new ControlMotor();
         outakeControlMotor = new ControlMotor();
 
-        // Set init position
         initStates();
         intakeRotateServo.setPosition((intakePivotServoPos-intakeGravitySubtractor) / 228);
         outakeArmServo.setPosition(outtakePivotServoPos / 328);
@@ -100,17 +95,12 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
         }
 
         while (opModeIsActive()) {
-            ///gamepad1
             double vertical = gamepad1.left_stick_y;
             double horizontal = gamepad1.left_stick_x;
             double pivot = -gamepad1.right_stick_x;
 
-            ///gamepad2
             double intakeinput = gamepad2.left_stick_y;
 
-
-
-            //Selectare Echipa
             if ((gamepad2.dpad_left) || (gamepad1.left_bumper && gamepad1.start))
                 currentTeam = colorList.blue;
             if ((gamepad2.dpad_right) || (gamepad1.right_bumper && gamepad1.start))
@@ -129,10 +119,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
             outtakeTargetPosAdder -= 1.5*gamepad2.left_stick_y;
 
 
-
-
-            //interesting slowdown
-
             if(intakeState == intakeStates.intakeExtended2out4 ||
                     intakeState == intakeStates.intakeExtended3out4 ||
                     intakeState == intakeStates.intakeExtended4out4
@@ -140,14 +126,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 pivot = pivot * slowyDownyAuto;
             }
 
-
-            ///CONTROLS
-
-            //PICK UP
-            /*
-            double timeAtTransfer = 0;
-            boolean isYetToGrab = false;
-            */
             if(gamepad1.a){
                 isPressedA1 = true;
             }
@@ -165,16 +143,7 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                     isAfterIntakeBeenDownColecting = true;
                 }
                 else {
-                    /*
-                    intakeRetracted();
-                    intakeCabinTransferPositionWithPower();
-                    if(!isInSpecimenState) {
-                        isIntakeSpinMOtorAfterJustTaking = true;
-                        intakeSpinMotorMorePowerAfterTakingTimer = System.currentTimeMillis();
-                        outtakeTransfer();
-                    }
-                    isAfterIntakeBeenDownColecting = false;
-                    //*/
+
                     shouldAutoCollect = true;
                 }
 
@@ -191,8 +160,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 isPressedX2 = false;
             }
 
-
-            //SPECIMEN
             if(gamepad1.b) isPressedB1 = true;
             if((!gamepad1.b && isPressedB1) || shouldDoAutoSpecInTeleopBeggining){
                 if(!(outtakeState == outtakeStates.outtakeSpecimenHang)) {
@@ -224,8 +191,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 outtakeClawServoPos = outtakeClawServoExtraExtendedPos;
             }
 
-
-            //BASKET SCORING
             if(gamepad1.x) {
                 isPressedX1 = true;
                 hasPressedXTimer = System.currentTimeMillis();
@@ -246,7 +211,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 outtakeBasket();
                 isAfterOuttakeClawClosedAfterTransfer = false;
             }
-            //going down after, quite complicated cuz holding to let sample go
             if(isAtStateOfLettingBasketSampleGo && gamepad1.x && outtakeState == outtakeStates.outtakeBasket){
                 outtakeClawServoPos = outtakeClawServoExtendedPos;
                 isAfterOuttakeScoredBasketSample = true;
@@ -260,13 +224,11 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                     isAfterOuttakeScoredBasketSample = false;
                 }
             }
-            //some weird bug that can be easy fix
+
             if(outtakeExtendMotorTargetPos == 0 && outtakeState == outtakeStates.outtakeBasket){
                 outtakeBasket();
             }
 
-
-            //LOWERBASKET
             if(gamepad2.b) isPressedB2  = true;
             if(!gamepad2.b && isPressedB2){
                 isInLowerBasketState = !isInLowerBasketState;
@@ -274,32 +236,15 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
             }
             if(justTransfered && isInLowerBasketState && outtakeState == outtakeStates.outtakeSpecimenHang){
                 justTransfered = false;
-                //outtakeBasket();
+
                 isPressedX1 = true;
             }
 
-
-
-
-            /*
-            //WALL PICK UP
-            if(gamepad1.y) isPressedY1 = true;
-            if(!gamepad1.y && isPressedY1){
-                intakeRetracted();
-                intakeCabinFullInBot();
-                outtakeWallPickUpNew();
-                isPressedY1 = false;
-            }*/
-
-            ///SOME STUFF
-
-            //auto retract
             if((currentStateOfSampleInIntake == colorSensorOutty.correctSample && isAfterIntakeBeenDownColecting && !isColorSensorNotInUse) ||
                 shouldAutoCollect
             ){
                 shouldAutoCollect = false;
                 intakeRetracted();
-                //makins sure sample enetered the intake fully with a small timer
                 isAfterIntakeBeenDownColecting = false;
                 isIntakeSpinMOtorAfterJustTaking = true;
                 basketStandbyState = 0;
@@ -331,18 +276,14 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 basketStandbyState++;
             }
             if(basketStandbyState == 2 && intakeSpinMotorMorePowerAfterTakingTimer + 1000 < System.currentTimeMillis()) {
-                //outtakeClawServoPos = outtakeClawServoRetractedPos;
+
                 basketStandbyState++;
                 outtakeSpecimenHang();
                 justTransfered = true;
 
                 basketStandbyState = 0;
-                //outtakeExtendMotorTargetPos = outtakeMotorStandByPos;
 
             }
-
-            //smol give out after the extra take in
-
 
             if(shouldStopIntakeCabinSpinningAfterTakig && shouldStopIntakeCabinSpinningAfterTakigTimer + 500 < System.currentTimeMillis()){
                 intakeSpinMotorPow = 0.8;
@@ -350,18 +291,13 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 hasSmolOutputed = true;
                 hasSmolOutputedTimer = System.currentTimeMillis();
             }
-            //and then stop the power stuff
             if(hasSmolOutputed && hasSmolOutputedTimer + 35 <System.currentTimeMillis()){
                 intakeCabinTransferPosition();
                 if(isInSpecimenState){
                     intakeCabinFullInBot();
                 }
                 hasSmolOutputed = false;
-            }//*/
-
-
-
-            //auto eject
+            }
             if(currentStateOfSampleInIntake == colorSensorOutty.wrongSample){
                 intakeCabinDownOutputting();
                 isIntakeOutputting = true;
@@ -372,9 +308,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 isIntakeOutputting = false;
             }
 
-
-
-            //manual eject
             if(gamepad1.left_bumper){
                 intakeSpinMotorPow = 0.75;
                 isIntakeOutputtingManual = true;
@@ -387,23 +320,16 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 isIntakeOutputtingManual = false;
             }
 
-
-            //chosing intake positions
-            //Intake positions
             if (gamepad1.dpad_left)  intakeExtended4out4();
             if (gamepad1.dpad_down)  intakeExtended3out4();
             if (gamepad1.dpad_right) intakeExtended2out4();
             if(gamepad1.dpad_up)     intakeExtended1out4();
             if(gamepad2.left_bumper) intakeRetracted();
 
-
-            //getting to specimen pick up pos without messing cables
             if(isInNeedToGoToSpecimenTransferPos && outakeLeftMotor.getCurrentPosition() + outtakeTargetPosAdder<-500){
                 outtakePivotServoPos = outtakePivotServoWallPickupPos;
                 isInNeedToGoToSpecimenTransferPos = false;
             }
-
-            //getting out of specimen pick up pos without messing cables
             if(isOuttakeInPositionToGoDown){
                 if(outtakeState == outtakeStates.outtakeBasket){
                     isOuttakeInPositionToGoDown = false;
@@ -462,26 +388,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
 
 
 
-            //*/
-
-            /*if(gamepad2.b){
-                if(isTimeToRefreshOutptingTime){
-                    timeSinceStartedMovingForTruBotOutput = System.currentTimeMillis();
-                    isTimeToRefreshOutptingTime = false;
-                }
-                if(!(intakeCabinState == intakeCabinStates.intakeCabinFullInBot)) {
-                    intakeCabinFullInBot();
-                    outtakeSpecimenHang();
-                } else if (timeSinceStartedMovingForTruBotOutput + 1000 < System.currentTimeMillis() ){
-                        intakeSpinMotorPow = 1;
-                    }
-            }
-            else if (intakeCabinState == intakeCabinStates.intakeCabinFullInBot){
-                    isTimeToRefreshOutptingTime = true;
-                    intakeCabinFullInBot();
-                    outtakeTransfer();
-                    intakeSpinMotorPow = 0;
-                }//*/
 
             if(gamepad2.a) isPressedA2 = true;
             if(!gamepad2.a && isPressedA2){
@@ -496,7 +402,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 isPressedD2Up = false;
             }
 
-            //PIDs
             PIDincrement=1;
             double intakeExtendMotorPow;
             intakeExtendMotorPow = NewPidsController.pidControllerIntake(intakeExtendMotorTargetPos+intakeTargetPosAdder, intakeMotor.getCurrentPosition());
@@ -515,13 +420,13 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 isTimeToReset = true;
                 isPressedD2Down = false;
             }
-            //overwriting power
+
             if(shouldBeginZeroesRetune && zeroesRetuneTimer + 1000 > System.currentTimeMillis()){
                 intakeExtendMotorPow = -0.8;
                 outtakeExtendMotorPow = 0.7;
                 if(isTimeToReset && zeroesRetuneTimer + 950 < System.currentTimeMillis()){
                     intakeTargetPosAdder += intakeMotor.getCurrentPosition();
-                    //outtakeTargetPosAdder += outakeLeftMotor.getCurrentPosition();
+
                     isTimeToReset = false;
                     shouldBeginZeroesRetune = false;
                 }
@@ -533,35 +438,25 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
             chassisFrontLeftPow = (pivot + vertical - horizontal);
             chassisBackLeftPow = (pivot + vertical + horizontal);
 
-
-            //slowdown
-
-            //manual slowdown
             if(gamepad1.right_bumper){
                 chassisFrontLeftPow *= slowyDownyManal;
                 chassisBackRightPow *= slowyDownyManal;
                 chassisFrontRightPow *= slowyDownyManal;
                 chassisBackLeftPow *= slowyDownyManal;
             }
-            //auto slowdown
 
-            else if(// intakeState == intakeStates.intakeExtended1out4
+
+            else if(
                 (outtakeState == outtakeStates.outtakeBasket && !isInLowerBasketState)
-            //intakeState == intakeStates.intakeExtended2out4 ||
-            //intakeState == intakeStates.intakeExtended3out4 ||
-            //intakeState == intakeStates.intakeExtended4out4
             )
 
-            //intakeCabinState == intakeCabinStates.intakeCabinDownCollecting
             {
                 chassisFrontLeftPow *= slowyDownyAuto;
                 chassisBackRightPow *= slowyDownyAuto;
                 chassisFrontRightPow *= slowyDownyAuto;
                 chassisBackLeftPow *= slowyDownyAuto;
-            }//-------> FACUT DE LUCA VOICILA :)  check by Atloe
+            }
 
-
-            // Toggle Claw on Y2
 
             if(gamepad2.y){
                 isPressedY2 = true;
@@ -575,9 +470,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
                 isPressedY2 = false;
             }
 
-
-
-            // set motor power
             frontLeftMotor.setPower(chassisFrontLeftPow);
             backLeftMotor.setPower(chassisBackLeftPow);
             frontRightMotor.setPower(chassisFrontRightPow);
@@ -587,24 +479,10 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
             outakeLeftMotor.setPower(outtakeExtendMotorPow);
             intakeSpinMotor.setPower(intakeSpinMotorPow);
 
-
-            //Set servo Positions
             intakeRotateServo.setPosition((intakePivotServoPos-intakeGravitySubtractor) / 228);
             outakeArmServo.setPosition(outtakePivotServoPos / 328);
             outakeSampleServo.setPosition(outtakeClawServoPos / 360);
 
-
-            //tel.addData("intakeSliderState",intakeState);
-            //tel.addData("intakeCabinState",intakeCabinState);
-            //tel.addData("outtakeState",outtakeState);
-            //tel.addData("outakeArmServoPOS GO TO", outtakePivotServoPos);
-            //tel.addData("outakeSamplePOS GO TO ", outtakeClawServoPos);
-            //tel.addData("intakeRotateServoPosition", intakePivotServoPos);
-            //tel.addData("intakeExtendMotorPow",intakeExtendMotorPow);
-            //tel.addData("intake current pos",intakeMotor.getCurrentPosition());
-            //tel.addData("outakeMotorPow",outtakeExtendMotorPow);
-            //tel.addData("outtakeTargetPos",outtakeExtendMotorTargetPos);
-            //tel.addData("outtake current pos",outakeLeftMotor.getCurrentPosition());
 
             tel.addData("color stuff",currentStateOfSampleInIntake);
             tel.addData("blue color",colors.blue);
@@ -616,9 +494,6 @@ public class NewStateyBBBstyleOutput extends LinearOpMode {
             tel.addData("outtake power", outtakeExtendMotorPow);
             tel.addData("intake power", intakeExtendMotorPow);
 
-            //tel.addData("current time",System.nanoTime());
-            //tel.addData("time diference",System.nanoTime() - current_time);
-            //current_time = System.nanoTime();
 
             tel.update();
         }

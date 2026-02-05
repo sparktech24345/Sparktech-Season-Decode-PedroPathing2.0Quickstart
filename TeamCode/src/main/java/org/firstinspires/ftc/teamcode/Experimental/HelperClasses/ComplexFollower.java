@@ -116,7 +116,6 @@ public class ComplexFollower {
     public static boolean isMoving() {
         if (follower == null) return false;
         return follower.isBusy()
-        //        || follower.getVelocity().getMagnitude() >= 0.01
         ;
     }
 

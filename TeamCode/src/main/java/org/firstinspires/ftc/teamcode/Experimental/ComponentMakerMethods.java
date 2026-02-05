@@ -13,8 +13,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 
 public class ComponentMakerMethods {
 
-    /// This is the only place where these methods should exist for the main version of the robots functionality
-    /// it sits in Experimental so that its the first thing you see no matter what
 
     public static void MakeComponents(RobotController robot) {
         robot.makeComponent("IntakeMotor", new MotorComponent()
@@ -37,7 +35,6 @@ public class ComponentMakerMethods {
         );
 
         robot.makeComponent("TurretRotateMotor", new MotorComponent()
-                //.setFeedforwardCoefficients(0, 0, 0)
                 .addMotor(turretRotationMotorName)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
                 .setPositionCoefficients(0.027, 0, 0.0015, 2)
@@ -48,17 +45,6 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
-
-        // Servos
-
-
-        robot.makeComponent("IntakeSorterServo", new ServoComponent()
-                .addMotor(intakeSorterServoName)
-                .setOperationMode(ServoComponent.ServoModes.Position)
-                .setResolution(360)
-                .setRange(0, 1)
-                .moveDuringInit(true)
-        );
 
         robot.makeComponent("LeftGateServo", new ServoComponent()
                 .addMotor(rightGateServoName)
@@ -84,7 +70,6 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
-        // color sensor stuff
 
         robot.makeComponent("colorSensorRight", new ColorSensorComponent(colorSensorRightName));
         robot.makeComponent("colorSensorLeft", new ColorSensorComponent(colorSensorLeftName));
@@ -104,25 +89,17 @@ public class ComponentMakerMethods {
                 .addState("FULL", 1);
 
 
-        // Servos
-
-
         robot.getComponent("LeftGateServo")
-                .addState("OPEN", 180) // 0.5
-                .addState("CLOSED", 33,true); // 0.09
+                .addState("OPEN", 180)
+                .addState("CLOSED", 33,true);
 
         robot.getComponent("RightGateServo")
-                .addState("CLOSED", 155, true) // 0.43
-                .addState("OPEN", 30); // 0.08333
-
-        robot.getComponent("IntakeSorterServo")
-                .addState("REDIRECT_TO_RIGHT", 61,true) // 61
-                .addState("REDIRECT_TO_LEFT", 170) // 154.8
-                .addState("BLOCK", 108); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
+                .addState("CLOSED", 155, true)
+                .addState("OPEN", 30);
 
         robot.getComponent("TurretAngle")
                 .addState("DOWN_MAX", 262.8)
-                .addState("DEFAULT", 288, true) // abt a middle point for safe init
-                .addState("UP_MAX",324); // 0.9 is max down and 0.73 is max up
+                .addState("DEFAULT", 288, true)
+                .addState("UP_MAX",324);
     }
 }

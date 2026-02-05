@@ -31,10 +31,8 @@ public class SparkyStrafeEncoder {
     }
 
     public void reset() {
-        //motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        previousPosition = pinpointDriver.getEncoderY(); //motor.getCurrentPosition();
-        currentPosition = pinpointDriver.getEncoderY();//motor.getCurrentPosition();
-        //motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        previousPosition = pinpointDriver.getEncoderY();
+        currentPosition = pinpointDriver.getEncoderY();
     }
 
     public void update() {
@@ -42,7 +40,7 @@ public class SparkyStrafeEncoder {
         currentPosition = pinpointDriver.getEncoderY();
     }
     public double getMultiplier() {
-        return multiplier * 1; //configure from pinpoint idk
+        return multiplier * 1;
     }
     public double getDeltaPosition() {
         return getMultiplier() * (currentPosition - previousPosition);

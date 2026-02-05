@@ -137,12 +137,12 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     private void runUpdates() {
-        ComplexGamepad.update(); // up to here about 0.5 milis
-        ComplexFollower.update(); // up to here about 20 milis
-        queuer.update(); // up to here also 20 milis
+        ComplexGamepad.update();
+        ComplexFollower.update();
+        queuer.update();
         for (Component c : components.values()) {
             c.update();
-        } // aprox 40 milisec tends to 45 / 50
+        }
         if (DriveTrain.wasInitialized()) DriveTrain.loop();
         telemetry.update();
     }

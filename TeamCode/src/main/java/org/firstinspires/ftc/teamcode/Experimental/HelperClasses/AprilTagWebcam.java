@@ -25,7 +25,6 @@ public class AprilTagWebcam {
 
 
     public void init(HardwareMap hwMap, MultipleTelemetry telemetry,String hardwareName){
-        //this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         this.telemetry = telemetry;
 
         aprilTagProcessor = new AprilTagProcessor.Builder()

@@ -34,12 +34,8 @@ public class DashboardDrawing {
         dashboardPoseTracker.update();
         drawDebug();
     }
-    /**
-     * This draws everything that will be used in the Follower's telemetryDebug() method. This takes
-     * a Follower as an input, so an instance of the DashbaordDrawingHandler class is not needed.
-     *
-     */
-    public void drawDebug(/*Follower follower, DashboardPoseTracker dashboardPoseTracker*/) {
+
+    public void drawDebug() {
         if (follower.getCurrentPath() != null) {
             drawPath(follower.getCurrentPath(), "#3F51B5");
             Pose closestPoint = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
@@ -51,13 +47,6 @@ public class DashboardDrawing {
         sendPacket();
     }
 
-    /**
-     * This adds instructions to the current packet to draw a robot at a specified Pose with a specified
-     * color. If no packet exists, then a new one is created.
-     *
-     * @param pose the Pose to draw the robot at
-     * @param color the color to draw the robot with
-     */
     public static void drawRobot(Pose pose, String color) {
         if (packet == null) packet = new TelemetryPacket();
 
@@ -66,14 +55,6 @@ public class DashboardDrawing {
     }
 
     public static void drawRobot(Pose pose){drawRobot(pose,"#4CAF50"); }
-
-    /**
-     * This adds instructions to the current packet to draw a Path with a specified color. If no
-     * packet exists, then a new one is created.
-     *
-     * @param path the Path to draw
-     * @param color the color to draw the Path with
-     */
     public static void drawPath(Path path, String color) {
         if (packet == null) packet = new TelemetryPacket();
 
@@ -81,26 +62,12 @@ public class DashboardDrawing {
         DashboardDrawing.drawPath(packet.fieldOverlay(), path.getPanelsDrawingPoints());
     }
 
-    /**
-     * This adds instructions to the current packet to draw all the Paths in a PathChain with a
-     * specified color. If no packet exists, then a new one is created.
-     *
-     * @param pathChain the PathChain to draw
-     * @param color the color to draw the PathChain with
-     */
     public static void drawPath(PathChain pathChain, String color) {
         for (int i = 0; i < pathChain.size(); i++) {
             drawPath(pathChain.getPath(i), color);
         }
     }
 
-    /**
-     * This adds instructions to the current packet to draw the pose history of the robot. If no
-     * packet exists, then a new one is created.
-     *
-     * @param poseTracker the DashboardPoseTracker to get the pose history from
-     * @param color the color to draw the pose history with
-     */
     public static void drawPoseHistory(DashboardPoseTracker poseTracker, String color) {
         if (packet == null) packet = new TelemetryPacket();
 
@@ -108,11 +75,6 @@ public class DashboardDrawing {
         packet.fieldOverlay().strokePolyline(poseTracker.getXPositionsArray(), poseTracker.getYPositionsArray());
     }
 
-    /**
-     * This tries to send the current packet to FTC Dashboard.
-     *
-     * @return returns if the operation was successful.
-     */
     public static boolean sendPacket() {
         if (packet != null) {
             FtcDashboard.getInstance().sendTelemetryPacket(packet);
@@ -122,13 +84,6 @@ public class DashboardDrawing {
         return false;
     }
 
-    /**
-     * This draws a robot on the Dashboard at a specified Pose. This is more useful for drawing the
-     * actual robot, since the Pose contains the direction the robot is facing as well as its position.
-     *
-     * @param c the Canvas on the Dashboard on which this will draw at
-     * @param t the Pose to draw at
-     */
     public static void drawRobotOnCanvas(Canvas c, Pose t) {
         c.strokeCircle(t.getX(), t.getY(), ROBOT_RADIUS);
         Vector v = t.getHeadingAsUnitVector();
@@ -138,12 +93,6 @@ public class DashboardDrawing {
         c.strokeLine(x1, y1, x2, y2);
     }
 
-    /**
-     * This draws a Path on the Dashboard from a specified Array of Points.
-     *
-     * @param c the Canvas on the Dashboard on which this will draw
-     * @param points the Points to draw
-     */
     public static void drawPath(Canvas c, double[][] points) {
         c.strokePolyline(points[0], points[1]);
     }

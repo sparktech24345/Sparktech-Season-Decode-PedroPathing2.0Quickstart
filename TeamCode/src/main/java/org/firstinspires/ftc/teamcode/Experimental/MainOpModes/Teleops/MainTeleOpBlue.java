@@ -199,7 +199,6 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         neededAngleForTurretRotation += D2_rotationAdder * D2_rotationAdderMulti;
         if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
-        /// if(Math.abs(neededAngleForTurretRotation - 30) < 0.3) neededAngleForTurretRotation -= 0.5; // so that it stops the vibrations MIGHT BE FAULTY
         if (neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
 
 
@@ -290,10 +289,6 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
 
-
-
-
-
         // ====================== Sorting Stuff ======================
 
         if (robot.getKey("RIGHT_BUMPER2").ExecuteOnPress) {
@@ -369,12 +364,6 @@ public class MainTeleOpBlue extends LinearOpMode {
             }
             else intakeGateState = lastGateState;
             lastGateState = intakeGateState;
-//            if(wantsToFireWithIntake){
-//                if(usedDistance < oneTunnelDistance) intakeGateState = 1;
-//                else{
-//                    intakeGateState = -1;
-//                }
-//            }
 
 
 
@@ -383,13 +372,10 @@ public class MainTeleOpBlue extends LinearOpMode {
                     hasBallInOuttake = true;
                     isMovingOuttakeGates = true;
                     robot.executeNow(new ActionSequence(
-                            new GeneralAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // reset remembering color logic
-                                    resetLeftBallColorTimer.reset();
-                                    shouldResetRightSensorBall = true;
-                                }
+                            new GeneralAction(() -> {
+                                // reset remembering color logic
+                                resetLeftBallColorTimer.reset();
+                                shouldResetRightSensorBall = true;
                             }),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate),
@@ -403,10 +389,6 @@ public class MainTeleOpBlue extends LinearOpMode {
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
                 if (usedDistance > 2.9 /* && hasBallInLeftChamber*/) {
                     robot.executeNow(new ActionSequence(
-                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
-                            //new DelayAction(outtakeReversingTime),
-                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
-                            //new DelayAction(timer5),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate),
                             new StateAction("RightGateServo", "CLOSED"),
@@ -421,12 +403,8 @@ public class MainTeleOpBlue extends LinearOpMode {
                     ));
                     hasJustBeganFiring = false;
                 }
-                else  /*&& hasBallInLeftChamber*/{
+                else {
                     robot.executeNow(new ActionSequence(
-                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = true;}}),
-                            //new DelayAction(outtakeReversingTime),
-                            //new GeneralAction(new Runnable() {@Override public void run() {wantsToTempOutputIntake = false;}}),
-                            //new DelayAction(timer6),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate),
                             new StateAction("RightGateServo", "CLOSED"),
@@ -529,19 +507,6 @@ public class MainTeleOpBlue extends LinearOpMode {
                 robot.executeNow(new StateAction("IntakeMotor", "FIRING_POWER"));
                 break;
         }
-        switch (intakeGateState) {
-            case -1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
-                break;
-
-            case 0:
-                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
-                break;
-
-            case 1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
-                break;
-        }
         if(!isMovingOuttakeGates){
             switch(outtakeGatesState){
                 case -1: // force close
@@ -598,8 +563,6 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            //if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity && usedDistance < oneTunnelDistance + 0.15) // +0.15 for safety
-            //    turretAngleVal += angleDecreaseValue;
             turretAngleVal = clamp(turretAngleVal, 262, 315);
             robot.getServoComponent("TurretAngle")
                     .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
@@ -607,11 +570,10 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             // ----------------------- Rotation Stuff -----------------------
 
-            if(shouldShootWithoutTurret) neededAngleForTurretRotation = 0; // stop rotation if ododmetry dies bad
+            if(shouldShootWithoutTurret) neededAngleForTurretRotation = 0;
             robot.getMotorComponent("TurretRotateMotor")
-                    //.setFeedforwardCoefficients(kVTurret,kATurret,kSTurret)
                     .setTarget(neededAngleForTurretRotation)
-                    .setPositionCoefficients(TurretP, 0, TurretD, TurretZero) // only enable for tunning porposes
+                    .setPositionCoefficients(TurretP, 0, TurretD, TurretZero)
             ;
 
         }
@@ -632,7 +594,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+            robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
 
             robot.getMotorComponent("TurretRotateMotor")
                     .setTarget(0);
@@ -641,24 +603,6 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
-
-        RobotController.telemetry.addData("robot rotation in degrees", Math.toDegrees(robot.getCurrentPose().getHeading()));
-        RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
-        RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
-        RobotController.telemetry.addData("is outtake Overriden", robot.getMotorComponent("TurretSpinMotor").isOverriden());
-        RobotController.telemetry.addData("target velocity", targetVelocity);
-        RobotController.telemetry.addData("actual Velocity", robot.getMotorComponent("TurretSpinMotor").getVelocity());
-        RobotController.telemetry.addData("SPEED", robot.getMotorComponent("TurretSpinMotor").getPower());
-        RobotController.telemetry.addData("CURRENT", robot.getMotorComponent("TurretSpinMotor").getCurrent());
-        RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
-        RobotController.telemetry.addData("Current Rotation", robot.getMotorComponent("TurretRotateMotor").getPosition());
-        RobotController.telemetry.addData("Target Rotation", neededAngleForTurretRotation);
-        RobotController.telemetry.addData("D2 velocity adder", D2_velocityAdder * D2_velocityAdderMulti);
-        RobotController.telemetry.addData("D2 rotation adder", D2_rotationAdder * D2_rotationAdderMulti);
-        RobotController.telemetry.addData("hasBallInRightChamber",hasBallInRightChamber);
-        RobotController.telemetry.addData("hasBallInOuttake",hasBallInOuttake);
-        RobotController.telemetry.addData(" Spin Motor Mode ",robot.getMotorComponent("TurretSpinMotor").getOperationMode());
-        ballColorQueue.spitOutQueueInTelemetry();
     }
 
 
@@ -689,7 +633,6 @@ public class MainTeleOpBlue extends LinearOpMode {
             robot.init_loop();
         }
         ComplexFollower.instance().setPose(globalRobotPose);
-        //ComplexFollower.setStartingPose(globalRobotPose);
 
         while (opModeIsActive()) {
             // loop
@@ -897,10 +840,6 @@ public class MainTeleOpBlue extends LinearOpMode {
             cfg.usedTargetX = cfg.targetXCenter;
             cfg.usedTargetY = cfg.targetYCenter;
         }
-
-
-        //usedTargetX = targetXCenter;
-        //usedTargetY = targetYCenter;
 
         RobotController.telemetry.addData("Calculated Rotation From Robot", degrees);
     }

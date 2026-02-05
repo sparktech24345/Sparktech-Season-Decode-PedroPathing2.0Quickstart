@@ -3,14 +3,12 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StolenMotorClass.Motor;
 
 @Config
-@Disabled
 @TeleOp(name="Test_Weird_Motor_PIDF" ,group="LinearOpMode")
 public class Test_Weird_Motor_PIDF extends LinearOpMode {
     Motor fancyMotorL;

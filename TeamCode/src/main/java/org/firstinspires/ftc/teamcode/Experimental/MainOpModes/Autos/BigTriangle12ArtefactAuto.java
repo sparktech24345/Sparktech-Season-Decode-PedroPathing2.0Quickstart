@@ -102,8 +102,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public  Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
     public  Pose third_row_done = pose(75, 30, 90); // Pose11: collect third row left
     public Pose classifier_starter = pose(120, 27, 90);
-
-    //public  Pose hp_ready = pose(30,25,130);
     public Pose hp_collect_pose = pose(4,47,180);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
@@ -134,7 +132,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 firingTurret(shouldFire);
                 if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseSecondRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseThirdRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
-                //bigIffMethod();
+
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
                 rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXAutoClose, cfg.targetYAutoClose);
@@ -158,14 +156,12 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         collectNumber = 0;
         movingTimer.reset();
         convertPoses();
-        //teamSensitiveStuff();
     }
 
     @Override
     public void init_loop() {
         robot.init_loop();
         robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitClsoeZone);
-        robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
         useCamera();
         RobotController.telemetry.addData("id",camId);
     }
@@ -192,7 +188,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    private PathConstraints brutalConstraints = new PathConstraints( // copiate direct din exemplul Pedro, de verificat / corectat
+    private PathConstraints brutalConstraints = new PathConstraints(
             0.995,
             0.1,
             0.1,
@@ -218,9 +214,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new DelayAction(600),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
-                //new StateAction("IntakeMotor","OFF"),
-                //new GeneralAction(turnStuffOff),
-
 
 
                 /// second row
@@ -278,7 +271,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                //new MoveAction(third_row_ready),
                 new MoveAction(third_row_done),
                 new GeneralAction(new Runnable() {
                     @Override
@@ -419,7 +411,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         if(shouldFire){
             // ----------------------- Power Stuff -----------------------
 
-            //double targetVelocity = FAR_TARGET_VELOCITY;
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Velocity)
@@ -431,8 +422,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             double turretAngleVal = normalAngle;
             turretAngleVal = clamp(turretAngleVal,262,324);
 
-            //if(robot.getMotorComponent("TurretSpinMotor").getVelocity() + velocityDeltaCompensation <= targetVelocity) // +0.15 for safety
-            //    turretAngleVal += angleDecreaseValue;
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
@@ -573,7 +562,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public static int lastGateState = 1;
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
-        if(/*!(collectNumber == 2 && camId == 23) || true*/ true){
+        if(true){
             if(shouldCheck) {
                     if (!hasBallInRightChamber) gateState = -1; // first fill up left
                     else if (!hasBallInLeftChamber) gateState = 1; // then right
@@ -592,22 +581,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             else gateState = lastGateState;
             lastGateState = gateState;
         }
-        // end of handicap
-
-
-        switch (gateState) {
-            case -1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_LEFT"));
-                break;
-
-            case 0:
-                robot.executeNow(new StateAction("IntakeSorterServo", "BLOCK"));
-                break;
-
-            case 1:
-                robot.executeNow(new StateAction("IntakeSorterServo", "REDIRECT_TO_RIGHT"));
-                break;
-        }
     }
     Runnable increaseCollectNumber = () -> {
         collectNumber++;
@@ -618,13 +591,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     Runnable turnOffIntakeServo = () -> {
         shouldMoveIntakeServo = false;
     };
-//    public void teamSensitiveStuff(){
-//        if(targetY < 0){
-//            targetY = -targetY;
-//        }
-//        teamPipeline = 0;
-//        currentTeamColor = TeamColor.Blue;
-//    }
+
     public void makeConfig(){
     cfg = new MainConfig(MainConfig.Configs.Blue);
 }
@@ -636,8 +603,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         first_row_done = convertPose(first_row_done);
 
         second_row_ready = convertPose(second_row_ready);
-        //second_row_intermediate = convertPose(second_row_intermediate);
-        //second_row_VERYintermediate = convertPose(second_row_VERYintermediate);
+
         second_row_done = convertPose(second_row_done);
         leverPoseSecondRow = convertPose(leverPoseSecondRow);
         leverPoseThirdRow = convertPose(leverPoseThirdRow);
@@ -646,12 +612,10 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         big_triangle_shoot_third_collect_with_park = convertPose(big_triangle_shoot_third_collect_with_park);
 
         third_row_ready = convertPose(third_row_ready);
-        //third_row_intermediate = convertPose(third_row_intermediate);
-        //third_row_VERYintermediate = convertPose(third_row_VERYintermediate);
+
         third_row_done = convertPose(third_row_done);
 
         classifier_starter = convertPose(classifier_starter);
-        //hp_ready = convertPose(hp_ready);
         hp_collect_pose = convertPose(hp_collect_pose);
         big_triangle_shoot_third_collect_with_park_180 = convertPose(big_triangle_shoot_third_collect_with_park_180);
         big_triangle_shoot_second_collect = convertPose(big_triangle_shoot_second_collect);
@@ -669,7 +633,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
         for (LLResultTypes.FiducialResult fr : fiducialResults) {
             camId = fr.getFiducialId();
-            //telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f",, fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
         }
         if(camId < 21 || camId > 23) camId = 23;
     }
@@ -677,8 +640,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         return pose;
     }
     public Pose passPose() {
-        Pose tempPose = ComplexFollower.instance().getPose();
-        globalRobotPose = tempPose;//new Pose(tempPose.getX(),tempPose.getY(),Math.toRadians(tempPose.getHeading())); //Math.toRadians
+        globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
 }
