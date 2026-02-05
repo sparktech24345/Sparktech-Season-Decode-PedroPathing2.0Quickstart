@@ -173,7 +173,7 @@ public class GlobalStorage {
         if( distance > 2.9) return farAngle;
         if(distance < 0.95) return closeAngle;
         if(distance < 1.25) return almostCloseAngle;
-        else return normalAngle; // TODO: Change this
+        else return normalAngle;
 
     }
     public static double grade0VeloClose = 840;

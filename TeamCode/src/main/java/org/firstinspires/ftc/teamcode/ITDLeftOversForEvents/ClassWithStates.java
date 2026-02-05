@@ -6,11 +6,6 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 public class ClassWithStates {
 
-    //state holders
-
-    //**************************************************************************\\
-
-    // intake
     public static enum intakeStates{
         noStateSet,
         intakeExtended4out4,
@@ -20,10 +15,6 @@ public class ClassWithStates {
         intakeRetracted,
     }
     public static intakeStates intakeState = intakeStates.noStateSet;
-
-    //*************************************************************************\\
-
-    //intake cabin
 
     public static enum intakeCabinStates{
         noStateSet,
@@ -35,10 +26,6 @@ public class ClassWithStates {
         intakeCabinFullInBotOutputting, isInTransferToIntakeCabinDownCollecting,
     }
     public static intakeCabinStates intakeCabinState = intakeCabinStates.noStateSet;
-
-    //**************************************************************************\\
-
-    //outtake
 
     public static enum outtakeStates{
         noStateSet,
@@ -54,8 +41,6 @@ public class ClassWithStates {
     }
     public static outtakeStates outtakeState = outtakeStates.noStateSet;
 
-    //***************************************************************************\\
-
     public static enum colorSensorOutty{
         noSample,
         correctSample,
@@ -63,9 +48,6 @@ public class ClassWithStates {
     }
 
     public static colorSensorOutty currentStateOfSampleInIntake = colorSensorOutty.noSample;
-
-    //***************************************************************************\\
-
     public static enum colorList{
         teamNotSet,
         red,
@@ -75,11 +57,6 @@ public class ClassWithStates {
 
     public static colorList currentTeam = colorList.teamNotSet;
 
-
-
-
-
-    //Intake States
 
     public static void intakeExtended4out4(){
         intakeState = intakeStates.intakeExtended4out4;
@@ -108,11 +85,6 @@ public class ClassWithStates {
     }
 
 
-
-
-
-
-    //intake cabin states
 
     public static void intakeCabinDownCollecting(){
         intakeCabinState = intakeCabinStates.intakeCabinDownCollecting;
@@ -159,12 +131,6 @@ public class ClassWithStates {
     }
 
 
-
-
-
-
-    //Outtake States
-
     public static void outtakePark(){
         outtakeState = outtakeStates.autoPark;
         outtakePivotServoPos = outtakePivotServoParkedPos;
@@ -178,12 +144,6 @@ public class ClassWithStates {
         outtakeClawServoPos = outtakeClawServoRetractedPos;
         outtakeExtendMotorTargetPos = outtakeSliderSpecimenHangPos;
     }
-    /*public static void autoOuttakeSpecimenHang(){
-        outtakeState = outtakeStates.outtakeSpecimenHang;
-        outtakePivotServoPos = outtakePivotServoHighRungHangPos;
-        outtakeClawServoPos = outtakeClawServoRetractedPos;
-        outtakeExtendMotorTargetPos = autoOuttakeSliderSpecimenHangPos;
-    }//*/
     public static void outtakeBasket(){
         outtakeState = outtakeStates.outtakeBasket;
         outtakeClawServoPos = outtakeClawServoRetractedPos;
@@ -198,46 +158,33 @@ public class ClassWithStates {
         outtakePivotServoPos = outtakePivotServoBasketPos;
         outtakeExtendMotorTargetPos = outtakeMotorMaxPosLowerBasket;
     }
-    /*public static void outtakeWallPickUpNormal(){ //old one
-        outtakeState = outtakeStates.outtakeWallPickUpNormal;
-        outtakePivotServoPos = 0;
-        outtakeClawServoPos = outtakeClawServoExtendedPos;
-        outtakeExtendMotorTargetPos = outtakeMotorActualZeroPos;
-    }//*/
+
     public static void outtakeWallPickUpNew(){
         outtakeState = outtakeStates.outtakeWallPickUpNew;
-        //outtakePivotServoPos = outtakePivotServoWallPickupPos;  //wire interference
+
         isInNeedToGoToSpecimenTransferPos = true;
         needsToExtraExtend = true;
         outtakeClawServoPos = outtakeClawServoExtendedPos;
-        //outtakeIsInNeedToExtraExtendClaw = true;
+
         outtakeIsInNeedToExtraExtendClawTimer = System.currentTimeMillis();
         outtakeExtendMotorTargetPos = outtakeSlidersWallPickPos;
     }
     public static void autoOuttakeWallPickUpNew(){
         outtakeState = outtakeStates.outtakeWallPickUpNew;
-        outtakePivotServoPos = outtakePivotServoWallPickupPos;  //wire interference
+        outtakePivotServoPos = outtakePivotServoWallPickupPos;
         isInNeedToGoToSpecimenTransferPos = true;
         needsToExtraExtend = true;
         outtakeClawServoPos = outtakeClawServoExtendedPos;
-        //outtakeIsInNeedToExtraExtendClaw = true;
+
         outtakeIsInNeedToExtraExtendClawTimer = System.currentTimeMillis();
         outtakeExtendMotorTargetPos = outtakeSlidersWallPickPos;
     }
-    /*public static void outtakeWallPickUpNewNoWireProtection(){
-        outtakeState = outtakeStates.outtakeWallPickUpNew;
-        outtakePivotServoPos = outtakePivotServoWallPickupPos; //wire interfereance
-        isInNeedToGoToSpecimenTransferPos = true;
-        outtakeClawServoPos = outtakeClawServoExtendedPos;
-        outtakeIsInNeedToExtraExtendClaw = true;
-        outtakeIsInNeedToExtraExtendClawTimer = System.currentTimeMillis();
-        outtakeExtendMotorTargetPos = outtakeSlidersWallPickPos;
-    }//*/
+
     public static void outtakeTransfer(){
         outtakeState = outtakeStates.outtakeTransfer;
         outtakeClawServoPos = outtakeClawServoExtendedPos;
         outtakePivotServoPos = outtakePivotServoTransferPos;
-        //outtakeExtendMotorTargetPos = outtakeMotorActualZeroPos;
+
         isOuttakeInPositionToGoDown = true;
         beforeOuttakeGoDownTimer = System.currentTimeMillis();
     }
@@ -249,12 +196,7 @@ public class ClassWithStates {
         isOuttakeInPositionToGoDown = true;
         beforeOuttakeGoDownTimer = System.currentTimeMillis();
     }
-    /*public static void outtakeStandByBasket(){
-        outtakeState = outtakeStates.outtakeStandBy;
-        outtakePivotServoPos = outtakePivotServoStandByPos;
-        outtakeExtendMotorTargetPos = outtakeMotorStandByPos;
-        //TO BE MEASURED
-    }//*/
+
 
     public static void outtakeStandByWithoutExtensions(){
         outtakeState = outtakeStates.outtakeStandByWithoutExtensions;
@@ -275,8 +217,6 @@ public class ClassWithStates {
         if (colors.green > colors.blue && colors.green > colors.red)
             color = colorList.yellow;
 
-
-        //reversing team
         colorList wrongSampleType = colorList.teamNotSet;
         if(currentTeam == colorList.blue) wrongSampleType = colorList.red;
         if(currentTeam == colorList.red) wrongSampleType = colorList.blue;
@@ -286,17 +226,10 @@ public class ClassWithStates {
         else return colorSensorOutty.correctSample;
     }
 
-    //init method cuz why not
     public static void initStates() {
         outtakeStandByWithoutExtensions();
         intakeCabinFullInBot();
         intakeRetracted();
     }
 
-    //wait method cuz why not
-
-    /*public void waitWhile(int timeToWait) {
-        long iniTime = System.currentTimeMillis();
-        while(iniTime + timeToWait < System.currentTimeMillis()){}
-    }*/
 }

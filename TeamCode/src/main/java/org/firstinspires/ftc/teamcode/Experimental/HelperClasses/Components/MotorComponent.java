@@ -61,7 +61,7 @@ public class MotorComponent extends Component {
 
     public MotorComponent setDcMotorMode(DcMotorEx.RunMode mode) {
         mainMotor.setMode(mode);
-        return this; // with or without encoder
+        return this;
     }
     public MotorComponent setBehaviour(DcMotorEx.ZeroPowerBehavior zeroPower) {
         for (DcMotorEx motor : motorMap.values()) {
@@ -183,7 +183,7 @@ public class MotorComponent extends Component {
                 break;
 
             case Velocity:
-                mainMotor.setVelocity(target); // this is so that we can have only 1 encoder per system of 1 or more engines on the same shaft
+                mainMotor.setVelocity(target);
                 targetPower = mainMotor.getPower();
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);

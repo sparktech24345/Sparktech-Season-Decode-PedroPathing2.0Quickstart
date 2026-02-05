@@ -2,47 +2,31 @@ package org.firstinspires.ftc.teamcode.ITDLeftOversForEvents;
 
 @com.acmerobotics.dashboard.config.Config
 public class OrganizedPositionStorage {
-    // MISC
     public static double PIDincrement;
     public static double gravityAdder;
 
-    // chassis / sasiu
     public static double chassisBackLeftPow = 0;
     public static double chassisBackRightPow = 0;
     public static double chassisFrontLeftPow = 0;
     public static double chassisFrontRightPow = 0;
 
-    // intake
     public static double intakePivotServoPos;
     public static double intakeSpinMotorPow;
     public static double intakeExtendMotorTargetPos=0;
     public static double intakeTargetPosAdder;
     public static double intakeGravitySubtractor=0;
 
-    // outtake
     public static double outtakePivotServoPos;
     public static double outtakeClawServoPos;
     public static double outtakeExtendMotorTargetPos=0;
 
     public static double outtakeTargetPosAdder;
 
-
-
-
-
-
-    // CONSTANTE*
-
-
-    //Outtake
-
-    //outtake claw
     public static double outtakeClawServoExtendedPos = 128;
     public static double outtakeClawServoExtraExtendedPos = 208;
     public static double outtakeClawServoRetractedPos = 35;
 
 
-    // outtake pivot
     public static double outtakePivotServoWallPickupPos = 285;
     public static double outtakePivotServoHighRungHangPos = 170;
     public static double outtakePivotServoBasketPos = 43;
@@ -51,35 +35,24 @@ public class OrganizedPositionStorage {
     public static double outtakePivotServoParkedPos = 0.53*328 - 9;
 
 
-    // outtake sliders
 
     public static double outtakeMotorMaxPos = 2100;
 
     public static double outtakeMotorMaxPosLowerBasket = 800;
     public static double outtakeSliderSpecimenHangPos = 1100;
     public static double autoOuttakeSliderSpecimenHangPos = 950;
-    public static double outtakeSlidersWallPickPos = 710;  //from 690
+    public static double outtakeSlidersWallPickPos = 710;
     public static double outtakeMotorActualZeroPos = 0;
     public static double outtakeMotorStandByPos = 1000;
     public static double tempOuttakeAPosition = 0;
     public static double outtakeMotorParkedPos = 655;
 
-
-
-    //intake
-
-    //intake pivot
-    public static double intakePivotServoPickupPos = 211;   // old 206
+    public static double intakePivotServoPickupPos = 211;
     public static double intakePivotServoOutputTruBotPos = 15;
     public static double intakePivotServoTransferPos = 153;
     public static double tempIntakeTargetPastPosDifrence = 135;
     public static double tempIntakeAPosition = 0;
 
-
-
-    // BOOLEANS
-
-    //misc
     public static boolean isYellowSampleNotGood = false;
     public static boolean reverseGamepad2 = false;
     public static boolean isRobotInAuto = false;
@@ -90,8 +63,6 @@ public class OrganizedPositionStorage {
     public static boolean isTimeToReset = false;
     public static boolean shouldDoAutoSpecInTeleopBeggining = false;
 
-
-    //is pressed
     public static boolean isPressedA1 = false;
     public static boolean isPressedA2 = false;
     public static boolean isPressedB1 = false;
@@ -105,8 +76,6 @@ public class OrganizedPositionStorage {
     public static boolean isPressedD2Up = false;
     public static boolean isPressedD2Down = false;
 
-
-    //intake stuff
     public static boolean isAfterIntakeBeenDownColecting = false;
     public static boolean isIntakeOutputting = false;
     public static boolean isAfterBotHasBeenOutputting = false;
@@ -126,7 +95,6 @@ public class OrganizedPositionStorage {
     public static boolean didTransfera = false;
     public static int basketStandbyState = 0;
 
-    //outtake stuff
     public static boolean isAfterOuttakeScoredSpecimen = false;
     public static boolean isAfterOuttakeScoredBasketSample = false;
     public static boolean isAfterOuttakeClosedClawAtWallSpecimen = false;
@@ -142,19 +110,8 @@ public class OrganizedPositionStorage {
     public static boolean shouldSpecimenTransfer = false;
     public static boolean isOuttakeAfterOutputedTruBot = false;
     public static boolean justTransfered = false;
-
-
-
-
-
-    //LONGS / TIMERS
-
-    //auto stuff
     public static long autoTimer;
     public static long zeroesRetuneTimer;
-
-
-    //intake stuff
 
     public static long intakeOutputtingTimer;
     public static long intakeAfterTransferClosedClawTimer;
@@ -169,9 +126,6 @@ public class OrganizedPositionStorage {
     public static long hasPressedXTimer;
     public static long didTransferTime;
 
-
-
-    //outtake stuff
     public static long outtakeSpecimenAfterScoreTimer;
     public static long outtakeAfterBasketSampleScoreTimer;
     public static long outtakeAfterHasClosedClawAtWallSpecimenTimer;
@@ -184,7 +138,6 @@ public class OrganizedPositionStorage {
 
 
     public static void resetStuff() {
-        //toggles
         Toggle.toggled = false;
         Toggle.toggle_var = false;
         Toggle.toggledButton2 = false;
@@ -196,29 +149,23 @@ public class OrganizedPositionStorage {
         shouldBeginZeroesRetune = false;
         isTimeToReset = false;
 
-        // MISC
         PIDincrement = 0;
         gravityAdder = 0;
 
-        // intake
         intakePivotServoPos = intakePivotServoTransferPos;
         intakeExtendMotorTargetPos = 0;
         intakeTargetPosAdder = 0;
         intakeGravitySubtractor = 0;
         tempIntakeAPosition = 0;
-
-        // outtake
         outtakePivotServoPos = outtakePivotServoTransferPos;
         outtakeClawServoPos = outtakeClawServoExtendedPos;
         outtakeExtendMotorTargetPos = 0;
         outtakeTargetPosAdder = 0;
         tempOuttakeAPosition = 0;
 
-        // BOOLEANS
         isYellowSampleNotGood = false;
         reverseGamepad2 = false;
 
-        // is pressed
         isPressedA1 = false;
         isPressedA2 = false;
         isPressedB1 = false;
@@ -231,7 +178,6 @@ public class OrganizedPositionStorage {
         isPressedD2Up = false;
         isPressedD2Down = false;
 
-        // intake stuff
         isAfterIntakeBeenDownColecting = false;
         isIntakeOutputting = false;
         isAfterBotHasBeenOutputting = false;
@@ -246,7 +192,6 @@ public class OrganizedPositionStorage {
         didTransfera = false;
         hasSmolOutputed = false;
 
-        // outtake stuff
         isAfterOuttakeScoredSpecimen = false;
         isAfterOuttakeScoredBasketSample = false;
         isAfterOuttakeClosedClawAtWallSpecimen = false;
@@ -257,7 +202,6 @@ public class OrganizedPositionStorage {
         isOuttakeAfterOutputedTruBot = false;
         justTransfered = false;
 
-        // LONGS / TIMERS
         outtakeSpecimenAfterScoreTimer = 0;
         outtakeAfterBasketSampleScoreTimer = 0;
         outtakeAfterHasClosedClawAtWallSpecimenTimer = 0;

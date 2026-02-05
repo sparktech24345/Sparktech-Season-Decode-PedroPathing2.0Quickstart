@@ -6,17 +6,6 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotCon
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-/*
-* 
-*  !! IMPORTANT !!
-* 
-*  THE DRIVETRAIN CLASS USES THE FOLLOWING ABBREVIATIONS:
-*  RF - Right Front
-*  LF - Left Front
-*  RB - Right Back
-*  LB - Left Back
-* 
-* */
 
 public class DriveTrain {
 
@@ -24,7 +13,7 @@ public class DriveTrain {
     private static DcMotor LFDrive;
     private static DcMotor RBDrive;
     private static DcMotor LBDrive;
-    private static boolean directionFlip = false; //configured for Decode
+    private static boolean directionFlip = false;
     private static String frontLeft  = frontLeftName;
     private static String frontRight = frontRightName;
     private static String backLeft   = backLeftName;
@@ -73,7 +62,7 @@ public class DriveTrain {
 
     public static void loop() {
 
-        double vertical     = -ComplexGamepad.get("LEFT_STICK_Y1").raw();  // Note: pushing stick forward gives negative value
+        double vertical     = -ComplexGamepad.get("LEFT_STICK_Y1").raw();
         double horizontal   = -ComplexGamepad.get("LEFT_STICK_X1").raw();
         double pivot        = ComplexGamepad.get("RIGHT_STICK_X1").raw();
 

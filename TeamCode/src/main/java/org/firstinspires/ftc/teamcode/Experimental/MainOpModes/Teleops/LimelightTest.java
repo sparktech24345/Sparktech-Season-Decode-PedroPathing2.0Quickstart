@@ -31,7 +31,6 @@ public class LimelightTest extends OpMode {
     public double camId = 0;
 
 
-    /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
     protected NormalizedRGBA rightSensorColors;
@@ -57,7 +56,7 @@ public class LimelightTest extends OpMode {
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(2);
         limelight3A.reloadPipeline();
-        limelight3A.setPollRateHz(100); // poll 100 times per second
+        limelight3A.setPollRateHz(100);
         limelight3A.start();
 
         intakeMotor = hardwareMap.get(DcMotorEx.class,intakeMotorName);
@@ -98,7 +97,7 @@ public class LimelightTest extends OpMode {
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
 
-        if (!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
+        if (!shouldRemoveBalls) {
             if (actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
 
