@@ -64,7 +64,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     private boolean had_balls = false;
     private int collectNumber = 0;
 
-    /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
     protected NormalizedRGBA rightSensorColors;
@@ -86,20 +85,20 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
     public static boolean shouldMoveIntakeServo = false;
-    public  Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
-    public  Pose first_row_ready = pose(35, -2, 120); // Pose4: collect first row right
-    public  Pose first_row_intermediate = pose(31, 13, 90); // Pose4: collect first row right
-    public  Pose first_row_done = pose(31, 46.5, 90); // Pose5: collect first row left
-    public  Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
-    public  Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
-    public  Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: colect second row left
-    public  Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: colect second row left
-    public  Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
-    public  Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
-    public  Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
-    public  Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
-    public  Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
-    public  Pose third_row_done = pose(75, 30, 90); // Pose11: collect third row left
+    public  Pose starter = pose(0.0, 0.0, 0.0);
+    public  Pose first_row_ready = pose(35, -2, 120);
+    public  Pose first_row_intermediate = pose(31, 13, 90);
+    public  Pose first_row_done = pose(31, 46.5, 90);
+    public  Pose second_row_ready = pose(53, 12, 90);
+    public  Pose second_row_done = pose(52, 42, 90);
+    public  Pose leverPoseSecondRow = pose(65, 39.5, 90);
+    public  Pose leverPoseThirdRow = pose(65.5, 39, 90);
+    public  Pose big_triangle_shoot_third_collect = pose(75, 0, 90);
+    public  Pose big_triangle_shoot_second_collect = pose(68, 4, 90);
+    public  Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90);
+    public  Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180);
+    public  Pose third_row_ready = pose(75, 0, 90);
+    public  Pose third_row_done = pose(75, 30, 90);
     public Pose classifier_starter = pose(120, 27, 90);
     public Pose hp_collect_pose = pose(4,47,180);
     public static double distanceToWallOdometry;
@@ -214,12 +213,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new DelayAction(600),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
-                //new StateAction("IntakeMotor","OFF"),
-                //new GeneralAction(turnStuffOff),
 
-
-
-                /// second row
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new MoveAction(second_row_ready),
@@ -456,7 +450,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                     new StateAction("LeftGateServo", "CLOSED")
             ));
         }
-        else // if cant sort
+        else
         {
             if(calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall){
                 robot.executeNow(new ActionSequence(
@@ -474,7 +468,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "CLOSED")
                 ));
             }
-            else{ // IF REAAALLLYYY no ball
+            else{
                 robot.executeNow(new ActionSequence(
                         new StateAction("RightGateServo", "OPEN"),
                         new StateAction("LeftGateServo", "OPEN"),

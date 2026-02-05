@@ -131,12 +131,6 @@ public class ClassWithStates {
     }
 
 
-
-
-
-
-    //Outtake States
-
     public static void outtakePark(){
         outtakeState = outtakeStates.autoPark;
         outtakePivotServoPos = outtakePivotServoParkedPos;
