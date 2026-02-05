@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathConstraints;
+import com.pedropathing.localization.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 

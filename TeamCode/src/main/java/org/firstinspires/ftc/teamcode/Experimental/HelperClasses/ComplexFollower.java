@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.*;
-import com.pedropathing.paths.*;
+import com.pedropathing.localization.*;
+import com.pedropathing.pathgen.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.FConstantsForPinpoint;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.LConstantsForPinpoint;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 import java.text.MessageFormat;
@@ -36,7 +38,7 @@ public class ComplexFollower {
 
     public static void init(HardwareMap hardwareMap, Pose startingPose) {
         hmap = hardwareMap;
-        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
+        follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
         follower.setStartingPose(startingPose);
         follower.update();
         currentPos = startPos;
@@ -85,17 +87,11 @@ public class ComplexFollower {
 
     public static void follow(Pose targetPos) {
         if (follower == null) return;
-        follow(targetPos, null);
-    }
-
-    public static void follow(Pose targetPos, PathConstraints pathConstraints) {
-        if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
         currentTargetPos = targetPos;
         pathToFollow = new Path(new BezierLine(currentPos, currentTargetPos));
         pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
-        if (pathConstraints != null) pathToFollow.setConstraints(pathConstraints);
         follower.followPath(pathToFollow);
         isDone = false;
     }

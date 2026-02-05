@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathConstraints;
+import com.pedropathing.localization.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
@@ -13,16 +12,6 @@ import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfi
 @Disabled
 @Autonomous(name="Big Triangle 15 Artefact Auto BLUE", group = "BBB")
 public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
-    private PathConstraints brutalConstraints = new PathConstraints(
-            0.995,
-            0.1,
-            0.1,
-            0.009,
-            50,
-            2,
-            10,
-            0.6
-    );
     @Override
     public void makeSortedAuto(){
         robot.executeNow(new MoveAction(big_triangle_shoot_third_collect));
@@ -100,7 +89,7 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
                 new MoveAction(first_row_ready),
-                new MoveAction(first_row_done,brutalConstraints),
+                new MoveAction(first_row_done),
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
                     shouldFire = true;
@@ -124,7 +113,7 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
 
-                new MoveAction(hp_collect_pose,brutalConstraints),
+                new MoveAction(hp_collect_pose),
                 new DelayAction(150),
                 new GeneralAction(() -> {
                     shouldFire = true;

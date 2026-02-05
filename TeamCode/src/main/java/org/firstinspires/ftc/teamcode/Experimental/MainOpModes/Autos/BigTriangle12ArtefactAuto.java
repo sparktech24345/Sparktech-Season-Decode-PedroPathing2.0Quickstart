@@ -18,8 +18,7 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathConstraints;
+import com.pedropathing.localization.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -87,20 +86,20 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public static boolean shouldFire = false;
     public static boolean shouldMoveIntakeServo = false;
     /// --------------------------------------------------------
-    public  Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
-    public  Pose first_row_ready = pose(35, -2, 120); // Pose4: collect first row right
-    public  Pose first_row_intermediate = pose(31, 13, 90); // Pose4: collect first row right
-    public  Pose first_row_done = pose(31, 46.5, 90); // Pose5: collect first row left
-    public  Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
-    public  Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
-    public  Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: colect second row left
-    public  Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: colect second row left
-    public  Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
-    public  Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
-    public  Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
-    public  Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
-    public  Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
-    public  Pose third_row_done = pose(75, 30, 90); // Pose11: collect third row left
+    public Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
+    public Pose first_row_ready = pose(35, -2, 120); // Pose4: collect first row right
+    public Pose first_row_intermediate = pose(31, 13, 90); // Pose4: collect first row right
+    public Pose first_row_done = pose(31, 46.5, 90); // Pose5: collect first row left
+    public Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
+    public Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
+    public Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: colect second row left
+    public Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: colect second row left
+    public Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
+    public Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
+    public Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
+    public Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
+    public Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
+    public Pose third_row_done = pose(75, 30, 90); // Pose11: collect third row left
     public Pose classifier_starter = pose(120, 27, 90);
     public Pose hp_collect_pose = pose(4,47,180);
     public static double distanceToWallOdometry;
@@ -188,16 +187,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    private PathConstraints brutalConstraints = new PathConstraints(
-            0.995,
-            0.1,
-            0.1,
-            0.009,
-            50,
-            1.5,
-            10,
-            0.8
-    );
     public void makeSortedAuto(){
         robot.addToQueue(
                 new StateAction("IntakeMotor","FULL"),

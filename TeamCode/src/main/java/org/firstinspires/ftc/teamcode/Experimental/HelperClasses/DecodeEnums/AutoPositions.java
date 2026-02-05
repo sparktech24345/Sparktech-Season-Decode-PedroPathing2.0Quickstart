@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums;
 
-import com.pedropathing.geometry.*;
+import com.pedropathing.localization.*;
 
 public enum AutoPositions {
     startingPositionDown(0, 0, 0),
