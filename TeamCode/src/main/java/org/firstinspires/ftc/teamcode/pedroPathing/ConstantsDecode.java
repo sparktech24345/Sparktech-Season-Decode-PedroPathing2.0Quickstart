@@ -32,7 +32,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyThreeW
 
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(11.5) // ?????
+            .mass(11.5)
             .forwardZeroPowerAcceleration(-28)
             .lateralZeroPowerAcceleration(-65)
             .centripetalScaling(0.005)
@@ -41,10 +41,6 @@ public class ConstantsDecode {
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.015, 0, 0.0005, 0.6,0));
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
-//            .leftFrontMotorName(GlobalStorage.frontRightName)
-//            .rightFrontMotorName(GlobalStorage.frontLeftName)
-//            .leftRearMotorName(GlobalStorage.backRightName)
-//            .rightRearMotorName(GlobalStorage.backLeftName)
 
             .leftFrontMotorName(GlobalStorage.frontLeftName)
             .rightFrontMotorName(GlobalStorage.frontRightName)
@@ -69,9 +65,9 @@ public class ConstantsDecode {
 
     public static SparkyPinpointConstants sparkyPinpointConstants = new SparkyPinpointConstants()
             .hardwareMapName("pinpoint")
-            .distanceUnit(DistanceUnit.METER) //might be changed later
-            .forwardPodY(-0.177563) //-0.172 // -0.177563
-            .strafePodX(0.09647796) //0.006 //0.09647796
+            .distanceUnit(DistanceUnit.METER)
+            .forwardPodY(-0.177563)
+            .strafePodX(0.09647796)
             .forwardEncoderDirection(SparkyPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(SparkyPinpointDriver.EncoderDirection.FORWARD);
 
@@ -127,8 +123,8 @@ public class ConstantsDecode {
                 @Override
                 public void initialize(HardwareMap hardwareMap, String hardwareMapName, RevHubOrientationOnRobot hubOrientation) {
                     imu = hardwareMap.get(IMU.class, "imu");
-                    logoFacingDirectionPosition = 5; // Right
-                    usbFacingDirectionPosition = 0; /// up now
+                    logoFacingDirectionPosition = 5;
+                    usbFacingDirectionPosition = 0;
                     updateOrientation();
                 }
 
@@ -148,7 +144,7 @@ public class ConstantsDecode {
                     imu.resetYaw();
                 }
             });
-    public static PathConstraints pathConstraints = new PathConstraints( // copiate direct din exemplul Pedro, de verificat / corectat
+    public static PathConstraints pathConstraints = new PathConstraints(
             0.995,
             0.1,
             0.1,
@@ -164,9 +160,6 @@ public class ConstantsDecode {
                 .mecanumDrivetrain(mecanumConstants)
                 .pathConstraints(pathConstraints)
                 .pinpointLocalizer(pinpointConstants)
-                //.threeWheelIMULocalizer(threeWheelIMUConstants)
-                //.setLocalizer(new SparkyThreeWheelIMULocalizer(hardwareMap,SparkyLocalizerConstants))
-                //.setLocalizer(new SparkyPinpointLocalizer(hardwareMap,sparkyPinpointConstants))
                 .build();
     }
 }

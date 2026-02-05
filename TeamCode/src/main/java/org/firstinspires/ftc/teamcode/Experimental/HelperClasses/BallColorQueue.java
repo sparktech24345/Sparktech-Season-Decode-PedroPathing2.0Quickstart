@@ -17,7 +17,7 @@ public class BallColorQueue {
      */
     public boolean add(BallColorSet_Decode color) {
         if (color == BallColorSet_Decode.NoBall) {
-            return false; // do not add NoBall
+            return false;
         }
 
         for (int i = 0; i < MAX_SIZE; i++) {
@@ -26,13 +26,10 @@ public class BallColorQueue {
                 return true;
             }
         }
-        return false; // queue is full
+        return false;
     }
 
-    /**
-     * Pulls the first element, removes it,
-     * and shifts remaining elements forward.
-     */
+
     public BallColorSet_Decode pull() {
         BallColorSet_Decode first = queue[0];
 
@@ -45,16 +42,13 @@ public class BallColorQueue {
         return first;
     }
 
-    /**
-     * Clears the queue to all NoBall
-     */
+
     public void clearQueue() {
         for (int i = 0; i < MAX_SIZE; i++) {
             queue[i] = BallColorSet_Decode.NoBall;
         }
     }
 
-    // Optional helper for debugging
     public BallColorSet_Decode[] getSnapshot() {
         return queue.clone();
     }
@@ -67,17 +61,11 @@ public class BallColorQueue {
         }
     }
 
-    /**
-     * Pushes a color to the front of the queue,
-     * shifting all existing elements one position back.
-     * The last element is discarded if the queue is full.
-     */
     public boolean push(BallColorSet_Decode color) {
         if (color == BallColorSet_Decode.NoBall) {
-            return false; // do not push NoBall
+            return false;
         }
 
-        // Shift everything back (from end to start)
         for (int i = MAX_SIZE - 1; i > 0; i--) {
             queue[i] = queue[i - 1];
         }

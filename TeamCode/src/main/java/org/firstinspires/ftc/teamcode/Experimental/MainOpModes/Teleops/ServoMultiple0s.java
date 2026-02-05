@@ -18,10 +18,10 @@ public class ServoMultiple0s extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Servo servo0 = hardwareMap.get(Servo.class, rightGateServoName); // 08333 i open 0.43
-        Servo servo1 = hardwareMap.get(Servo.class, leftGateServoName); // 0.1 is open 0.43 is closed
-        Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName); // 0.9 is max down and 0.73 is max up
-        Servo servo3 = hardwareMap.get(Servo.class, intakeSorterServoName); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
+        Servo servo0 = hardwareMap.get(Servo.class, rightGateServoName);
+        Servo servo1 = hardwareMap.get(Servo.class, leftGateServoName);
+        Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
+        Servo servo3 = hardwareMap.get(Servo.class, intakeSorterServoName);
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, intakeMotorName);
 
 

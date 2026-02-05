@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class CRServoComponent extends Component {
 
     public static enum CRServoModes {
-        Power // just this for now since PID controllers dont work well on CRServos
+        Power
     }
     protected HashMap<String, CRServo> motorMap = new HashMap<>();
     protected CRServo mainServo = null;

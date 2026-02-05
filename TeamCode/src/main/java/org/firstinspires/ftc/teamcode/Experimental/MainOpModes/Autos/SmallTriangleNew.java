@@ -55,7 +55,6 @@ public class SmallTriangleNew extends OpMode {
     public static boolean shouldMoveIntakeServo = false;
     public static boolean doIntakePulse = false;
 
-    /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
     protected NormalizedRGBA rightSensorColors;
@@ -76,14 +75,10 @@ public class SmallTriangleNew extends OpMode {
     public static double velocity = 1480;
     public static double angle = 266;
     public static int camId =23;
-    /// --------------------------------------------------------
-    private Pose starter = pose( 0.0, 6.12, 90); // Weird starting position wo that we are closer to balls
-    private Pose small_triangle_shoot = pose(1, 3, 90); // Pose1: shooting position small triangle
+    private Pose starter = pose( 0.0, 6.12, 90);
+    private Pose small_triangle_shoot = pose(1, 3, 90);
     private Pose parkPose = pose(10, 15, 90);
-    //private Pose prepHPCollectPose = pose(15,39,150);
     private Pose fininshHPCollectPose = pose(0,46,90);
-    //private Pose weirdHpCollectPose = pose(7,43,130);
-    //private Pose halfTheWayHPCollectPose = pose(12,39,130);
     @Override
     public void init() {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -100,7 +95,7 @@ public class SmallTriangleNew extends OpMode {
                         RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
             }
 
-            private void controls() { // this will happen in a loop
+            private void controls() {
                 isMoving = ComplexFollower.instance().isBusy();
                 HandleColors();
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
@@ -119,7 +114,7 @@ public class SmallTriangleNew extends OpMode {
         convertPoses();
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
         shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
-        //teamSensitiveStuff();
+
     }
 
     @Override
@@ -167,18 +162,14 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(fireSortedBall),
                 new DelayAction(500),
                 new StateAction("IntakeMotor","OFF"),
-                //new GeneralAction(turnStuffOff),
 
-                //second row of stuff
                 new StateAction("IntakeMotor","FULL"),
-                //new MoveAction(weirdHpCollectPose,collect_constraints),
-                //new DelayAction(300),
+
                 new MoveAction(fininshHPCollectPose),
                 new DelayAction(300),
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    //shouldMoveIntakeServo = false;
                     doIntakePulse = true;
                 }),
                 new MoveAction(small_triangle_shoot),
@@ -191,19 +182,16 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(fireSortedBall),
                 new DelayAction(500),
                 new StateAction("IntakeMotor","OFF"),
-                //new GeneralAction(turnStuffOff),
 
-                // mystery pick up
                 new GeneralAction(turnOnIntakeServo),
                 new StateAction("IntakeMotor","FULL"),
-                //new MoveAction(halfTheWayHPCollectPose),
-                //new DelayAction(500),
+
                 new MoveAction(fininshHPCollectPose),
                 new GeneralAction(prepQueueToFireSortedBall),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     doIntakePulse = true;
-                    //shouldMoveIntakeServo = false;
+
                 }),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(() -> doIntakePulse = true),
@@ -216,7 +204,7 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(fireSortedBall),
                 new DelayAction(800),
 
-                /// WARNING THIS IS 12th BALL CYCLE
+
 
 
                 new MoveAction(fininshHPCollectPose),
@@ -224,7 +212,6 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> {
                     shouldFire = true;
                     doIntakePulse = true;
-                    //shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(() -> doIntakePulse = true),
@@ -241,14 +228,14 @@ public class SmallTriangleNew extends OpMode {
 
 
 
-                /// WARNING THIS IS 12th BALL CYCLE
+
 
                 new StateAction("IntakeMotor","OFF"),
                 new GeneralAction(turnStuffOff),
                 new MoveAction(parkPose)
         );
     }
-    /// Runnables
+
     Runnable prepQueueToFireSortedBall = () -> {
         ballColorQueue.clearQueue();
         switch (camId) {
@@ -290,7 +277,7 @@ public class SmallTriangleNew extends OpMode {
                     new StateAction("LeftGateServo", "CLOSED")
             ));
         }
-        else // if cant sort
+        else
         {
             if(calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall){
                 robot.executeNow(new ActionSequence(
@@ -308,7 +295,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "CLOSED")
                 ));
             }
-            else{ // IF REAAALLLYYY no ball
+            else{
                 robot.executeNow(new ActionSequence(
                         new StateAction("RightGateServo", "OPEN"),
                         new StateAction("LeftGateServo", "OPEN"),
@@ -332,7 +319,7 @@ public class SmallTriangleNew extends OpMode {
         robot.getMotorComponent("TurretSpinMotor")
                 .setOperationMode(MotorComponent.MotorModes.Power)
                 .setTarget(0);
-        robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
+        robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
         robot.getMotorComponent("TurretRotateMotor").setTarget(0);
     };
     public void firingTurret(boolean shouldFire) {
@@ -342,23 +329,18 @@ public class SmallTriangleNew extends OpMode {
         if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
 
         if(shouldFire){
-            // ----------------------- Power Stuff -----------------------
 
-            //double targetVelocity = FAR_TARGET_VELOCITY;
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) + cfg.autoVelAdder;
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.Velocity)
                     .setTarget(targetVelocity);
 
 
-            // ----------------------- Angle Stuff -----------------------
-
             double turretAngleVal = angle;
             turretAngleVal = clamp(turretAngleVal,262,324);
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
-            // ----------------------- Rotation Stuff -----------------------
 
             robot.getMotorComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
@@ -381,7 +363,7 @@ public class SmallTriangleNew extends OpMode {
         }
 
 
-        if (!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
+        if (!shouldRemoveBalls) {
             if (actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
                 calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
 
@@ -428,9 +410,9 @@ public class SmallTriangleNew extends OpMode {
     protected void intakeChecks(boolean shouldCheck){
         int gateState = 0;
         if(shouldCheck) {
-            if (!hasBallInRightChamber) gateState = 1; // first fill up right
-            else if (!hasBallInLeftChamber) gateState = -1; // then left
-            else gateState = 0; // then point middle cuz new sorting logic
+            if (!hasBallInRightChamber) gateState = 1;
+            else if (!hasBallInLeftChamber) gateState = -1;
+            else gateState = 0;
         }
         else gateState = lastGateState;
         lastGateState = gateState;
@@ -461,15 +443,14 @@ public class SmallTriangleNew extends OpMode {
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(2);
         limelight3A.reloadPipeline();
-        limelight3A.setPollRateHz(100); // poll 100 times per second
+        limelight3A.setPollRateHz(100);
         limelight3A.start();
 
         LLResult llResult = limelight3A.getLatestResult();
-        //llResult.getFiducialResults();
+
         List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
         for (LLResultTypes.FiducialResult fr : fiducialResults) {
             camId = fr.getFiducialId();
-            //telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f",, fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
         }
         if(camId < 21 || camId > 23) camId = 23;
     }
@@ -477,16 +458,13 @@ public class SmallTriangleNew extends OpMode {
         starter = convertPose(starter);
         parkPose = convertPose(parkPose);
         small_triangle_shoot = convertPose(small_triangle_shoot);
-        //prepHPCollectPose = convertPose(prepHPCollectPose);
         fininshHPCollectPose = convertPose(fininshHPCollectPose);
-        //halfTheWayHPCollectPose = convertPose(halfTheWayHPCollectPose);
-        //weirdHpCollectPose = convertPose(weirdHpCollectPose);
     }
     public Pose convertPose(Pose pose) {
         return pose;
     }
     public Pose passPose() {
-        globalRobotPose = ComplexFollower.instance().getPose(); //Math.toRadians
+        globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
 }

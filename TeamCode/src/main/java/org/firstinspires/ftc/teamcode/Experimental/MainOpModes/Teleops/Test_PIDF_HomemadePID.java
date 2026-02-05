@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StolenMotorClas
 
 @Config
 @Disabled
-@TeleOp(name="Test_PIDF_HomemadePID" ,group="LinearOpMode")
+@TeleOp(name="Test_PIDF_HomemadePID" ,group="Linear OpMode")
 public class Test_PIDF_HomemadePID extends LinearOpMode {
     SimpleMotorFeedforward feedforward;
     DcMotorEx turretSpinL;
@@ -45,20 +45,14 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
     public void runOpMode() {
         MultipleTelemetry tele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         turretSpinL = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorLeft");
-        turretSpinL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turretSpinL.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        turretSpinR = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
-        //turretSpinR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        turretSpinR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         piDcontroller = new PIDcontroller(P, I, D);
 
 
-        Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName); // 0.9 is max down and 0.73 is max up
+        Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
         servo2.setPosition(turretAngle / 360);
         DcMotorSimple intakeMotor = hardwareMap.get(DcMotorSimple.class, intakeMotorName);
-        Servo servo3 = hardwareMap.get(Servo.class, intakeSorterServoName); // 0.17 is redirect to right 0.3 is block // 0.44 is redirect to left
+        Servo servo3 = hardwareMap.get(Servo.class, intakeSorterServoName);
         servo3.setPosition(0.17);
 
         waitForStart();
@@ -68,9 +62,9 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
             servo2.setPosition(turretAngle/360);
 
             currentVelLeft = turretSpinL.getVelocity();
-            currentVelRight = turretSpinR.getVelocity();
+
             double errorLeft = targetVel - currentVelLeft;
-            double errorRight = targetVel - currentVelRight;
+
 
             double power = piDcontroller.calculate(targetVel,currentVelLeft) + targetVel * F;
             piDcontroller.setConstants(P, I, D);
@@ -78,18 +72,14 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
             if(powerOverride != 0) power = powerOverride;
 
             turretSpinL.setPower(power);
-            turretSpinR.setPower(power);
-
 
             sleep(50);
 
             tele.addData("errorLeft" , errorLeft);
-            tele.addData("errorRight" , errorRight);
             tele.addData("targetVelocity" , targetVel);
             tele.addData("currentVelocityLeft" , currentVelLeft);
             tele.addData("currentVelocityRight" , currentVelRight);
             tele.addData("left motor power" , turretSpinL.getPower());
-            tele.addData("right motor power" , turretSpinR.getPower());
             tele.addData("left motor velocity smth" , turretSpinR.getVelocity(AngleUnit.DEGREES));
             tele.addData("amperaj R" , turretSpinR.getCurrent(CurrentUnit.AMPS));
             tele.addData("amperaj L" , turretSpinL.getCurrent(CurrentUnit.AMPS));

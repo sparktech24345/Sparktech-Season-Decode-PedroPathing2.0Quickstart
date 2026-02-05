@@ -49,20 +49,12 @@ public class PIDcontroller {
 
         double error = target - current;
 
-        // if (Math.signum(error) != Math.signum(integral)) integral = 0;
-
-        // Integral term (accumulated error)
         integral += error * deltaTime;
 
-        // Derivative term (rate of change of error)
         double derivative = (deltaTime > 0) ? (error - lastError) / deltaTime : 0;
         lastError = error;
 
-        // PID output
         double output = (kp * error) + (ki * integral) + (kd * derivative);
-
-        // Clamp to motor power limits
-        //output = clamp(output, -1.0, 1.0); //Not needed and detrimental for tests
 
         return output;
     }

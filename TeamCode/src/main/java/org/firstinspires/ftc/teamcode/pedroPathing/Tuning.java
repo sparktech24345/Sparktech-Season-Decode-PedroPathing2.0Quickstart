@@ -1050,10 +1050,6 @@ class CentripetalTuner extends OpMode {
         follower.setStartingPose(new Pose(72, 72));
     }
 
-    /**
-     * This initializes the Follower and creates the forward and backward Paths.
-     * Additionally, this initializes the Panels telemetry.
-     */
     @Override
     public void init_loop() {
         telemetryM.debug("This will run the robot in a curve going " + DISTANCE + " inches to the left and the same number of inches forward.");
@@ -1075,11 +1071,6 @@ class CentripetalTuner extends OpMode {
 
         follower.followPath(forwards);
     }
-
-    /**
-     * This runs the OpMode, updating the Follower as well as printing out the debug statements to
-     * the Telemetry, as well as the Panels..
-     */
     @Override
     public void loop() {
         follower.update();
@@ -1114,11 +1105,6 @@ class Triangle extends OpMode {
     private final Pose endPose = new Pose(24 + 72, 24 + 72, Math.toRadians(45));
 
     private PathChain triangle;
-
-    /**
-     * This runs the OpMode, updating the Follower as well as printing out the debug statements to
-     * the Telemetry, as well as the Panels.
-     */
     @Override
     public void loop() {
         follower.update();
@@ -1143,7 +1129,6 @@ class Triangle extends OpMode {
         drawOnlyCurrent();
     }
 
-    /** Creates the PathChain for the "triangle".*/
     @Override
     public void start() {
         follower.setStartingPose(startPose);
@@ -1204,11 +1189,6 @@ class Circle extends OpMode {
     public void init() {
         follower.setStartingPose(new Pose(72, 72));
     }
-
-    /**
-     * This runs the OpMode, updating the Follower as well as printing out the debug statements to
-     * the Telemetry, as well as the FTC Dashboard.
-     */
     @Override
     public void loop() {
         follower.update();
@@ -1236,20 +1216,10 @@ class Drawing {
     private static final Style historyLook = new Style(
             "", "#4CAF50", 1
     );
-
-    /**
-     * This prepares Panels Field for using Pedro Offsets
-     */
     public static void init() {
         panelsField.setOffsets(PanelsField.INSTANCE.getPresets().getPEDRO_PATHING());
     }
 
-    /**
-     * This draws everything that will be used in the Follower's telemetryDebug() method. This takes
-     * a Follower as an input, so an instance of the DashbaordDrawingHandler class is not needed.
-     *
-     * @param follower Pedro Follower instance.
-     */
     public static void drawDebug(Follower follower) {
         if (follower.getCurrentPath() != null) {
             drawPath(follower.getCurrentPath(), robotLook);
@@ -1262,13 +1232,7 @@ class Drawing {
         sendPacket();
     }
 
-    /**
-     * This draws a robot at a specified Pose with a specified
-     * look. The heading is represented as a line.
-     *
-     * @param pose  the Pose to draw the robot at
-     * @param style the parameters used to draw the robot with
-     */
+
     public static void drawRobot(Pose pose, Style style) {
         if (pose == null || Double.isNaN(pose.getX()) || Double.isNaN(pose.getY()) || Double.isNaN(pose.getHeading())) {
             return;
@@ -1287,22 +1251,9 @@ class Drawing {
         panelsField.moveCursor(x1, y1);
         panelsField.line(x2, y2);
     }
-
-    /**
-     * This draws a robot at a specified Pose. The heading is represented as a line.
-     *
-     * @param pose the Pose to draw the robot at
-     */
     public static void drawRobot(Pose pose) {
         drawRobot(pose, robotLook);
     }
-
-    /**
-     * This draws a Path with a specified look.
-     *
-     * @param path  the Path to draw
-     * @param style the parameters used to draw the Path with
-     */
     public static void drawPath(Path path, Style style) {
         double[][] points = path.getPanelsDrawingPoints();
 
@@ -1318,26 +1269,11 @@ class Drawing {
         panelsField.moveCursor(points[0][0], points[0][1]);
         panelsField.line(points[1][0], points[1][1]);
     }
-
-    /**
-     * This draws all the Paths in a PathChain with a
-     * specified look.
-     *
-     * @param pathChain the PathChain to draw
-     * @param style     the parameters used to draw the PathChain with
-     */
     public static void drawPath(PathChain pathChain, Style style) {
         for (int i = 0; i < pathChain.size(); i++) {
             drawPath(pathChain.getPath(i), style);
         }
     }
-
-    /**
-     * This draws the pose history of the robot.
-     *
-     * @param poseTracker the PoseHistory to get the pose history from
-     * @param style       the parameters used to draw the pose history with
-     */
     public static void drawPoseHistory(PoseHistory poseTracker, Style style) {
         panelsField.setStyle(style);
 
@@ -1349,19 +1285,11 @@ class Drawing {
         }
     }
 
-    /**
-     * This draws the pose history of the robot.
-     *
-     * @param poseTracker the PoseHistory to get the pose history from
-     */
     public static void drawPoseHistory(PoseHistory poseTracker) {
         drawPoseHistory(poseTracker, historyLook);
     }
 
-    /**
-     * This tries to send the current packet to FTControl Panels.
-     */
-    public static void sendPacket() {
+     public static void sendPacket() {
         panelsField.update();
     }
 }

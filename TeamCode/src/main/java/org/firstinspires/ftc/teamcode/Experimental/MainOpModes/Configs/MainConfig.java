@@ -28,11 +28,11 @@ public class MainConfig {
     public static double targetXCenter;
     public static double targetYCenter;
 
-    public static double targetXRightPanel; // about +6 cuz thats a tyle
-    public static double targetYRightPanel; // a 3 bias for y
+    public static double targetXRightPanel;
+    public static double targetYRightPanel;
 
-    public static double targetXLeftPanel; // and ofc a 3 bias on X for that one
-    public static double targetYLeftPanel; // about +6 but on y
+    public static double targetXLeftPanel;
+    public static double targetYLeftPanel;
 
     public static double usedTargetX;
     public static double usedTargetY;

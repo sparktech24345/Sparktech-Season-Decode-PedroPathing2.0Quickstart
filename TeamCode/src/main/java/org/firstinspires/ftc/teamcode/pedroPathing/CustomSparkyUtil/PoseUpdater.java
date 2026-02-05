@@ -1,7 +1,4 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
+
 
 package org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil;
 
@@ -81,26 +78,7 @@ public class PoseUpdater {
     }
 
     private static Localizer createLocalizer(HardwareMap hardwareMap) {
-        /*switch (ITDConstants.ITDlocalizerConstants.) {
-            case DRIVE_ENCODERS:
-                return new DriveEncoderLocalizer(hardwareMap);
-            case TWO_WHEEL:
-                return new TwoWheelLocalizer(hardwareMap);
-            case THREE_WHEEL:
-                return new ThreeWheelLocalizer(hardwareMap);
-            case THREE_WHEEL_IMU:
-                return new ThreeWheelIMULocalizer(hardwareMap);
-            case OTOS:
-                return new OTOSLocalizer(hardwareMap);
-            case PINPOINT:
-                return new PinpointLocalizer(hardwareMap);
-            default:
-                throw new IllegalArgumentException("Unsupported localizer type");
-        }
-
-         */
         return new PinpointLocalizer(hardwareMap, ConstantsDecode.pinpointConstants);
-       /// return new SparkyPinpointLocalizer(hardwareMap, ConstantsDecode.sparkyPinpointConstants);
     }
 
     public void update() {
@@ -190,13 +168,6 @@ public class PoseUpdater {
         return this.previousPose;
     }
 
-    /*public Pose getDeltaPose() {
-        Pose returnPose = this.getPose();
-        returnPose.subtract(this.previousPose);
-        return returnPose;
-    }
-
-     */
 
     public Vector getVelocity() {
         if (this.currentVelocity == null) {
