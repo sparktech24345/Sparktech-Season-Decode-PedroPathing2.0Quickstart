@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.*;
 import com.pedropathing.pathgen.*;
+import com.pedropathing.util.Drawing;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -123,6 +124,7 @@ public class ComplexFollower {
         currentX = currentPos.getX();
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
+        Drawing.drawDebug(follower);
     }
 
     public static void interrupt() {

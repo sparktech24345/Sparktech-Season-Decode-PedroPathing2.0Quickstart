@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.localization.Pose;
+import com.pedropathing.util.Drawing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -77,6 +78,7 @@ public class TestAuto extends OpMode {
                 }
             }
         };
+
         ComponentMakerMethods.MakeComponents(robotTester);
         ComponentMakerMethods.MakeStates(robotTester);
         robotTester.init(OpModes.Autonomous);
