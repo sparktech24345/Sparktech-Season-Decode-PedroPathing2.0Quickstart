@@ -3,8 +3,10 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.*;
 import com.pedropathing.pathgen.*;
+import com.pedropathing.util.Constants;
 import com.pedropathing.util.Drawing;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -40,6 +42,7 @@ public class ComplexFollower {
     public static void init(HardwareMap hardwareMap, Pose startingPose) {
         hmap = hardwareMap;
         follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+        com.pedropathing.util.Constants.setConstants(FConstantsForPinpoint.class, LConstantsForPinpoint.class);
         follower.setStartingPose(startingPose);
         follower.update();
         currentPos = startPos;

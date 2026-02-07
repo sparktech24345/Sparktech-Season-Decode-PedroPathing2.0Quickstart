@@ -34,13 +34,16 @@ public class ComponentMakerMethods {
                 .setRange(-1,3000)
         );
 
-        robot.makeComponent("TurretRotateMotor", new MotorComponent()
+        robot.makeComponent("TurretRotateMotor", new TurretComponent()
+                .setFeedforwardCoefficients(0.0008, 0.0001, 0.04)
                 .addMotor(turretRotationMotorName)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
-                .setPositionCoefficients(0.027, 0, 0.0015, 2)
+                // We set the multiplier to 1 because feedforward handles the 'kick' now
+                .setPositionCoefficients(0.035, 0, 0.0015, 1)
+                // kV: velocity power, kA: acceleration burst, kStatic: friction bypass
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0)
-                .setResolution(2.62)
+                .setResolution(4.983)
                 .setRange(-30, 330)
                 .moveDuringInit(true)
         );

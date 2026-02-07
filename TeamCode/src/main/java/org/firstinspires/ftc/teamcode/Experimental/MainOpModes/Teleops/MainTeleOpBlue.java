@@ -11,6 +11,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.*;
 
 import android.graphics.Color;
 
@@ -37,6 +38,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAc
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Drivers;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
@@ -138,13 +140,10 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
     public static double shootSortedTime = 800;
-
-    public static double TurretP = 0.025;
-    public static double TurretD = 0.0015;
-    public static double kVTurret = 0;
-    public static double kATurret = 0;
-    public static double kSTurret = 0;
-    public static double TurretZero = 2;
+    public static double kVTurret = 0.001;
+    public static double kATurret = 0.00015;
+    public static double kSTurret = 0.06;
+    public static double lookAheadSeconds = 0.1;
     public static double rotationAdder = 0;
     public static boolean isTryingToFire = false;
     public static boolean isMovingOuttakeGates = false;
@@ -174,9 +173,13 @@ public class MainTeleOpBlue extends LinearOpMode {
         processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
 
+        TurretComponent tempTurret = (TurretComponent) robot.getMotorComponent("TurretRotateMotor");
+        // Update pose from Odometry
+        tempTurret.updateRobotPose(robot.getCurrentPose());
 
         // this uses the processed target values
-        rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.usedTargetX, cfg.usedTargetY);
+        //rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, cfg.usedTargetY);
+        rotationToWallOdometry = tempTurret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
         RobotController.telemetry.addData("fakeRotation", fakeRotation);
         //colors
@@ -570,11 +573,10 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             // ----------------------- Rotation Stuff -----------------------
 
-            if(shouldShootWithoutTurret) neededAngleForTurretRotation = 0;
-            robot.getMotorComponent("TurretRotateMotor")
-                    .setTarget(neededAngleForTurretRotation)
-                    .setPositionCoefficients(TurretP, 0, TurretD, TurretZero)
-            ;
+            // Predict target (Target is at 0,0 in world space for example)
+            // lookaheadSeconds should roughly match your control loop latency + motor response time
+            tempTurret.setFeedforwardCoefficients(kVTurret,kATurret,kSTurret);
+            tempTurret.setTarget(neededAngleForTurretRotation);
 
         }
         else {
@@ -830,15 +832,15 @@ public class MainTeleOpBlue extends LinearOpMode {
         double degrees = Math.abs(angleFromTargetToRobot(pose, targetX, targetY)); // Abs value so that it works for red and blue
 
         if (degrees < 25) { // is lower part of scorer
-            cfg.usedTargetX = cfg.targetXRightPanel;
+            usedTargetX = cfg.targetXRightPanel;
             cfg.usedTargetY = cfg.targetYRightPanel;
         }
         else if (degrees > 70) {  // is right upper part of scorer
-            cfg.usedTargetX = cfg.targetXLeftPanel;
+            usedTargetX = cfg.targetXLeftPanel;
             cfg.usedTargetY = cfg.targetYLeftPanel;
         }
         else { // is in the middle or somewhere weird
-            cfg.usedTargetX = cfg.targetXCenter;
+            usedTargetX = cfg.targetXCenter;
             cfg.usedTargetY = cfg.targetYCenter;
         }
 
