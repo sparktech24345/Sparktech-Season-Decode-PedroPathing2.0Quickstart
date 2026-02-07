@@ -72,6 +72,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public Button getKey(String name) {
         return ComplexGamepad.get(name);
     }
+    public void spitFollowerTelemetry(){ComplexFollower.telemetry();}
 
     public Component getComponent(String componentName) {
          return components.get(componentName);

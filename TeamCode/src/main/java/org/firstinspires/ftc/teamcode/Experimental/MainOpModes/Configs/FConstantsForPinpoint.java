@@ -38,7 +38,6 @@ public class FConstantsForPinpoint { // TODO: de actualizat pt decode
         FollowerConstants.drivePIDFCoefficients.setCoefficients(0.004,0.0005,0.0009,0.6,0);
         FollowerConstants.useSecondaryDrivePID = true;
         FollowerConstants.secondaryDrivePIDFCoefficients.setCoefficients(0.01,0,0.001,0.6,0); // Not being used, @see useSecondaryDrivePID
-        FollowerConstants.drivePIDFSwitch = 35;
 
         FollowerConstants.zeroPowerAccelerationMultiplier = 8;//8
 

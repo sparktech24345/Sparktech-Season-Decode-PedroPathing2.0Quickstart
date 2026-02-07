@@ -11,4 +11,9 @@ public class MoveAction extends Action {
         this.OnStart = () -> ComplexFollower.follow(moveTargetPos);
         this.DoneCondition = () -> ComplexFollower.done();
     }
+    public MoveAction(Pose moveTargetPos,Pose bezierHelper) {
+        super();
+        this.OnStart = () -> ComplexFollower.follow(moveTargetPos,bezierHelper);
+        this.DoneCondition = () -> ComplexFollower.done();
+    }
 }

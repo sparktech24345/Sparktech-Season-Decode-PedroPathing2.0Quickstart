@@ -96,6 +96,16 @@ public class ComplexFollower {
         follower.followPath(pathToFollow);
         isDone = false;
     }
+    public static void follow(Pose targetPos, Pose bezierPointHelper){
+        if (follower == null) return;
+        if (follow_timer == null) follow_timer = new ElapsedTime();
+        else follow_timer.reset();
+        currentTargetPos = targetPos;
+        pathToFollow = new Path(new BezierCurve(currentPos,bezierPointHelper,currentTargetPos));
+        pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
+        follower.followPath(pathToFollow);
+        isDone = false;
+    }
 
     public static Follower instance() {
         return follower;
@@ -139,7 +149,7 @@ public class ComplexFollower {
         }
         RobotController.telemetry.addData("Follower is busy", follower.isBusy());
         RobotController.telemetry.addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, currentHeading));
-        RobotController.telemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), currentTargetPos.getHeading()));
+        RobotController.telemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), Math.toDegrees(currentTargetPos.getHeading())));
         RobotController.telemetry.addData("Follower velocity", follower.getVelocity().getMagnitude());
         RobotController.telemetry.addData("Is done?", isDone);
     }

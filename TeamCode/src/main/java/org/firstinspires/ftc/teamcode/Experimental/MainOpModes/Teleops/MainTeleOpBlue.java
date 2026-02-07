@@ -603,6 +603,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
+        robot.spitFollowerTelemetry();
     }
 
 
