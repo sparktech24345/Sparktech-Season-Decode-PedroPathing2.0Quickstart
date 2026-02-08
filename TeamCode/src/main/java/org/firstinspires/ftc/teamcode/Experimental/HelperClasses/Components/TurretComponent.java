@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.farVelo;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.grade0VeloClose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.grade1VeloClose;
+
 import com.pedropathing.localization.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -7,18 +11,18 @@ import com.qualcomm.robotcore.util.Range;
 
 public class TurretComponent extends MotorComponent {
 
-    // Feedforward Gains
-    private double kV = 0.0; // Velocity gain
-    private double kA = 0.0; // Acceleration gain
-    private double kStatic = 0.0; // Static friction/stiction gain
-
-    // Tracking for physics calculations
+    private double kV = 0.0, kA = 0.0, kStatic = 0.0;
     private double lastX = 0, lastY = 0, lastAngle = 0;
     private double lastTimestamp = 0;
     private double robotAngularVel = 0;
     private double vx = 0, vy = 0;
 
     private final ElapsedTime timer = new ElapsedTime();
+
+    // The time the ball spends in the air.
+    // Since you observed ~1s, we use this to offset robot velocity drift.
+    private double ballTimeInAir = 1.0;
+
     public TurretComponent setFeedforwardCoefficients(double kV, double kA, double kStatic) {
         this.kV = kV;
         this.kA = kA;
@@ -26,24 +30,24 @@ public class TurretComponent extends MotorComponent {
         return this;
     }
 
-    public void updateRobotPose(Pose robotPose) {
+    public void setBallTimeInAir(double seconds) {
+        this.ballTimeInAir = seconds;
+    }
 
+    public void updateRobotPose(Pose robotPose) {
         double x = robotPose.getX();
         double y = robotPose.getY();
         double angle = Math.toDegrees(robotPose.getHeading());
-
 
         double currentTime = timer.seconds();
         double dt = currentTime - lastTimestamp;
         if (dt <= 0) return;
 
-        // Calculate Angular Velocity with wrap-around check
         double deltaAngle = angle - lastAngle;
         while (deltaAngle > 180) deltaAngle -= 360;
         while (deltaAngle < -180) deltaAngle += 360;
         this.robotAngularVel = deltaAngle / dt;
 
-        // Calculate Linear Velocity
         this.vx = (x - lastX) / dt;
         this.vy = (y - lastY) / dt;
 
@@ -53,52 +57,62 @@ public class TurretComponent extends MotorComponent {
         this.lastTimestamp = currentTime;
     }
 
+    /**
+     * Calculates target angle AND distance for the flywheel
+     */
     public double calculateLookaheadTarget(double targetX, double targetY, double lookaheadSeconds) {
+        // Use smoothed velocities to predict FUTURE position
         double predX = lastX + (vx * lookaheadSeconds);
         double predY = lastY + (vy * lookaheadSeconds);
 
         double dx = targetX - predX;
         double dy = targetY - predY;
 
-        double predictedAngleWorld = Math.toDegrees(Math.atan2(dy, dx));
+        double worldAngle = Math.toDegrees(Math.atan2(dy, dx));
+        double relative = worldAngle - lastAngle;
 
-        // Target relative to robot heading
-        double relativeAngle = predictedAngleWorld - lastAngle;
-        while (relativeAngle > 180) relativeAngle -= 360;
-        while (relativeAngle < -180) relativeAngle += 360;
+        while (relative > 180) relative -= 360;
+        while (relative < -180) relative += 360;
 
-        return relativeAngle;
+        return relative;
+    }
+
+    /**
+     * Your provided velocity function integrated into the component
+     * @return The required RPM/Velocity for your flywheel
+     */
+    public double getTargetFlywheelVelocity(double currentDistanceToTarget) {
+        if (currentDistanceToTarget > 2.9) return farVelo;
+        return grade1VeloClose * currentDistanceToTarget + grade0VeloClose;
     }
 
     @Override
     public void update() {
-        // If we aren't in position mode, just act like a normal motor
         if (motorCurrentMode != MotorModes.Position) {
             super.update();
             return;
         }
 
-        // 1. Get PD Output
         double currentPos = mainMotor.getCurrentPosition() / resolution;
         double pdOutput = pidControllerForPosition.calculate(target, currentPos);
 
-        // 2. Add Base Compensation (FF)
-        // This pushes the motor to cancel out the robot's rotation
+        // Feedforward to fight the 70ms loop delay for heading
         double feedforward = (robotAngularVel * kV);
 
-        // 3. Final Output Assembly
         double totalOutput = pdOutput + feedforward;
 
-        // 4. Add Static Friction (only if we are actually trying to move)
-        if (Math.abs(target-currentPos) > 0.25) {
+        // Static friction kick
+        if (Math.abs(target - currentPos) > 0.25) {
             totalOutput += Math.signum(totalOutput) * kStatic;
         }
-        //else totalOutput = 0;
 
         double finalPower = Range.clip(totalOutput, -1, 1);
-
         for (DcMotorEx motor : motorMap.values()) {
             motor.setPower(finalPower);
         }
     }
+
+    // Getters for your distance function logic
+    public double getVx() { return vx; }
+    public double getVy() { return vy; }
 }

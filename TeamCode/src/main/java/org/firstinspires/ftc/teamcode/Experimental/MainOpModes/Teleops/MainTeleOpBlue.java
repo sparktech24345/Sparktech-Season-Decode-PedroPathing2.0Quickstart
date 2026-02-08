@@ -144,6 +144,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double kATurret = 0.00015;
     public static double kSTurret = 0.06;
     public static double lookAheadSeconds = 0.1;
+    public static double ballInAirTime = 0.2;
     public static double rotationAdder = 0;
     public static boolean isTryingToFire = false;
     public static boolean isMovingOuttakeGates = false;
@@ -176,10 +177,10 @@ public class MainTeleOpBlue extends LinearOpMode {
         TurretComponent tempTurret = (TurretComponent) robot.getMotorComponent("TurretRotateMotor");
         // Update pose from Odometry
         tempTurret.updateRobotPose(robot.getCurrentPose());
+        tempTurret.setBallTimeInAir(ballInAirTime);
 
         // this uses the processed target values
         //rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, cfg.usedTargetY);
-        rotationToWallOdometry = tempTurret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
         RobotController.telemetry.addData("fakeRotation", fakeRotation);
         //colors
@@ -189,6 +190,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         double usedDistance = 0;
         double neededAngleForTurretRotation = 0;
         usedDistance = distanceToWallOdometry;
+
+        rotationToWallOdometry = tempTurret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
+
         neededAngleForTurretRotation -= rotationToWallOdometry; /// TODO this might be to be reversed in some ways
 
 
@@ -538,7 +542,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         if (isTryingToFire) {
             // ----------------------- Power Stuff -----------------------
 
-            targetVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier;
+            targetVelocity = tempTurret.getTargetFlywheelVelocity(usedDistance) * vMultiplier;
             if(!shouldForceOuttake){
                 if(Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= 80){
                     robot.getMotorComponent("TurretSpinMotor")

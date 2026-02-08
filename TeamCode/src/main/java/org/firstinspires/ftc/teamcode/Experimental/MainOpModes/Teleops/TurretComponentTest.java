@@ -74,6 +74,7 @@ public class TurretComponentTest extends LinearOpMode {
             sleep(50);
 
             tel.addData("POS",turret.getPosition());
+            tel.addData("CURRENT",turret.getCurrent());
             tel.addData("TARGET POS",testAdder + turret.calculateLookaheadTarget(usedTargetX, usedTargetY, 0.08));
             tel.addData("SPEED", turret.getPower());
             tel.update();

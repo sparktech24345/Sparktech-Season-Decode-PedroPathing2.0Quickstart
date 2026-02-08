@@ -23,7 +23,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StolenMotorClass.SimpleMotorFeedforward;
 
 @Config
-@Disabled
 @TeleOp(name="Test_PIDF_HomemadePID" ,group="Linear OpMode")
 public class Test_PIDF_HomemadePID extends LinearOpMode {
     SimpleMotorFeedforward feedforward;
@@ -47,6 +46,8 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
         turretSpinL = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorLeft");
         turretSpinL.setDirection(DcMotorSimple.Direction.REVERSE);
         piDcontroller = new PIDcontroller(P, I, D);
+
+        turretSpinR = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
 
 
         Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
@@ -72,6 +73,7 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
             if(powerOverride != 0) power = powerOverride;
 
             turretSpinL.setPower(power);
+            turretSpinR.setPower(power);
 
             sleep(50);
 
