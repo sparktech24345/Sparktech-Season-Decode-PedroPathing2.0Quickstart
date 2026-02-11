@@ -57,7 +57,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double vd =0;//25;
     public static double veld =25;
     public static double vf = 0.00045;//15;
-    public static double velf = 15;
+    public static double velf = 12;
     public static double vMultiplier = 1;
 
     public static MainConfig cfg;
@@ -81,9 +81,11 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean hasBallInRightChamber = false;
     public static boolean hasBallInLeftChamber = false;
     public static boolean shouldRemoveBalls = false;
+    public static double OuttakePIDSwitch = 81;
     public static boolean shouldPullFromQueue = false;
     public static boolean wantsToTempOutputIntake = false;
     public static boolean shouldResetRightSensorBall = false;
+    public static boolean ShouldSpewOutSensors = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
 
     /// ----------------- Limelight Stuff -----------------
@@ -143,8 +145,8 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double kVTurret = 0.001;
     public static double kATurret = 0.00015;
     public static double kSTurret = 0.06;
-    public static double lookAheadSeconds = 0.1;
-    public static double ballInAirTime = 0.2;
+    public static double lookAheadSeconds = 0.35;
+    public static double ballInAirTime = 1;
     public static double rotationAdder = 0;
     public static boolean isTryingToFire = false;
     public static boolean isMovingOuttakeGates = false;
@@ -544,7 +546,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             targetVelocity = tempTurret.getTargetFlywheelVelocity(usedDistance) * vMultiplier;
             if(!shouldForceOuttake){
-                if(Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= 80){
+                if(Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
                     robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.Velocity)
                             .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
@@ -610,6 +612,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
         robot.spitFollowerTelemetry();
+        RobotController.telemetry.addData("target vel",targetVelocity);
+        RobotController.telemetry.addData("actual vel",robot.getMotorComponent("TurretSpinMotor").getVelocity());
     }
 
 
@@ -746,16 +750,18 @@ public class MainTeleOpBlue extends LinearOpMode {
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
-        RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-        RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-        RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+        if(ShouldSpewOutSensors){
+            RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+            RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+            RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-        RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-        RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-        RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+            RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+            RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+            RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
-        RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-        RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+            RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+            RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+        }
     }
 
 

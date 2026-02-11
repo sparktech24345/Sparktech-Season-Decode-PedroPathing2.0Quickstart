@@ -63,6 +63,7 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
             servo2.setPosition(turretAngle/360);
 
             currentVelLeft = turretSpinL.getVelocity();
+            currentVelRight = turretSpinR.getVelocity();
 
             double errorLeft = targetVel - currentVelLeft;
 

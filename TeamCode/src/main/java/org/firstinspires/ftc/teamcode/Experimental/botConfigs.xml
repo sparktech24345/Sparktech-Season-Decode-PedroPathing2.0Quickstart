@@ -6,11 +6,11 @@
             <goBILDA5202SeriesMotor name="frontgreen" port="1" />
             <goBILDA5202SeriesMotor name="backpurple" port="2" />
             <goBILDA5202SeriesMotor name="backgreen" port="3" />
-            <RevColorSensorV3 name="colorSensorLeft" port="0" bus="0" />
+            <RevColorSensorV3 name="colorSensorLeft" port="0" bus="2" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
-            <goBILDA5202SeriesMotor name="turretFlyWheelMotorLeft" port="0" />
-            <goBILDA5202SeriesMotor name="turretFlyWheelMotorRight" port="1" />
+            <goBILDA5202SeriesMotor name="turretFlyWheelMotorRight" port="0" />
+            <goBILDA5202SeriesMotor name="turretFlyWheelMotorLeft" port="1" />
             <goBILDA5202SeriesMotor name="turretRotateMotor" port="2" />
             <goBILDA5202SeriesMotor name="intakeMotor" port="3" />
             <Servo name="rightGateServo" port="0" />
