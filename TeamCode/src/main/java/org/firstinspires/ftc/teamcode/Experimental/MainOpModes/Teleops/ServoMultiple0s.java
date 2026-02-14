@@ -12,9 +12,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ServoMultiple0s extends LinearOpMode {
     public static double rightGatePos = 0;
     public static double leftGatePos = 0;
-    public static double leftTiltPos = 0;
-    public static double rightTiltPos = 0;
-    public static double angleServoPos = 0;
+    public static double leftTiltPos = 1;//  poses are syncronized, in bot = 1, out of bot = 0
+    public static double rightTiltPos = 1;
+    public static double angleServoPos = 0.4; // max down is 0.88 and max up is 0.05
     public static double motorPow = 0;
 
     @Override
@@ -35,13 +35,13 @@ public class ServoMultiple0s extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeInInit()) {
-            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);
+            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);// poses are syncronized, in bot = 1, out of bot = 0
             if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
 
             if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
             if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
 
-            if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos);
+            if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos); // max down is 0.88 and max up is 0.05
         }
 
         while (opModeIsActive()) {
