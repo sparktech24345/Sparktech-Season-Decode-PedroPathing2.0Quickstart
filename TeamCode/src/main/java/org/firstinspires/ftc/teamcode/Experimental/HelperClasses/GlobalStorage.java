@@ -59,10 +59,10 @@ public class GlobalStorage {
     public static String outtakeExtendRightName = "outakerightmotor";
     public static String outtakeArmName         = "outakeArmServo";
     public static String outtakeClawName        = "outakeSampleServo";
-    public static String frontRightName         = "frontpurple";
-    public static String frontLeftName          = "frontgreen";
+    public static String frontRightName         = "frontright";
+    public static String frontLeftName          = "frontleft";
     public static String backRightName          = "backpurple";
-    public static String backLeftName           = "backgreen";
+    public static String backLeftName           = "backleft";
     public static String colorSensorName        = "sensorColor";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
     public static double ballColorTresholdBlue = 15;
@@ -87,10 +87,12 @@ public class GlobalStorage {
     public static String turretFlyWheelMotorLeftName = "turretFlyWheelMotorLeft"; // port control 0
     public static String turretFlyWheelMotorRightName = "turretFlyWheelMotorRight"; // port control 1
 
-    public static String rightGateServoName = "rightGateServo";
-    public static String leftGateServoName = "leftGateServo";
-    public static String turretAngleServoName = "turretAngleServo";
-    public static String intakeSorterServoName = "intakeServo";
+    public static String rightGateServoName = "rightGateServo"; // port 2
+    public static String leftGateServoName = "leftGateServo"; // port 3
+    public static String rightTiltServoName = "rightTiltServo"; // port 1
+    public static String leftTiltServoName = "leftTiltServo"; // port 0
+    public static String turretAngleServoName = "turretAngleServo"; // port 4
+    public static String intakeSorterServoName = "intakeServo"; // no longer on bot
     public static String colorSensorRightName = "colorSensorRight";
     public static String colorSensorLeftName = "colorSensorLeft";
 

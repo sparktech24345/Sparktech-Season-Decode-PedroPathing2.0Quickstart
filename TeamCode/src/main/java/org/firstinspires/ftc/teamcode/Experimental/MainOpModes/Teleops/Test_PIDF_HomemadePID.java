@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.intakeMotorName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.intakeSorterServoName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.turretAngleServoName;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -50,17 +49,15 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
         turretSpinR = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
 
 
-        Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
-        servo2.setPosition(turretAngle / 360);
+        //Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
+        //servo2.setPosition(turretAngle / 360);
         DcMotorSimple intakeMotor = hardwareMap.get(DcMotorSimple.class, intakeMotorName);
-        Servo servo3 = hardwareMap.get(Servo.class, intakeSorterServoName);
-        servo3.setPosition(0.17);
 
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {
             intakeMotor.setPower(motorPow);
-            servo2.setPosition(turretAngle/360);
+            //servo2.setPosition(turretAngle/360);
 
             currentVelLeft = turretSpinL.getVelocity();
             currentVelRight = turretSpinR.getVelocity();

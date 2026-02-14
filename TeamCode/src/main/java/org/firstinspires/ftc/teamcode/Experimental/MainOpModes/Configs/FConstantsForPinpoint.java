@@ -5,14 +5,14 @@ import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.Localizers;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-public class FConstantsForPinpoint { // TODO: de actualizat pt decode
+public class FConstantsForPinpoint {
     static {
         FollowerConstants.localizers = Localizers.PINPOINT;
 
-        FollowerConstants.leftFrontMotorName = "frontgreen";
-        FollowerConstants.leftRearMotorName = "backgreen";
-        FollowerConstants.rightFrontMotorName = "frontpurple";
-        FollowerConstants.rightRearMotorName = "backpurple";
+        FollowerConstants.leftFrontMotorName = frontLeftName;
+        FollowerConstants.leftRearMotorName = backLeftName;
+        FollowerConstants.rightFrontMotorName = frontRightName;
+        FollowerConstants.rightRearMotorName = backRightName;
 
         FollowerConstants.leftFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
         FollowerConstants.leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;

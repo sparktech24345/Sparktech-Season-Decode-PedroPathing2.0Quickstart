@@ -10,18 +10,24 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 @TeleOp(name = "ServoMultiple0", group = "Linear OpMode")
 public class ServoMultiple0s extends LinearOpMode {
-    public static double rightGatePos = 0.09;
-    public static double leftGatePos = 0.43;
-    public static double angleServoPos = 0.9;
-    public static double intakeServoPos = 0.3;
+    public static double rightGatePos = 0;
+    public static double leftGatePos = 0;
+    public static double leftTiltPos = 0;
+    public static double rightTiltPos = 0;
+    public static double angleServoPos = 0;
     public static double motorPow = 0;
 
     @Override
     public void runOpMode() {
-        Servo servo0 = hardwareMap.get(Servo.class, rightGateServoName);
-        Servo servo1 = hardwareMap.get(Servo.class, leftGateServoName);
-        Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
-        Servo servo3 = hardwareMap.get(Servo.class, intakeSorterServoName);
+        Servo leftTiltServo = hardwareMap.get(Servo.class, leftTiltServoName);
+        Servo rightTiltServo = hardwareMap.get(Servo.class, rightTiltServoName);
+
+        Servo rightGateServo = hardwareMap.get(Servo.class, rightGateServoName);
+        Servo leftGateServo = hardwareMap.get(Servo.class, leftGateServoName);
+
+        Servo turretAngleServo = hardwareMap.get(Servo.class, turretAngleServoName);
+
+
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, intakeMotorName);
 
 
@@ -29,18 +35,23 @@ public class ServoMultiple0s extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeInInit()) {
-            if (servo0 != null) servo0.setPosition(rightGatePos);
-            if (servo1 != null) servo1.setPosition(leftGatePos);
-            if (servo2 != null) servo2.setPosition(angleServoPos);
-            if (servo3 != null) servo3.setPosition(intakeServoPos);
+            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);
+            if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
+
+            if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
+            if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
+
+            if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos);
         }
 
         while (opModeIsActive()) {
-            if (servo0 != null) servo0.setPosition(rightGatePos);
-            if (servo1 != null) servo1.setPosition(leftGatePos);
-            if (servo2 != null) servo2.setPosition(angleServoPos);
-            if (servo3 != null) servo3.setPosition(intakeServoPos);
+            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);
+            if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
 
+            if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
+            if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
+
+            if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos);
             motor.setPower(motorPow);
         }
     }
