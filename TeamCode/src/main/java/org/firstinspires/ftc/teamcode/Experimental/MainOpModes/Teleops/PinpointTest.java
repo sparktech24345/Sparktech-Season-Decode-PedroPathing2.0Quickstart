@@ -22,6 +22,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.backLeftName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.backRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentOpModes;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.frontLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.frontRightName;
@@ -60,10 +61,10 @@ public class PinpointTest extends OpMode {
 
         configurePinpoint();
         if (currentOpModes == OpModes.TeleOP) {
-            RFDrive = hardwareMap.get(DcMotor.class, "frontpurple");
-            LFDrive = hardwareMap.get(DcMotor.class, "frontgreen");
-            RBDrive = hardwareMap.get(DcMotor.class, "backpurple");
-            LBDrive = hardwareMap.get(DcMotor.class, "backgreen");
+            RFDrive = hardwareMap.get(DcMotor.class, frontRightName);
+            LFDrive = hardwareMap.get(DcMotor.class, frontLeftName);
+            RBDrive = hardwareMap.get(DcMotor.class, backRightName);
+            LBDrive = hardwareMap.get(DcMotor.class, backLeftName);
 
             RFDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             LFDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -117,8 +118,6 @@ public class PinpointTest extends OpMode {
         tel.addData("getDeviceVersion",pinpoint.getDeviceVersion());
         tel.addData("getHeadingVelocity",pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES));
         tel.addData("getManufacturer",pinpoint.getManufacturer());
-        tel.addData("getPosX",pinpoint.getPosX(DistanceUnit.INCH));
-        tel.addData("getPosT",pinpoint.getPosY(DistanceUnit.INCH));
         tel.addData("getVelX",pinpoint.getVelX(DistanceUnit.INCH));
         tel.addData("getVelY",pinpoint.getVelY(DistanceUnit.INCH));
         tel.update();
@@ -128,11 +127,13 @@ public class PinpointTest extends OpMode {
 
     public void configurePinpoint(){
 
-        pinpoint.setOffsets(-165.5, -166.5, DistanceUnit.MM);
+        pinpoint.setOffsets(-116.5, -119.38, DistanceUnit.MM); // -116.5 -141.5
 
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
-        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+
+        pinpoint.setYawScalar(1);
 
         pinpoint.resetPosAndIMU();
     }

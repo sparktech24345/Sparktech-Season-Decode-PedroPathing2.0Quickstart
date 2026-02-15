@@ -27,6 +27,7 @@ public class MotorComponent extends Component {
     protected PIDcontroller pidControllerForPosition;
     protected PIDcontroller VPIDController;
     protected double vpidF = 0;
+    protected double vpidS = 0;
     protected MotorModes motorCurrentMode = MotorModes.Power;
     protected double velocity = 0;
     protected double zeroVelocityMultiplier = 0;
@@ -121,10 +122,11 @@ public class MotorComponent extends Component {
         this.zeroVelocityMultiplier = zeroVelocityMultiplier;
         return this;
     }
-    public MotorComponent setAccelerationVelocityCoefficients(double p, double i, double d, double f) {
+    public MotorComponent setAccelerationVelocityCoefficients(double p, double i, double d, double f,double s) {
         if(VPIDController == null) VPIDController = new PIDcontroller(p,i,d);
         VPIDController.setConstants(p,i,d);
         vpidF = f;
+        vpidS = s;
         return this;
     }
     public MotorComponent setVelocityCoefficients(double p, double i, double d, double f) {
@@ -147,6 +149,9 @@ public class MotorComponent extends Component {
     }
     public double getPosition() {
         return mainMotor.getCurrentPosition() / resolution;
+    }
+    public double getAbsolutePosition() {
+        return mainMotor.getCurrentPosition();
     }
     public double getPower() {
         return mainMotor.getPower();
@@ -190,7 +195,9 @@ public class MotorComponent extends Component {
                 break;
 
             case AcceleratingVelocity:
-                targetPower = VPIDController.calculate(target,mainMotor.getVelocity()) + target * vpidF;
+                if(target == 0) targetPower = 0;
+                else targetPower = VPIDController.calculate(target,mainMotor.getVelocity()) + target * vpidF + vpidS * Math.signum(target);
+
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;

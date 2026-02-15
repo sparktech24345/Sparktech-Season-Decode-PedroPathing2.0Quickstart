@@ -137,7 +137,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
                 rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXAutoClose, cfg.targetYAutoClose);
-                if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
+                if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
 
                 if (startAuto) {
                     startAuto = false;

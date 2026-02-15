@@ -51,35 +51,16 @@ public class GlobalStorage {
 
 
     // HARDWARE NAMES
-
-    public static String intakeSpinName         = "intakespin";
-    public static String intakeExtendName       = "intakemotor";
-    public static String intakePosName          = "intakeRotateServo";
-    public static String outtakeExtendLeftName  = "outakeleftmotor";
-    public static String outtakeExtendRightName = "outakerightmotor";
-    public static String outtakeArmName         = "outakeArmServo";
-    public static String outtakeClawName        = "outakeSampleServo";
-    public static String frontRightName         = "frontright";
-    public static String frontLeftName          = "frontleft";
-    public static String backRightName          = "backpurple";
-    public static String backLeftName           = "backleft";
-    public static String colorSensorName        = "sensorColor";
+    public static String frontRightName         = "frontleft";
+    public static String frontLeftName          = "frontright";
+    public static String backRightName          = "backleft";
+    public static String backLeftName           = "backright";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
     public static double ballColorTresholdBlue = 15;
     public static double ballColorTresholdGreen = 15;
     public static double leftSensorColorMultiplier = 1.5;
-    public static String __frontLeftName        = "frontleft";
-    public static String __frontRightName       = "frontright";
-    public static String __backLeftName         = "backleft";
-    public static String __backRightName        = "backright";
 
     // DECODE
-    public static String LaunchMotorOneName     = "launchmotorone";
-    public static String LaunchMotorTwoName     = "launchmotortwo";
-    public static String ServoControlName       = "controlservo";
-    public static String ServoExpansionName     = "expansionservo";
-    public static String PushServoOneName       = "expansionpushservo";
-    public static String PushServoTwoName       = "controlpushservo";
 
     // DECODE ROBOT V2
     public static String intakeMotorName = "intakeMotor"; // port control 3
@@ -92,7 +73,6 @@ public class GlobalStorage {
     public static String rightTiltServoName = "rightTiltServo"; // port 1
     public static String leftTiltServoName = "leftTiltServo"; // port 0
     public static String turretAngleServoName = "turretAngleServo"; // port 4
-    public static String intakeSorterServoName = "intakeServo"; // no longer on bot
     public static String colorSensorRightName = "colorSensorRight";
     public static String colorSensorLeftName = "colorSensorLeft";
 
@@ -167,10 +147,10 @@ public class GlobalStorage {
         return distance;
     }
 
-    public static double farAngle = 266;
-    public static double normalAngle = 280;
-    public static double closeAngle = 310;
-    public static double almostCloseAngle = 295;
+    public static double farAngle = 95;
+    public static double normalAngle = 160;
+    public static double closeAngle = 300;
+    public static double almostCloseAngle = 210;
     public static double distanceToAngleFunction(double distance) {
         if( distance > 2.9) return farAngle;
         if(distance < 0.95) return closeAngle;
@@ -178,11 +158,12 @@ public class GlobalStorage {
         else return normalAngle;
 
     }
-    public static double grade0VeloClose = 1200; // 840
-    public static double grade1VeloClose = 240; // 179
-    public static double farVelo = 1970;
+    public static double grade0VeloClose = 1280;
+    public static double grade1VeloClose = 100;
+    public static double grade0farVelo = 800;
+    public static double grade1farVelo = 320;
     public static double distanceToVelocityFunction(double distance) {
-        if (distance > 2.9) return farVelo;
+        if (distance > 2.9) return grade1farVelo * distance + grade0farVelo;;
         return grade1VeloClose * distance + grade0VeloClose;
     }
 

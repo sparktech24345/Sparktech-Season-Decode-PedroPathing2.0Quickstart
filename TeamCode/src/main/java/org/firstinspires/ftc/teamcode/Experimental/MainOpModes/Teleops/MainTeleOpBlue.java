@@ -52,13 +52,15 @@ public class MainTeleOpBlue extends LinearOpMode {
     protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
-    public static double vp = 0.0055;//195;
-    public static double velp = 195;
-    public static double vd =0;//25;
-    public static double veld =25;
-    public static double vf = 0.00045;//15;
-    public static double velf = 12;
+    public static double vp =- 0.0055;//195;
+    public static double vs =- 0.1;//195;
+    public static double velp = -195;
+    public static double vd =-0;//25;
+    public static double veld =-25;
+    public static double vf = - 0.0003;//15;
+    public static double velf = -12;
     public static double vMultiplier = 1;
+    public static boolean shouldUseSecondaryPID = false;
 
     public static MainConfig cfg;
     public static Drivers driver = Drivers.Teo;
@@ -207,8 +209,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         neededAngleForTurretRotation += D2_rotationAdder * D2_rotationAdderMulti;
-        if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
-        if (neededAngleForTurretRotation < -30) neededAngleForTurretRotation += 360;
+        //if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
+        if (neededAngleForTurretRotation < 0) neededAngleForTurretRotation += 360;
 
 
 
@@ -546,7 +548,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             targetVelocity = tempTurret.getTargetFlywheelVelocity(usedDistance) * vMultiplier;
             if(!shouldForceOuttake){
-                if(Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
+                if(shouldUseSecondaryPID && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
                     robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.Velocity)
                             .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
@@ -556,7 +558,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                             .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-                            .setAccelerationVelocityCoefficients(vp,0,vd,vf);;
+                            .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs);;
                 }
 
             }
@@ -572,7 +574,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            turretAngleVal = clamp(turretAngleVal, 262, 315);
+            //turretAngleVal = clamp(turretAngleVal, 262, 315);
             robot.getServoComponent("TurretAngle")
                     .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
@@ -581,6 +583,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             // Predict target (Target is at 0,0 in world space for example)
             // lookaheadSeconds should roughly match your control loop latency + motor response time
+            if(shouldShootWithoutTurret) neededAngleForTurretRotation = 0;
             tempTurret.setFeedforwardCoefficients(kVTurret,kATurret,kSTurret);
             tempTurret.setTarget(neededAngleForTurretRotation);
 

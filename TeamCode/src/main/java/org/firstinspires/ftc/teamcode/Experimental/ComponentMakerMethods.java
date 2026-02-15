@@ -27,11 +27,11 @@ public class ComponentMakerMethods {
                 .addMotor(turretFlyWheelMotorRightName)
                 .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setVelocityCoefficients(180, 0, 18, 15)
-                .setAccelerationVelocityCoefficients(0.0055,0,0,0.00045)
+                .setVelocityCoefficients(-180, 0, -18, -15)
+                .setAccelerationVelocityCoefficients(-0.0055,0,0,-0.0003,-0.1)
                 .setOperationMode(MotorComponent.MotorModes.Velocity)
                 .setTarget(0)
-                .setRange(-1,3000)
+                .setRange(-3000,3000)
         );
 
         robot.makeComponent("TurretRotateMotor", new TurretComponent()
@@ -43,14 +43,14 @@ public class ComponentMakerMethods {
                 // kV: velocity power, kA: acceleration burst, kStatic: friction bypass
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0)
-                .setResolution(4.983)
-                .setRange(-30, 330)
+                .setResolution(5)
+                .setRange(0, 360)
                 .moveDuringInit(true)
         );
 
 
         robot.makeComponent("LeftGateServo", new ServoComponent()
-                .addMotor(rightGateServoName)
+                .addMotor(leftGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0, 1)
@@ -58,7 +58,7 @@ public class ComponentMakerMethods {
         );
 
         robot.makeComponent("RightGateServo", new ServoComponent()
-                .addMotor(leftGateServoName)
+                .addMotor(rightGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0, 1)
@@ -69,7 +69,7 @@ public class ComponentMakerMethods {
                 .addMotor(turretAngleServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
-                .setRange(0.7, 0.9)
+                .setRange(0,1)
                 .moveDuringInit(true)
         );
 
@@ -93,16 +93,16 @@ public class ComponentMakerMethods {
 
 
         robot.getComponent("LeftGateServo")
-                .addState("OPEN", 180)
-                .addState("CLOSED", 33,true);
+                .addState("OPEN", 72)
+                .addState("CLOSED", 227,true);
 
         robot.getComponent("RightGateServo")
-                .addState("CLOSED", 155, true)
-                .addState("OPEN", 30);
+                .addState("CLOSED", 108, true)
+                .addState("OPEN", 270);
 
         robot.getComponent("TurretAngle")
-                .addState("DOWN_MAX", 262.8)
-                .addState("DEFAULT", 288, true)
-                .addState("UP_MAX",324);
+                .addState("DOWN_MAX", 316) // 0.88
+                .addState("DEFAULT", 180, true)
+                .addState("UP_MAX",18); // 0.05
     }
 }

@@ -324,7 +324,7 @@ public class SmallTriangleNew extends OpMode {
         double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXLeftPanel, cfg.targetYLeftPanel);
         rotationToWallOdometry += cfg.autoZoneAdderFar;
-        if(rotationToWallOdometry < -30) rotationToWallOdometry += 360;
+        if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
 
         if(shouldFire){
 

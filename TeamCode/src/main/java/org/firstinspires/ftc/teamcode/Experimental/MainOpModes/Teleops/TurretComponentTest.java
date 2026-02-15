@@ -27,7 +27,7 @@ public class TurretComponentTest extends LinearOpMode {
     public static double ka = 0.0001;
     public static double ks = 0.06;
     public static double testAdder = 0;
-    public static boolean shouldTestEncoder = false;
+    public static boolean shouldTestEncoder = true;
     TurretComponent turret;
     /*
                 .setFeedforwardCoefficients(0.0008, 0.00005, 0.04)
@@ -49,8 +49,8 @@ public class TurretComponentTest extends LinearOpMode {
                 // kV: velocity power, kA: acceleration burst, kStatic: friction bypass
                 .setOperationMode(MotorComponent.MotorModes.Position)
                 .setTarget(0)
-                .setResolution(4.983)
-                .setRange(-30, 330)
+                .setResolution(5)
+                .setRange(0, 360)
                 .moveDuringInit(true);
 
 
@@ -74,6 +74,7 @@ public class TurretComponentTest extends LinearOpMode {
             sleep(50);
 
             tel.addData("POS",turret.getPosition());
+            tel.addData("Absolute POS",turret.getAbsolutePosition());
             tel.addData("CURRENT",turret.getCurrent());
             tel.addData("TARGET POS",testAdder + turret.calculateLookaheadTarget(usedTargetX, usedTargetY, 0.08));
             tel.addData("SPEED", turret.getPower());

@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.farVelo;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.grade0VeloClose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.grade1VeloClose;
 
@@ -82,8 +82,7 @@ public class TurretComponent extends MotorComponent {
      * @return The required RPM/Velocity for your flywheel
      */
     public double getTargetFlywheelVelocity(double currentDistanceToTarget) {
-        if (currentDistanceToTarget > 2.9) return farVelo;
-        return grade1VeloClose * currentDistanceToTarget + grade0VeloClose;
+        return distanceToVelocityFunction(currentDistanceToTarget);
     }
 
     @Override
