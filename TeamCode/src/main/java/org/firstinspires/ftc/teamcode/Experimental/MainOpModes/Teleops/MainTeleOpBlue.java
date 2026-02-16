@@ -134,13 +134,13 @@ public class MainTeleOpBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 550;
+    public static double timer1 = 350; // 550 far side
     public static double timer5 = 600;
     public static double timer6 = 400;
     public static double outtakeReversingTime = 180;
-    public static double timer2 = 700;
-    public static double timer3 = 100;
-    public static double timer4 = 300;
+    public static double timer2 = 400; // 700 far side
+    public static double timer3 = 100; // close side
+    public static double timer4 = 400; // close side
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
     public static double shootSortedTime = 800;
@@ -176,7 +176,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         // processing
         processCameraStuff();
         processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
-        distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
+        distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.usedTargetX, cfg.usedTargetY);
 
         TurretComponent tempTurret = (TurretComponent) robot.getMotorComponent("TurretRotateMotor");
         // Update pose from Odometry
@@ -844,16 +844,16 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static void processTargetStuff(Pose pose, double targetX, double targetY) {
         double degrees = Math.abs(angleFromTargetToRobot(pose, targetX, targetY)); // Abs value so that it works for red and blue
 
-        if (degrees < 25) { // is lower part of scorer
-            usedTargetX = cfg.targetXRightPanel;
+        if (degrees < 40) { // is lower part of scorer
+            cfg.usedTargetX = cfg.targetXRightPanel;
             cfg.usedTargetY = cfg.targetYRightPanel;
         }
-        else if (degrees > 70) {  // is right upper part of scorer
-            usedTargetX = cfg.targetXLeftPanel;
+        else if (degrees > 65) {  // is right upper part of scorer
+            cfg.usedTargetX = cfg.targetXLeftPanel;
             cfg.usedTargetY = cfg.targetYLeftPanel;
         }
         else { // is in the middle or somewhere weird
-            usedTargetX = cfg.targetXCenter;
+            cfg.usedTargetX = cfg.targetXCenter;
             cfg.usedTargetY = cfg.targetYCenter;
         }
 

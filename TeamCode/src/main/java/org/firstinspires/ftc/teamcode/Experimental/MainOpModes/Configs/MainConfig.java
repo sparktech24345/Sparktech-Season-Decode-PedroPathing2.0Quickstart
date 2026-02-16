@@ -46,7 +46,7 @@ public class MainConfig {
             case Blue:
                 teamPipeline = 0;
 
-                farZoneCameraAdder = 3;
+                farZoneCameraAdder = 0;
                 autoZoneAdderFar = 1.5;
 
                 autoVelAdder = -20;
@@ -55,17 +55,17 @@ public class MainConfig {
                 rotationForInitSmallTriangle = 90;
 
                 targetX = 131;
-                targetY = 46;
+                targetY = 48;
 
 
                 targetXAutoClose = 127;
                 targetYAutoClose = 48;
 
-                targetXCenter = 131;
-                targetYCenter = 48;
+                targetXCenter = 130;
+                targetYCenter = 53;
 
-                targetXRightPanel = 133;
-                targetYRightPanel = 45;
+                targetXRightPanel = 127;
+                targetYRightPanel = 52;
 
                 targetXLeftPanel = 129;
                 targetYLeftPanel = 55;
@@ -78,8 +78,8 @@ public class MainConfig {
             case Red:
                 teamPipeline = 1;
 
-                farZoneCameraAdder = 2;
-                autoZoneAdderFar = -0.5;
+                farZoneCameraAdder = 0;
+                autoZoneAdderFar = -1.5;
 
                 autoVelAdder = -20;
 

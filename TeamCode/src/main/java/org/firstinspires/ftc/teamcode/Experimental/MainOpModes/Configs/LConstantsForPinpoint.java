@@ -12,7 +12,7 @@ public class LConstantsForPinpoint {
         PinpointConstants.distanceUnit = DistanceUnit.METER;
         PinpointConstants.hardwareMapName = "pinpoint";
         PinpointConstants.useYawScalar = false;
-        PinpointConstants.yawScalar = 1; // for every 10 rotations it measures about 3607 degrees
+        PinpointConstants.yawScalar = 1.001168; // for every 10 rotations it measures about 3596 degrees
         PinpointConstants.useCustomEncoderResolution = false;
         PinpointConstants.encoderResolution = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
         PinpointConstants.customEncoderResolution = 13.26291192;
