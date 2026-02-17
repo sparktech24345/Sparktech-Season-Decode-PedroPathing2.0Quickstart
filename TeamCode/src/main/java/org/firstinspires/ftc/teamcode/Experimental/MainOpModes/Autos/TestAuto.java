@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.localization.Pose;
 import com.pedropathing.util.Drawing;
@@ -21,10 +22,11 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 import java.io.IOException;
-
+@Config
 @Autonomous(name = "Test Auto", group = "Tests")
 public class TestAuto extends OpMode {
     public static RobotController robotTester;
+    public static double multi = 1;
     private AutoRecorder recorder;
     ElapsedTime timer = new ElapsedTime();
 
@@ -50,18 +52,18 @@ public class TestAuto extends OpMode {
 
             private void controls() {
                 if (ComplexGamepad.get("A1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)).setName("Line p1"));
+                    robotTester.addToQueue(new MoveAction(pose(20*multi, 0, 0)).setName("Line p1"));
                     robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Line p2"));
                 }
                 else if (ComplexGamepad.get("B1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)).setName("Square p1"));
-                    robotTester.addToQueue(new MoveAction(pose(20, 20, 0)).setName("Square p2"));
+                    robotTester.addToQueue(new MoveAction(pose(20*multi, 0, 0)).setName("Square p1"));
+                    robotTester.addToQueue(new MoveAction(pose(20*multi, 20*multi, 0)).setName("Square p2"));
                     robotTester.addToQueue(new MoveAction(pose(0, 20, 0)).setName("Square p3"));
                     robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Square p4"));
                 }
                 else if (ComplexGamepad.get("X1").ExecuteOnPress) {
-                    robotTester.addToQueue(new MoveAction(pose(10, 20, 0)).setName("Triangle p1"));
-                    robotTester.addToQueue(new MoveAction(pose(20, 0, 0)).setName("Triangle p2"));
+                    robotTester.addToQueue(new MoveAction(pose(10*multi, 20*multi, 0)).setName("Triangle p1"));
+                    robotTester.addToQueue(new MoveAction(pose(20*multi, 0, 0)).setName("Triangle p2"));
                     robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Triangle p3"));
                 }
                 else if (ComplexGamepad.get("DPAD_UP1").ExecuteOnPress) {

@@ -134,7 +134,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 350; // 550 far side
+    public static double timer1 = 250; // 550 far side
     public static double timer5 = 600;
     public static double timer6 = 400;
     public static double outtakeReversingTime = 180;
@@ -406,11 +406,11 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                             new DelayAction(timer1),
 
-                            new StateAction("RightGateServo", "OPEN"),
+                            new StateAction("LeftGateServo", "OPEN"),
 
                             new DelayAction(timer2),
 
-                            new StateAction("LeftGateServo", "OPEN") // fire alternatevly so that when u fire unsorted u dont wait for the last timer
+                            new StateAction("RightGateServo", "OPEN") // fire alternatevly so that when u fire unsorted u dont wait for the last timer
                     ));
                     hasJustBeganFiring = false;
                 }

@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.tuners_tests.examples;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower.improviseBezierCurvePath;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
@@ -30,8 +34,8 @@ public class Triangle extends OpMode {
     private Follower follower;
 
     private final Pose startPose = new Pose(0,0, Math.toRadians(0));
-    private final Pose interPose = new Pose(24, -24, Math.toRadians(90));
-    private final Pose endPose = new Pose(24, 24, Math.toRadians(45));
+    private final Pose interPose = new Pose(24, -24, Math.toRadians(-90));
+    private final Pose endPose = new Pose(24, 24, Math.toRadians(0));
 
     private PathChain triangle;
 
@@ -46,7 +50,7 @@ public class Triangle extends OpMode {
         follower.update();
 
         if (follower.atParametricEnd()) {
-            follower.followPath(triangle, true);
+            follower.followPath(triangle, false);
         }
 
         follower.telemetryDebug(telemetryA);
@@ -62,13 +66,26 @@ public class Triangle extends OpMode {
         follower = new Follower(hardwareMap,FConstantsForPinpoint.class,LConstantsForPinpoint.class);
         follower.setStartingPose(startPose);
 
+//        triangle = follower.pathBuilder()
+//                .addPath(new BezierLine(new Point(startPose), new Point(interPose)))
+//                .setLinearHeadingInterpolation(startPose.getHeading(), interPose.getHeading())
+//                .addPath(new BezierLine(new Point(interPose), new Point(endPose)))
+//                .setLinearHeadingInterpolation(interPose.getHeading(), endPose.getHeading())
+//                .addPath(new BezierLine(new Point(endPose), new Point(startPose)))
+//                .setLinearHeadingInterpolation(endPose.getHeading(), startPose.getHeading())
+//                .build();
+
+        Path curve1 = improviseBezierCurvePath(startPose,interPose,true);
+        Path curve2 = improviseBezierCurvePath(interPose,endPose,false);
+        curve2.setReversed(true);
+        Path curve3 = improviseBezierCurvePath(endPose,startPose,true);
+        curve3.setReversed(true);
+
         triangle = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(startPose), new Point(interPose)))
-                .setLinearHeadingInterpolation(startPose.getHeading(), interPose.getHeading())
+                .addPath(curve1)
                 .addPath(new BezierLine(new Point(interPose), new Point(endPose)))
                 .setLinearHeadingInterpolation(interPose.getHeading(), endPose.getHeading())
-                .addPath(new BezierLine(new Point(endPose), new Point(startPose)))
-                .setLinearHeadingInterpolation(endPose.getHeading(), startPose.getHeading())
+                .addPath(curve3)
                 .build();
 
         follower.followPath(triangle);

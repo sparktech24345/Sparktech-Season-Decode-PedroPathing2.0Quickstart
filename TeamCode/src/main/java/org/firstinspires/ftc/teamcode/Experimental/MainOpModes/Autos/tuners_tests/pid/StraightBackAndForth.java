@@ -76,10 +76,10 @@ public class StraightBackAndForth extends OpMode {
         if (!follower.isBusy()) {
             if (forward) {
                 forward = false;
-                follower.followPath(backwards);
+                follower.followPath(backwards,true);
             } else {
                 forward = true;
-                follower.followPath(forwards);
+                follower.followPath(forwards,true);
             }
         }
 

@@ -9,33 +9,37 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.General
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
-@Disabled
+
 @Autonomous(name="Big Triangle 15 Artefact Auto BLUE", group = "BBB")
 public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
     @Override
     public void makeSortedAuto(){
-        robot.executeNow(new MoveAction(big_triangle_shoot_third_collect));
         robot.addToQueue(
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new GeneralAction(prepToFireSortedBall),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle),//false,true,false),
+                new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1200),
+//                new GeneralAction(prepToFireSortedBall),
+//                new DelayAction(400),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(500),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(500),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(500),
 
-                /// collecting the closest row second now
+                ///second now
 
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                new MoveAction(third_row_done),
+                new MoveAction(second_row_ready),
+                new MoveAction(second_row_done),
 
                 new GeneralAction(new Runnable() {
                     @Override
@@ -44,96 +48,68 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                         shouldMoveIntakeServo = false;
                     }
                 }),
-                new MoveAction(big_triangle_shoot_third_collect),
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle),
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
+                new DelayAction(200),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1400),
                 // end of first row firing
 
 
 
-                /// second row + lever
+                /// second row + lever on repeat
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                new MoveAction(second_row_ready),
-                new MoveAction(second_row_done),
-                new DelayAction(300),
-                new MoveAction(leverPoseSecondRow),
+                //new MoveAction(gateCollectPose,gateCollectHelperPoint,false,true),//gateCollectHelperPoint,false),
+                new MoveAction(leverCollectPose),
+                new DelayAction(1200),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_second_collect),
-                new GeneralAction(prepToFireSortedBall),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
-                /// end of second row firing
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle,gateCollectHelperPointForReverse,true,true),
+                new DelayAction(350),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1800),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
 
-
-
-
-                /// beginning of third row collect
-                new StateAction("IntakeMotor","FULL"),
+                /// second row + lever on repeat
+        new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                new MoveAction(first_row_ready),
-                new MoveAction(first_row_done),
-                ///firing the 12th ball firing
+                //new MoveAction(gateCollectPose,gateCollectHelperPoint,false,true),//gateCollectHelperPoint,false),
+                new MoveAction(leverCollectPose),
+                new DelayAction(1200),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_second_collect), ///TODO might change to park
-                new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
-                /// end of 12 ball  row firing
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle,gateCollectHelperPointForReverse,true,true),
+                new DelayAction(350),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1800),
+                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(turnStuffOff),
 
 
-                /// 15th ball row
-                new StateAction("IntakeMotor","FULL"),
+        /// second row + lever on repeat
+        new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-
-                new MoveAction(hp_collect_pose),
-                new DelayAction(150),
+                //new MoveAction(gateCollectPose,gateCollectHelperPoint,false,true),//gateCollectHelperPoint,false),
+                new MoveAction(leverCollectPose),
+                new DelayAction(1200),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(big_triangle_shoot_third_collect_with_park_180),
-                new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(300),
-                /// end of 15 ball  row firing
-
-
-
-
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle,gateCollectHelperPointForReverse,true,true),
+                new DelayAction(350),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1800),
                 new StateAction("IntakeMotor","OFF"),
                 new GeneralAction(turnStuffOff)
         );

@@ -24,8 +24,8 @@ public class FConstantsForPinpoint {
         FollowerConstants.xMovement = 78;//0.6*78;
         FollowerConstants.yMovement = 63;//0.6*63;
 
-        FollowerConstants.forwardZeroPowerAcceleration = -35;
-        FollowerConstants.lateralZeroPowerAcceleration = -72;
+        FollowerConstants.forwardZeroPowerAcceleration = -28;
+        FollowerConstants.lateralZeroPowerAcceleration = -66;
 
         FollowerConstants.translationalPIDFCoefficients.setCoefficients(0.16,0,0.01,0);
         FollowerConstants.useSecondaryTranslationalPID = false;
@@ -36,7 +36,7 @@ public class FConstantsForPinpoint {
         FollowerConstants.secondaryHeadingPIDFCoefficients.setCoefficients(2,0,0.1,0); // Not being used, @see useSecondaryHeadingPID
 
         FollowerConstants.drivePIDFCoefficients.setCoefficients(0.004,0.0005,0.0009,0.6,0);
-        FollowerConstants.useSecondaryDrivePID = true;
+        FollowerConstants.useSecondaryDrivePID = false;
         FollowerConstants.secondaryDrivePIDFCoefficients.setCoefficients(0.01,0,0.001,0.6,0); // Not being used, @see useSecondaryDrivePID
 
         FollowerConstants.zeroPowerAccelerationMultiplier = 8;//8

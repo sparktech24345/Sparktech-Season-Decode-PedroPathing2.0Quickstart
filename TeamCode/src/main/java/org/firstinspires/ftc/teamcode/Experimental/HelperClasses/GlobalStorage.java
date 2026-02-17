@@ -164,7 +164,7 @@ public class GlobalStorage {
     public static double grade0VeloClose = 1050;
     public static double grade1VeloClose = 230.5;
     public static double closeVelo = 1300; //230.49196x+1048.81104
-    public static double grade0farVelo = 740;
+    public static double grade0farVelo = 760;
     public static double grade1farVelo = 318;
     // general grad \\
     public static double distanceToVelocityFunction(double  distance) {

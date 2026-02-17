@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
@@ -11,6 +12,9 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.angleDecreaseValue;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.velocityDeltaCompensation;
 
 import android.graphics.Color;
@@ -19,6 +23,8 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.pathgen.Point;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -94,7 +100,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
     public Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: colect second row left
     public Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: colect second row left
-    public Pose leverCollectPose = pose(55,42.3,65);
+    public Pose leverCollectPose = pose(54.5,43.5,80);
     public Pose leverCollectPoseBezierHelper = pose(60,20,75);
     public Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
     public Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
@@ -102,7 +108,11 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
     public Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
     public Pose third_row_done = pose(75, 30, 90); // Pose11: collect third row left
-    public Pose classifier_starter = pose(120, 27, 90);
+    public Pose classifier_starter = pose(120,26,90);//pose(120, 27, 90);
+    public Pose bezierCurveShooterPoseTipOfTriangle = pose(68,0,90);
+    public Pose gateCollectPose = pose(55,42.5,75);
+    public Pose gateCollectHelperPoint = pose(45, 37,60);
+    public Pose gateCollectHelperPointForReverse = pose(68,11.475,90);
     public Pose hp_collect_pose = pose(4,47,180);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
@@ -162,7 +172,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     @Override
     public void init_loop() {
         robot.init_loop();
-        robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitClsoeZone);
+        robot.getTurretComponent("TurretRotateMotor").setTarget(cfg.rotationForInitClsoeZone);
         useCamera();
         RobotController.telemetry.addData("id",camId);
     }
@@ -371,7 +381,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new GeneralAction(turnOnIntakeServo),
 //                new MoveAction(first_row_ready),
 //                new MoveAction(first_row_done),
-                new MoveAction(leverCollectPose,leverCollectPoseBezierHelper),
+                new MoveAction(leverCollectPose,leverCollectPoseBezierHelper,false,true),
                 new DelayAction(2000),
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
@@ -406,21 +416,20 @@ public class BigTriangle12ArtefactAuto extends OpMode {
 
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
             robot.getMotorComponent("TurretSpinMotor")
-                    .setOperationMode(MotorComponent.MotorModes.Velocity)
+                    .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                     .setTarget(targetVelocity);
 
 
             // ----------------------- Angle Stuff -----------------------
 
-            double turretAngleVal = normalAngle;
-            turretAngleVal = clamp(turretAngleVal,262,324);
+            double turretAngleVal = distanceToAngleFunction(distanceToWallOdometry);
 
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
             // ----------------------- Rotation Stuff -----------------------
 
-            robot.getMotorComponent("TurretRotateMotor")
+            robot.getTurretComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
             ;
             return;
@@ -499,6 +508,20 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         }
         ballToFire = BallColorSet_Decode.NoBall;
     };
+    Runnable fireUnsortedBalls = () -> {
+        robot.executeNow(new ActionSequence(
+                new StateAction("RightGateServo", "OPEN"),
+                new DelayAction(timerToCloseGate),
+                new StateAction("RightGateServo", "CLOSED"),
+                new DelayAction(timer3),
+                new StateAction("LeftGateServo", "OPEN"),
+                new DelayAction(timer4),
+                new StateAction("RightGateServo", "OPEN"),
+                new DelayAction(1000),
+                new StateAction("RightGateServo", "CLOSED"),
+                new StateAction("LeftGateServo", "CLOSED")
+        ));
+    };
     Runnable turnStuffOff = () -> {
         shouldFire = false;
         shouldMoveIntakeServo = false;
@@ -507,7 +530,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 .setOperationMode(MotorComponent.MotorModes.Power)
                 .setTarget(0);
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT")); // go to default position
-            robot.getMotorComponent("TurretRotateMotor").setTarget(0);
+            robot.getTurretComponent("TurretRotateMotor").setTarget(0);
     };
 
     protected void HandleColors() {

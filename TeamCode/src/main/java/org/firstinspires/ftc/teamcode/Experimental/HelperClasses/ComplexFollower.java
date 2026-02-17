@@ -96,19 +96,54 @@ public class ComplexFollower {
         currentTargetPos = targetPos;
         pathToFollow = new Path(new BezierLine(currentPos, currentTargetPos));
         pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
-        follower.followPath(pathToFollow);
+        follower.followPath(pathToFollow,true);
         isDone = false;
     }
-    public static void follow(Pose targetPos, Pose bezierPointHelper){
+    public static void follow(Pose targetPos, Pose bezierPointHelper, boolean shouldReverse,boolean holdHeading){
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
-        currentTargetPos = targetPos;
-        pathToFollow = new Path(new BezierCurve(currentPos,bezierPointHelper,currentTargetPos));
-        pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
-        follower.followPath(pathToFollow);
+
+        Point pointCurrent = poseToPoint(currentPos);
+        Point bezierExtraPoint = poseToPoint(bezierPointHelper);
+        Point pointTarget = poseToPoint(targetPos);
+
+        pathToFollow = new Path(new BezierCurve(pointCurrent,bezierExtraPoint,pointTarget));
+        if(holdHeading) pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), targetPos.getHeading());
+        pathToFollow.setReversed(shouldReverse);
+        follower.followPath(pathToFollow,true);
         isDone = false;
     }
+    public static void follow(Pose targetPos, boolean shouldImproviseBezierOnX, boolean shouldReverse, boolean holdHeading){
+        if (follower == null) return;
+        if (follow_timer == null) follow_timer = new ElapsedTime();
+        else follow_timer.reset();
+
+        pathToFollow = improviseBezierCurvePath(currentPos, targetPos,shouldImproviseBezierOnX);
+        if(holdHeading) pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), targetPos.getHeading());
+        pathToFollow.setReversed(shouldReverse);
+        follower.followPath(pathToFollow,true);
+        isDone = false;
+    }
+
+
+    /// Bezier improvising stuff \\\
+    public static Point poseToPoint(Pose pose){
+        return new Point(pose.getX(),pose.getY(),Point.CARTESIAN);
+    }
+    public static Path improviseBezierCurvePath(Pose currentPose, Pose targetPose, boolean shouldImproviseBezierOnX){
+        Point helperPoint;
+        if(shouldImproviseBezierOnX) helperPoint = new Point(targetPose.getX(),currentPose.getY(),Point.CARTESIAN); // currents Pose y
+        else helperPoint = new Point(currentPose.getX(),targetPose.getY(),Point.CARTESIAN); // currents Pose x
+
+        return new Path(new BezierCurve(
+                poseToPoint(currentPose),
+                helperPoint,
+                poseToPoint(targetPose)
+        ));
+    }
+
+
 
     public static Follower instance() {
         return follower;
