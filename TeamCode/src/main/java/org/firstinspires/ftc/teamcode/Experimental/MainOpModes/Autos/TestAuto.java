@@ -53,7 +53,7 @@ public class TestAuto extends OpMode {
             private void controls() {
                 if (ComplexGamepad.get("A1").ExecuteOnPress) {
                     robotTester.addToQueue(new MoveAction(pose(20*multi, 0, 0)).setName("Line p1"));
-                    robotTester.addToQueue(new DelayAction(500));
+                    //robotTester.addToQueue(new DelayAction(500));
                     robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Line p2"));
                 }
                 else if (ComplexGamepad.get("B1").ExecuteOnPress) {

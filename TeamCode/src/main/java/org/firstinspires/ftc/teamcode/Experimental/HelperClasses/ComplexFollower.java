@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 public class ComplexFollower {
 
@@ -103,12 +104,12 @@ public class ComplexFollower {
 
         pathToFollow = new Path(new BezierLine(toUsePose, currentTargetPos));
         pathToFollow.setConstantHeadingInterpolation(0);
-        follower.followPath(pathToFollow);
+        follower.followPath(pathToFollow,true);
         isDone = false;
 
         lastTargetPose = targetPos;
     }
-    public static void follow(Pose targetPos, Pose bezierPointHelper, boolean shouldReverse,boolean holdHeading){
+    public static void follow(Pose targetPos,BezierCurveTypes bezierCurveType,double headingIfNeeded, Pose... bezierPointHelper){
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
@@ -118,15 +119,33 @@ public class ComplexFollower {
         else toUsePose = lastTargetPose;
 
 
-        pathToFollow = new Path(new BezierCurve(toUsePose,bezierPointHelper,targetPos));
-        if(holdHeading) pathToFollow.setLinearHeadingInterpolation(toUsePose.getHeading(), targetPos.getHeading());
-        //pathToFollow.setReversed(shouldReverse);
-        follower.followPath(pathToFollow);
+
+        pathToFollow = new Path(new BezierCurve(combinePoseArrays(toUsePose,bezierPointHelper,targetPos)));
+
+        switch(bezierCurveType){
+            case TangentHeading:
+                pathToFollow.setTangentHeadingInterpolation();
+                break;
+            case LinearHeading:
+                pathToFollow.setLinearHeadingInterpolation(toUsePose.getHeading(),targetPos.getHeading());
+                break;
+            case ConstantHeading:
+                pathToFollow.setConstantHeadingInterpolation(headingIfNeeded);
+                break;
+            case ReverseTangentHeading:
+                pathToFollow.setTangentHeadingInterpolation();
+                pathToFollow.reverseHeadingInterpolation();
+                break;
+            default:
+                pathToFollow.setConstantHeadingInterpolation(0);
+        }
+
+        follower.followPath(pathToFollow,true);
         isDone = false;
 
         lastTargetPose = targetPos;
     }
-    public static void follow(Pose targetPos, boolean shouldImproviseBezierOnX, boolean shouldReverse, boolean holdHeading) {
+    public static void follow(Pose targetPos, boolean shouldImproviseOnX,BezierCurveTypes bezierCurveType,double headingIfNeeded){
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
@@ -135,27 +154,55 @@ public class ComplexFollower {
         if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
         else toUsePose = lastTargetPose;
 
-        pathToFollow = improviseBezierCurvePath(toUsePose, targetPos, shouldImproviseBezierOnX);
-        if (holdHeading)
-            pathToFollow.setLinearHeadingInterpolation(toUsePose.getHeading(), targetPos.getHeading());
-        //pathToFollow.setReversed(shouldReverse);
-        follower.followPath(pathToFollow);
+
+        pathToFollow = new Path(new BezierCurve(toUsePose,improviseBezierCurvePath(toUsePose,targetPos,shouldImproviseOnX),targetPos));
+
+        switch(bezierCurveType){
+            case TangentHeading:
+                pathToFollow.setTangentHeadingInterpolation();
+                break;
+            case LinearHeading:
+                pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(),targetPos.getHeading());
+                break;
+            case ConstantHeading:
+                pathToFollow.setConstantHeadingInterpolation(headingIfNeeded);
+                break;
+            case ReverseTangentHeading:
+                pathToFollow.setTangentHeadingInterpolation();
+                pathToFollow.reverseHeadingInterpolation();
+                break;
+            default:
+                pathToFollow.setConstantHeadingInterpolation(0);
+        }
+
+        follower.followPath(pathToFollow,true);
         isDone = false;
 
         lastTargetPose = targetPos;
     }
-    public static Path improviseBezierCurvePath(Pose currentPose, Pose targetPose, boolean shouldImproviseBezierOnX){
+    public static Pose improviseBezierCurvePath(Pose currentPose, Pose targetPose, boolean shouldImproviseBezierOnX){
         Pose helperPoint;
         if(shouldImproviseBezierOnX) helperPoint = new Pose(targetPose.getX(),currentPose.getY()); // currents Pose y
         else helperPoint = new Pose(currentPose.getX(),targetPose.getY()); // currents Pose x
 
-        return new Path(new BezierCurve(
-                currentPose,
-                helperPoint,
-                targetPose
-        ));
+        return helperPoint;
     }
+    public static Pose[] combinePoseArrays(Pose start, Pose[] middle, Pose end) {
+        // 1. Define the exact size needed
+        Pose[] combined = new Pose[middle.length + 2];
 
+        // 2. Place the 'start' at the very beginning
+        combined[0] = start;
+
+        // 3. High-speed memory copy of the middle array
+        // (Source, SourcePos, Dest, DestPos, Length)
+        System.arraycopy(middle, 0, combined, 1, middle.length);
+
+        // 4. Place the 'end' at the very last index
+        combined[combined.length - 1] = end;
+
+        return combined;
+    }
 
 
     public static Follower instance() {

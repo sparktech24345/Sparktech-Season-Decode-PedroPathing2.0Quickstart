@@ -4,8 +4,6 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ColorSensorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
@@ -72,10 +70,6 @@ public class ComponentMakerMethods {
                 .setRange(0,1)
                 .moveDuringInit(true)
         );
-
-
-        robot.makeComponent("colorSensorRight", new ColorSensorComponent(colorSensorRightName));
-        robot.makeComponent("colorSensorLeft", new ColorSensorComponent(colorSensorLeftName));
     }
 
     public static void MakeStates(RobotController robot) {

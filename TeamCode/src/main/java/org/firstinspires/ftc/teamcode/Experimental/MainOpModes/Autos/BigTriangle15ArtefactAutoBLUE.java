@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfi
 
 @Autonomous(name="Big Triangle 15 Artefact Auto BLUE", group = "BBB")
 public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
+    public Pose poser;
     @Override
     public void makeSortedAuto(){
         robot.addToQueue(
@@ -54,7 +55,6 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new DelayAction(200),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1400),
-                // end of first row firing
 
 
 
@@ -62,32 +62,31 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                //new MoveAction(gateCollectPose,gateCollectHelperPoint,false,true),//gateCollectHelperPoint,false),
                 new MoveAction(leverCollectPose),
                 new DelayAction(1200),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(bezierCurveShooterPoseTipOfTriangle,gateCollectHelperPointForReverse,true,true),
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle),
                 new DelayAction(350),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1800),
                 new StateAction("IntakeMotor","OFF"),
                 new GeneralAction(turnStuffOff),
+
 
                 /// second row + lever on repeat
-        new StateAction("IntakeMotor","FULL"),
+                new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                //new MoveAction(gateCollectPose,gateCollectHelperPoint,false,true),//gateCollectHelperPoint,false),
                 new MoveAction(leverCollectPose),
                 new DelayAction(1200),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(bezierCurveShooterPoseTipOfTriangle,gateCollectHelperPointForReverse,true,true),
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle),//gateCollectHelperPointForReverse,true,true),
                 new DelayAction(350),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1800),
@@ -95,18 +94,17 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
                 new GeneralAction(turnStuffOff),
 
 
-        /// second row + lever on repeat
-        new StateAction("IntakeMotor","FULL"),
+                /// second row + lever on repeat
+                new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
                 new GeneralAction(turnOnIntakeServo),
-                //new MoveAction(gateCollectPose,gateCollectHelperPoint,false,true),//gateCollectHelperPoint,false),
                 new MoveAction(leverCollectPose),
                 new DelayAction(1200),
                 new GeneralAction(() -> {
                     shouldFire = true;
                     shouldMoveIntakeServo = false;
                 }),
-                new MoveAction(bezierCurveShooterPoseTipOfTriangle,gateCollectHelperPointForReverse,true,true),
+                new MoveAction(bezierCurveShooterPoseTipOfTriangle),//gateCollectHelperPointForReverse,true,true),
                 new DelayAction(350),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1800),
@@ -117,5 +115,11 @@ public class BigTriangle15ArtefactAutoBLUE extends BigTriangle12ArtefactAuto {
     @Override
     public void makeLeverAuto(){
         makeSortedAuto();
+    }
+
+    @Override
+    public void convertPoses(){
+        super.convertPoses();
+
     }
 }

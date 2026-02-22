@@ -40,6 +40,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAct
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BezierCurveTypes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
@@ -95,9 +96,9 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public Pose first_row_intermediate = pose(31, 13, 90); // Pose4: collect first row right
     public Pose first_row_done = pose(31, 46.5, 90); // Pose5: collect first row left
     public Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
-    public Pose second_row_done = pose(52, 42, 90); // Pose8: colect second row left
-    public Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: colect second row left
-    public Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: colect second row left
+    public Pose second_row_done = pose(52, 42, 90); // Pose8: collect second row left
+    public Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: collect second row left
+    public Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: collect second row left
     public Pose leverCollectPose = pose(54.5,43.5,80);
     public Pose leverCollectPoseBezierHelper = pose(60,20,75);
     public Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
@@ -379,7 +380,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 new GeneralAction(turnOnIntakeServo),
 //                new MoveAction(first_row_ready),
 //                new MoveAction(first_row_done),
-                new MoveAction(leverCollectPose,leverCollectPoseBezierHelper,false,true),
+                new MoveAction(leverCollectPose, BezierCurveTypes.LinearHeading,0,leverCollectPoseBezierHelper),
                 new DelayAction(2000),
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {

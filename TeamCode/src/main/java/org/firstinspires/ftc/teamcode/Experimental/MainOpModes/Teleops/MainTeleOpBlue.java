@@ -401,7 +401,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 if (usedDistance > 2.9 /* && hasBallInLeftChamber*/) {
                     robot.executeNow(new ActionSequence(
                             new StateAction("RightGateServo", "OPEN"),
-                            new DelayAction(timerToCloseGate),
+                            new DelayAction(timerToCloseGate),// 300mls
                             new StateAction("RightGateServo", "CLOSED"),
 
                             new DelayAction(timer1),
@@ -417,7 +417,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 else {
                     robot.executeNow(new ActionSequence(
                             new StateAction("RightGateServo", "OPEN"),
-                            new DelayAction(timerToCloseGate),
+                            new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
                             new DelayAction(timer3),
                             new StateAction("LeftGateServo", "OPEN"),
