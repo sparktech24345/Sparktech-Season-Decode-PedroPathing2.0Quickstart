@@ -53,6 +53,7 @@ public class PinpointTest extends OpMode {
     private DcMotor LFDrive;
     private DcMotor RBDrive;
     private DcMotor LBDrive;
+    long bugetTimer =0;
     MultipleTelemetry tel;
     @Override
     public void init() {
@@ -83,6 +84,9 @@ public class PinpointTest extends OpMode {
         double vertical     = -gamepad1.left_stick_y;
         double horizontal   = -gamepad1.left_stick_x;
         double pivot        = gamepad1.right_stick_x;
+
+        if(gamepad1.a) bugetTimer = System.currentTimeMillis() + 1200;
+        //if(bugetTimer > System.currentTimeMillis()) vertical = 1;
 
 
         double FrontRightPow = vertical + horizontal - pivot;

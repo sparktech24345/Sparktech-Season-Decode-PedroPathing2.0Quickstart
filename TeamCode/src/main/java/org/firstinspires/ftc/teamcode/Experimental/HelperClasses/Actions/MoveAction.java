@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions;
 
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 

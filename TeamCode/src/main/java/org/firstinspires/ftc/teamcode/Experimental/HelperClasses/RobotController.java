@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.localization.*;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -17,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Serv
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -25,8 +28,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public static HardwareMap hardwareMap = null;
     public static MultipleTelemetry telemetry = null;
     public static StateQueuer queuer = null;
-    
-    
+    private List<LynxModule> allHubs;
     private double tickMS = 0;
     private ElapsedTime tickTimer = new ElapsedTime();
     private HashMap<String, RobotState> states = new HashMap<>();
@@ -34,6 +36,12 @@ public abstract class RobotController implements RobotControllerInterface {
     private DriveTrain movement = null;
 
     private void init_all() {
+        //loop time improving thingy
+        allHubs = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+
         ComplexFollower.init(hardwareMap);
         ComplexFollower.setStartingPose(globalRobotPose);
         ComplexFollower.update();
@@ -138,12 +146,26 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     private void runUpdates() {
+        // time improving thingy
+        for (LynxModule hub : allHubs) {
+            hub.clearBulkCache();
+        }
+
         ComplexGamepad.update();
-        ComplexFollower.update();
+        // untill here about 0.6 milisec with spikes up to 1.5
+        ComplexFollower.update(); /// this is problem
+        // up to here anywhere from 7 mls to 35
+
+
+        // about 0.1 mls or lower
         queuer.update();
-        for (Component c : components.values()) {
+
+        //from 12 mls to spikes of 50
+        for (Component c : components.values()) { /// this is big problem
             c.update();
         }
+
+        //this and telemtry takes about 0.1
         if (DriveTrain.wasInitialized()) DriveTrain.loop();
         telemetry.update();
     }
@@ -151,7 +173,13 @@ public abstract class RobotController implements RobotControllerInterface {
     public void loop() {
         tickTimer.reset();
         runUpdates();
+        // main loop takes under 0.5 milsec and is not the problem
         main_loop();
+//        if(tickMS < 35) try {
+//            Thread.sleep((long) (35 - tickMS));
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         tickMS = tickTimer.milliseconds();
     }
 

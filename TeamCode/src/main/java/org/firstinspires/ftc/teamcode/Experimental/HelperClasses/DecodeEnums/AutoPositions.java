@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums;
 
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.localization.*;
 
 public enum AutoPositions {

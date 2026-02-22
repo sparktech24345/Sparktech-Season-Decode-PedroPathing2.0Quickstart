@@ -5,14 +5,13 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.pedropathing.localization.Pose;
-import com.pedropathing.util.Drawing;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
@@ -40,19 +39,21 @@ public class TestAuto extends OpMode {
             }
 
             private void telemetry() {
-                ComplexFollower.telemetry();
-                queuer.telemetry();
-                telemetry.addData("AAA_controls: A1", "move fata spate");
-                telemetry.addData("AAA_controls: B1", "move patrat");
-                telemetry.addData("AAA_controls: X1", "move triunghi");
-                telemetry.addData("AAA_controls: DPAD UP1", "move fata spate + hood movement");
-                telemetry.addData("AAA_controls: DPAD DOWN1", "move patrat + hood movement");
+                //ComplexFollower.telemetry();
+                //queuer.telemetry();
+                telemetry.addData("llopTimer", robotTester.getExecMS());
+//                telemetry.addData("AAA_controls: A1", "move fata spate");
+//                telemetry.addData("AAA_controls: B1", "move patrat");
+//                telemetry.addData("AAA_controls: X1", "move triunghi");
+//                telemetry.addData("AAA_controls: DPAD UP1", "move fata spate + hood movement");
+//                telemetry.addData("AAA_controls: DPAD DOWN1", "move patrat + hood movement");
                 telemetry.update();
             }
 
             private void controls() {
                 if (ComplexGamepad.get("A1").ExecuteOnPress) {
                     robotTester.addToQueue(new MoveAction(pose(20*multi, 0, 0)).setName("Line p1"));
+                    robotTester.addToQueue(new DelayAction(500));
                     robotTester.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Line p2"));
                 }
                 else if (ComplexGamepad.get("B1").ExecuteOnPress) {
@@ -99,7 +100,7 @@ public class TestAuto extends OpMode {
 
     @Override
     public void loop() {
-        recorder.update();
+        //recorder.update();
         robotTester.loop();
     }
 

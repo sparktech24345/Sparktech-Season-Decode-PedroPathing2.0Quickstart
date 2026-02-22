@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 import android.util.Pair;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.MotifSequence;

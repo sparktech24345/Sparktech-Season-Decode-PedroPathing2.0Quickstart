@@ -3,7 +3,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotCon
 
 import android.annotation.SuppressLint;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.utils.autoRecorder.TimedPoseData;
 

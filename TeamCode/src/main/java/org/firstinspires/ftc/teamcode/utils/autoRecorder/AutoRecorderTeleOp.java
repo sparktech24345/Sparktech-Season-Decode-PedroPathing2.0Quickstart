@@ -6,14 +6,11 @@ import android.annotation.SuppressLint;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.follower.Follower;import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.FConstantsForPinpoint;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.LConstantsForPinpoint;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 import java.io.File;
@@ -34,7 +31,8 @@ public class AutoRecorderTeleOp extends LinearOpMode {
 
         MultipleTelemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+        //follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
 
         waitForStart();
 

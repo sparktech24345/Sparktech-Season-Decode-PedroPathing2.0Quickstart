@@ -1,19 +1,17 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.draw;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.*;
-import com.pedropathing.pathgen.*;
-import com.pedropathing.util.Constants;
-import com.pedropathing.util.Drawing;
+import com.pedropathing.geometry.*;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.FConstantsForPinpoint;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.LConstantsForPinpoint;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 import java.text.MessageFormat;
 
@@ -21,7 +19,7 @@ public class ComplexFollower {
 
     private static boolean isDone = true;
     private static Pose startPos = pose(0, 0, 0);
-
+    private static Pose lastTargetPose = startPos;
     private static double currentX = startPos.getX();
     private static double currentY = startPos.getY();
     private static double currentHeading = startPos.getHeading();
@@ -41,15 +39,19 @@ public class ComplexFollower {
 
     public static void init(HardwareMap hardwareMap, Pose startingPose) {
         hmap = hardwareMap;
-        follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
-        com.pedropathing.util.Constants.setConstants(FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+       // follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+        //com.pedropathing.util.Constants.setConstants(FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
         follower.setStartingPose(startingPose);
+        lastTargetPose = startingPose;
         follower.update();
         currentPos = startPos;
         currentX = currentPos.getX();
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
         currentTargetPos = startPos;
+        Drawing.drawDebug(follower);
+        follower.activateAllPIDFs();
     }
 
     public static void reset() {
@@ -94,52 +96,63 @@ public class ComplexFollower {
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
         currentTargetPos = targetPos;
-        pathToFollow = new Path(new BezierLine(currentPos, currentTargetPos));
-        pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), currentTargetPos.getHeading());
-        follower.followPath(pathToFollow,true);
+
+        Pose toUsePose;
+        //if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
+         toUsePose = lastTargetPose;
+
+        pathToFollow = new Path(new BezierLine(toUsePose, currentTargetPos));
+        pathToFollow.setConstantHeadingInterpolation(0);
+        follower.followPath(pathToFollow);
         isDone = false;
+
+        lastTargetPose = targetPos;
     }
     public static void follow(Pose targetPos, Pose bezierPointHelper, boolean shouldReverse,boolean holdHeading){
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
 
-        Point pointCurrent = poseToPoint(currentPos);
-        Point bezierExtraPoint = poseToPoint(bezierPointHelper);
-        Point pointTarget = poseToPoint(targetPos);
+        Pose toUsePose;
+        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
+        else toUsePose = lastTargetPose;
 
-        pathToFollow = new Path(new BezierCurve(pointCurrent,bezierExtraPoint,pointTarget));
-        if(holdHeading) pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), targetPos.getHeading());
-        pathToFollow.setReversed(shouldReverse);
-        follower.followPath(pathToFollow,true);
+
+        pathToFollow = new Path(new BezierCurve(toUsePose,bezierPointHelper,targetPos));
+        if(holdHeading) pathToFollow.setLinearHeadingInterpolation(toUsePose.getHeading(), targetPos.getHeading());
+        //pathToFollow.setReversed(shouldReverse);
+        follower.followPath(pathToFollow);
         isDone = false;
+
+        lastTargetPose = targetPos;
     }
-    public static void follow(Pose targetPos, boolean shouldImproviseBezierOnX, boolean shouldReverse, boolean holdHeading){
+    public static void follow(Pose targetPos, boolean shouldImproviseBezierOnX, boolean shouldReverse, boolean holdHeading) {
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
 
-        pathToFollow = improviseBezierCurvePath(currentPos, targetPos,shouldImproviseBezierOnX);
-        if(holdHeading) pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(), targetPos.getHeading());
-        pathToFollow.setReversed(shouldReverse);
-        follower.followPath(pathToFollow,true);
+        Pose toUsePose;
+        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
+        else toUsePose = lastTargetPose;
+
+        pathToFollow = improviseBezierCurvePath(toUsePose, targetPos, shouldImproviseBezierOnX);
+        if (holdHeading)
+            pathToFollow.setLinearHeadingInterpolation(toUsePose.getHeading(), targetPos.getHeading());
+        //pathToFollow.setReversed(shouldReverse);
+        follower.followPath(pathToFollow);
         isDone = false;
-    }
 
-
-    /// Bezier improvising stuff \\\
-    public static Point poseToPoint(Pose pose){
-        return new Point(pose.getX(),pose.getY(),Point.CARTESIAN);
+        lastTargetPose = targetPos;
     }
     public static Path improviseBezierCurvePath(Pose currentPose, Pose targetPose, boolean shouldImproviseBezierOnX){
-        Point helperPoint;
-        if(shouldImproviseBezierOnX) helperPoint = new Point(targetPose.getX(),currentPose.getY(),Point.CARTESIAN); // currents Pose y
-        else helperPoint = new Point(currentPose.getX(),targetPose.getY(),Point.CARTESIAN); // currents Pose x
+        Pose helperPoint;
+        if(shouldImproviseBezierOnX) helperPoint = new Pose(targetPose.getX(),currentPose.getY()); // currents Pose y
+        else helperPoint = new Pose(currentPose.getX(),targetPose.getY()); // currents Pose x
 
         return new Path(new BezierCurve(
-                poseToPoint(currentPose),
+                currentPose,
                 helperPoint,
-                poseToPoint(targetPose)
+                targetPose
         ));
     }
 

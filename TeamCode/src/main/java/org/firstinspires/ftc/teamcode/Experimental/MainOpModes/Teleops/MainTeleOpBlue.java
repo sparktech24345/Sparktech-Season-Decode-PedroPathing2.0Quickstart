@@ -18,7 +18,7 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -134,13 +134,13 @@ public class MainTeleOpBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 250; // 550 far side
-    public static double timer5 = 600;
-    public static double timer6 = 400;
+    public static double timer1 = 0; // 550 far side
+    public static double timer5 = 0;
+    public static double timer6 = 0;
     public static double outtakeReversingTime = 180;
-    public static double timer2 = 400; // 700 far side
-    public static double timer3 = 100; // close side
-    public static double timer4 = 400; // close side
+    public static double timer2 = 0; // 700 far side
+    public static double timer3 = 0; // close side
+    public static double timer4 = 0; // close side
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
     public static double shootSortedTime = 800;
