@@ -61,6 +61,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double velf = -12;
     public static double vMultiplier = 1;
     public static boolean shouldUseSecondaryPID = false;
+    public static int a;
 
     public static MainConfig cfg;
     public static Drivers driver = Drivers.Teo;
@@ -178,7 +179,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.usedTargetX, cfg.usedTargetY);
 
-        TurretComponent tempTurret = (TurretComponent) robot.getMotorComponent("TurretRotateMotor");
+        TurretComponent tempTurret = robot.getTurretComponent("TurretRotateMotor");
         // Update pose from Odometry
         tempTurret.updateRobotPose(robot.getCurrentPose());
         tempTurret.setBallTimeInAir(ballInAirTime);

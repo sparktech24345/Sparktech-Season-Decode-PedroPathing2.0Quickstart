@@ -31,7 +31,7 @@ import java.nio.file.Path;
 
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(14)
+            .mass(14.3)
             .forwardZeroPowerAcceleration(-27.81051833)
             .lateralZeroPowerAcceleration(-55.7462)
             .centripetalScaling(0.0005)

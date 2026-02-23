@@ -1,21 +1,17 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.normalAngle;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.angleDecreaseValue;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.velocityDeltaCompensation;
 
 import android.graphics.Color;
 
@@ -53,7 +49,7 @@ import java.util.List;
 
 @Config
 @Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
-public class BigTriangle12ArtefactAuto extends OpMode {
+public class BigTriangleArtefactAuto extends OpMode {
     public RobotController robot;
     private AutoRecorder recorder;
     private Limelight3A limelight3A;
@@ -86,10 +82,10 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public static boolean hasBallInLeftChamber = false;
     public static boolean hadBallInLeftChamberInPast = false;
     public static boolean shouldRemoveBalls = false;
-    public static boolean shouldPullFromQueue = false;
+    public static boolean shouldBoostOnTheGoVelocityLogic = false;
+    public static double velocityAdderOnTheGo = 700;
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
-    public static boolean shouldMoveIntakeServo = false;
     /// --------------------------------------------------------
     public Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
     public Pose first_row_ready = pose(35, -2, 120); // Pose4: collect first row right
@@ -102,7 +98,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     public Pose leverCollectPose = pose(54.5,43.5,80);
     public Pose leverCollectPoseBezierHelper = pose(60,20,75);
     public Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
-    public Pose big_triangle_shoot_second_collect = pose(68, 4, 90); // Pose9: shooting big triangle pose
+    public Pose big_triangle_shoot_second_collect = pose(64, 2, 90); // Pose9: shooting big triangle pose
     public Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
     public Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
     public Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
@@ -138,7 +134,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
                 HandleColors();
-                intakeChecks(shouldMoveIntakeServo);
                 firingTurret(shouldFire);
                 if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseSecondRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseThirdRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
@@ -161,7 +156,7 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
-        shouldFire = false; shouldMoveIntakeServo = false; lastGateState = 1;
+        shouldFire = false; lastGateState = 1;
         hadBallInRightChamberInPast = false; hadBallInLeftChamberInPast = false;
         collectNumber = 0;
         movingTimer.reset();
@@ -198,88 +193,53 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    public void makeSortedAuto(){
+    /// =============================== Lever Auto ============================
+
+
+    public void makeLeverAuto(){
         robot.addToQueue(
+                /// prep and firing preload
                 new StateAction("IntakeMotor","FULL"),
+                new GeneralAction(() -> shouldFire = true),
+                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = true),
                 new GeneralAction(() -> {
-                    shouldFire = true;
-                    shouldMoveIntakeServo = false;
+                    robot.executeNow(new ActionSequence(
+                            new DelayAction(800),
+                            new GeneralAction(fireUnsortedBalls)
+                    ));
                 }),
-                new MoveAction(big_triangle_shoot_third_collect),
-                new GeneralAction(prepToFireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
+                new MoveAction(big_triangle_shoot_second_collect),
+                new DelayAction(200),
+                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = false),
+                /// finished preload and path
+
 
 
                 /// second row
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
-                new MoveAction(second_row_ready),
+                //new MoveAction(second_row_ready),
                 new MoveAction(second_row_done),
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                    shouldMoveIntakeServo = false;
-                }),
-                new MoveAction(big_triangle_shoot_third_collect),
-                new GeneralAction(prepToFireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
+                new MoveAction(big_triangle_shoot_second_collect),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1000),
                 /// end of second row firing
 
 
 
-                /// beginning of first row collect
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(increaseCollectNumber),
-                new MoveAction(first_row_ready),
-                new MoveAction(first_row_done),
-                new StateAction("IntakeMotor","OFF"),
-                new DelayAction(200),
-                ///firing the 12th ball firing
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                    shouldMoveIntakeServo = false;
-                }),
-                new MoveAction(big_triangle_shoot_third_collect), ///TODO might change to park
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
-                /// end of first row firing
-
-
-
-
                 /// collecting the third row
-
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(increaseCollectNumber),
-                new GeneralAction(turnOnIntakeServo),
+                new MoveAction(third_row_ready),
                 new MoveAction(third_row_done),
+                new DelayAction(350),
+                new MoveAction(leverPoseThirdRow),
+                new DelayAction(500),
                 new GeneralAction(new Runnable() {
                     @Override
                     public void run() {
                         shouldFire = true;
-                        shouldMoveIntakeServo = false;
                     }
                 }),
-                new MoveAction(big_triangle_shoot_third_collect_with_park),
+                new MoveAction(big_triangle_shoot_third_collect),
                 new GeneralAction(prepToFireSortedBall),
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(800),
@@ -292,92 +252,9 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 /// end of third row firing
 
 
-
-                new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(turnStuffOff)
-        );
-    }
-
-
-    /// =============================== Lever Auto ============================
-
-
-    public void makeLeverAuto(){
-        robot.addToQueue(
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                    shouldMoveIntakeServo = false;
-                }),
-                new MoveAction(big_triangle_shoot_third_collect),
-                new GeneralAction(prepToFireSortedBall),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-
-                /// collecting the first row
-
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(increaseCollectNumber),
-                new GeneralAction(turnOnIntakeServo),
-                new MoveAction(third_row_ready),
-                new MoveAction(third_row_done),
-                new DelayAction(350),
-                new MoveAction(leverPoseThirdRow),
-                new DelayAction(500),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        shouldFire = true;
-                        shouldMoveIntakeServo = false;
-                    }
-                }),
-                new MoveAction(big_triangle_shoot_third_collect),
-                new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                /// end of first row firing
-
-
-
-                /// second row
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(increaseCollectNumber),
-                new GeneralAction(turnOnIntakeServo),
-                new MoveAction(second_row_ready),
-                new MoveAction(second_row_done),
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                    shouldMoveIntakeServo = false;
-                }),
-                new MoveAction(big_triangle_shoot_third_collect),
-                new GeneralAction(prepToFireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                /// end of second row firing
-
-
-
-
                 /// beginning of third row collect
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(increaseCollectNumber),
-                new GeneralAction(turnOnIntakeServo),
 //                new MoveAction(first_row_ready),
 //                new MoveAction(first_row_done),
                 new MoveAction(leverCollectPose, BezierCurveTypes.LinearHeading,0,leverCollectPoseBezierHelper),
@@ -385,7 +262,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
                 ///firing the 12th ball firing
                 new GeneralAction(() -> {
                     shouldFire = true;
-                    shouldMoveIntakeServo = false;
                 }),
                 new MoveAction(big_triangle_shoot_third_collect_with_park),
                 new GeneralAction(prepToFireSortedBall),
@@ -414,6 +290,9 @@ public class BigTriangle12ArtefactAuto extends OpMode {
             // ----------------------- Power Stuff -----------------------
 
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
+
+            if(shouldBoostOnTheGoVelocityLogic) targetVelocity += velocityAdderOnTheGo;
+
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                     .setTarget(targetVelocity);
@@ -523,7 +402,6 @@ public class BigTriangle12ArtefactAuto extends OpMode {
     };
     Runnable turnStuffOff = () -> {
         shouldFire = false;
-        shouldMoveIntakeServo = false;
 
         robot.getMotorComponent("TurretSpinMotor")
                 .setOperationMode(MotorComponent.MotorModes.Power)
@@ -575,38 +453,9 @@ public class BigTriangle12ArtefactAuto extends OpMode {
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
     public static int lastGateState = 1;
-    protected void intakeChecks(boolean shouldCheck){
-        int gateState = 0;
-        if(true){
-            if(shouldCheck) {
-                    if (!hasBallInRightChamber) gateState = -1; // first fill up left
-                    else if (!hasBallInLeftChamber) gateState = 1; // then right
-                    else gateState = 1; // then point middle cuz new sorting logic
-            } // yet another logic
-            else gateState = lastGateState;
-            lastGateState = gateState;
-        }
-        else{
-            if(shouldCheck) {
-                if (!hasBallInLeftChamber) gateState = -1; // first fill up left
-                else if (!hasBallInRightChamber) gateState = 1; // then right
-                else gateState = -1; // then continue pointing to right for when you fire
-                //else gateState = lastGateState;
-            }
-            else gateState = lastGateState;
-            lastGateState = gateState;
-        }
-    }
     Runnable increaseCollectNumber = () -> {
         collectNumber++;
     };
-    Runnable turnOnIntakeServo = () -> {
-        shouldMoveIntakeServo = true;
-    };
-    Runnable turnOffIntakeServo = () -> {
-        shouldMoveIntakeServo = false;
-    };
-
     public void makeConfig(){
     cfg = new MainConfig(MainConfig.Configs.Blue);
 }

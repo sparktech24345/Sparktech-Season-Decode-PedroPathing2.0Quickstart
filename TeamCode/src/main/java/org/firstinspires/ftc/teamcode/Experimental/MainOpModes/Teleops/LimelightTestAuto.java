@@ -51,28 +51,14 @@ public class LimelightTestAuto extends OpMode {
     }
 
     public void useCamera() {
-//        LLResult llResult = limelight3A.getLatestResult();
-//        List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-//        for (LLResultTypes.FiducialResult fr : fiducialResults) {
-//            camId = fr.getFiducialId();
-//        }
-
-
-//        telemetry.addData("april tag detected id",camId);
-//        telemetry.addData("ty to tag",llResult.getTy());
         LLResult llResult = limelight3A.getLatestResult();
 
-        if (llResult != null && llResult.isValid()) {
-            // This grabs the double[] array returned by your python script
+        if (llResult != null) {
             double[] pythonData = llResult.getPythonOutput();
-
-            // Make sure the array isn't empty before accessing it
             if (pythonData.length > 0) {
                 double firstValue = pythonData[0];
-//                double secondValue = pythonData[1];
 
                 telemetry.addData("Python Val 1", firstValue);
-//                telemetry.addData("Python Val 2", secondValue);
             }
         }
 

@@ -5,6 +5,9 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Ma
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.rotationForInitSmallTriangle;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
 
 import android.graphics.Color;
 
@@ -29,10 +32,12 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAct
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BezierCurveTypes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
@@ -44,15 +49,15 @@ import java.util.List;
 @Autonomous(name = "Small Triangle Auto BLUE", group = "AAA")
 public class SmallTriangleNew extends OpMode {
     private RobotController robot;
-    private AutoRecorder recorder;
+    //private AutoRecorder recorder;
     private Limelight3A limelight3A;
     public static MainConfig cfg;
     private boolean shouldFire;
     public static boolean isMoving;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime resetLeftBallColorTimer = new ElapsedTime();
-    public static boolean shouldMoveIntakeServo = false;
     public static boolean doIntakePulse = false;
+    public static boolean shouldHoldTurretForCameraScan = false;
 
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
@@ -73,11 +78,19 @@ public class SmallTriangleNew extends OpMode {
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static double velocity = 1480;
     public static double angle = 266;
+    public static double rotationNeededForCameraScan = 15; // about 15 degrees to scan with limelight
     public static int camId =23;
-    private Pose starter = pose( 0.0, 6.12, 90);
-    private Pose small_triangle_shoot = pose(1, 3, 90);
+    private Pose starter = pose( 0.0, 13.6, 90); // would also be around 1.4x
+    private Pose small_triangle_shoot = pose(1, 10, 90);
     private Pose parkPose = pose(10, 15, 90);
     private Pose fininshHPCollectPose = pose(0,46,90);
+    private Pose firstZoneCameraCollect = pose(0, 45.8, 90);
+    private Pose secondZoneCameraCollect = pose(14, 45.5, 90);
+    private Pose thirdZoneCameraCollect = pose(33, 45.1, 90);
+    private Pose bezierHelper1 = pose(6.3, 20, 90);
+    private Pose bezierHelper2 = pose(39, 10, 90);
+    private Pose finalThirdRow = pose(29.3, 38.9, 90);
+
     @Override
     public void init() {
         robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
@@ -93,13 +106,11 @@ public class SmallTriangleNew extends OpMode {
                         RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
                         RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
             }
-
             private void controls() {
                 isMoving = ComplexFollower.instance().isBusy();
-                HandleColors();
+                //HandleColors();
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 firingTurret(shouldFire);
-                intakeChecks(shouldMoveIntakeServo);
                 pulseIntake(doIntakePulse);
             }
         };
@@ -107,13 +118,15 @@ public class SmallTriangleNew extends OpMode {
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         robot.init(OpModes.Autonomous);
-        recorder = new AutoRecorder();
+        //recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         convertPoses();
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
         shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
 
+        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight3A.pipelineSwitch(2);
     }
 
     @Override
@@ -133,99 +146,74 @@ public class SmallTriangleNew extends OpMode {
 
     @Override
     public void loop() {
-        recorder.update();
+        //recorder.update();
         robot.loop();
     }
 
     @Override
     public void stop() {
-        try {
-            recorder.save();
-            passPose();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        //recorder.save();
+        passPose();
     }
     private void makeAuto() {
         robot.addToQueue(
-                new GeneralAction(prepQueueToFireSortedBall),
-                new GeneralAction(turnOnIntakeServo),
-                new GeneralAction(() -> shouldFire = true),
+                // preload
+                new GeneralAction(() -> shouldFire = true), // prep outtake
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(3500),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(500),
-                new StateAction("IntakeMotor","OFF"),
+                new DelayAction(3000), // revving up outtake
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1000),
+                // end of preload
 
-                new StateAction("IntakeMotor","FULL"),
-
+                //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPose),
                 new DelayAction(300),
-                new GeneralAction(prepQueueToFireSortedBall),
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                    doIntakePulse = true;
-                }),
+                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
-                new StateAction("IntakeMotor","FULL"),
+                new DelayAction(400),
+                new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
+                // end of hp collect and shooting
+
+
+                // third row collecting and shooting
+                new MoveAction(finalThirdRow, BezierCurveTypes.TangentHeading,0, bezierHelper1, bezierHelper2),
+                new GeneralAction(() -> doIntakePulse = true),
+                new MoveAction(small_triangle_shoot, BezierCurveTypes.ReverseTangentHeading,0, bezierHelper2, bezierHelper1),
+                new DelayAction(400),
+                new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
+                // finished third row shooting
+
+
+                // 4th cycle, camera collecting
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
+                new DelayAction(800),
+                new GeneralAction(scanForBallsAndPlanPath),
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                // actual collect and firing
+                new MoveAction(true),
+                new GeneralAction(() -> doIntakePulse = true),
+                new MoveAction(small_triangle_shoot),
                 new DelayAction(500),
-                new StateAction("IntakeMotor","OFF"),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1000),
+                // finished firing camera cycle
 
-                new GeneralAction(turnOnIntakeServo),
-                new StateAction("IntakeMotor","FULL"),
 
-                new MoveAction(fininshHPCollectPose),
-                new GeneralAction(prepQueueToFireSortedBall),
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                    doIntakePulse = true;
-
-                }),
-                new MoveAction(small_triangle_shoot),
+                // 5th cycle, camera collecting
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
+                new DelayAction(800),
+                new GeneralAction(scanForBallsAndPlanPath),
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                // actual collect and firing
+                new MoveAction(true),
                 new GeneralAction(() -> doIntakePulse = true),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-
-
-
-
-                new MoveAction(fininshHPCollectPose),
-                new GeneralAction(prepQueueToFireSortedBall),
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                    doIntakePulse = true;
-                }),
                 new MoveAction(small_triangle_shoot),
-                new GeneralAction(() -> doIntakePulse = true),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
+                new DelayAction(400),
+                new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1000),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-
-
-
+                // finished firing camera cycle this was last cycle
 
 
                 new StateAction("IntakeMotor","OFF"),
@@ -308,9 +296,22 @@ public class SmallTriangleNew extends OpMode {
         }
         ballToFire = BallColorSet_Decode.NoBall;
     };
+    Runnable fireUnsortedBalls = () -> {
+        robot.executeNow(new ActionSequence(
+                new StateAction("RightGateServo", "OPEN"),
+                new DelayAction(timerToCloseGate),
+                new StateAction("RightGateServo", "CLOSED"),
+                new DelayAction(timer3),
+                new StateAction("LeftGateServo", "OPEN"),
+                new DelayAction(timer4),
+                new StateAction("RightGateServo", "OPEN"),
+                new DelayAction(1000),
+                new StateAction("RightGateServo", "CLOSED"),
+                new StateAction("LeftGateServo", "CLOSED")
+        ));
+    };
     Runnable turnStuffOff = () -> {
         shouldFire = false;
-        shouldMoveIntakeServo = false;
         doIntakePulse = false;
         shouldRemoveBalls = false;
 
@@ -318,29 +319,28 @@ public class SmallTriangleNew extends OpMode {
                 .setOperationMode(MotorComponent.MotorModes.Power)
                 .setTarget(0);
         robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
-        robot.getMotorComponent("TurretRotateMotor").setTarget(0);
+        robot.getTurretComponent("TurretRotateMotor").setTarget(0);
     };
     public void firingTurret(boolean shouldFire) {
         double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXLeftPanel, cfg.targetYLeftPanel);
-        rotationToWallOdometry += cfg.autoZoneAdderFar;
+        //rotationToWallOdometry += cfg.autoZoneAdderFar;
         if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
 
         if(shouldFire){
 
-            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) + cfg.autoVelAdder;
+            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry)/* + cfg.autoVelAdder*/;
             robot.getMotorComponent("TurretSpinMotor")
-                    .setOperationMode(MotorComponent.MotorModes.Velocity)
+                    .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                     .setTarget(targetVelocity);
 
 
-            double turretAngleVal = angle;
-            turretAngleVal = clamp(turretAngleVal,262,324);
+            double turretAngleVal = distanceToAngleFunction(distanceToWallOdometry);
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
-
-            robot.getMotorComponent("TurretRotateMotor")
+            if(shouldHoldTurretForCameraScan) rotationToWallOdometry = rotationNeededForCameraScan;
+            robot.getTurretComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
             ;
         }
@@ -405,28 +405,10 @@ public class SmallTriangleNew extends OpMode {
             ));
         }
     }
-    protected void intakeChecks(boolean shouldCheck){
-        int gateState = 0;
-        if(shouldCheck) {
-            if (!hasBallInRightChamber) gateState = 1;
-            else if (!hasBallInLeftChamber) gateState = -1;
-            else gateState = 0;
-        }
-        else gateState = lastGateState;
-        lastGateState = gateState;
-    }
-    Runnable turnOnIntakeServo = () -> {
-        shouldMoveIntakeServo = true;
-    };
-    Runnable turnOffIntakeServo = () -> {
-        shouldMoveIntakeServo = false;
-    };
     public void makeConfig(){
         cfg = new MainConfig(MainConfig.Configs.Blue);
     }
     public void useCamera() {
-        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(2);
         limelight3A.reloadPipeline();
         limelight3A.setPollRateHz(100);
         limelight3A.start();
@@ -452,4 +434,29 @@ public class SmallTriangleNew extends OpMode {
         globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
+    public double getBallNumber(){
+        limelight3A.pipelineSwitch(1);
+        LLResult llResult = limelight3A.getLatestResult();
+
+        if (llResult != null) {
+            double[] pythonData = llResult.getPythonOutput();
+            if (pythonData.length > 0) {
+                double firstValue = pythonData[0];
+
+                return firstValue;
+//                telemetry.addData("Python Val 1", firstValue);
+
+            }
+        }
+        return 0;
+    }
+    public Runnable scanForBallsAndPlanPath = () -> {
+        int cameraCase = (int) getBallNumber();
+        switch (cameraCase){
+            case 1: GlobalStorage.futureMoveActionTargetPose = firstZoneCameraCollect; break;
+            case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; break;
+            case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
+            default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
+        }
+    };
 }

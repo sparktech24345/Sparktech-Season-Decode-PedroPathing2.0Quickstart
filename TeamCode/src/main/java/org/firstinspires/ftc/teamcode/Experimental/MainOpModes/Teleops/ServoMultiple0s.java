@@ -31,9 +31,6 @@ public class ServoMultiple0s extends LinearOpMode {
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, intakeMotorName);
 
 
-        waitForStart();
-        if (isStopRequested()) return;
-
         while (opModeInInit()) {
             if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);// poses are syncronized, in bot = 1, out of bot = 0
             if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);

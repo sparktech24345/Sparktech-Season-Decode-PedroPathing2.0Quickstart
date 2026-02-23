@@ -100,10 +100,11 @@ public class ComplexFollower {
 
         Pose toUsePose;
         //if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
-         toUsePose = lastTargetPose;
+         //toUsePose = lastTargetPose;
+        toUsePose = currentPos;
 
         pathToFollow = new Path(new BezierLine(toUsePose, currentTargetPos));
-        pathToFollow.setConstantHeadingInterpolation(0);
+        pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(),currentTargetPos.getHeading());
         follower.followPath(pathToFollow,true);
         isDone = false;
 
@@ -115,8 +116,9 @@ public class ComplexFollower {
         else follow_timer.reset();
 
         Pose toUsePose;
-        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
-        else toUsePose = lastTargetPose;
+//        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
+//        else toUsePose = lastTargetPose;
+        toUsePose = currentPos;
 
 
 
@@ -151,8 +153,9 @@ public class ComplexFollower {
         else follow_timer.reset();
 
         Pose toUsePose;
-        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
-        else toUsePose = lastTargetPose;
+//        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
+//        else toUsePose = lastTargetPose;
+        toUsePose = currentPos;
 
 
         pathToFollow = new Path(new BezierCurve(toUsePose,improviseBezierCurvePath(toUsePose,targetPos,shouldImproviseOnX),targetPos));

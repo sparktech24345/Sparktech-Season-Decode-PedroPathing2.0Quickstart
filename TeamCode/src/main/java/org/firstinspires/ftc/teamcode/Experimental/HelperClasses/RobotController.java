@@ -27,7 +27,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public static HardwareMap hardwareMap = null;
     public static MultipleTelemetry telemetry = null;
     public static StateQueuer queuer = null;
-    private List<LynxModule> allHubs;
+//    private List<LynxModule> allHubs;
     private double tickMS = 0;
     private ElapsedTime tickTimer = new ElapsedTime();
     private HashMap<String, RobotState> states = new HashMap<>();
@@ -36,10 +36,10 @@ public abstract class RobotController implements RobotControllerInterface {
 
     private void init_all() {
         //loop time improving thingy
-        allHubs = hardwareMap.getAll(LynxModule.class);
-        for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
+//        allHubs = hardwareMap.getAll(LynxModule.class);
+//        for (LynxModule hub : allHubs) {
+//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO); /// TODO de jucat cu chestia asta
+//        }
 
         ComplexFollower.init(hardwareMap);
         ComplexFollower.setStartingPose(globalRobotPose);
@@ -142,9 +142,9 @@ public abstract class RobotController implements RobotControllerInterface {
 
     private void runUpdates() {
         // time improving thingy
-        for (LynxModule hub : allHubs) {
-            hub.clearBulkCache();
-        }
+//        for (LynxModule hub : allHubs) {
+//            hub.clearBulkCache();
+//        }
 
         ComplexGamepad.update();
         // untill here about 0.6 milisec with spikes up to 1.5

@@ -4,12 +4,21 @@ import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BezierCurveTypes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
 
 public class MoveAction extends Action {
 
     public MoveAction(Pose moveTargetPos) {
         super();
         this.OnStart = () -> ComplexFollower.follow(moveTargetPos);
+        this.DoneCondition = () -> ComplexFollower.done();
+    }
+    public MoveAction(boolean ThisIsAFutureMoveAction){
+        super();
+
+        if( GlobalStorage.futureMoveActionTargetPose == null) GlobalStorage.futureMoveActionTargetPose = new Pose();
+
+        this.OnStart = () -> ComplexFollower.follow(GlobalStorage.futureMoveActionTargetPose);
         this.DoneCondition = () -> ComplexFollower.done();
     }
     public MoveAction(Pose targetPos, boolean shouldImproviseOnX, BezierCurveTypes bezierCurveType, double headingIfNeeded) {

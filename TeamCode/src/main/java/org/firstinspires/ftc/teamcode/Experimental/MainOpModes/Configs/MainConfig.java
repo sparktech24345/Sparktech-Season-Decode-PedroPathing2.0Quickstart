@@ -67,7 +67,7 @@ public class MainConfig {
                 targetXRightPanel = 127;
                 targetYRightPanel = 52;
 
-                targetXLeftPanel = 129;
+                targetXLeftPanel = 131;
                 targetYLeftPanel = 55;
 
                 usedTargetX = 131;
