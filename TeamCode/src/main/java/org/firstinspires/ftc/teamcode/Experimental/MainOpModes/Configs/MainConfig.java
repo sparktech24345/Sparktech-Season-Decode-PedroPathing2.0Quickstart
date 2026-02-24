@@ -51,7 +51,7 @@ public class MainConfig {
 
                 autoVelAdder = -20;
 
-                rotationForInitClsoeZone = 145;
+                rotationForInitClsoeZone = 225;
                 rotationForInitSmallTriangle = 90;
 
                 targetX = 131;

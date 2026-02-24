@@ -148,7 +148,7 @@ public class GlobalStorage {
         return distance;
     }
 
-    public static double farAngle = 70; // old 105
+    public static double farAngle = 60; // old 70
     public static double normalAngle = 160;
 
     public static double closeAngle = 310;

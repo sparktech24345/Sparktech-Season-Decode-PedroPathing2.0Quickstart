@@ -83,32 +83,31 @@ public class BigTriangleArtefactAuto extends OpMode {
     public static boolean hadBallInLeftChamberInPast = false;
     public static boolean shouldRemoveBalls = false;
     public static boolean shouldBoostOnTheGoVelocityLogic = false;
-    public static double velocityAdderOnTheGo = 700;
+    public static boolean shouldBoostOnTheGoTurretLogic = false;
+    public static boolean shouldUseColorSensors = false;
+    public static double velocityAdderOnTheGo = 100;
+    public static double rotationOnTheGo = 3.5;
+    public static double angleOnTheGo = 140; // old -75
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
     /// --------------------------------------------------------
-    public Pose starter = pose(0.0, 0.0, 0.0); // Default Start Position (p0)
-    public Pose first_row_ready = pose(35, -2, 120); // Pose4: collect first row right
-    public Pose first_row_intermediate = pose(31, 13, 90); // Pose4: collect first row right
-    public Pose first_row_done = pose(31, 46.5, 90); // Pose5: collect first row left
-    public Pose second_row_ready = pose(53, 12, 90); // Pose7: collect second row right
-    public Pose second_row_done = pose(52, 42, 90); // Pose8: collect second row left
-    public Pose leverPoseSecondRow = pose(65, 39.5, 90); // Pose8: collect second row left
-    public Pose leverPoseThirdRow = pose(65.5, 39, 90); // Pose8: collect second row left
-    public Pose leverCollectPose = pose(54.5,43.5,80);
-    public Pose leverCollectPoseBezierHelper = pose(60,20,75);
-    public Pose big_triangle_shoot_third_collect = pose(75, 0, 90); // Pose9: shooting big triangle pose
-    public Pose big_triangle_shoot_second_collect = pose(64, 2, 90); // Pose9: shooting big triangle pose
-    public Pose big_triangle_shoot_third_collect_with_park = pose(100, 0, 90); // Pose9: shooting big triangle pose
-    public Pose big_triangle_shoot_third_collect_with_park_180 = pose(100, 0, 180); // Pose9: shooting big triangle pose
-    public Pose third_row_ready = pose(75, 0, 90); // Pose10: collect third row right
-    public Pose third_row_done = pose(75, 30, 90); // Pose11: collect third row left
-    public Pose classifier_starter = pose(120,26,90);//pose(120, 27, 90);
-    public Pose bezierCurveShooterPoseTipOfTriangle = pose(68,0,90);
-    public Pose gateCollectPose = pose(55,42.5,75);
-    public Pose gateCollectHelperPoint = pose(45, 37,60);
-    public Pose gateCollectHelperPointForReverse = pose(68,11.475,90);
-    public Pose hp_collect_pose = pose(4,47,180);
+    private Pose closeStarter = pose(122, 26.3, 180); // would also be around 1.4x
+    private Pose small_triangle_shoot = pose(1.5, 8, 90);
+    private Pose parkPose = pose(1, 22, 90);
+    private Pose fininshHPCollectPose = pose(1.8,44,90); // hp collect
+    private Pose secondZoneCameraCollect = pose(17.8, 44, 90);
+    private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
+    private Pose thirdRowCollectDone = pose(30, 42, 90); // third row done
+    private Pose secondRowCollectDone = pose(51.7, 36, 90);
+    private Pose firstRowCollectDone = pose(77.5, 36, 90);
+    private Pose gateCollect = pose(53.8, 40.2, 70);
+    private Pose tipBigTriangleShooting = pose(67, -3, 180);
+    private Pose tipBigTriangleShootingTurned90Deg = pose(67, -3, 90);
+    private Pose middleBigTriangleShooting = pose(88.2, -3, 180);
+    private Pose middleBigTriangleShootingTurned90Deg = pose(88.2, -3, 90);
+    private Pose parkedBigTriangleShooting = pose(104.2, 0, 180);
+    private Pose gateOpen = pose(60.1, 36.7, 90);
+    private Pose bezierHelper1 = pose(32, 4, 90);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
     public static int camId = 23;
@@ -133,11 +132,9 @@ public class BigTriangleArtefactAuto extends OpMode {
 
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
-                HandleColors();
+                if(shouldUseColorSensors) HandleColors();
                 firingTurret(shouldFire);
-                if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseSecondRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
-                if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(leverPoseThirdRow) && !ComplexFollower.done()) ComplexFollower.interrupt();
-
+                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
                 rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXAutoClose, cfg.targetYAutoClose);
@@ -173,7 +170,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
     @Override
     public void start() {
-        ComplexFollower.setPose(classifier_starter);
+        ComplexFollower.setPose(closeStarter);
         timer.reset();
         startAuto = true;
     }
@@ -201,82 +198,80 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// prep and firing preload
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> shouldFire = true),
-                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = true),
-                new GeneralAction(() -> {
-                    robot.executeNow(new ActionSequence(
-                            new DelayAction(800),
-                            new GeneralAction(fireUnsortedBalls)
-                    ));
-                }),
-                new MoveAction(big_triangle_shoot_second_collect),
-                new DelayAction(200),
-                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = false),
+                new GeneralAction(() -> shouldUseColorSensors = false),
+//                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = true),
+//                new GeneralAction(() -> shouldBoostOnTheGoTurretLogic = true),
+//                new GeneralAction(() -> shouldUseColorSensors = false),
+//                new GeneralAction(() -> {
+//                    robot.executeNow(new ActionSequence(
+//                            new DelayAction(800),
+//                            new GeneralAction(fireUnsortedBalls),
+//                            new DelayAction(1000),
+//                            new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = false),
+//                            new DelayAction(1200),
+//                            new GeneralAction(() -> shouldBoostOnTheGoTurretLogic  = false)
+//                    ));
+//                }),
+                new MoveAction(middleBigTriangleShooting),//false,BezierCurveTypes.TangentHeading,0),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1400),
                 /// finished preload and path
 
 
 
                 /// second row
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(increaseCollectNumber),
+                new GeneralAction(() -> collectNumber++),
                 //new MoveAction(second_row_ready),
-                new MoveAction(second_row_done),
-                new MoveAction(big_triangle_shoot_second_collect),
+                new MoveAction(secondRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
+                new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new DelayAction(1400),
                 /// end of second row firing
 
 
+                /// collecting lever pose not implemented yet so its just the second row logic again
+                new GeneralAction(() -> collectNumber++),
+                new MoveAction(secondRowCollectDone),
+                new MoveAction(tipBigTriangleShootingTurned90Deg),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1400),
+                ///finished gate collect
 
-                /// collecting the third row
-                new MoveAction(third_row_ready),
-                new MoveAction(third_row_done),
-                new DelayAction(350),
-                new MoveAction(leverPoseThirdRow),
-                new DelayAction(500),
-                new GeneralAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        shouldFire = true;
-                    }
-                }),
-                new MoveAction(big_triangle_shoot_third_collect),
+
+                /// collecting the first row
+                new GeneralAction(() -> collectNumber++),
+                new MoveAction(firstRowCollectDone),
+                new MoveAction(tipBigTriangleShooting),
+                new GeneralAction(() -> shouldUseColorSensors = true),
+                new DelayAction(150),
                 new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(800),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(800),
+                new DelayAction(450),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                /// end of third row firing
+                new DelayAction(400),
+                new GeneralAction(() -> shouldUseColorSensors = false),
+                /// end of first row firing
 
 
                 /// beginning of third row collect
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(increaseCollectNumber),
-//                new MoveAction(first_row_ready),
-//                new MoveAction(first_row_done),
-                new MoveAction(leverCollectPose, BezierCurveTypes.LinearHeading,0,leverCollectPoseBezierHelper),
-                new DelayAction(2000),
-                ///firing the 12th ball firing
-                new GeneralAction(() -> {
-                    shouldFire = true;
-                }),
-                new MoveAction(big_triangle_shoot_third_collect_with_park),
+                new GeneralAction(() -> collectNumber++),
+                new MoveAction(thirdRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
+                new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
+                new GeneralAction(() -> shouldUseColorSensors = true),
+                new DelayAction(200),
                 new GeneralAction(prepToFireSortedBall),
-                new StateAction("IntakeMotor","FULL"),
-                new DelayAction(800),
+                new GeneralAction(fireSortedBall),
+                new DelayAction(450),
                 new GeneralAction(fireSortedBall),
                 new DelayAction(600),
                 new GeneralAction(fireSortedBall),
-                new DelayAction(600),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(800),
-                /// end of 12 ball  row firing
+                new DelayAction(1000),
+                new GeneralAction(() -> shouldUseColorSensors = false),
+                ///end of third row firing
 
-
-
+                //shut up after parking
                 new StateAction("IntakeMotor","OFF"),
                 new GeneralAction(turnStuffOff)
         );
@@ -301,12 +296,12 @@ public class BigTriangleArtefactAuto extends OpMode {
             // ----------------------- Angle Stuff -----------------------
 
             double turretAngleVal = distanceToAngleFunction(distanceToWallOdometry);
-
+            if(shouldBoostOnTheGoVelocityLogic) turretAngleVal = angleOnTheGo;
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
             // ----------------------- Rotation Stuff -----------------------
-
+            if(shouldBoostOnTheGoVelocityLogic) rotationToWallOdometry += rotationOnTheGo;
             robot.getTurretComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
             ;
@@ -453,37 +448,27 @@ public class BigTriangleArtefactAuto extends OpMode {
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
     public static int lastGateState = 1;
-    Runnable increaseCollectNumber = () -> {
-        collectNumber++;
-    };
     public void makeConfig(){
     cfg = new MainConfig(MainConfig.Configs.Blue);
 }
-    public void convertPoses(){
-        starter = convertPose(starter);
-
-        first_row_ready = convertPose(first_row_ready);
-        first_row_intermediate = convertPose(first_row_intermediate);
-        first_row_done = convertPose(first_row_done);
-
-        second_row_ready = convertPose(second_row_ready);
-
-        second_row_done = convertPose(second_row_done);
-        leverPoseSecondRow = convertPose(leverPoseSecondRow);
-        leverPoseThirdRow = convertPose(leverPoseThirdRow);
-
-        big_triangle_shoot_third_collect = convertPose(big_triangle_shoot_third_collect);
-        big_triangle_shoot_third_collect_with_park = convertPose(big_triangle_shoot_third_collect_with_park);
-
-        third_row_ready = convertPose(third_row_ready);
-
-        third_row_done = convertPose(third_row_done);
-
-        classifier_starter = convertPose(classifier_starter);
-        hp_collect_pose = convertPose(hp_collect_pose);
-        big_triangle_shoot_third_collect_with_park_180 = convertPose(big_triangle_shoot_third_collect_with_park_180);
-        big_triangle_shoot_second_collect = convertPose(big_triangle_shoot_second_collect);
-
+    public void convertPoses() {
+        closeStarter = convertPose(closeStarter);
+        parkPose = convertPose(parkPose);
+        small_triangle_shoot = convertPose(small_triangle_shoot);
+        fininshHPCollectPose = convertPose(fininshHPCollectPose);
+        secondZoneCameraCollect = convertPose(secondZoneCameraCollect);
+        thirdZoneCameraCollect = convertPose(thirdZoneCameraCollect);
+        thirdRowCollectDone = convertPose(thirdRowCollectDone);
+        secondRowCollectDone = convertPose(secondRowCollectDone);
+        firstRowCollectDone = convertPose(firstRowCollectDone);
+        gateCollect = convertPose(gateCollect);
+        tipBigTriangleShooting = convertPose(tipBigTriangleShooting);
+        middleBigTriangleShooting = convertPose(middleBigTriangleShooting);
+        tipBigTriangleShootingTurned90Deg = convertPose(tipBigTriangleShootingTurned90Deg);
+        middleBigTriangleShootingTurned90Deg = convertPose(middleBigTriangleShootingTurned90Deg);
+        parkedBigTriangleShooting = convertPose(parkedBigTriangleShooting);
+        gateOpen = convertPose(gateOpen);
+        bezierHelper1 = convertPose(bezierHelper1);
     }
     public void useCamera(){
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");

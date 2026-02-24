@@ -75,21 +75,31 @@ public class SmallTriangleNew extends OpMode {
     public static boolean shouldRemoveBalls = false;
     private boolean shouldResetRightSensorBall = false;
     public static boolean shouldPullFromQueue = false;
+    public static boolean shouldSwitchChannel = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static double velocity = 1480;
     public static double angle = 266;
-    public static double rotationNeededForCameraScan = 15; // about 15 degrees to scan with limelight
+    public static double rotationNeededForCameraScan = 13; // about 13 degrees to scan with limelight
+    public static double targetForCameraX = 9;
+    public static double targetForCameraY = 50;
     public static int camId =23;
-    private Pose starter = pose( 0.0, 13.6, 90); // would also be around 1.4x
-    private Pose small_triangle_shoot = pose(1, 10, 90);
-    private Pose parkPose = pose(10, 15, 90);
-    private Pose fininshHPCollectPose = pose(0,46,90);
-    private Pose firstZoneCameraCollect = pose(0, 45.8, 90);
-    private Pose secondZoneCameraCollect = pose(14, 45.5, 90);
-    private Pose thirdZoneCameraCollect = pose(33, 45.1, 90);
-    private Pose bezierHelper1 = pose(6.3, 20, 90);
-    private Pose bezierHelper2 = pose(39, 10, 90);
-    private Pose finalThirdRow = pose(29.3, 38.9, 90);
+    private Pose starter = pose( 0, 14, 90); // would also be around 1.4x
+    private Pose small_triangle_shoot = pose(1.5, 8, 90);
+    private Pose parkPose = pose(1, 22, 90);
+    private Pose fininshHPCollectPose = pose(1.8,44,90); // hp collect
+    private Pose secondZoneCameraCollect = pose(17.8, 44, 90);
+    private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
+    private Pose thirdRowCollectDone = pose(30, 34, 90); // third row done
+    private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
+    private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
+    private Pose gateCollect = pose(53.8, 40.2, 70);
+    private Pose tipBigTriangleShooting = pose(67, -5.3, 180);
+    private Pose middleBigTriangleShooting = pose(88.2, -4.7, 180);
+    private Pose middleBigTriangleShootingTurned90Deg = pose(88.2, -4.7, 90);
+    private Pose parkedBigTriangleShooting = pose(104.2, 0, 180);
+    private Pose autoCloseStart = pose(123.1, 30.4, -129);
+    private Pose gateOpen = pose(60.1, 36.7, 90);
+    private Pose bezierHelper1 = pose(32, 4, 90);
 
     @Override
     public void init() {
@@ -160,14 +170,14 @@ public class SmallTriangleNew extends OpMode {
                 // preload
                 new GeneralAction(() -> shouldFire = true), // prep outtake
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(3000), // revving up outtake
+                new DelayAction(1500), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1000),
                 // end of preload
 
                 //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPose),
-                new DelayAction(300),
+                new DelayAction(1000),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new DelayAction(400),
@@ -177,42 +187,62 @@ public class SmallTriangleNew extends OpMode {
 
 
                 // third row collecting and shooting
-                new MoveAction(finalThirdRow, BezierCurveTypes.TangentHeading,0, bezierHelper1, bezierHelper2),
+                new MoveAction(thirdRowCollectDone, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1),
                 new GeneralAction(() -> doIntakePulse = true),
-                new MoveAction(small_triangle_shoot, BezierCurveTypes.ReverseTangentHeading,0, bezierHelper2, bezierHelper1),
+                new MoveAction(small_triangle_shoot),
                 new DelayAction(400),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new GeneralAction(() -> limelight3A.pipelineSwitch(1)), // switch channel only once
+                new DelayAction(1400),
                 // finished third row shooting
 
 
                 // 4th cycle, camera collecting
+                new GeneralAction(() -> shouldSwitchChannel = true),
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
-                new DelayAction(800),
+                new DelayAction(700),
                 new GeneralAction(scanForBallsAndPlanPath),
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
                 // actual collect and firing
                 new MoveAction(true),
+                new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new DelayAction(500),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new DelayAction(1400),
                 // finished firing camera cycle
 
 
                 // 5th cycle, camera collecting
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
-                new DelayAction(800),
+                new DelayAction(500),
                 new GeneralAction(scanForBallsAndPlanPath),
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
                 // actual collect and firing
                 new MoveAction(true),
+                new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new DelayAction(400),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new DelayAction(1400),
+                // finished firing camera cycle this was last cycle
+
+
+                // 6th cycle, camera collecting
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
+                new DelayAction(500),
+                new GeneralAction(scanForBallsAndPlanPath),
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                // actual collect and firing
+                new MoveAction(true),
+                new DelayAction(400),
+                new GeneralAction(() -> doIntakePulse = true),
+                new MoveAction(small_triangle_shoot),
+                new DelayAction(400),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1200),
                 // finished firing camera cycle this was last cycle
 
 
@@ -339,7 +369,8 @@ public class SmallTriangleNew extends OpMode {
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
-            if(shouldHoldTurretForCameraScan) rotationToWallOdometry = rotationNeededForCameraScan;
+            if(shouldHoldTurretForCameraScan)
+                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), targetForCameraX, targetForCameraY);;
             robot.getTurretComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
             ;
@@ -398,9 +429,9 @@ public class SmallTriangleNew extends OpMode {
         if(shouldPulseIntake){
             doIntakePulse = false;
             robot.executeNow(new ActionSequence(
-
-                    new StateAction("IntakeMotor","FULL_REVERSE"),
                     new DelayAction(50),
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(80),
                     new StateAction("IntakeMotor","FULL")
             ));
         }
@@ -426,6 +457,19 @@ public class SmallTriangleNew extends OpMode {
         parkPose = convertPose(parkPose);
         small_triangle_shoot = convertPose(small_triangle_shoot);
         fininshHPCollectPose = convertPose(fininshHPCollectPose);
+        secondZoneCameraCollect = convertPose(secondZoneCameraCollect);
+        thirdZoneCameraCollect = convertPose(thirdZoneCameraCollect);
+        thirdRowCollectDone = convertPose(thirdRowCollectDone);
+        secondRowCollectDone = convertPose(secondRowCollectDone);
+        firstRowCollectDone = convertPose(firstRowCollectDone);
+        gateCollect = convertPose(gateCollect);
+        tipBigTriangleShooting = convertPose(tipBigTriangleShooting);
+        middleBigTriangleShooting = convertPose(middleBigTriangleShooting);
+        middleBigTriangleShootingTurned90Deg = convertPose(middleBigTriangleShootingTurned90Deg);
+        parkedBigTriangleShooting = convertPose(parkedBigTriangleShooting);
+        autoCloseStart = convertPose(autoCloseStart);
+        gateOpen = convertPose(gateOpen);
+        bezierHelper1 = convertPose(bezierHelper1);
     }
     public Pose convertPose(Pose pose) {
         return pose;
@@ -435,17 +479,18 @@ public class SmallTriangleNew extends OpMode {
         return globalRobotPose;
     }
     public double getBallNumber(){
-        limelight3A.pipelineSwitch(1);
+//        if(shouldSwitchChannel){
+//            limelight3A.pipelineSwitch(1);
+//            shouldSwitchChannel = false;
+//        }
         LLResult llResult = limelight3A.getLatestResult();
 
         if (llResult != null) {
             double[] pythonData = llResult.getPythonOutput();
             if (pythonData.length > 0) {
                 double firstValue = pythonData[0];
-
+                RobotController.telemetry.addData("Python Val 1", firstValue);
                 return firstValue;
-//                telemetry.addData("Python Val 1", firstValue);
-
             }
         }
         return 0;
@@ -453,7 +498,7 @@ public class SmallTriangleNew extends OpMode {
     public Runnable scanForBallsAndPlanPath = () -> {
         int cameraCase = (int) getBallNumber();
         switch (cameraCase){
-            case 1: GlobalStorage.futureMoveActionTargetPose = firstZoneCameraCollect; break;
+            case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; break;
             case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
