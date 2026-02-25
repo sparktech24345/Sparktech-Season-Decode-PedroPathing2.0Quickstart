@@ -72,6 +72,7 @@ public class SuperLimelightTest extends OpMode {
 
         ballQueue = getBallQueue();
         tel.addData("Queue: ", ballQueue);
+        tel.update();
     }
 
 
@@ -82,7 +83,13 @@ public class SuperLimelightTest extends OpMode {
         if (result != null && result.isValid()) {
             List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
             int index = 0;
+//            for(LLResultTypes.DetectorResult detection : detections){
+//                index++;
+//                tel.addData("Ball number: " + index + " ",detection.getClassName());
+//            }
+
             for (LLResultTypes.DetectorResult detection : detections) {
+                if(index>=8) break;
                 switch (detection.getClassName()) {
                     case "purple": {
                         ballQueue.set(index, 1);
@@ -92,9 +99,12 @@ public class SuperLimelightTest extends OpMode {
                         ballQueue.set(index, 2);
                         break;
                     }
+                    default:
+                        ballQueue.set(index, 0);
+                        break;
                 }
                 index++;
-            }
+            }//*/
         }
         return ballQueue;
     }

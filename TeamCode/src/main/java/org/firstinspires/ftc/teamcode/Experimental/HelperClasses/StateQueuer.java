@@ -57,4 +57,8 @@ public class StateQueuer {
         if (actionQueue.isEmpty()) return;
         actionQueue.get(0).telemetry();
     }
+
+    public void clearMainQueue(){
+        actionQueue.clear();
+    }
 }

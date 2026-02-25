@@ -58,6 +58,7 @@ public class SmallTriangleNew extends OpMode {
     ElapsedTime resetLeftBallColorTimer = new ElapsedTime();
     public static boolean doIntakePulse = false;
     public static boolean shouldHoldTurretForCameraScan = false;
+    public static boolean shouldCheckColorSensors = false;
 
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
@@ -118,7 +119,7 @@ public class SmallTriangleNew extends OpMode {
             }
             private void controls() {
                 isMoving = ComplexFollower.instance().isBusy();
-                //HandleColors();
+                if(shouldCheckColorSensors) HandleColors();
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 firingTurret(shouldFire);
                 pulseIntake(doIntakePulse);
@@ -202,48 +203,75 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
                 new DelayAction(700),
                 new GeneralAction(scanForBallsAndPlanPath),
-                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
-                // actual collect and firing
+
                 new MoveAction(true),
+                new GeneralAction(() -> shouldCheckColorSensors = true),
                 new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
+
                 new MoveAction(small_triangle_shoot),
+                new GeneralAction(checkEmptyIntake).setDoneCondition(() -> ComplexFollower.done()),
+                new GeneralAction(() -> shouldCheckColorSensors = false),
+
+                //the shooting action
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
                 new DelayAction(500),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1400),
-                // finished firing camera cycle
+                // finished 4th firing camera cycle
+
+
+
 
 
                 // 5th cycle, camera collecting
+                new GeneralAction(() -> shouldSwitchChannel = true),
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
-                new DelayAction(500),
+                new DelayAction(700),
                 new GeneralAction(scanForBallsAndPlanPath),
-                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
-                // actual collect and firing
+
                 new MoveAction(true),
+                new GeneralAction(() -> shouldCheckColorSensors = true),
                 new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
+
                 new MoveAction(small_triangle_shoot),
-                new DelayAction(400),
+                new GeneralAction(checkEmptyIntake).setDoneCondition(() -> ComplexFollower.done()),
+                new GeneralAction(() -> shouldCheckColorSensors = false),
+
+                //the shooting action
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                new DelayAction(500),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1400),
-                // finished firing camera cycle this was last cycle
+                // finished 5th firing camera cycle
+
+
+
 
 
                 // 6th cycle, camera collecting
+                new GeneralAction(() -> shouldSwitchChannel = true),
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
-                new DelayAction(500),
+                new DelayAction(700),
                 new GeneralAction(scanForBallsAndPlanPath),
-                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
-                // actual collect and firing
+
                 new MoveAction(true),
+                new GeneralAction(() -> shouldCheckColorSensors = true),
                 new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
+
                 new MoveAction(small_triangle_shoot),
-                new DelayAction(400),
+                new GeneralAction(checkEmptyIntake).setDoneCondition(() -> ComplexFollower.done()),
+                new GeneralAction(() -> shouldCheckColorSensors = false),
+
+                //the shooting action
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                new DelayAction(500),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1200),
-                // finished firing camera cycle this was last cycle
+                new DelayAction(1400),
+                // finished 6th firing camera cycle
+
 
 
                 new StateAction("IntakeMotor","OFF"),
@@ -251,6 +279,25 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(parkPose)
         );
     }
+    public Runnable scanForBallsAndPlanPath = () -> {
+        int cameraCase = (int) getBallNumber();
+        switch (cameraCase){
+            case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
+            case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; break;
+            case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
+            default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
+        }
+    };
+    Runnable checkEmptyIntake = () -> {
+        if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.NoBall || calculatedRightSensorDetectedBall == BallColorSet_Decode.NoBall){
+            // go to collect again
+            robot.executeNow(
+                    new GeneralAction(scanForBallsAndPlanPath),
+                    new MoveAction(true)
+            );
+        }
+
+    };
 
     Runnable prepQueueToFireSortedBall = () -> {
         ballColorQueue.clearQueue();
@@ -495,13 +542,4 @@ public class SmallTriangleNew extends OpMode {
         }
         return 0;
     }
-    public Runnable scanForBallsAndPlanPath = () -> {
-        int cameraCase = (int) getBallNumber();
-        switch (cameraCase){
-            case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
-            case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; break;
-            case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
-            default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
-        }
-    };
 }

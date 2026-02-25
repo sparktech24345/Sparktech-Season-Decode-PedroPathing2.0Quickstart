@@ -56,9 +56,9 @@ public class GlobalStorage {
     public static String backRightName          = "backleft";
     public static String backLeftName           = "backright";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
-    public static double ballColorTresholdBlue = 15;
-    public static double ballColorTresholdGreen = 15;
-    public static double leftSensorColorMultiplier = 1.5;
+    public static double ballColorTresholdBlue = 20;
+    public static double ballColorTresholdGreen = 20;
+    public static double leftSensorColorMultiplier = 0.9;
 
     // DECODE
 

@@ -75,6 +75,10 @@ public abstract class RobotController implements RobotControllerInterface {
             queuer.addAction(action);
         return this;
     }
+    public RobotController clearMainQueue(){
+        queuer.clearMainQueue();
+        return this;
+    }
 
     public Button getKey(String name) {
         return ComplexGamepad.get(name);
