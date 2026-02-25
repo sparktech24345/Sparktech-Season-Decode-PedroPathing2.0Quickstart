@@ -100,7 +100,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose thirdRowCollectDone = pose(30, 42, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 36, 90);
     private Pose firstRowCollectDone = pose(77.5, 36, 90);
-    private Pose gateCollect = pose(53.8, 40.2, 70);
+    private Pose gateCollect = pose(52.691, 41.142, 64.358);
     private Pose tipBigTriangleShooting = pose(67, -3, 180);
     private Pose tipBigTriangleShootingTurned90Deg = pose(67, -3, 90);
     private Pose middleBigTriangleShooting = pose(88.2, -3, 180);
@@ -128,7 +128,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
                         RobotController.telemetry.addData("is moving",isMoving);
                         RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
-                        }
+            }
 
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
