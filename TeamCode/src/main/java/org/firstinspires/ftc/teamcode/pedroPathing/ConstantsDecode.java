@@ -81,6 +81,16 @@ public class ConstantsDecode {
             10,
             1
     );
+    public static PathConstraints littleConstraints = new PathConstraints(
+            0.995,
+            0.1,
+            0.1,
+            0.007,
+            100,
+            1.2,
+            10,
+            0.6
+    );
 
 
     public static Follower createFollowerDecode(HardwareMap hardwareMap) {

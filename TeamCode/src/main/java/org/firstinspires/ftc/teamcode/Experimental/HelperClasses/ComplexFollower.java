@@ -8,6 +8,7 @@ import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.*;
 import com.pedropathing.geometry.*;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
@@ -104,6 +105,24 @@ public class ComplexFollower {
         toUsePose = currentPos;
 
         pathToFollow = new Path(new BezierLine(toUsePose, currentTargetPos));
+        pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(),currentTargetPos.getHeading());
+        follower.followPath(pathToFollow,true);
+        isDone = false;
+
+        lastTargetPose = targetPos;
+    }
+    public static void follow(Pose targetPos, PathConstraints littleConstraints) {
+        if (follower == null) return;
+        if (follow_timer == null) follow_timer = new ElapsedTime();
+        else follow_timer.reset();
+        currentTargetPos = targetPos;
+
+        Pose toUsePose;
+        //if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
+        //toUsePose = lastTargetPose;
+        toUsePose = currentPos;
+
+        pathToFollow = new Path(new BezierLine(toUsePose, currentTargetPos),littleConstraints);
         pathToFollow.setLinearHeadingInterpolation(currentPos.getHeading(),currentTargetPos.getHeading());
         follower.followPath(pathToFollow,true);
         isDone = false;

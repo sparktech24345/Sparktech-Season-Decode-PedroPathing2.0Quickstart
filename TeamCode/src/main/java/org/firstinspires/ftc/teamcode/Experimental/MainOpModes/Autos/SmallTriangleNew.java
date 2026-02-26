@@ -210,7 +210,8 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
 
                 new MoveAction(small_triangle_shoot),
-                new GeneralAction(checkEmptyIntake).setDoneCondition(() -> ComplexFollower.done()),
+                new GeneralAction(scanForBallsAndPlanPath),
+                new MoveAction(true).setStartCondition(this::checkIfNoBall),
                 new GeneralAction(() -> shouldCheckColorSensors = false),
 
                 //the shooting action
@@ -236,7 +237,8 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
 
                 new MoveAction(small_triangle_shoot),
-                new GeneralAction(checkEmptyIntake).setDoneCondition(() -> ComplexFollower.done()),
+                new GeneralAction(scanForBallsAndPlanPath),
+                new MoveAction(true).setStartCondition(this::checkIfNoBall),
                 new GeneralAction(() -> shouldCheckColorSensors = false),
 
                 //the shooting action
@@ -262,7 +264,8 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
 
                 new MoveAction(small_triangle_shoot),
-                new GeneralAction(checkEmptyIntake).setDoneCondition(() -> ComplexFollower.done()),
+                new GeneralAction(scanForBallsAndPlanPath),
+                new MoveAction(true).setStartCondition(this::checkIfNoBall),
                 new GeneralAction(() -> shouldCheckColorSensors = false),
 
                 //the shooting action
@@ -298,6 +301,9 @@ public class SmallTriangleNew extends OpMode {
         }
 
     };
+    public boolean checkIfNoBall(){
+        return calculatedLeftSensorDetectedBall == BallColorSet_Decode.NoBall || calculatedRightSensorDetectedBall == BallColorSet_Decode.NoBall;
+    }
 
     Runnable prepQueueToFireSortedBall = () -> {
         ballColorQueue.clearQueue();
