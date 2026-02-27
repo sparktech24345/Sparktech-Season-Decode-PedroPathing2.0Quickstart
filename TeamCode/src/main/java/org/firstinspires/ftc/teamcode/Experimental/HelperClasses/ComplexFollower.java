@@ -92,7 +92,13 @@ public class ComplexFollower {
         if (follower == null) return;
         follower.setPose(pose);
     }
+    public static void hold(Pose holdPose){
+        if (follower == null) return;
+        if (follow_timer == null) follow_timer = new ElapsedTime();
+        else follow_timer.reset();
 
+        follower.holdPoint(holdPose,false);
+    }
     public static void follow(Pose targetPos) {
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
@@ -238,6 +244,13 @@ public class ComplexFollower {
     public static boolean done() {
         if (follower == null) return true;
         return isDone;
+    }
+    public static double getFollowingTimeMilisec(){
+        if(follow_timer == null) return 0;
+        return follow_timer.milliseconds();
+    }
+    public static boolean isDoneFollowingTimer(double timeToPass){
+        return getFollowingTimeMilisec() >= timeToPass;
     }
 
     public static boolean isMoving() {

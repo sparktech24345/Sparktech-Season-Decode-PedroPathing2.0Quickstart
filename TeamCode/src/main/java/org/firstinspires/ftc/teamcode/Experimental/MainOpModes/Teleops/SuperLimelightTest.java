@@ -83,10 +83,6 @@ public class SuperLimelightTest extends OpMode {
         if (result != null && result.isValid()) {
             List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
             int index = 0;
-//            for(LLResultTypes.DetectorResult detection : detections){
-//                index++;
-//                tel.addData("Ball number: " + index + " ",detection.getClassName());
-//            }
 
             for (LLResultTypes.DetectorResult detection : detections) {
                 if(index>=8) break;
@@ -104,7 +100,7 @@ public class SuperLimelightTest extends OpMode {
                         break;
                 }
                 index++;
-            }//*/
+            }
         }
         return ballQueue;
     }

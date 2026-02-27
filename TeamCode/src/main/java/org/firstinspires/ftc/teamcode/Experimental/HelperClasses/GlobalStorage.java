@@ -91,6 +91,8 @@ public class GlobalStorage {
     public static int teamPipeline = 0;
     public static double redThreshold = 40;
 
+    public static int globalCamId = 0;
+
     public static double normalizeTurretRotationForServo(double targetDegrees) {
         targetDegrees  = clamp(targetDegrees,-121.5,121.5);
         return - targetDegrees + 121.5;
@@ -148,7 +150,7 @@ public class GlobalStorage {
         return distance;
     }
 
-    public static double farAngle = 60; // old 70
+    public static double farAngle = 105; // old 70
     public static double normalAngle = 160;
 
     public static double closeAngle = 310;
@@ -165,8 +167,8 @@ public class GlobalStorage {
     public static double grade0VeloClose = 1060;
     public static double grade1VeloClose = 230.5;
     public static double closeVelo = 1300; //230.49196x+1048.81104
-    public static double grade0farVelo = 830;
-    public static double grade1farVelo = 320; // 318
+    public static double grade0farVelo = 770; // 830
+    public static double grade1farVelo = 318; // 320
     // general grad \\
     public static double distanceToVelocityFunction(double  distance) {
         if (distance < 1.25) return closeVelo;

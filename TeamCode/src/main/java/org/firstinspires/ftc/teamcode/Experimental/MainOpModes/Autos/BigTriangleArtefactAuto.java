@@ -6,12 +6,14 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalCamId;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToFireBothFromTheLeft;
 import static org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode.littleConstraints;
 
 import android.graphics.Color;
@@ -33,6 +35,7 @@ import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.HoldAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
@@ -101,9 +104,9 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose thirdZoneCameraCollect = pose(33.96, 46.5, 90);
     private Pose thirdRowCollectDone = pose(30, 44, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 41.5, 90);
-    private Pose firstRowCollectDone = pose(80, 37, 90);
-    private Pose gateCollect = pose(53, 42.5, 55);
-    private Pose gateActualCollect = pose(54.2, 44, 55);
+    private Pose firstRowCollectDone = pose(80.5, 37, 90);
+    private Pose gateCollect = pose(53.4, 42.5, 55);
+    private Pose gateActualCollect = pose(55, 44.5, 50);
     private Pose gateHelperPoint = pose(40, 30, 55);
     private Pose gateHold = pose(53.8, 42, 90);
     private Pose tipBigTriangleShooting = pose(67, -1, 180);
@@ -240,8 +243,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new MoveAction(gateActualCollect),
-                new DelayAction(350),
+                new HoldAction(gateActualCollect,1200),
+                //new DelayAction(350),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(fireUnsortedBalls),
@@ -252,12 +255,14 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose number 2
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new MoveAction(gateActualCollect),
-                new DelayAction(800),
+                new HoldAction(gateActualCollect,1400),
+                //new DelayAction(800),
                 new GeneralAction(() -> doIntakePulse = true),
+                new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
-                new GeneralAction(fireUnsortedBalls),
+                new GeneralAction(fireSortedBalls),
                 new DelayAction(1200),
+                new GeneralAction(() -> shouldUseColorSensors = false),
                 ///finished gate collect number 2
 
 
@@ -268,13 +273,15 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(tipBigTriangleShooting),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 //new DelayAction(150),
-                new GeneralAction(prepToFireSortedBall),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
+//                new GeneralAction(prepToFireSortedBall),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(400),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(400),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(400),
+                new GeneralAction(fireSortedBalls),
+                new DelayAction(1200),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 /// end of first row firing
 
@@ -286,13 +293,14 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 //new DelayAction(200),
-                new GeneralAction(prepToFireSortedBall),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(450),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(400),
-                new GeneralAction(fireSortedBall),
-                new DelayAction(1000),
+//                new GeneralAction(prepToFireSortedBall),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(450),
+//                new GeneralAction(fireSortedBall),
+//                new DelayAction(400),
+//                new GeneralAction(fireSortedBall),
+                new GeneralAction(fireSortedBalls),
+                new DelayAction(1200),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 ///end of third row firing
 
@@ -333,79 +341,160 @@ public class BigTriangleArtefactAuto extends OpMode {
             return;
         }
     }
-    Runnable prepToFireSortedBall = () -> {
+    Runnable fireSortedBalls = () -> {
         switch (camId) {
-            case 23:
-                ballColorQueue.add(BallColorSet_Decode.Purple);
-                ballColorQueue.add(BallColorSet_Decode.Purple);
-                ballColorQueue.add(BallColorSet_Decode.Green);
+            case 23: // ppg
+                firePPG();
+//                ballColorQueue.add(BallColorSet_Decode.Purple);
+//                ballColorQueue.add(BallColorSet_Decode.Purple);
+//                ballColorQueue.add(BallColorSet_Decode.Green);
                 break;
 
-            case 22:
-                ballColorQueue.add(BallColorSet_Decode.Purple);
-                ballColorQueue.add(BallColorSet_Decode.Green);
-                ballColorQueue.add(BallColorSet_Decode.Purple);
+            case 22: // pgp
+                firePGP();
+//                ballColorQueue.add(BallColorSet_Decode.Purple);
+//                ballColorQueue.add(BallColorSet_Decode.Green);
+//                ballColorQueue.add(BallColorSet_Decode.Purple);
                 break;
 
-            case 21:
-                ballColorQueue.add(BallColorSet_Decode.Green);
-                ballColorQueue.add(BallColorSet_Decode.Purple);
-                ballColorQueue.add(BallColorSet_Decode.Purple);
+            case 21: // gpp
+                fireGPP();
+//                ballColorQueue.add(BallColorSet_Decode.Green);
+//                ballColorQueue.add(BallColorSet_Decode.Purple);
+//                ballColorQueue.add(BallColorSet_Decode.Purple);
                 break;
         }
     };
-    Runnable fireSortedBall = () -> {
-        ballToFire = ballColorQueue.pull();
-
-        if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
-            robot.executeNow(new ActionSequence(
-                    new StateAction("RightGateServo", "OPEN"),
-                    new DelayAction(300),
-                    new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
-                    new StateAction("RightGateServo", "CLOSED")
-            ));
-        }
-        else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
-            robot.executeNow(new ActionSequence(
-                    new StateAction("LeftGateServo", "OPEN"),
-                    new DelayAction(300),
-                    new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
-                    new StateAction("LeftGateServo", "CLOSED")
-            ));
-        }
-        else // if cant sort
-        {
-            if(calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall){
-                robot.executeNow(new ActionSequence(
+    public void firePPG(){
+        int greenBallPosition = 3;
+        if(calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
+        else if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
+        else greenBallPosition = 3; // green is on the right
+        switch (greenBallPosition) {
+            case 1: // green on the right
+                robot.executeNow(new ActionSequence( //left left right
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(300),
-                        new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
-                        new StateAction("LeftGateServo", "CLOSED")
-                ));
-            }
-            else if(calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall){
-                robot.executeNow(new ActionSequence(
+                        new DelayAction(timerToFireBothFromTheLeft),
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(300),
-                        new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
-                        new StateAction("RightGateServo", "CLOSED")
-                ));
-            }
-            else{ // IF REAAALLLYYY no ball
-                robot.executeNow(new ActionSequence(
-                        new StateAction("RightGateServo", "OPEN"),
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(500),
-                        new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
-                        new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
+                        new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
-            }
-
+                break;
+            case 2: // if green is on the left
+                robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timerToFireBothFromTheLeft),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
+            case 3: // green isnt or is in intake
+                robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer3),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer4),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
         }
-        ballToFire = BallColorSet_Decode.NoBall;
-    };
+    }
+    public void firePGP(){
+        int greenBallPosition = 3;
+        if(calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
+        else if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
+        else greenBallPosition = 3; // green is on the right
+        switch (greenBallPosition) {
+            case 1: // green on the right
+                robot.executeNow(new ActionSequence( // left right left
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(timer3),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timer4),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
+            case 2: // if green is on the left
+                robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer3),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer4),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
+            case 3: // green ball is in intake
+                robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timerToFireBothFromTheLeft),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
+        }
+    }
+    public void fireGPP(){
+        int greenBallPosition = 3;
+        if(calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
+        else if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
+        else greenBallPosition = 3; // green is on the right
+        switch (greenBallPosition) {
+            case 1: // green on the right
+                robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timerToFireBothFromTheLeft),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
+            case 2: // if green is on the left
+                robot.executeNow(new ActionSequence( //left left right
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timerToFireBothFromTheLeft),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
+            case 3: // green ball is in intake, cant actually sort this
+                robot.executeNow(new ActionSequence(
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer3),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer4),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(1000),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
+                ));
+                break;
+        }
+    }
     Runnable fireUnsortedBalls = () -> {
         robot.executeNow(new ActionSequence(
                 new StateAction("RightGateServo", "OPEN"),
@@ -415,6 +504,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new StateAction("LeftGateServo", "OPEN"),
                 new DelayAction(timer4),
                 new StateAction("RightGateServo", "OPEN"),
+
+                // close gates
                 new DelayAction(1000),
                 new StateAction("RightGateServo", "CLOSED"),
                 new StateAction("LeftGateServo", "CLOSED")
@@ -524,12 +615,19 @@ public class BigTriangleArtefactAuto extends OpMode {
             camId = fr.getFiducialId();
         }
         if(camId < 21 || camId > 23) camId = 23;
+        passMotif();
     }
     public Pose convertPose(Pose pose){
         return pose;
+    }
+    public int passMotif(){
+        globalCamId = camId;
+        return camId;
     }
     public Pose passPose() {
         globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
+
+
 }

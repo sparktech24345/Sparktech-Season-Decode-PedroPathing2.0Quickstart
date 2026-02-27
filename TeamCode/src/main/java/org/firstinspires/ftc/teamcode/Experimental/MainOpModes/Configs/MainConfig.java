@@ -65,7 +65,7 @@ public class MainConfig {
                 targetYCenter = 53;
 
                 targetXRightPanel = 127;
-                targetYRightPanel = 52;
+                targetYRightPanel = 48;
 
                 targetXLeftPanel = 131;
                 targetYLeftPanel = 55;

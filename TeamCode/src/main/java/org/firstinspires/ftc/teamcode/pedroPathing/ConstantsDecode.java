@@ -65,8 +65,8 @@ public class ConstantsDecode {
     public static PinpointConstants pinpointConstants = new PinpointConstants()
             .hardwareMapName("pinpoint")
             .distanceUnit(DistanceUnit.METER)
-            .forwardPodY(-0.117)
-            .strafePodX(-0.11938)
+            .forwardPodY(-0.1165)//(-0.117) -0.119
+            .strafePodX(-0.1415)//(-0.11938) -0.142
             .yawScalar(1.001168)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
