@@ -87,7 +87,7 @@ public class TurretComponent extends MotorComponent {
 
     @Override
     public void update() {
-        if (motorCurrentMode != MotorModes.Position) {
+        if (motorCurrentMode != MotorModes.Position || target == 0) {
             super.update();
             return;
         }

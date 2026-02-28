@@ -136,6 +136,9 @@ public class BigTriangleArtefactAuto extends OpMode {
                         RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
                         RobotController.telemetry.addData("is moving",isMoving);
                         RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
+                        RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+                        RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+
             }
 
             private void controls() { // this will happen in a loop
@@ -243,7 +246,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1200),
+                new HoldAction(gateActualCollect,1400), //1200
                 //new DelayAction(350),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
@@ -255,7 +258,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose number 2
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1400),
+                new HoldAction(gateActualCollect,1800), //1600
                 //new DelayAction(800),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
@@ -270,8 +273,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
-                new MoveAction(tipBigTriangleShooting),
                 new GeneralAction(() -> shouldUseColorSensors = true),
+                new MoveAction(tipBigTriangleShooting),
                 //new DelayAction(150),
 //                new GeneralAction(prepToFireSortedBall),
 //                new GeneralAction(fireSortedBall),
@@ -290,8 +293,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(thirdRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
-                new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
                 new GeneralAction(() -> shouldUseColorSensors = true),
+                new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
                 //new DelayAction(200),
 //                new GeneralAction(prepToFireSortedBall),
 //                new GeneralAction(fireSortedBall),

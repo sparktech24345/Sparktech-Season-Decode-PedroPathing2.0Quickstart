@@ -144,7 +144,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer2 = 350; // 700 far side
     public static double timer3 = 0; // close side
     public static double timer4 = 0; // close side
-    public static double timerToFireBothFromTheLeft = 600; // close side
+    public static double timerToFireBothFromTheLeft = 900; // close side
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
     public static double shootSortedTime = 800;
@@ -229,7 +229,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         shouldShootWithoutTurret = robot.getKey("DPAD_DOWN1").IsToggledOnPress;
         //shouldForceOuttake = robot.getKey("DPAD_UP1").IsToggledOnPress;
 
-        if(robot.getKey("DPAD_RIGHT1").ExecuteOnPress){
+        if(robot.getKey("DPAD_RIGHT1").ExecuteOnPress || robot.getKey("RIGHT_BUMPER2").ExecuteOnPress){
             robot.executeNow(new ActionSequence( // reverse for a bit
                     new GeneralAction(() -> wantsToTempOutputIntake = true),
                     new DelayAction(60),
@@ -369,7 +369,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
 
-        if(!isInSortedMode || wantsToFireWithIntakeUnsortedInSortingMode){ // it includes the fire without sorting cuz one state at a time => it cant fail
+        if(true){ // it includes the fire without sorting cuz one state at a time => it cant fail
             // UNSORTED MODE
 
             //just one channel logic
@@ -402,7 +402,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             //shooting
             if(((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && hasJustBeganFiring) /*&& hasBallInLeftChamber*/){ // hasSwitchedIntakeState for do once logic
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
-                if (usedDistance > 2.9 /* && hasBallInLeftChamber*/) {
+                if (usedDistance > 2.9 /* && hasBallInLeftChamber*/ && !isInSortedMode) {
                     robot.executeNow(new ActionSequence(
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate),// 300mls
@@ -418,7 +418,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                     ));
                     hasJustBeganFiring = false;
                 }
-                else {
+                else if(!isInSortedMode){
                     robot.executeNow(new ActionSequence(
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
@@ -430,60 +430,22 @@ public class MainTeleOpBlue extends LinearOpMode {
                     ));
                     hasJustBeganFiring = false;
                 }
-            }
-
-        } else{
-            //SORTED MODE
-
-//            //always do this bcuz u can
-//            if (!hasBallInRightChamber) intakeGateState = 1; // first fill up right
-//            else if (!hasBallInLeftChamber) intakeGateState = -1; // then left
-//            else intakeGateState = 0; // only for sorted
-
-            switch (camId){
-                case 21 :
-                    fireGPP();
-                    break;
-                case 22:
-                    firePGP();
-                    break;
-                case 23:
-                    firePPG();
-                    break;
-            }
-            /*
-            //shooting
-            if (sortingShootTimer.milliseconds() > shootSortedTime && wantsToFireWithIntake) {
-                shouldPullFromQueue = true;
-                sortingShootTimer.reset();
-            }
-
-            if (shouldPullFromQueue) {
-                ballToFire = ballColorQueue.pull();
-
-                if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
-                    isMovingOuttakeGates = true; // wont do special move commands until state is switched
-                    robot.executeNow(new ActionSequence(
-                            new StateAction("RightGateServo", "OPEN"),
-                            new DelayAction(timerToCloseGate),
-                            new StateAction("RightGateServo", "CLOSED")
-                    ));
+                else {
+                    switch (camId){
+                        case 21 :
+                            fireGPP();
+                            break;
+                        case 22:
+                            firePGP();
+                            break;
+                        case 23:
+                            firePPG();
+                            break;
+                    }
+                    hasJustBeganFiring = false;
                 }
-                else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
-                    isMovingOuttakeGates = true; // wont do special move commands until state is switched
-                    robot.executeNow(new ActionSequence(
-                            new StateAction("LeftGateServo", "OPEN"),
-                            new DelayAction(timerToCloseGate),
-                            new StateAction("LeftGateServo", "CLOSED")
-                    ));
-                }
-                else if((calculatedRightSensorDetectedBall  != ballToFire && calculatedLeftSensorDetectedBall != ballToFire))
-                        ballToFire = BallColorSet_Decode.NoBall; // that means that both thins have the same ball or no ball case in wich no problem
-
-                ballToFire = BallColorSet_Decode.NoBall;
             }
-            shouldPullFromQueue = false;
-            //&*/
+
         }
 
         /// =-=-=-=-=-=  end of big if(sorting)  =-=-=-=-=-=
@@ -510,9 +472,10 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
 
-        if ((robot.getKey("X2").ExecuteOnPress )) camId = 21; // gpp
-        if ((robot.getKey("Y2").ExecuteOnPress)) camId = 22; // pgp
+        if ((robot.getKey("Y2").ExecuteOnPress )) camId = 21; // gpp
+        if ((robot.getKey("X2").ExecuteOnPress)) camId = 22; // pgp
         if ((robot.getKey("A2").ExecuteOnPress)) camId = 23; // ppg
+
         switch (intakeState) {
             case -1:
                 robot.executeNow(new StateAction("IntakeMotor", "FULL_REVERSE"));
