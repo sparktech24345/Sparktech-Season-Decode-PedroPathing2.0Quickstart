@@ -38,12 +38,32 @@ public class ComplexFollower {
     public static void init(HardwareMap hardwareMap) {
         init(hardwareMap, startPos);
     }
+    public static void init(HardwareMap hardwareMap,boolean isFar) {
+        init(hardwareMap, startPos,isFar);
+    }
 
     public static void init(HardwareMap hardwareMap, Pose startingPose) {
         hmap = hardwareMap;
        // follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
         //com.pedropathing.util.Constants.setConstants(FConstantsForPinpoint.class, LConstantsForPinpoint.class);
         follower = ConstantsDecode.createFollowerDecode(hardwareMap);
+        follower.setStartingPose(startingPose);
+        lastTargetPose = startingPose;
+        follower.update();
+        currentPos = startPos;
+        currentX = currentPos.getX();
+        currentY = currentPos.getY();
+        currentHeading = currentPos.getHeading();
+        currentTargetPos = startPos;
+        Drawing.drawDebug(follower);
+        follower.activateAllPIDFs();
+    }
+    public static void init(HardwareMap hardwareMap, Pose startingPose,boolean isFar) {
+        hmap = hardwareMap;
+       // follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+        //com.pedropathing.util.Constants.setConstants(FConstantsForPinpoint.class, LConstantsForPinpoint.class);
+        if(isFar) follower = ConstantsDecode.createFollowerDecodeFarAuto(hardwareMap);
+        else follower = ConstantsDecode.createFollowerDecode(hardwareMap);
         follower.setStartingPose(startingPose);
         lastTargetPose = startingPose;
         follower.update();
@@ -67,10 +87,10 @@ public class ComplexFollower {
         follower = null;
     }
 
-    public static void resetAndInit() {
+    public static void resetAndInit(boolean isFar) {
         reset();
         if (hmap == null) return;
-        init(hmap);
+        init(hmap,isFar);
     }
 
     public static double followingForMS() {

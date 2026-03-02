@@ -191,6 +191,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         //rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, cfg.usedTargetY);
         RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
         RobotController.telemetry.addData("fakeRotation", fakeRotation);
+        RobotController.telemetry.addData("current cam id: ", camId);
         //colors
         HandleColors();
 
@@ -301,6 +302,13 @@ public class MainTeleOpBlue extends LinearOpMode {
         // force store ball in outtake sorted if can, unsorted if cannot
         if (robot.getKey("A1").ExecuteOnPress) {
             hasBallInOuttake = false;
+        }
+
+        if(robot.getKey("DPAD_UP1").ExecuteOnPress){
+            if(robot.getServoComponent("TiltServos").getPosition() == 1) // if retracted then extend
+                robot.executeNow(new StateAction("TiltServos","EXTENDED"));
+            else // else retract back
+                robot.executeNow(new StateAction("TiltServos","RETRACTED"));
         }
 
 

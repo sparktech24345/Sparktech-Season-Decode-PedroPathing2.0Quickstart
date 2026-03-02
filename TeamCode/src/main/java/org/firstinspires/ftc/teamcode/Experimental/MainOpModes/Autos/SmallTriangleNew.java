@@ -50,7 +50,7 @@ import java.util.List;
 public class SmallTriangleNew extends OpMode {
     private RobotController robot;
     //private AutoRecorder recorder;
-    private Limelight3A limelight3A;
+    public Limelight3A limelight3A;
     public static MainConfig cfg;
     private boolean shouldFire;
     public static boolean isMoving;
@@ -59,6 +59,7 @@ public class SmallTriangleNew extends OpMode {
     public static boolean doIntakePulse = false;
     public static boolean shouldHoldTurretForCameraScan = false;
     public static boolean shouldCheckColorSensors = false;
+    public static boolean doOnce = false;
 
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
@@ -81,8 +82,6 @@ public class SmallTriangleNew extends OpMode {
     public static double velocity = 1480;
     public static double angle = 266;
     public static double rotationNeededForCameraScan = 13; // about 13 degrees to scan with limelight
-    public static double targetForCameraX = 9;
-    public static double targetForCameraY = 50;
     public static int camId =23;
     private Pose starter = pose( 0, 14, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.5, 8, 90);
@@ -138,10 +137,13 @@ public class SmallTriangleNew extends OpMode {
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(2);
+        doOnce = true;
     }
 
     @Override
     public void init_loop() {
+        if(doOnce) ComplexFollower.resetAndInit(true);
+        doOnce = false;
         robot.init_loop();
         robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitSmallTriangle);
         useCamera();
@@ -194,7 +196,7 @@ public class SmallTriangleNew extends OpMode {
                 new DelayAction(400),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(() -> limelight3A.pipelineSwitch(1)), // switch channel only once
-                new DelayAction(1400),
+                new DelayAction(1000),
                 // finished third row shooting
 
 
@@ -203,25 +205,16 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
                 new DelayAction(700),
                 new GeneralAction(scanForBallsAndPlanPath),
-
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                // actual collect and firing
                 new MoveAction(true),
-                new GeneralAction(() -> shouldCheckColorSensors = true),
                 new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
-
                 new MoveAction(small_triangle_shoot),
-                new GeneralAction(scanForBallsAndPlanPath),
-                new MoveAction(true).setStartCondition(this::checkIfNoBall),
-                new GeneralAction(() -> shouldCheckColorSensors = false),
-
-                //the shooting action
-                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
-                new DelayAction(500),
+                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1400),
-                // finished 4th firing camera cycle
-
-
+                new DelayAction(1000),
+                // finished firing camera cycle
 
 
 
@@ -230,24 +223,16 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
                 new DelayAction(700),
                 new GeneralAction(scanForBallsAndPlanPath),
-
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                // actual collect and firing
                 new MoveAction(true),
-                new GeneralAction(() -> shouldCheckColorSensors = true),
                 new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
-
                 new MoveAction(small_triangle_shoot),
-                new GeneralAction(scanForBallsAndPlanPath),
-                new MoveAction(true).setStartCondition(this::checkIfNoBall),
-                new GeneralAction(() -> shouldCheckColorSensors = false),
-
-                //the shooting action
-                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
-                new DelayAction(500),
+                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1400),
-                // finished 5th firing camera cycle
-
+                new DelayAction(1000),
+                // finished firing camera cycle
 
 
 
@@ -257,23 +242,16 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> shouldHoldTurretForCameraScan = true),
                 new DelayAction(700),
                 new GeneralAction(scanForBallsAndPlanPath),
-
+                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
+                // actual collect and firing
                 new MoveAction(true),
-                new GeneralAction(() -> shouldCheckColorSensors = true),
                 new DelayAction(400),
                 new GeneralAction(() -> doIntakePulse = true),
-
                 new MoveAction(small_triangle_shoot),
-                new GeneralAction(scanForBallsAndPlanPath),
-                new MoveAction(true).setStartCondition(this::checkIfNoBall),
-                new GeneralAction(() -> shouldCheckColorSensors = false),
-
-                //the shooting action
-                new GeneralAction(() -> shouldHoldTurretForCameraScan = false),
-                new DelayAction(500),
+                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1400),
-                // finished 6th firing camera cycle
+                // finished firing camera cycle
 
 
 
@@ -287,7 +265,7 @@ public class SmallTriangleNew extends OpMode {
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; break;
-            case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
+            //case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
         }
     };
@@ -405,8 +383,8 @@ public class SmallTriangleNew extends OpMode {
         robot.getTurretComponent("TurretRotateMotor").setTarget(0);
     };
     public void firingTurret(boolean shouldFire) {
-        double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
-        double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXLeftPanel, cfg.targetYLeftPanel);
+        double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXRightPanel, cfg.targetYRightPanel);
+        double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXRightPanel, cfg.targetYRightPanel);
         //rotationToWallOdometry += cfg.autoZoneAdderFar;
         if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
 
@@ -423,7 +401,7 @@ public class SmallTriangleNew extends OpMode {
                     .setTarget(turretAngleVal);
 
             if(shouldHoldTurretForCameraScan)
-                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), targetForCameraX, targetForCameraY);;
+                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForCameraX, cfg.targetForCameraY);;
             robot.getTurretComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
             ;
@@ -484,7 +462,7 @@ public class SmallTriangleNew extends OpMode {
             robot.executeNow(new ActionSequence(
                     new DelayAction(50),
                     new StateAction("IntakeMotor","FULL_REVERSE"),
-                    new DelayAction(80),
+                    new DelayAction(45),
                     new StateAction("IntakeMotor","FULL")
             ));
         }

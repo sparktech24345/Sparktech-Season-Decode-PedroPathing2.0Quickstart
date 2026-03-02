@@ -37,6 +37,9 @@ public class MainConfig {
     public static double usedTargetX;
     public static double usedTargetY;
 
+    public static double targetForCameraX;
+    public static double targetForCameraY;
+
     public static TeamColor currentTeamColor;
 
     public MainConfig() {}
@@ -47,11 +50,14 @@ public class MainConfig {
                 teamPipeline = 0;
 
                 farZoneCameraAdder = 0;
-                autoZoneAdderFar = 1.5;
+                autoZoneAdderFar = 0;
 
-                autoVelAdder = -20;
+                targetForCameraX = 16;
+                targetForCameraY = 50;
 
-                rotationForInitClsoeZone = 225;
+                //autoVelAdder = -20;
+
+                rotationForInitClsoeZone = 245;
                 rotationForInitSmallTriangle = 90;
 
                 targetX = 131;
@@ -64,7 +70,7 @@ public class MainConfig {
                 targetYCenter = 53;
 
                 targetXRightPanel = 127;
-                targetYRightPanel = 46;
+                targetYRightPanel = 48;
 
                 targetXLeftPanel = 129;
                 targetYLeftPanel = 55;
@@ -78,25 +84,28 @@ public class MainConfig {
                 teamPipeline = 1;
 
                 farZoneCameraAdder = 0;
-                autoZoneAdderFar = -1.5;
+                autoZoneAdderFar = 0;
 
-                autoVelAdder = -20;
 
-                rotationForInitClsoeZone = 200;
+                targetForCameraX = 16;
+                targetForCameraY = -50;
+
+                //autoVelAdder = -20;
+
+                rotationForInitClsoeZone = 115;
                 rotationForInitSmallTriangle = 270;
 
                 targetX = 131;
-                targetY = -46;
-
+                targetY = -48;
 
                 targetXAutoClose = 127;
                 targetYAutoClose = -48;
 
-                targetXCenter = 131;
-                targetYCenter = -48;
+                targetXCenter = 130;
+                targetYCenter = -53;
 
-                targetXRightPanel = 131;
-                targetYRightPanel = -47;
+                targetXRightPanel = 127;
+                targetYRightPanel = -43; //
 
                 targetXLeftPanel = 129;
                 targetYLeftPanel = -55;

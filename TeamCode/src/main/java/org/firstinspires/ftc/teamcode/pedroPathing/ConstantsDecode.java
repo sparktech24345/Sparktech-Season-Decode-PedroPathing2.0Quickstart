@@ -91,13 +91,29 @@ public class ConstantsDecode {
             10,
             0.6
     );
-
+    public static PathConstraints pathConstraintsFarAuto = new PathConstraints(
+            0.995,
+            0.1,
+            0.1,
+            0.007,
+            100,
+            2,
+            10,
+            1
+    );
 
     public static Follower createFollowerDecode(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(mecanumConstants)
                 .pinpointLocalizer(pinpointConstants)
                 .pathConstraints(pathConstraints)
+                .build();
+    }
+    public static Follower createFollowerDecodeFarAuto(HardwareMap hardwareMap) {
+        return new FollowerBuilder(followerConstants, hardwareMap)
+                .mecanumDrivetrain(mecanumConstants)
+                .pinpointLocalizer(pinpointConstants)
+                .pathConstraints(pathConstraintsFarAuto)
                 .build();
     }
 }

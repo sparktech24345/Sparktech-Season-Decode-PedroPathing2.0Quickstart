@@ -70,6 +70,14 @@ public class ComponentMakerMethods {
                 .setRange(0,1)
                 .moveDuringInit(true)
         );
+        robot.makeComponent("TiltServos", new ServoComponent()
+                .addMotor(rightTiltServoName)
+                .addMotor(leftTiltServoName)
+                .setOperationMode(ServoComponent.ServoModes.Position)
+                .setResolution(360)
+                .setRange(0,1)
+                .moveDuringInit(true)
+        );
     }
 
     public static void MakeStates(RobotController robot) {
@@ -98,5 +106,9 @@ public class ComponentMakerMethods {
                 .addState("DOWN_MAX", 316) // 0.88
                 .addState("DEFAULT", 180, true)
                 .addState("UP_MAX",18); // 0.05
+
+        robot.getComponent("TiltServos")
+                .addState("RETRACTED", 360,true) // 1
+                .addState("EXTENDED", 198); // 0.55
     }
 }
