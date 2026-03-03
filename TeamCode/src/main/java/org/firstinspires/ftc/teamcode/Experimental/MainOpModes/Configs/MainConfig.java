@@ -63,8 +63,8 @@ public class MainConfig {
                 targetX = 130;
                 targetY = 53;
 
-                targetXAutoClose = 130;
-                targetYAutoClose = 53;
+                targetXAutoClose = 127;
+                targetYAutoClose = 48;
 
                 targetXCenter = 130;
                 targetYCenter = 53;
@@ -98,8 +98,8 @@ public class MainConfig {
                 targetX = 130;
                 targetY = -53;
 
-                targetXAutoClose = 130;
-                targetYAutoClose = -53;
+                targetXAutoClose = 127;
+                targetYAutoClose = -43;
 
                 targetXCenter = 130;
                 targetYCenter = -53;
