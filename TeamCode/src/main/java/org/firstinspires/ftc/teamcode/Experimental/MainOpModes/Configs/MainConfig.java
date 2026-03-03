@@ -60,11 +60,11 @@ public class MainConfig {
                 rotationForInitClsoeZone = 245;
                 rotationForInitSmallTriangle = 90;
 
-                targetX = 131;
-                targetY = 48;
+                targetX = 130;
+                targetY = 53;
 
-                targetXAutoClose = 127;
-                targetYAutoClose = 48;
+                targetXAutoClose = 130;
+                targetYAutoClose = 53;
 
                 targetXCenter = 130;
                 targetYCenter = 53;
@@ -95,11 +95,11 @@ public class MainConfig {
                 rotationForInitClsoeZone = 115;
                 rotationForInitSmallTriangle = 270;
 
-                targetX = 131;
-                targetY = -48;
+                targetX = 130;
+                targetY = -53;
 
-                targetXAutoClose = 127;
-                targetYAutoClose = -48;
+                targetXAutoClose = 130;
+                targetYAutoClose = -53;
 
                 targetXCenter = 130;
                 targetYCenter = -53;

@@ -144,6 +144,8 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer2 = 350; // 700 far side
     public static double timer3 = 0; // close side
     public static double timer4 = 0; // close side
+    public static double timer1ForSorting = 200;
+    public static double timer2ForSorting = 300;
     public static double timerToFireBothFromTheLeft = 900; // close side
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;
@@ -855,9 +857,13 @@ public class MainTeleOpBlue extends LinearOpMode {
         else greenBallPosition = 3; // green is on the right
         switch (greenBallPosition) {
             case 1: // green on the right
-                robot.executeNow(new ActionSequence( //left left right
+                robot.executeNow(new ActionSequence( // left right right
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -867,7 +873,11 @@ public class MainTeleOpBlue extends LinearOpMode {
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( // right right left
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -879,9 +889,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer3),
+                        new DelayAction(timer1ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer4),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -901,9 +911,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        new DelayAction(timer3),
+                        new DelayAction(timer1ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timer4),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -915,9 +925,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer3),
+                        new DelayAction(timer1ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer4),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -927,7 +937,11 @@ public class MainTeleOpBlue extends LinearOpMode {
             case 3: // green ball is in intake
                 robot.executeNow(new ActionSequence( // right right left
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -945,7 +959,11 @@ public class MainTeleOpBlue extends LinearOpMode {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // right right left
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -955,7 +973,11 @@ public class MainTeleOpBlue extends LinearOpMode {
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( //left left right
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),

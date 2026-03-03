@@ -10,6 +10,8 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer1ForSorting;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer2ForSorting;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
@@ -96,26 +98,26 @@ public class BigTriangleArtefactAuto extends OpMode {
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
     /// --------------------------------------------------------
-    private Pose closeStarter = pose(122, 28.5, 180); // would also be around 1.4x
-    private Pose small_triangle_shoot = pose(1.5, 10.5, 90);
-    private Pose parkPose = pose(1, 24.5, 90);
-    private Pose fininshHPCollectPose = pose(1.8,46.5,90); // hp collect
-    private Pose secondZoneCameraCollect = pose(17.8, 46.5, 90);
-    private Pose thirdZoneCameraCollect = pose(33.96, 46.5, 90);
-    private Pose thirdRowCollectDone = pose(30, 44, 90); // third row done
-    private Pose secondRowCollectDone = pose(51.7, 41.5, 90);
-    private Pose firstRowCollectDone = pose(80.5, 37, 90);
-    private Pose gateCollect = pose(53.4, 42.5, 55);
-    private Pose gateActualCollect = pose(55, 44.5, 50);
-    private Pose gateHelperPoint = pose(40, 30, 55);
-    private Pose gateHold = pose(53.8, 42, 90);
-    private Pose tipBigTriangleShooting = pose(67, -1, 180);
-    private Pose tipBigTriangleShootingTurned90Deg = pose(67, -1, 90);
-    private Pose middleBigTriangleShooting = pose(88.2, -1, 180);
-    private Pose middleBigTriangleShootingTurned90Deg = pose(88.2, -1, 90);
-    private Pose parkedBigTriangleShooting = pose(104.2, 2.5, 180);
-    private Pose gateOpen = pose(60.1, 38, 90);
-    private Pose bezierHelper1 = pose(32, 6.5, 90);
+    private Pose closeStarter = pose(119, 30.5, 180); // would also be around 1.4x
+    private Pose small_triangle_shoot = pose(-1.5, 12.5, 90);
+    private Pose parkPose = pose(-2, 26.5, 90);
+    private Pose fininshHPCollectPose = pose(-1.2,48.5,90); // hp collect
+    private Pose secondZoneCameraCollect = pose(14.8, 48.5, 90);
+    private Pose thirdZoneCameraCollect = pose(30.96, 48.5, 90);
+    private Pose thirdRowCollectDone = pose(27, 46, 90); // third row done
+    private Pose secondRowCollectDone = pose(48.7, 43.5, 90);
+    private Pose firstRowCollectDone = pose(77.5, 39, 90);
+    private Pose gateCollect = pose(50.4, 44.5, 55);
+    private Pose gateActualCollect = pose(52 + 1.2, 46.5 + 1, 50);
+    private Pose gateHelperPoint = pose(37, 32, 55);
+    private Pose gateHold = pose(50.8, 44, 90);
+    private Pose tipBigTriangleShooting = pose(64, 1, 180);
+    private Pose tipBigTriangleShootingTurned90Deg = pose(64, 1, 90);
+    private Pose middleBigTriangleShooting = pose(85.2, 1, 180);
+    private Pose middleBigTriangleShootingTurned90Deg = pose(85.2, 1, 90);
+    private Pose parkedBigTriangleShooting = pose(101.2, 4.5, 180);
+    private Pose gateOpen = pose(57.1, 40, 90);
+    private Pose bezierHelper1 = pose(29, 8.5, 90);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
     public static int camId = 23;
@@ -263,7 +265,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
-                new GeneralAction(fireSortedBalls),
+                new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 ///finished gate collect number 2
@@ -283,7 +285,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 //                new DelayAction(400),
 //                new GeneralAction(fireSortedBall),
 //                new DelayAction(400),
-                new GeneralAction(fireSortedBalls),
+                new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 /// end of first row firing
@@ -302,7 +304,8 @@ public class BigTriangleArtefactAuto extends OpMode {
 //                new GeneralAction(fireSortedBall),
 //                new DelayAction(400),
 //                new GeneralAction(fireSortedBall),
-                new GeneralAction(fireSortedBalls),
+                new DelayAction(200),
+                new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 ///end of third row firing
@@ -375,9 +378,13 @@ public class BigTriangleArtefactAuto extends OpMode {
         else greenBallPosition = 3; // green is on the right
         switch (greenBallPosition) {
             case 1: // green on the right
-                robot.executeNow(new ActionSequence( //left left right
+                robot.executeNow(new ActionSequence( // left right right
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -387,7 +394,11 @@ public class BigTriangleArtefactAuto extends OpMode {
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( // right right left
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -399,9 +410,9 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer3),
+                        new DelayAction(timer1ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer4),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -421,9 +432,9 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        new DelayAction(timer3),
+                        new DelayAction(timer1ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timer4),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -435,9 +446,9 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer3),
+                        new DelayAction(timer1ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer4),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -447,7 +458,11 @@ public class BigTriangleArtefactAuto extends OpMode {
             case 3: // green ball is in intake
                 robot.executeNow(new ActionSequence( // right right left
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -465,7 +480,11 @@ public class BigTriangleArtefactAuto extends OpMode {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // right right left
                         new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -475,7 +494,11 @@ public class BigTriangleArtefactAuto extends OpMode {
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( //left left right
                         new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timerToFireBothFromTheLeft),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(timer1ForSorting),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer2ForSorting),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),

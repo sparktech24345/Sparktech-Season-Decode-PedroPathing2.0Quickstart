@@ -153,15 +153,18 @@ public class GlobalStorage {
     public static double farAngle = 105; // old 70
     public static double normalAngle = 160;
 
-    public static double closeAngle = 310;
-    public static double almostCloseAngle = 200;
+    public static double closeAngle = 295;
+    public static double almostCloseAngle = 210;
     public static double grade1angle = -49;//-49.13547x+232.62596
     public static double grade0angle = 233;//-49.13547x+232.62596
     public static double distanceToAngleFunction(double distance) {
+        int handicapAdder;
         if(distance < 1)    return closeAngle;
-        if(distance < 1.25) return almostCloseAngle;
+        if(distance < 1.6)  handicapAdder = 20;
+        else handicapAdder = 0;
         if(distance > 3) return farAngle;
-        else return grade1angle * distance + grade0angle;
+
+        return grade1angle * distance + grade0angle + handicapAdder;
 
     }
     public static double grade0VeloClose = 1060;
