@@ -67,7 +67,7 @@ public class ConstantsDecode {
             .distanceUnit(DistanceUnit.METER)
             .forwardPodY(-0.1165)//(-0.117) -0.119
             .strafePodX(-0.1415)//(-0.11938) -0.142
-            .yawScalar(1.001168)
+            .yawScalar(1.000977114)//.001168)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 

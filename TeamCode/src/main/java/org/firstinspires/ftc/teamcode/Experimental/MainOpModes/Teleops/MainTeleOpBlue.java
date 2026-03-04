@@ -827,23 +827,36 @@ public class MainTeleOpBlue extends LinearOpMode {
     }
 
     public static void processTargetStuff(Pose pose, double targetX, double targetY) {
-        double degrees = Math.abs(angleFromTargetToRobot(pose, targetX, targetY)); // Abs value so that it works for red and blue
+        double degrees = Math.abs(angleFromTargetToRobot(pose, targetX, targetY));
 
-        if (degrees < 40) { // is lower part of scorer
-            cfg.usedTargetX = cfg.targetXRightPanel;
-            cfg.usedTargetY = cfg.targetYRightPanel;
-        }
-        else if (degrees > 65) {  // is right upper part of scorer
-            cfg.usedTargetX = cfg.targetXLeftPanel;
-            cfg.usedTargetY = cfg.targetYLeftPanel;
-        }
-        else { // is in the middle or somewhere weird
+        if (degrees < 30) {
+            // alpha is 1.0 at 0 degrees (Full Right) and 0.0 at 30 degrees (Center)
+            double alpha = (30.0 - degrees) / 30.0;
+            cfg.usedTargetX = lerp(cfg.targetXCenter, cfg.targetXRightPanel, alpha);
+            cfg.usedTargetY = lerp(cfg.targetYCenter, cfg.targetYRightPanel, alpha);
+
+        } else if (degrees > 65) {
+            // alpha is 0.0 at 65 degrees (Center) and 1.0 at 90+ degrees (Full Left)
+            // clamp alpha between 0 and 1 to prevent the target from sliding off the goal
+            double alpha = Math.min(1.0, (degrees - 65.0) / 25.0);
+            cfg.usedTargetX = lerp(cfg.targetXCenter, cfg.targetXLeftPanel, alpha);
+            cfg.usedTargetY = lerp(cfg.targetYCenter, cfg.targetYLeftPanel, alpha);
+
+        } else {
+            //if between 30 and 65, stay locked on Center
             cfg.usedTargetX = cfg.targetXCenter;
             cfg.usedTargetY = cfg.targetYCenter;
         }
 
-        RobotController.telemetry.addData("Calculated Rotation From Robot", degrees);
+        RobotController.telemetry.addData("Calculated Rotation", degrees);
+        RobotController.telemetry.addData("Target X", cfg.usedTargetX);
     }
+
+    // Helper function for Linear Interpolation
+    public static double lerp(double start, double end, double alpha) {
+        return start + alpha * (end - start);
+    }
+
 
     public static double calculateDistanceToWallInMeters(Pose robotPose, double targetX, double targetY) {
         return calculateDistance(robotPose, new Pose(targetX, targetY, 0), true);
