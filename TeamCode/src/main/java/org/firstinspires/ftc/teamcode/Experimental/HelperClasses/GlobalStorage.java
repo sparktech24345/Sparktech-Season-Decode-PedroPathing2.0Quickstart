@@ -151,6 +151,8 @@ public class GlobalStorage {
     }
 
     public static double farAngle = 105; // old 70
+    public static double farAngleGrade0 = 177;
+    public static double farAngleGrade1 = -21;
     public static double normalAngle = 160;
 
     public static double closeAngle = 295;
@@ -162,7 +164,8 @@ public class GlobalStorage {
         if(distance < 1)    return closeAngle;
         if(distance < 1.6)  handicapAdder = 20;
         else handicapAdder = 0;
-        if(distance > 3) return farAngle;
+//        if(distance > 3) return farAngle;
+        if(distance > 3) return farAngleGrade1 * distance + farAngleGrade0;
 
         return grade1angle * distance + grade0angle + handicapAdder;
 
@@ -170,8 +173,8 @@ public class GlobalStorage {
     public static double grade0VeloClose = 1060;
     public static double grade1VeloClose = 230.5;
     public static double closeVelo = 1300; //230.49196x+1048.81104
-    public static double grade0farVelo = 770; // 830
-    public static double grade1farVelo = 318; // 320
+    public static double grade0farVelo = 1200; // 770
+    public static double grade1farVelo = 183; // 318
     // general grad \\
     public static double distanceToVelocityFunction(double  distance) {
         if (distance < 1.25) return closeVelo;

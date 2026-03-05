@@ -66,7 +66,7 @@ public class MainConfig {
                 targetXAutoClose = 127;
                 targetYAutoClose = 48;
 
-                targetXCenter = 130;
+                targetXCenter = 128; // 130
                 targetYCenter = 53;
 
                 targetXRightPanel = 127;
@@ -101,13 +101,13 @@ public class MainConfig {
                 targetXAutoClose = 127;
                 targetYAutoClose = -43;
 
-                targetXCenter = 130;
+                targetXCenter = 128; // 130
                 targetYCenter = -53;
 
                 targetXRightPanel = 127;
                 targetYRightPanel = -43; //
 
-                targetXLeftPanel = 129;
+                targetXLeftPanel = 125;
                 targetYLeftPanel = -55;
 
                 usedTargetX = 131;
