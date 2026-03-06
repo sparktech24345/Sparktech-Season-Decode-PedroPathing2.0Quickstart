@@ -478,6 +478,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         if(wantsToTempOutputIntake)
             intakeState = -1;
 
+        if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && Math.abs(tempTurret.getError()) > 15)
+            intakeState = 0;
+
         hasSwitchedIntakeState = false;
 
 

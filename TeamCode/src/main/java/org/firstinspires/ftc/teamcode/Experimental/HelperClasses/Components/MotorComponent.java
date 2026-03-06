@@ -157,6 +157,9 @@ public class MotorComponent extends Component {
         return mainMotor.getPower();
     }
     public double getCurrent(){return mainMotor.getCurrent(CurrentUnit.AMPS);}
+    public double getError(){
+        return target - getPosition();
+    }
     public DcMotorEx getMotor(String name) {
         return motorMap.get(name);
     }

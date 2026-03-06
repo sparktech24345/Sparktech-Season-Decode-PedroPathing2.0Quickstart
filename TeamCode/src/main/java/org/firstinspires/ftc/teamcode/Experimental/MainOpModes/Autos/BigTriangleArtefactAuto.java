@@ -96,6 +96,8 @@ public class BigTriangleArtefactAuto extends OpMode {
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
     public static boolean shouldMakeSortedAuto = false;
+    public static boolean shouldHoldTurretForClassifierScan = false;
+
     /// --------------------------------------------------------
     private Pose closeStarter = pose(119, 30.5, 180); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(-1.5, 12.5, 90);
@@ -110,13 +112,13 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose gateActualCollect = pose(52 + 1.2, 46.5 + 1, 50);
     private Pose gateHelperPoint = pose(37, 32, 55);
     private Pose gateHold = pose(50.8, 44, 90);
-    private Pose tipBigTriangleShooting = pose(64, 1, 180);
-    private Pose tipBigTriangleShootingTurned90Deg = pose(64, 1, 90);
-    private Pose middleBigTriangleShooting = pose(85.2, 1, 180);
-    private Pose middleBigTriangleShootingTurned90Deg = pose(85.2, 1, 90);
+    private Pose tipBigTriangleShooting = pose(67, 0, 180);
+    private Pose tipBigTriangleShootingTurned90Deg = pose(67, 0, 90);
+    private Pose middleBigTriangleShooting = pose(87, 0, 180);
+    private Pose middleBigTriangleShootingTurned90Deg = pose(87, 0, 90);
     private Pose parkedBigTriangleShooting = pose(101.2, 4.5, 180);
-    private Pose gateOpen = pose(54, 40, 90);
-    private Pose gateOpenHelper = pose(49, 40, 90);
+    private Pose gateOpen = pose(57, 42, 90);
+    private Pose gateOpenHelper = pose(51, 38, 90);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
     public static int camId = 23;
@@ -139,6 +141,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
                         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
                         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+                        RobotController.telemetry.addData("Current cam id", camId);
 
             }
 
@@ -173,6 +176,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         hadBallInRightChamberInPast = false; hadBallInLeftChamberInPast = false;
         doIntakePulse = false;
         shouldMakeSortedAuto = false;
+        shouldHoldTurretForClassifierScan = false;
         collectNumber = 0;
         movingTimer.reset();
         convertPoses();
@@ -351,7 +355,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 // gate holding comes here
                 new MoveAction(gateOpenHelper),
                 new MoveAction(gateOpen),
-                new DelayAction(400),
+                new DelayAction(600),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(() -> limelight3A.pipelineSwitch(8)), // preactivly switch pipeline
@@ -364,9 +368,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting the first row
                 new GeneralAction(() -> collectNumber++),
                 // camera motif scan goes here
+                new GeneralAction(() -> shouldHoldTurretForClassifierScan = true),
+                new GeneralAction(beginCameraScanning),
                 new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
+                new GeneralAction(() -> shouldHoldTurretForClassifierScan = false),
                 new MoveAction(tipBigTriangleShooting),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1800),
@@ -421,6 +428,9 @@ public class BigTriangleArtefactAuto extends OpMode {
                     .setTarget(turretAngleVal);
 
             // ----------------------- Rotation Stuff -----------------------
+            if(shouldHoldTurretForClassifierScan)
+                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForClassifierX, cfg.targetForClassifierY);;
+
             if(shouldBoostOnTheGoVelocityLogic) rotationToWallOdometry += rotationOnTheGo;
             robot.getTurretComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
@@ -738,6 +748,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     public int countBallsInClassifier() {
         int countedBalls = 0;
         LLResult result = limelight3A.getLatestResult();
+        limelight3A.captureSnapshot("Photo with classifier at scan time");
         if (result != null && result.isValid()) {
             List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
             int index = 0;
@@ -765,12 +776,19 @@ public class BigTriangleArtefactAuto extends OpMode {
         int placesToShift = detectedBalls % 3;
 
         // 23 ppg, 22 pgp, 21 gpp, shift the needed amount
-        camId -= placesToShift;
+        camId += placesToShift;
 
         if(camId < 21) camId += 3;
 
         //backup
-        if(camId > 23) camId = 23;
+        if(camId > 23) camId -= 3;
     };
-
+    public Runnable beginCameraScanning = () -> {
+        robot.executeNow(
+                new ActionSequence(
+                        new DelayAction(500),
+                        new GeneralAction(scanClassifierAndSwitchMotif)
+                )
+        );
+    };
 }
