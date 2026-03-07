@@ -16,6 +16,8 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.Ma
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
 
+import static java.lang.Math.max;
+
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -68,6 +70,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     ElapsedTime shouldFinish = new ElapsedTime();
     private boolean had_balls = false;
     private int collectNumber = 0;
+    public int detectedBalls;
 
     /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
@@ -110,7 +113,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose firstRowCollectDone = pose(77.5, 39, 90);
     private Pose gateCollect = pose(50.4, 44.5, 55);
     private Pose gateActualCollect = pose(52 + 1.2, 46.5 + 1, 50);
-    private Pose gateHelperPoint = pose(37, 32, 55);
+    private Pose gateHelperPoint = pose(35, 29, 55);
     private Pose gateHold = pose(50.8, 44, 90);
     private Pose tipBigTriangleShooting = pose(67, 0, 180);
     private Pose tipBigTriangleShootingTurned90Deg = pose(67, 0, 90);
@@ -369,12 +372,15 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> collectNumber++),
                 // camera motif scan goes here
                 new GeneralAction(() -> shouldHoldTurretForClassifierScan = true),
-                new GeneralAction(beginCameraScanning),
+                new GeneralAction(countBallsInClassifierWithDelay),
                 new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
-                new GeneralAction(() -> shouldHoldTurretForClassifierScan = false),
                 new MoveAction(tipBigTriangleShooting),
+                new GeneralAction(countBallsInClassifier),
+                new GeneralAction(processCameraScanning),
+                new GeneralAction(() -> shouldHoldTurretForClassifierScan = false),
+                new DelayAction(500),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1800),
                 new GeneralAction(() -> shouldUseColorSensors = false),
@@ -745,7 +751,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
-    public int countBallsInClassifier() {
+    public Runnable countBallsInClassifier = () -> {
         int countedBalls = 0;
         LLResult result = limelight3A.getLatestResult();
         limelight3A.captureSnapshot("Photo with classifier at scan time");
@@ -766,12 +772,17 @@ public class BigTriangleArtefactAuto extends OpMode {
                 }
                 index++;
             }
-            return countedBalls;
+            detectedBalls = max(detectedBalls,countedBalls);
         }
-        else return 0;
-    }
-    public Runnable scanClassifierAndSwitchMotif = () -> {
-        int detectedBalls = countBallsInClassifier();
+    };
+    public Runnable countBallsInClassifierWithDelay = () -> {
+        robot.executeNow(new ActionSequence(
+                new DelayAction(500),
+                new GeneralAction(countBallsInClassifier)
+        ));
+    };
+    public Runnable processClassifierAndSwitchMotif = () -> {
+        //int detectedBalls = countBallsInClassifier();
         // only between 0-2
         int placesToShift = detectedBalls % 3;
 
@@ -783,12 +794,12 @@ public class BigTriangleArtefactAuto extends OpMode {
         //backup
         if(camId > 23) camId -= 3;
     };
-    public Runnable beginCameraScanning = () -> {
-        robot.executeNow(
-                new ActionSequence(
-                        new DelayAction(500),
-                        new GeneralAction(scanClassifierAndSwitchMotif)
-                )
+    public Runnable processCameraScanning = () -> {
+        robot.executeNow(new GeneralAction(processClassifierAndSwitchMotif)
+//                new ActionSequence(
+//                        new DelayAction(500),
+//
+//                )
         );
     };
 }

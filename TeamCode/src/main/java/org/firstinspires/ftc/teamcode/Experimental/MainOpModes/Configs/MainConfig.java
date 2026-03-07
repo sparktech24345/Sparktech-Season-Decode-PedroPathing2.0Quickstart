@@ -57,9 +57,8 @@ public class MainConfig {
                 targetForCameraX = 16;
                 targetForCameraY = 50;
 
-
-                targetForClassifierX = 75;
-                targetForClassifierY = 50;
+                targetForClassifierX = 85;
+                targetForClassifierY = 47;
 
                 //autoVelAdder = -20;
 
@@ -97,8 +96,8 @@ public class MainConfig {
                 targetForCameraY = -50;
 
 
-                targetForClassifierX = 75;
-                targetForClassifierY = -50;
+                targetForClassifierX = 85;
+                targetForClassifierY = -47;
 
                 //autoVelAdder = -20;
 
