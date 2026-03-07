@@ -83,7 +83,7 @@ public class SmallTriangleNew extends OpMode {
     public static double angle = 266;
     public static double rotationNeededForCameraScan = 13; // about 13 degrees to scan with limelight
     public static int camId =23;
-    private Pose starter = pose( 0, 12, 90); // would also be around 1.4x
+    private Pose starter = pose( 0, 12.85, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.5, 8, 90);
     private Pose parkPose = pose(1, 22, 90);
     private Pose fininshHPCollectPose = pose(1.8,44,90); // hp collect
