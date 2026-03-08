@@ -54,22 +54,22 @@ public class MainConfig {
                 farZoneCameraAdder = 0;
                 autoZoneAdderFar = 0;
 
-                targetForCameraX = 16;
+                targetForCameraX = 12;
                 targetForCameraY = 50;
 
-                targetForClassifierX = 85;
+                targetForClassifierX = 75;
                 targetForClassifierY = 47;
 
                 //autoVelAdder = -20;
 
-                rotationForInitClsoeZone = 245;
+                rotationForInitClsoeZone = 250;
                 rotationForInitSmallTriangle = 90;
 
                 targetX = 130;
                 targetY = 53;
 
                 targetXAutoClose = 127;
-                targetYAutoClose = 48;
+                targetYAutoClose = 49;
 
                 targetXCenter = 128; // 130
                 targetYCenter = 53;
@@ -92,16 +92,16 @@ public class MainConfig {
                 autoZoneAdderFar = 0;
 
 
-                targetForCameraX = 16;
+                targetForCameraX = 12;
                 targetForCameraY = -50;
 
 
-                targetForClassifierX = 85;
+                targetForClassifierX = 75;
                 targetForClassifierY = -47;
 
                 //autoVelAdder = -20;
 
-                rotationForInitClsoeZone = 115;
+                rotationForInitClsoeZone = 100;
                 rotationForInitSmallTriangle = 270;
 
                 targetX = 130;

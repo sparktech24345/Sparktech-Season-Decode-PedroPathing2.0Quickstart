@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.HoldAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
@@ -83,6 +84,7 @@ public class SmallTriangleNew extends OpMode {
     public static double angle = 266;
     public static double rotationNeededForCameraScan = 13; // about 13 degrees to scan with limelight
     public static int camId =23;
+    public static int wentTooNumber2 =23;
     private Pose starter = pose( 0, 12.85, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.5, 8, 90);
     private Pose parkPose = pose(1, 22, 90);
@@ -122,6 +124,10 @@ public class SmallTriangleNew extends OpMode {
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 firingTurret(shouldFire);
                 pulseIntake(doIntakePulse);
+                if(timer.milliseconds() > 29000 + 800){
+                    EmergencyOverrideAtTheEnd();
+                    timer.reset();
+                }
             }
         };
         makeConfig();
@@ -134,6 +140,7 @@ public class SmallTriangleNew extends OpMode {
         convertPoses();
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
         shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
+        wentTooNumber2  =0;
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(2);
@@ -262,9 +269,10 @@ public class SmallTriangleNew extends OpMode {
     }
     public Runnable scanForBallsAndPlanPath = () -> {
         int cameraCase = (int) getBallNumber();
+        if(wentTooNumber2 >0) cameraCase = 1;
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
-            case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; break;
+            case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
             //case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
         }
@@ -386,7 +394,6 @@ public class SmallTriangleNew extends OpMode {
         double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXRightPanel, cfg.targetYRightPanel);
         double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXRightPanel, cfg.targetYRightPanel);
         //rotationToWallOdometry += cfg.autoZoneAdderFar;
-        if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
 
         if(shouldFire){
 
@@ -402,8 +409,10 @@ public class SmallTriangleNew extends OpMode {
 
             if(shouldHoldTurretForCameraScan)
                 rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForCameraX, cfg.targetForCameraY);;
+
+            if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
             robot.getTurretComponent("TurretRotateMotor")
-                    .setTarget(rotationToWallOdometry)
+                .setTarget(rotationToWallOdometry)
             ;
         }
     }
@@ -515,6 +524,7 @@ public class SmallTriangleNew extends OpMode {
 //            shouldSwitchChannel = false;
 //        }
         LLResult llResult = limelight3A.getLatestResult();
+        limelight3A.captureSnapshot("HpSnap");
 
         if (llResult != null) {
             double[] pythonData = llResult.getPythonOutput();
@@ -525,5 +535,12 @@ public class SmallTriangleNew extends OpMode {
             }
         }
         return 0;
+    }
+    public void EmergencyOverrideAtTheEnd(){
+        robot.clearMainQueue();
+        robot.executeNow(new ActionSequence(
+                new HoldAction(500),
+                new GeneralAction(turnStuffOff)
+        ));
     }
 }

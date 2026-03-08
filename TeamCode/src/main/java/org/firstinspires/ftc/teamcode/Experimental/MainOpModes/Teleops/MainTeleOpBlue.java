@@ -143,9 +143,9 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double outtakeReversingTime = 180;
     public static double timer2 = 350; // 700 far side
     public static double timer3 = 0; // close side
-    public static double timer4 = 0; // close side
-    public static double timer1ForSorting = 200;
-    public static double timer2ForSorting = 300;
+    public static double timer4 = 150; // close side
+    public static double timer1ForSorting = 200 + 150;
+    public static double timer2ForSorting = 300 + 150;
     public static double timerToFireBothFromTheLeft = 900; // close side
     public static double revUpTime = 1400;
     public static double timerToCloseGate = 300;

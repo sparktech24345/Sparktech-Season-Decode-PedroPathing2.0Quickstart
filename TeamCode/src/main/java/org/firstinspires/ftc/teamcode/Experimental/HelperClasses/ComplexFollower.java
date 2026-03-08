@@ -119,6 +119,13 @@ public class ComplexFollower {
 
         follower.holdPoint(holdPose,false);
     }
+    public static void hold(boolean holdCurrentPos){
+        if (follower == null) return;
+        if (follow_timer == null) follow_timer = new ElapsedTime();
+        else follow_timer.reset();
+
+        follower.holdPoint(currentPos,false);
+    }
     public static void follow(Pose targetPos) {
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
@@ -288,6 +295,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
         Drawing.drawDebug(follower);
+        globalRobotPose = currentPos;
     }
 
     public static void interrupt() {
