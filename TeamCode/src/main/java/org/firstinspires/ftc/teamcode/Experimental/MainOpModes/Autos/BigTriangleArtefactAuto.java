@@ -51,7 +51,11 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
+
+import kotlinx.coroutines.Delay;
 
 @Config
 @Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
@@ -121,10 +125,13 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose middleBigTriangleShootingTurned90Deg = pose(87, 0, 90);
     private Pose parkedBigTriangleShooting = pose(100, 4.5, 180);
     private Pose gateOpen = pose(59, 39.5, 90); // actual gate opener
-    private Pose gateOpenHelper = pose(48, 29, 90);
+    private Pose gateOpenHelper = pose(48, 30, 90);
+    private Pose gateSecond = pose(57, 30, 90);
+    private Pose gateSecondOpen = pose(57, 39, 90);
     public static double distanceToWallOdometry;
     public static double rotationToWallOdometry;
     public static int camId = 23;
+    public static boolean moveToZero = false;
 
     @Override
     public void init() {
@@ -327,6 +334,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> shouldFire = true),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 new MoveAction(middleBigTriangleShooting),
+//                new DelayAction(200),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 /// finished preload and path
@@ -350,9 +358,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 // gate holding comes here
-                new MoveAction(gateOpenHelper),
-                new MoveAction(gateOpen),
+//                new MoveAction(gateOpenHelper),
+//                new MoveAction(gateOpen),
+                new MoveAction(gateSecond),
                 new DelayAction(400),
+                new MoveAction(gateOpen),
+//                new MoveAction(gateSecondOpen),
+                new DelayAction(700),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(fireSortedBalls),
@@ -365,17 +377,36 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting the first row
                 new GeneralAction(() -> collectNumber++),
                 // camera motif scan goes here
-                new GeneralAction(() -> shouldHoldTurretForClassifierScan = true),
-                //new GeneralAction(countBallsInClassifierWithDelay),
+//                new GeneralAction(() -> shouldHoldTurretForClassifierScan = true),
+//                new GeneralAction(setCameraZero),
+//                new GeneralAction(() -> moveToZero = true),
+//                new GeneralAction(countBallsInClassifierWithDelay),
                 new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
-                new GeneralAction(countBallsInClassifierWithDelay),
-                new MoveAction(tipBigTriangleShooting),
+//                new GeneralAction(countBallsInClassifierWithDelay),
+//                new DelayAction(200),
+//                new GeneralAction(() -> moveToZero = false),
+                new GeneralAction(() -> moveToZero = true),
                 new DelayAction(200),
+                new GeneralAction(countBallsInClassifierWithDelay),
+//                new DelayAction(200),
+//                new GeneralAction(countBallsInClassifierWithDelay),
+//                new MoveAction(tipBigTriangleShooting),
+//                new DelayAction(200),
+                new MoveAction(tipBigTriangleShootingTurned90Deg),
+//                new GeneralAction(countBallsInClassifier),
+//                new DelayAction(400),
+//                new GeneralAction(countBallsInClassifierWithDelay),
+                new GeneralAction(() -> moveToZero = false),
+                new DelayAction(200),
+                new GeneralAction(countBallsInClassifierWithDelay),
+//                new DelayAction(200),
                 new GeneralAction(processCameraScanning),
+                new DelayAction(200),
                 new GeneralAction(() -> shouldHoldTurretForClassifierScan = false),
-                new DelayAction(500),
+                new GeneralAction(() -> moveToZero = false),
+//                new DelayAction(1000),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1800),
                 new GeneralAction(() -> shouldUseColorSensors = false),
@@ -430,10 +461,13 @@ public class BigTriangleArtefactAuto extends OpMode {
 
             // ----------------------- Rotation Stuff -----------------------
             if(shouldHoldTurretForClassifierScan)
-                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForClassifierX, cfg.targetForClassifierY);;
+                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForClassifierX, cfg.targetForClassifierY);
 
             if(shouldBoostOnTheGoVelocityLogic) rotationToWallOdometry += rotationOnTheGo;
             if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
+            if(moveToZero) {
+                rotationToWallOdometry = 0;
+            }
             robot.getTurretComponent("TurretRotateMotor")
                     .setTarget(rotationToWallOdometry)
             ;
@@ -749,6 +783,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         return globalRobotPose;
     }
     public Runnable countBallsInClassifier = () -> {
+        List<String> ball_colors = new ArrayList<>();
         int countedBalls = 0;
         LLResult result = limelight3A.getLatestResult();
         if (result != null && result.isValid()) {
@@ -756,6 +791,7 @@ public class BigTriangleArtefactAuto extends OpMode {
             int index = 0;
 
             for (LLResultTypes.DetectorResult detection : detections) {
+                ball_colors.add(detection.getClassName());
                 if (index >= 8) break;
                 switch (detection.getClassName()) {
                     case "purple":
@@ -769,13 +805,16 @@ public class BigTriangleArtefactAuto extends OpMode {
                 index++;
             }
             detectedBalls = max(detectedBalls,countedBalls);
+//            detectedBalls = countedBalls;
+            RobotController.telemetry.addData("DETECTED BALLZ", detections);
+            RobotController.telemetry.addData("BALLS LIST", ball_colors);
         }
         RobotController.telemetry.addData("Counted Balls",countedBalls);
         limelight3A.captureSnapshot("Classifier scan" + timer.milliseconds());
     };
     public Runnable countBallsInClassifierWithDelay = () -> {
         robot.executeNow(new ActionSequence(
-                new DelayAction(700),
+                new DelayAction(900),
                 new GeneralAction(countBallsInClassifier)
         ));
     };
@@ -785,7 +824,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         int placesToShift = detectedBalls % 3;
 
         // 23 ppg, 22 pgp, 21 gpp, shift the needed amount
-        camId += placesToShift;
+        camId -= placesToShift;
 
         if(camId < 21) camId += 3;
 
