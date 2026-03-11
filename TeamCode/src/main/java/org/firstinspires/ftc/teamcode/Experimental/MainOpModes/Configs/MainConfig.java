@@ -40,7 +40,9 @@ public class MainConfig {
     public static double targetForCameraX;
     public static double targetForCameraY;
     public static double targetForClassifierX;
+    public static double targetForClassifierXNumber2;
     public static double targetForClassifierY;
+    public static double targetForClassifierYNumber2;
 
     public static TeamColor currentTeamColor;
 
@@ -59,6 +61,9 @@ public class MainConfig {
 
                 targetForClassifierX = 75;
                 targetForClassifierY = 47;
+
+                targetForClassifierXNumber2= 85;
+                targetForClassifierYNumber2 = 50;
 
                 //autoVelAdder = -20;
 
@@ -98,6 +103,10 @@ public class MainConfig {
 
                 targetForClassifierX = 75;
                 targetForClassifierY = -47;
+
+
+                targetForClassifierXNumber2= 85;
+                targetForClassifierYNumber2 = -50;
 
                 //autoVelAdder = -20;
 

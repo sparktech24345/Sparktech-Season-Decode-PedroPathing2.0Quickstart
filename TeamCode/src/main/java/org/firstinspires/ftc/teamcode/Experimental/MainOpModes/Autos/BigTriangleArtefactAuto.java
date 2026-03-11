@@ -104,6 +104,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     public static boolean shouldFire = false;
     public static boolean shouldMakeSortedAuto = false;
     public static boolean shouldHoldTurretForClassifierScan = false;
+    public static boolean shouldHoldTurretForClassifierScanNumber2 = false;
 
     /// --------------------------------------------------------
     private Pose closeStarter = pose(119, 30.5, 180); // would also be around 1.4x
@@ -112,7 +113,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose fininshHPCollectPose = pose(-1.2,48.5,90); // hp collect
     private Pose secondZoneCameraCollect = pose(14.8, 48.5, 90);
     private Pose thirdZoneCameraCollect = pose(30.96, 48.5, 90);
-    private Pose thirdRowCollectDone = pose(27, 47, 90); // third row done
+    private Pose thirdRowCollectDone = pose(27, 45, 90); // third row done
     private Pose secondRowCollectDone = pose(48.7, 43.5, 90);
     private Pose firstRowCollectDone = pose(77.5, 38, 90);
     private Pose gateCollect = pose(49.5, 47, 40);
@@ -373,6 +374,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 ///finished gate collect
 
 
+                new GeneralAction(() -> limelight3A.pipelineSwitch(9)), // preactivly switch pipeline
+
 
                 /// collecting the first row
                 new GeneralAction(() -> collectNumber++),
@@ -400,7 +403,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 //                new GeneralAction(countBallsInClassifierWithDelay),
                 new GeneralAction(() -> moveToZero = false),
                 new DelayAction(200),
-                new GeneralAction(countBallsInClassifierWithDelay),
+//                new GeneralAction(countBallsInClassifierWithDelay),
 //                new DelayAction(200),
                 new GeneralAction(processCameraScanning),
                 new DelayAction(200),
@@ -419,7 +422,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
-                new DelayAction(200),
+                new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = true),
+                new DelayAction(500),
+                new GeneralAction(countBallsInClassifier),
+                new DelayAction(300),
+                new GeneralAction(processCameraScanning),
+                new DelayAction(250),
+                new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = false),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1800),
                 new GeneralAction(() -> shouldUseColorSensors = false),
@@ -462,6 +471,9 @@ public class BigTriangleArtefactAuto extends OpMode {
             // ----------------------- Rotation Stuff -----------------------
             if(shouldHoldTurretForClassifierScan)
                 rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForClassifierX, cfg.targetForClassifierY);
+
+            if(shouldHoldTurretForClassifierScanNumber2)
+                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForClassifierXNumber2, cfg.targetForClassifierYNumber2);
 
             if(shouldBoostOnTheGoVelocityLogic) rotationToWallOdometry += rotationOnTheGo;
             if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
@@ -806,15 +818,14 @@ public class BigTriangleArtefactAuto extends OpMode {
             }
             detectedBalls = max(detectedBalls,countedBalls);
 //            detectedBalls = countedBalls;
-            RobotController.telemetry.addData("DETECTED BALLZ", detections);
             RobotController.telemetry.addData("BALLS LIST", ball_colors);
         }
-        RobotController.telemetry.addData("Counted Balls",countedBalls);
+        RobotController.telemetry.addData("Counted Balls", detectedBalls);
         limelight3A.captureSnapshot("Classifier scan" + timer.milliseconds());
     };
     public Runnable countBallsInClassifierWithDelay = () -> {
         robot.executeNow(new ActionSequence(
-                new DelayAction(900),
+                new DelayAction(1000),
                 new GeneralAction(countBallsInClassifier)
         ));
     };
