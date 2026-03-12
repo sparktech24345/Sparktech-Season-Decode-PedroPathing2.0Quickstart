@@ -44,6 +44,15 @@ public class MainConfig {
     public static double targetForClassifierY;
     public static double targetForClassifierYNumber2;
 
+    public static double targetForFirstClassifierScan;
+
+    public static double hpResetX;
+    public static double hpResetY;
+    public static double hpResetDeg;
+    public static double classifierResetX;
+    public static double classifierResetY;
+    public static double classifierResetDeg;
+
     public static TeamColor currentTeamColor;
 
     public MainConfig() {}
@@ -64,6 +73,8 @@ public class MainConfig {
 
                 targetForClassifierXNumber2= 85;
                 targetForClassifierYNumber2 = 50;
+
+                targetForFirstClassifierScan = 0;
 
                 //autoVelAdder = -20;
 
@@ -89,6 +100,15 @@ public class MainConfig {
                 usedTargetY = 40;
 
                 currentTeamColor = TeamColor.Blue;
+
+                hpResetX = 0.5;
+                hpResetY = 48;
+                hpResetDeg = -90;
+
+                classifierResetX = 122;
+                classifierResetY = 30.5;
+                classifierResetDeg = -135;
+
                 break;
             case Red:
                 teamPipeline = 1;
@@ -104,6 +124,7 @@ public class MainConfig {
                 targetForClassifierX = 75;
                 targetForClassifierY = -47;
 
+                targetForFirstClassifierScan = 345;
 
                 targetForClassifierXNumber2= 85;
                 targetForClassifierYNumber2 = -50;
@@ -132,6 +153,17 @@ public class MainConfig {
                 usedTargetY = -40;
 
                 currentTeamColor = TeamColor.Red;
+
+
+                hpResetX = 0.5;
+                hpResetY = -48;
+                hpResetDeg = 90;
+
+                classifierResetX = 122;
+                classifierResetY = -30.5;
+                classifierResetDeg = 135;
+
+
                 break;
         }
     }

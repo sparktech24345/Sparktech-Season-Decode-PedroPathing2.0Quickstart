@@ -88,10 +88,10 @@ public class SmallTriangleNew extends OpMode {
     private Pose starter = pose( 0, 12.85, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.5, 8, 90);
     private Pose parkPose = pose(1, 22, 90);
-    private Pose fininshHPCollectPose = pose(1.8,44,90); // hp collect
+    private Pose fininshHPCollectPose = pose(0.5,47,90); // hp collect
     private Pose secondZoneCameraCollect = pose(17.8, 44, 90);
     private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
-    private Pose thirdRowCollectDone = pose(30, 34, 90); // third row done
+    private Pose thirdRowCollectDone = pose(30, 37, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
     private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
     private Pose gateCollect = pose(53.8, 40.2, 70);
@@ -269,7 +269,7 @@ public class SmallTriangleNew extends OpMode {
     }
     public Runnable scanForBallsAndPlanPath = () -> {
         int cameraCase = (int) getBallNumber();
-        if(wentTooNumber2 >0) cameraCase = 1;
+        //if(wentTooNumber2 >0) cameraCase = 1; not needed with new rolers
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
