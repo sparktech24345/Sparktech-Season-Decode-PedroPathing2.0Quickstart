@@ -798,6 +798,9 @@ public class BigTriangleArtefactAuto extends OpMode {
         List<String> ball_colors = new ArrayList<>();
         int countedBalls = 0;
         LLResult result = limelight3A.getLatestResult();
+        List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+
+
         if (result != null && result.isValid()) {
             List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
             int index = 0;
@@ -819,6 +822,34 @@ public class BigTriangleArtefactAuto extends OpMode {
             detectedBalls = max(detectedBalls,countedBalls);
 //            detectedBalls = countedBalls;
             RobotController.telemetry.addData("BALLS LIST", ball_colors);
+
+
+            // counting corners stuff
+            double maxX=0,maxY=0;
+            double x1=0,x2=0,y1=0,y2=0;
+            int counter = 0;
+
+
+            List<List<Double>> listWithStuff;
+            for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                counter++;
+                listWithStuff = fr.getTargetCorners(); // List<List<x,y>>
+                x1 = listWithStuff.get(0).get(0); // x
+                y1 = listWithStuff.get(0).get(1); // y
+                x2 = listWithStuff.get(1).get(0); // x
+                y2 = listWithStuff.get(1).get(1); // y
+                RobotController.telemetry.addData("Ball Corners No." + counter, x1 + "  " + y1 + " ::: " + x2 + "  " + y2);
+            }
+
+
+            maxX = max(maxX,max(x1,x2));
+            maxY = max(maxY,max(y1,y2));
+            RobotController.telemetry.addData("fudicial is empty", fiducialResults.isEmpty());
+
+
+            RobotController.telemetry.addData("maxX", maxX);
+            RobotController.telemetry.addData("maxY", maxY);
+
         }
         RobotController.telemetry.addData("Counted Balls", detectedBalls);
         limelight3A.captureSnapshot("Classifier scan" + timer.milliseconds());
