@@ -610,6 +610,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         robot.spitFollowerTelemetry();
         RobotController.telemetry.addData("target vel",targetVelocity);
         RobotController.telemetry.addData("actual vel",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+        RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
     }
 
 

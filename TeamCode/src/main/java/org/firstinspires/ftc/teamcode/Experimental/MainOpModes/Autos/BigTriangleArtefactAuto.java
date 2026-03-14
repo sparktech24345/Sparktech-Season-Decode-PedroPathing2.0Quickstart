@@ -118,7 +118,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose thirdZoneCameraCollect = pose(30.96, 48.5, 90);
     private Pose thirdRowCollectDone = pose(27, 45, 90); // third row done
     private Pose secondRowCollectDone = pose(48.7, 43.5 + 1.5, 90);
-    private Pose firstRowCollectDone = pose(77.5, 38 + 1.5, 90);
+    private Pose firstRowCollectDone = pose(77.5, 38 + 2, 90);
     private Pose gateCollect = pose(49.5, 47, 40);
     private Pose gateActualCollect = pose(50, 52, 60);
     private Pose gateHelperPoint = pose(30, 31, 55); // helper for the collect
@@ -128,7 +128,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose middleBigTriangleShooting = pose(87, 0, 180);
     private Pose middleBigTriangleShootingTurned90Deg = pose(87, 0, 90);
     private Pose parkedBigTriangleShooting = pose(100, 4.5, 180);
-    private Pose gateOpen = pose(59, 43.5, 90); // actual gate opener
+    private Pose gateOpen = pose(59, 44, 90); // actual gate opener
     private Pose gateOpenHelper = pose(48, 30, 90);
     private Pose gateSecond = pose(57, 30, 90);
     private Pose gateSecondOpen = pose(57, 39, 90);
@@ -370,7 +370,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 //                new MoveAction(gateOpen),
                 new MoveAction(gateSecond),
 //                new DelayAction(400),
-                new HoldAction(gateOpen,1000),
+                new HoldAction(gateOpen,1200),
 //                new MoveAction(gateSecondOpen),
 //                new DelayAction(700),
                 new GeneralAction(() -> doIntakePulse = true),
@@ -473,7 +473,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose number 2
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1800), //1600
+                new HoldAction(gateActualCollect,2100), //1800
                 //new DelayAction(800),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
@@ -489,13 +489,14 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
-                new MoveAction(tipBigTriangleShooting),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1200),
+                //new MoveAction(tipBigTriangleShooting),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 /// end of first row firing
 
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
+                ///firing here
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1200),
                 /// no more third row
 
 

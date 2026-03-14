@@ -102,8 +102,8 @@ public class MainConfig {
                 currentTeamColor = TeamColor.Blue;
 
                 hpResetX = 0.5;
-                hpResetY = 48;
-                hpResetDeg = -90;
+                hpResetY = -78.9;
+                hpResetDeg = 90;
 
                 classifierResetX = 122;
                 classifierResetY = 30.5;
@@ -156,8 +156,8 @@ public class MainConfig {
 
 
                 hpResetX = 0.5;
-                hpResetY = -48;
-                hpResetDeg = 90;
+                hpResetY = 78.9; // with plus
+                hpResetDeg = -90;
 
                 classifierResetX = 122;
                 classifierResetY = -30.5;
