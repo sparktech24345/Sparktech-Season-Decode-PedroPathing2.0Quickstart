@@ -89,7 +89,7 @@ public class SmallTriangleNew extends OpMode {
     private Pose small_triangle_shoot = pose(1.5, 8, 90);
     private Pose parkPose = pose(1, 22, 90);
     private Pose fininshHPCollectPose = pose(0.5,47,90); // hp collect
-    private Pose secondZoneCameraCollect = pose(17.8, 44, 90);
+    private Pose secondZoneCameraCollect = pose(17.8 + 0.5, 44, 90); /// CHECK THIS slightly more up spot
     private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
     private Pose thirdRowCollectDone = pose(30, 37, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
@@ -180,17 +180,17 @@ public class SmallTriangleNew extends OpMode {
                 // preload
                 new GeneralAction(() -> shouldFire = true), // prep outtake
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1300), // revving up outtake
+                new DelayAction(1100), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 // end of preload
 
                 //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPose),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
-                new DelayAction(400),
+                new DelayAction(200),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 // end of hp collect and shooting
@@ -200,7 +200,7 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(thirdRowCollectDone, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
-                new DelayAction(400),
+                new DelayAction(200),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(() -> limelight3A.pipelineSwitch(1)), // switch channel only once
                 new DelayAction(1200),
@@ -257,7 +257,7 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(small_triangle_shoot),
                 new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1400),
+                new DelayAction(1300),
                 // finished firing camera cycle
 
 
