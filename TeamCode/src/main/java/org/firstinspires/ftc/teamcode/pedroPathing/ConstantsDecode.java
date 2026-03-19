@@ -77,7 +77,7 @@ public class ConstantsDecode {
             0.1,
             0.007,
             100,
-            1.25,
+            1.6,
             10,
             1
     );
