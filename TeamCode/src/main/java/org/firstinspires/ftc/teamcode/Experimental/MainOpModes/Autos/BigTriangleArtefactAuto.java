@@ -8,8 +8,12 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalCamId;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.usedTargetX;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.usedTargetY;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.ballInAirTime;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.lookAheadSeconds;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer1ForSorting;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer2ForSorting;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
@@ -45,6 +49,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BezierCurveTypes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
@@ -157,8 +162,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(gateActualCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
-                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXAutoClose, cfg.targetYAutoClose);
-                if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
+
 
                 if (startAuto) {
                     startAuto = false;
@@ -408,11 +412,20 @@ public class BigTriangleArtefactAuto extends OpMode {
     /// Runnables
     public static double FAR_TARGET_VELOCITY = 1240;
     public static double FAR_TARGET_ANGLE = 280;
+    TurretComponent turret;
     public void firingTurret(boolean shouldFire) {
+        turret = robot.getTurretComponent("TurretRotateMotor");
         if(shouldFire){
+
+            turret.updateRobotPose(robot.getCurrentPose());
+            turret.setBallTimeInAir(ballInAirTime);
+            rotationToWallOdometry = - turret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
+            //rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXAutoClose, cfg.targetYAutoClose);
+
             // ----------------------- Power Stuff -----------------------
 
-            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
+            //double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
+            double targetVelocity = turret.getTargetFlywheelVelocity(distanceToWallOdometry);
 
             if(shouldBoostOnTheGoVelocityLogic) targetVelocity += velocityAdderOnTheGo;
 
@@ -434,10 +447,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
             if(shouldBoostOnTheGoVelocityLogic) rotationToWallOdometry += rotationOnTheGo;
             if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
-            robot.getTurretComponent("TurretRotateMotor")
-                    .setTarget(rotationToWallOdometry)
-            ;
-            return;
+            turret.setTarget(rotationToWallOdometry);
         }
     }
     Runnable fireSortedBalls = () -> {
