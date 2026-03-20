@@ -545,10 +545,10 @@ public class BigTriangleArtefactAuto extends OpMode {
                 rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForClassifierXNumber2, cfg.targetForClassifierYNumber2);
 
             if(shouldBoostOnTheGoVelocityLogic) rotationToWallOdometry += rotationOnTheGo;
-            if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
             if(moveToZero) {
                 rotationToWallOdometry = cfg.targetForFirstClassifierScan;
             }
+            if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
             turret.setTarget(rotationToWallOdometry);
         }
     }
