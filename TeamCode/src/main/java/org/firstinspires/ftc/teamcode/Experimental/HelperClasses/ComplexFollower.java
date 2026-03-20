@@ -1,21 +1,16 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.draw;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.follower.FollowerConstants;
-import com.pedropathing.localization.*;
 import com.pedropathing.geometry.*;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
-import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 import java.text.MessageFormat;
-import java.util.List;
 
 public class ComplexFollower {
 
