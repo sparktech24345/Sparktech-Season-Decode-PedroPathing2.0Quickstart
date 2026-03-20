@@ -278,11 +278,17 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
         // Driver Switch Mode
-        if (robot.getKey("Y1").ExecuteOnPress){
+        if (robot.getKey("Y1").ExecuteOnPress || robot.getKey("B2").ExecuteOnPress){
             isInSortedMode = !isInSortedMode;
         }
-        if(isInSortedMode) gamepad1.setLedColor(0,0,255,30000);
-        else gamepad1.setLedColor(255,0,0,30000);
+        if(isInSortedMode){
+            gamepad1.setLedColor(0,0,255,30000);
+            gamepad2.setLedColor(0,0,255,30000);
+        }
+        else{
+            gamepad1.setLedColor(255,0,0,30000);
+            gamepad2.setLedColor(255,0,0,30000);
+        }
         // Driver fire unsorted in sorted mode
         if (robot.getKey("X1").ExecuteOnPress){
             wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
@@ -356,15 +362,15 @@ public class MainTeleOpBlue extends LinearOpMode {
             D2_rotationAdder = 0;
         }
 
-        if(robot.getKey("RIGHT_TRIGGER2").ExecuteOnPress) {
-            if (calculatedRightSensorDetectedBall == BallColorSet_Decode.NoBall)
-                calculatedRightSensorDetectedBall = BallColorSet_Decode.Purple;
-            else calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
+        if(robot.getKey("RIGHT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
+            ComplexFollower.instance().setPose(pose(cfg.hpResetX, cfg.hpResetY, cfg.hpResetDeg));
+            D2_velocityAdder = 0;
+            D2_rotationAdder = 0;
         }
-        if(robot.getKey("LEFT_TRIGGER2").ExecuteOnPress) {
-            if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.NoBall)
-                calculatedLeftSensorDetectedBall = BallColorSet_Decode.Purple;
-            else calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
+        if(robot.getKey("LEFT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
+            ComplexFollower.instance().setPose(pose(cfg.classifierResetX,cfg.classifierResetY,cfg.classifierResetDeg));
+            D2_velocityAdder = 0;
+            D2_rotationAdder = 0;
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
@@ -604,6 +610,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         robot.spitFollowerTelemetry();
         RobotController.telemetry.addData("target vel",targetVelocity);
         RobotController.telemetry.addData("actual vel",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+        RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
     }
 
 

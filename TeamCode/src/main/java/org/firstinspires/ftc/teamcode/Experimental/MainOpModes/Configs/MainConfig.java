@@ -40,7 +40,18 @@ public class MainConfig {
     public static double targetForCameraX;
     public static double targetForCameraY;
     public static double targetForClassifierX;
+    public static double targetForClassifierXNumber2;
     public static double targetForClassifierY;
+    public static double targetForClassifierYNumber2;
+
+    public static double targetForFirstClassifierScan;
+
+    public static double hpResetX;
+    public static double hpResetY;
+    public static double hpResetDeg;
+    public static double classifierResetX;
+    public static double classifierResetY;
+    public static double classifierResetDeg;
 
     public static TeamColor currentTeamColor;
 
@@ -54,11 +65,16 @@ public class MainConfig {
                 farZoneCameraAdder = 0;
                 autoZoneAdderFar = 0;
 
-                targetForCameraX = 12;
+                targetForCameraX = 11.5; // this is the hp stuff prev 12
                 targetForCameraY = 50;
 
                 targetForClassifierX = 75;
                 targetForClassifierY = 47;
+
+                targetForClassifierXNumber2= 85;
+                targetForClassifierYNumber2 = 50;
+
+                targetForFirstClassifierScan = 0;
 
                 //autoVelAdder = -20;
 
@@ -84,6 +100,15 @@ public class MainConfig {
                 usedTargetY = 40;
 
                 currentTeamColor = TeamColor.Blue;
+
+                hpResetX = 0.5;
+                hpResetY = -78.9;
+                hpResetDeg = 90;
+
+                classifierResetX = 122;
+                classifierResetY = 30.5;
+                classifierResetDeg = -135;
+
                 break;
             case Red:
                 teamPipeline = 1;
@@ -92,12 +117,17 @@ public class MainConfig {
                 autoZoneAdderFar = 0;
 
 
-                targetForCameraX = 12;
+                targetForCameraX = 11.5; // this is the hp stuff prev 12
                 targetForCameraY = -50;
 
 
                 targetForClassifierX = 75;
                 targetForClassifierY = -47;
+
+                targetForFirstClassifierScan = 345;
+
+                targetForClassifierXNumber2= 85;
+                targetForClassifierYNumber2 = -50;
 
                 //autoVelAdder = -20;
 
@@ -123,6 +153,17 @@ public class MainConfig {
                 usedTargetY = -40;
 
                 currentTeamColor = TeamColor.Red;
+
+
+                hpResetX = 0.5;
+                hpResetY = 78.9; // with plus
+                hpResetDeg = -90;
+
+                classifierResetX = 122;
+                classifierResetY = -30.5;
+                classifierResetDeg = 135;
+
+
                 break;
         }
     }

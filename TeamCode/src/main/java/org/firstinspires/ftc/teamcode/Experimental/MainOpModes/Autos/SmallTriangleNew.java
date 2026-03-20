@@ -88,10 +88,11 @@ public class SmallTriangleNew extends OpMode {
     private Pose starter = pose( 0, 12.85, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.5, 8, 90);
     private Pose parkPose = pose(1, 22, 90);
-    private Pose fininshHPCollectPose = pose(1.8,44,90); // hp collect
-    private Pose secondZoneCameraCollect = pose(17.8, 44, 90);
+    private Pose fininshHPCollectPose = pose(0.5,47,90); // hp collect
+    private Pose fininshHPCollectPoseNEW = pose(0.5,45,90); // hp collect
+    private Pose secondZoneCameraCollect = pose(17.8 + 1, 44, 90); /// CHECK THIS slightly more up spot
     private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
-    private Pose thirdRowCollectDone = pose(30, 34, 90); // third row done
+    private Pose thirdRowCollectDone = pose(30, 37, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
     private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
     private Pose gateCollect = pose(53.8, 40.2, 70);
@@ -122,6 +123,7 @@ public class SmallTriangleNew extends OpMode {
                 isMoving = ComplexFollower.instance().isBusy();
                 if(shouldCheckColorSensors) HandleColors();
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPoseNEW) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 firingTurret(shouldFire);
                 pulseIntake(doIntakePulse);
                 if(timer.milliseconds() > 29000 + 800){
@@ -180,17 +182,17 @@ public class SmallTriangleNew extends OpMode {
                 // preload
                 new GeneralAction(() -> shouldFire = true), // prep outtake
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1300), // revving up outtake
+                new DelayAction(1100), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 // end of preload
 
                 //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPose),
-                new DelayAction(1000),
+                new DelayAction(600),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
-                new DelayAction(400),
+                new DelayAction(200),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
                 // end of hp collect and shooting
@@ -200,7 +202,7 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(thirdRowCollectDone, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
-                new DelayAction(400),
+                new DelayAction(200),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(() -> limelight3A.pipelineSwitch(1)), // switch channel only once
                 new DelayAction(1200),
@@ -257,7 +259,7 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(small_triangle_shoot),
                 new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1400),
+                new DelayAction(1300),
                 // finished firing camera cycle
 
 
@@ -269,12 +271,12 @@ public class SmallTriangleNew extends OpMode {
     }
     public Runnable scanForBallsAndPlanPath = () -> {
         int cameraCase = (int) getBallNumber();
-        if(wentTooNumber2 >0) cameraCase = 1;
+        //if(wentTooNumber2 >0) cameraCase = 1; not needed with new rolers
         switch (cameraCase){
-            case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
+            case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
             //case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
-            default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
+            default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
         }
     };
     Runnable checkEmptyIntake = () -> {
@@ -497,6 +499,7 @@ public class SmallTriangleNew extends OpMode {
         parkPose = convertPose(parkPose);
         small_triangle_shoot = convertPose(small_triangle_shoot);
         fininshHPCollectPose = convertPose(fininshHPCollectPose);
+        fininshHPCollectPoseNEW = convertPose(fininshHPCollectPoseNEW);
         secondZoneCameraCollect = convertPose(secondZoneCameraCollect);
         thirdZoneCameraCollect = convertPose(thirdZoneCameraCollect);
         thirdRowCollectDone = convertPose(thirdRowCollectDone);
