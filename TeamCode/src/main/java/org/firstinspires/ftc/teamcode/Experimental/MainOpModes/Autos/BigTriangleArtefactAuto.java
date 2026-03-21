@@ -126,7 +126,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose secondRowCollectDone = pose(48.7, 43.5 + 1.5, 90);
     private Pose firstRowCollectDone = pose(77.5 - 0.5, 38 + 2, 90);
     private Pose gateCollect = pose(49, 47.5, 45);
-    private Pose gateActualCollect = pose(50 + 1, 52, 55);
+    private Pose gateActualCollect = pose(50 + 1, 52 + 0.3, 55);
     private Pose gateHelperPoint = pose(30, 31, 55); // helper for the collect
     private Pose gateHold = pose(50.8, 44, 90); // not used
     private Pose tipBigTriangleShooting = pose(67, 0, 180);

@@ -470,6 +470,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         // Closing gates if they arent needed
         if(!hasBallInLeftChamber && !hasBallInRightChamber) outtakeGatesState = -1;
 
+        if(hasBallInLeftChamber && hasBallInRightChamber && hasBallInIntake)
+            gamepad1.rumble(0.6,0.6,100);
+
         // IntakeStuff
         if(wantsToOutput){
             intakeState = -1;
@@ -562,8 +565,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         .setTarget(forcedOuttakeSpeed);
             }
 
-            if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
-                gamepad1.rumble(0.4,0.4,100);
+            //if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
+            //    gamepad1.rumble(0,0,100);
+
 
 
                 // ----------------------- Angle Stuff -----------------------
