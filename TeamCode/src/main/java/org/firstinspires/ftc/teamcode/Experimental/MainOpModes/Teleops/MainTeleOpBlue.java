@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_DISTANCE_MM;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_VOLTS;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballInIntakeThreshold;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceSensorName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalCamId;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
@@ -82,6 +84,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     protected BallColorSet_Decode actualLeftSensorDetectedBall;
     protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
     protected BallColorSet_Decode ballToFire;
+    public static boolean hasBallInIntake = false;
     public static boolean hasBallInRightChamber = false;
     public static boolean hasBallInLeftChamber = false;
     public static boolean shouldRemoveBalls = false;
@@ -104,9 +107,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static int camId = 0;
 
     /// ----------------- Limelight Stuff -----------------
-    private AnalogInput laserAnalog; // if < 110 then has ball
-    private static final double MAX_VOLTS = 3.3;
-    private static final double MAX_DISTANCE_MM = 1000.0;
+    private AnalogInput laserAnalog;
 
     /// ----------------- Imu Stuff -----------------
     int logoFacingDirectionPosition;
@@ -633,7 +634,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         robot.init(OpModes.TeleOP);
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
-        InitOtherStuff(teamPipeline);
+        initOtherStuff(teamPipeline);
         robot.UseDefaultMovement();
         makeConfig();
 
@@ -689,7 +690,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         D2_rotationAdder = 0;
     }
 
-    public void InitOtherStuff(int limelightPipeline) {
+    public void initOtherStuff(int limelightPipeline) {
         //limelight stuff
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(limelightPipeline);
@@ -700,11 +701,12 @@ public class MainTeleOpBlue extends LinearOpMode {
         //other stuff like color sensor
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
+        laserAnalog = hardwareMap.get(AnalogInput.class, distanceSensorName);
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
-        gamepad1.setLedColor(254, 254, 254, 1000000);
-        gamepad2.setLedColor(254, 0, 0, 1000000);
+        //gamepad1.setLedColor(254, 254, 254, 1000000);
+        //gamepad2.setLedColor(254, 0, 0, 1000000);
     }
 
 
@@ -748,7 +750,17 @@ public class MainTeleOpBlue extends LinearOpMode {
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
-        if(ShouldSpewOutSensors){
+
+         /// distance sesnsor stuff
+
+         // Read sensor voltage (0.0–3.3V)
+         double volts = laserAnalog.getVoltage();
+         // Convert voltage to distance in millimeters (linear mapping)
+         double distanceMM = (volts / MAX_VOLTS) * MAX_DISTANCE_MM;
+         hasBallInIntake = distanceMM < ballInIntakeThreshold;
+
+
+         if(ShouldSpewOutSensors){
             RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
             RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
             RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
@@ -759,7 +771,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
             RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
-        }
+            RobotController.telemetry.addData("Has ball in intake", hasBallInIntake);
+         }
     }
 
 

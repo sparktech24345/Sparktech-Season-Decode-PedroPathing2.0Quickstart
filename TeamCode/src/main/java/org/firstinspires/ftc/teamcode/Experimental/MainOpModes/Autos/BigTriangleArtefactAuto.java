@@ -1,14 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalCamId;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.usedTargetX;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.usedTargetY;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.ballInAirTime;
@@ -35,6 +27,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -97,6 +90,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     protected BallColorSet_Decode actualLeftSensorDetectedBall;
     protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
     protected BallColorSet_Decode ballToFire;
+    public static boolean hasBallInIntake = false;
     public static boolean hasBallInRightChamber = false;
     public static boolean hadBallInRightChamberInPast = false;
     public static boolean hasBallInLeftChamber = false;
@@ -104,6 +98,12 @@ public class BigTriangleArtefactAuto extends OpMode {
     public static boolean shouldRemoveBalls = false;
     public static boolean shouldBoostOnTheGoVelocityLogic = false;
     public static boolean shouldUseColorSensors = false;
+
+    /// distance sensor stuff
+
+    private AnalogInput laserAnalog;
+
+    /// other stuff
     public static double velocityAdderOnTheGo = 150;
     public static double rotationOnTheGo = -2.5;
     public static double angleOnTheGo = 155; // old -75
@@ -126,7 +126,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose secondRowCollectDone = pose(48.7, 43.5 + 1.5, 90);
     private Pose firstRowCollectDone = pose(77.5 - 0.5, 38 + 2, 90);
     private Pose gateCollect = pose(49, 47.5, 45);
-    private Pose gateActualCollect = pose(50 + 1, 53 - 0.5, 60);
+    private Pose gateActualCollect = pose(50 + 1, 52, 55);
     private Pose gateHelperPoint = pose(30, 31, 55); // helper for the collect
     private Pose gateHold = pose(50.8, 44, 90); // not used
     private Pose tipBigTriangleShooting = pose(67, 0, 180);
@@ -142,6 +142,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     public static double rotationToWallOdometry;
     public static int camId = 23;
     public static boolean moveToZero = false;
+    boolean hasLeftIntentionally = false;
 
     @Override
     public void init() {
@@ -153,16 +154,22 @@ public class BigTriangleArtefactAuto extends OpMode {
             }
 
             private void telemetry() {
-                        RobotController.telemetry.addData("robot rotation", Math.toDegrees(robot.getCurrentPose().getHeading()));
-                        RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
-                        RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
-                        RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
-                        RobotController.telemetry.addData("is moving",isMoving);
-                        RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
-                        RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-                        RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
-                        RobotController.telemetry.addData("Current cam id", camId);
+                RobotController.telemetry.addData("robot rotation", Math.toDegrees(robot.getCurrentPose().getHeading()));
+                RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
+                RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
+                RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+                RobotController.telemetry.addData("is moving",isMoving);
+                RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
+                RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+                RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+                RobotController.telemetry.addData("Current cam id", camId);
+                RobotController.telemetry.addData("Current path time", ComplexFollower.followingForMS());
 
+                RobotController.telemetry.addData("Has ball in left", hasBallInLeftChamber);
+                RobotController.telemetry.addData("Has ball in right", hasBallInRightChamber);
+                RobotController.telemetry.addData("Has ball in intake", hasBallInIntake);
+
+                RobotController.telemetry.addData("Has left intentionally", hasLeftIntentionally);
             }
 
             private void controls() { // this will happen in a loop
@@ -172,7 +179,15 @@ public class BigTriangleArtefactAuto extends OpMode {
                 pulseIntake(doIntakePulse);
                 checkToFireUnsortedBalls(shouldFireUnsortedBalls);
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
-                if (ComplexFollower.followingForMS() > 1000 && ComplexFollower.getTarget().equals(gateActualCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
+
+
+                if (    (hasBallInIntake && hasBallInLeftChamber && hasBallInRightChamber)
+                        && ComplexFollower.getTarget().equals(gateActualCollect)
+                        && !shouldMakeAutoWithout3rdRow
+                        && !shouldMakeSortedAuto){
+                    ComplexFollower.setStopHolding(true);
+                    hasLeftIntentionally = true;
+                }
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
 
@@ -198,6 +213,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
+        laserAnalog = hardwareMap.get(AnalogInput.class, distanceSensorName);
         shouldFire = false; lastGateState = 1;
         hadBallInRightChamberInPast = false; hadBallInLeftChamberInPast = false; shouldFireUnsortedBalls = false;
         doIntakePulse = false;
@@ -273,8 +289,9 @@ public class BigTriangleArtefactAuto extends OpMode {
 
                 /// collecting lever pose
                 new GeneralAction(() -> collectNumber++),
+                new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1200), //1200
+                new HoldAction(gateActualCollect,1100),  //1100 at full 21, switched with new sensor
                 //new DelayAction(350),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldFireUnsortedBalls = true),
@@ -287,7 +304,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose number 2
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1100), //1600
+                new HoldAction(gateActualCollect,1100), //1100 at full 21, switched with new sensor
                 //new DelayAction(800),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldFireUnsortedBalls = true),
@@ -300,8 +317,9 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose number 3
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1100), //2100
+                new HoldAction(gateActualCollect,1100), //1100 at full 21, switched with new sensor
                 //new DelayAction(800),
+                new GeneralAction(() -> shouldUseColorSensors = false),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
@@ -522,10 +540,9 @@ public class BigTriangleArtefactAuto extends OpMode {
         turret = robot.getTurretComponent("TurretRotateMotor");
         if(shouldFire){
 
-            if(shouldBoostOnTheGoVelocityLogic) turret.updateRobotPose(robot.getCurrentPose());
+            if(shouldBoostOnTheGoVelocityLogic || true) turret.updateRobotPose(robot.getCurrentPose());
             if(shouldBoostOnTheGoVelocityLogic) turret.setBallTimeInAir(ballInAirTime);
             else turret.setBallTimeInAir(0);
-            //rotationToWallOdometry = - turret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
             rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXAutoClose, cfg.targetYAutoClose);
 
             // ----------------------- Power Stuff -----------------------
@@ -753,7 +770,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         ));
     };
     public void checkToFireUnsortedBalls(boolean shouldFire){
-        if(calculateDistance(robot.getCurrentPose(),tipBigTriangleShootingTurned90Deg,true) < 0.35 && shouldFire){
+        if(calculateDistance(robot.getCurrentPose(),tipBigTriangleShootingTurned90Deg,true) < 0.25 && shouldFire){
             shouldFireUnsortedBalls = false;
             robot.executeNow(new ActionSequence(
                     new StateAction("RightGateServo", "OPEN"),
@@ -830,8 +847,17 @@ public class BigTriangleArtefactAuto extends OpMode {
         if (calculatedLeftSensorDetectedBall == null) calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
         if (calculatedRightSensorDetectedBall == null) calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
 
-        hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
-        hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
+        hasBallInLeftChamber = (actualRightSensorDetectedBall != BallColorSet_Decode.NoBall);
+        hasBallInRightChamber = (actualRightSensorDetectedBall != BallColorSet_Decode.NoBall);
+
+        /// distance sesnsor stuff
+
+        // Read sensor voltage (0.0–3.3V)
+        double volts = laserAnalog.getVoltage();
+        // Convert voltage to distance in millimeters (linear mapping)
+        double distanceMM = (volts / MAX_VOLTS) * MAX_DISTANCE_MM;
+        hasBallInIntake = distanceMM < ballInIntakeThreshold;
+
 
         RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
         RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
@@ -843,6 +869,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+
     }
     public static int lastGateState = 1;
     public void makeConfig(){

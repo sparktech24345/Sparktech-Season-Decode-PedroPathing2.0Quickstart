@@ -9,12 +9,12 @@ public class HoldAction extends Action {
         super();
         this.OnStart = () -> ComplexFollower.hold(holdTargetPos);
         this.DoneCondition = () -> ComplexFollower.isDoneFollowingTimer(timeToHoldPose);
-        this.OnDone = () -> ComplexFollower.interrupt();
+        this.OnDone = () -> {ComplexFollower.interrupt(); ComplexFollower.setStopHolding(false);};
     }
     public HoldAction(double timeToHoldPose) {
         super();
         this.OnStart = () -> ComplexFollower.hold(true);
         this.DoneCondition = () -> ComplexFollower.isDoneFollowingTimer(timeToHoldPose);
-        this.OnDone = () -> ComplexFollower.interrupt();
+        this.OnDone = () -> {ComplexFollower.interrupt(); ComplexFollower.setStopHolding(false);};
     }
 }

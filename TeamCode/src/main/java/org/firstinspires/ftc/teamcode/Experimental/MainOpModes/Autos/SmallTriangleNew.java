@@ -20,6 +20,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -73,6 +74,7 @@ public class SmallTriangleNew extends OpMode {
     protected BallColorSet_Decode actualLeftSensorDetectedBall;
     protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
     protected BallColorSet_Decode ballToFire;
+    public static boolean hasBallInIntake = false;
     public static boolean hasBallInRightChamber = false;
     public static boolean hasBallInLeftChamber = false;
     public static boolean shouldRemoveBalls = false;
@@ -80,6 +82,12 @@ public class SmallTriangleNew extends OpMode {
     public static boolean shouldPullFromQueue = false;
     public static boolean shouldSwitchChannel = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
+
+    /// distance sensor stuff
+    private AnalogInput laserAnalog;
+
+    /// other stuff
+
     public static double velocity = 1480;
     public static double angle = 266;
     public static double rotationNeededForCameraScan = 13; // about 13 degrees to scan with limelight
@@ -139,6 +147,7 @@ public class SmallTriangleNew extends OpMode {
         //recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
+        laserAnalog = hardwareMap.get(AnalogInput.class, distanceSensorName);
         convertPoses();
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
         shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
@@ -452,8 +461,17 @@ public class SmallTriangleNew extends OpMode {
         if (calculatedLeftSensorDetectedBall == null) calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
         if (calculatedRightSensorDetectedBall == null) calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
 
-        hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
-        hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
+        hasBallInLeftChamber = (actualRightSensorDetectedBall != BallColorSet_Decode.NoBall);
+        hasBallInRightChamber = (actualRightSensorDetectedBall != BallColorSet_Decode.NoBall);
+
+        /// distance sesnsor stuff
+
+        // Read sensor voltage (0.0–3.3V)
+        double volts = laserAnalog.getVoltage();
+        // Convert voltage to distance in millimeters (linear mapping)
+        double distanceMM = (volts / MAX_VOLTS) * MAX_DISTANCE_MM;
+        hasBallInIntake = distanceMM < ballInIntakeThreshold;
+
 
         RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
         RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
@@ -465,6 +483,8 @@ public class SmallTriangleNew extends OpMode {
 
         RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
         RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+        RobotController.telemetry.addData("Has ball in intake", hasBallInIntake);
+
     }
     public static int lastGateState = 0;
     protected void pulseIntake(boolean shouldPulseIntake){

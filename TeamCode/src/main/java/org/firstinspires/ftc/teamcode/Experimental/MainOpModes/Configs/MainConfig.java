@@ -85,7 +85,7 @@ public class MainConfig {
                 targetY = 53;
 
                 targetXAutoClose = 127;
-                targetYAutoClose = 49;
+                targetYAutoClose = 50;
 
                 targetXCenter = 128; // 130
                 targetYCenter = 53;

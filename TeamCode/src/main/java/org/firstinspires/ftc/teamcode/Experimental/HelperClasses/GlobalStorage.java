@@ -60,6 +60,11 @@ public class GlobalStorage {
     public static double ballColorTresholdGreen = 20;
     public static double leftSensorColorMultiplier = 0.9;
 
+    // Sensor scale: 3.3V corresponds to 1000 mm
+    public static double MAX_VOLTS = 3.3;
+    public static double MAX_DISTANCE_MM = 1000.0;
+    public static double ballInIntakeThreshold = 235;
+
     // DECODE
 
     // DECODE ROBOT V2
@@ -75,6 +80,7 @@ public class GlobalStorage {
     public static String turretAngleServoName = "turretAngleServo"; // port 4
     public static String colorSensorRightName = "colorSensorRight";
     public static String colorSensorLeftName = "colorSensorLeft";
+    public static String distanceSensorName = "distanceSensor";
 
     public static OpModes currentOpModes = OpModes.TeleOP;
     public static TeamColor currentTeamColor = TeamColor.TeamNotSet;
