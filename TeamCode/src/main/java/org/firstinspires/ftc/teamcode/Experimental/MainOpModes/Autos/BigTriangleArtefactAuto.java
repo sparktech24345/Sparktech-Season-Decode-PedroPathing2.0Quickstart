@@ -126,7 +126,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose secondRowCollectDone = pose(48.7, 43.5 + 1.5, 90);
     private Pose firstRowCollectDone = pose(77.5 - 0.5, 38 + 2, 90);
     private Pose gateCollect = pose(49, 47.5, 45);
-    private Pose gateActualCollect = pose(50 + 0.7, 52 + 0.2, 55);
+    private Pose gateActualCollect = pose(50 + 0.9, 52 + 0.3, 50);
     private Pose gateHelperPoint = pose(30, 31, 55); // helper for the collect
     private Pose gateHold = pose(50.8, 44, 90); // not used
     private Pose tipBigTriangleShooting = pose(67, 0, 180);
@@ -452,11 +452,11 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
                 new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = true),
-                new DelayAction(500),
+                new DelayAction(850),
                 new GeneralAction(countBallsInClassifier),
-                new DelayAction(300),
+                new DelayAction(350),
                 new GeneralAction(processCameraScanning),
-                new DelayAction(250),
+                new DelayAction(375),
                 new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = false),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1600),
@@ -1030,8 +1030,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 else if (maxY >= 242) detectedBalls = 3;
                 else if (maxY >= 225) detectedBalls = 4;
                 else if (maxY >= 211) detectedBalls = 5;
-                else if (maxY >= 202) detectedBalls = 6;
-                else if (maxY >= 180) detectedBalls = 7;
+                else if (maxY >= 190) detectedBalls = 6;
+                else if (maxY >= 170) detectedBalls = 7;
                 else detectedBalls = 8; // cant detect more then 8 anyway
             }
             else detectedBalls = countedBalls;
