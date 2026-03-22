@@ -105,8 +105,8 @@ public class BigTriangleArtefactAuto extends OpMode {
 
     /// other stuff
     public static double velocityAdderOnTheGo = 150;
-    public static double rotationOnTheGo = -2.5;
-    public static double angleOnTheGo = 155; // old -75
+    public static double rotationOnTheGo = -2;
+    public static double angleOnTheGo = 160; // old -75
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
     public static boolean shouldFireUnsortedBalls = false;
@@ -126,7 +126,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose secondRowCollectDone = pose(48.7, 43.5 + 1.5, 90);
     private Pose firstRowCollectDone = pose(77.5 - 0.5, 38 + 2, 90);
     private Pose gateCollect = pose(49, 47.5, 45);
-    private Pose gateActualCollect = pose(50 + 0.9, 52 + 0.3, 50);
+    private Pose gateActualCollect = pose(51 + 1.4, 46.25, 55);
     private Pose gateHelperPoint = pose(30, 31, 55); // helper for the collect
     private Pose gateHold = pose(50.8, 44, 90); // not used
     private Pose tipBigTriangleShooting = pose(67, 0, 180);
@@ -394,10 +394,10 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new HoldAction(gateActualCollect,1300),  //1100 at full 21, switched with new sensor
                 //new DelayAction(350),
                 new GeneralAction(() -> doIntakePulse = true),
-                //new GeneralAction(() -> shouldFireUnsortedBalls = true),
+                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(800),
+                //new GeneralAction(fireUnsortedBalls),
+                new DelayAction(675),
                 ///finished gate collect
 
 
@@ -407,7 +407,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// collecting lever pose
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1500),
+                new HoldAction(gateActualCollect,1750),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 // gate holding comes here
@@ -416,7 +416,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(fireSortedBalls),
-                new DelayAction(1600),
+                new DelayAction(1525),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 ///finished gate collect
 
@@ -440,7 +440,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> moveToZero = false),
                 new DelayAction(200),
                 new GeneralAction(fireSortedBalls),
-                new DelayAction(1600),
+                new DelayAction(1525),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 /// end of first row firing
 
@@ -452,11 +452,11 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
                 new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = true),
-                new DelayAction(850),
+                new DelayAction(750),
                 new GeneralAction(countBallsInClassifier),
-                new DelayAction(350),
+                new DelayAction(300),
                 new GeneralAction(processCameraScanning),
-                new DelayAction(375),
+                new DelayAction(200),
                 new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = false),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1600),
