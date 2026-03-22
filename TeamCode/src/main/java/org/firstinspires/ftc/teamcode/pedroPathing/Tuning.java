@@ -1,12 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.changes;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawOnlyCurrent;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.draw;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.stopRobot;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.telemetryM;
-
+import static com.pedropathing.math.MathFunctions.quadraticFit;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 import android.annotation.SuppressLint;
@@ -29,8 +23,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.sun.tools.javac.util.Constants;
-import static com.pedropathing.math.MathFunctions.quadraticFit;
-//import com.pedropathing.math.MathFunctions.quadraticFit; // ble-ble blu-blu nu vrea sa mearga ble-ble blu-blu
 
 import java.util.ArrayList;
 import java.util.List;
@@ -396,7 +388,7 @@ class ForwardVelocityTuner extends OpMode {
                 stopRobot();
             } else {
                 follower.setTeleOpDrive(1,0,0,true);
-//double currentVelocity = Math.abs(follower.getVelocity().getXComponent());
+                //double currentVelocity = Math.abs(follower.getVelocity().getXComponent());
                 double currentVelocity = Math.abs(follower.poseTracker.getLocalizer().getVelocity().getX());
                 velocities.add(currentVelocity);
                 velocities.remove(0);
