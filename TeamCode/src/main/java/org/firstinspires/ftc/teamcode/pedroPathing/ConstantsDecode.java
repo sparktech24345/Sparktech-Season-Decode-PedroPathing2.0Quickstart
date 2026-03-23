@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -34,14 +35,14 @@ public class ConstantsDecode {
             .mass(14.3)
             .forwardZeroPowerAcceleration(-27.81051833)
             .lateralZeroPowerAcceleration(-55.7462)
-            .centripetalScaling(0.0005)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.04, 0, 0.004, 0.025))
+            .centripetalScaling(0.0005) // cand se fac testele treb sa fie cam 0 - dupa Pedro
+//            .translationalPIDFCoefficients(new PIDFCoefficients(0.04, 0, 0.004, 0.025))
             .headingPIDFCoefficients(new PIDFCoefficients(0.9, 0, 0.045, 0.0005))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03,0,0.0037,0.6,0.02))
-
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.0002, 0.6,0.02))
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.057,0,0.004,0.02))
-
+//            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03,0,0.0037,0.6,0.02))
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.04, 0.0016)) //TODO: de refacut valorile LUATE DE LA PEDRO
+            // also de vazut cum merge PB. Pedro zice ca inlocuiste translational si drive PID
+//            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.0002, 0.6,0.02))
+//            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.057,0,0.004,0.02))
 
             .useSecondaryDrivePIDF(false)
             .useSecondaryTranslationalPIDF(false)
