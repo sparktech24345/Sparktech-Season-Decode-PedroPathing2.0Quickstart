@@ -168,7 +168,7 @@ public class GlobalStorage {
     public static double distanceToAngleFunction(double distance) {
         int handicapAdder;
         if(distance < 1)    return closeAngle;
-        if(distance < 1.6)  handicapAdder = 20;
+        if(distance < 1.7)  handicapAdder = 25;
         else handicapAdder = 0;
         if(distance > 3) return farAngle;
 //        if(distance > 3) return farAngleGrade1 * distance + farAngleGrade0;
