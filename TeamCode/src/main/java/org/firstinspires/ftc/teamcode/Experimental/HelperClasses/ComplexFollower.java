@@ -50,7 +50,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
         currentTargetPos = startPos;
-        Drawing.drawDebug(follower);
+//        Drawing.drawDebug(follower);
         follower.activateAllPIDFs();
     }
     public static void init(HardwareMap hardwareMap, Pose startingPose,boolean isFar) {
@@ -67,7 +67,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
         currentTargetPos = startPos;
-        Drawing.drawDebug(follower);
+//        Drawing.drawDebug(follower);
         follower.activateAllPIDFs();
     }
 
@@ -289,7 +289,7 @@ public class ComplexFollower {
         currentX = currentPos.getX();
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
-        Drawing.drawDebug(follower);
+//        Drawing.drawDebug(follower);
         globalRobotPose = currentPos;
     }
 

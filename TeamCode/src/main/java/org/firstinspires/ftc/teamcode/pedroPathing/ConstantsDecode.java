@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
@@ -30,16 +31,17 @@ import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyPinpoi
 
 import java.nio.file.Path;
 
+@Config
 public class ConstantsDecode {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(14.3)
             .forwardZeroPowerAcceleration(-27.81051833)
             .lateralZeroPowerAcceleration(-55.7462)
-            .centripetalScaling(0.0005) // cand se fac testele treb sa fie cam 0 - dupa Pedro
+            .centripetalScaling(0) // cand se fac testele treb sa fie cam 0 - dupa Pedro
 //            .translationalPIDFCoefficients(new PIDFCoefficients(0.04, 0, 0.004, 0.025))
             .headingPIDFCoefficients(new PIDFCoefficients(0.9, 0, 0.045, 0.0005))
 //            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03,0,0.0037,0.6,0.02))
-            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.04, 0.0016)) //TODO: de refacut valorile LUATE DE LA PEDRO
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.17617982660884826, 0.001307816881916385)) //TODO: de refacut valorile LUATE DE LA PEDRO
             // also de vazut cum merge PB. Pedro zice ca inlocuiste translational si drive PID
 //            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.0002, 0.6,0.02))
 //            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.057,0,0.004,0.02))
