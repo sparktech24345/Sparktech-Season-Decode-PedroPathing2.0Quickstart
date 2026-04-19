@@ -5,16 +5,17 @@ import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 
 public class HoldAction extends Action {
-    public HoldAction(Pose holdTargetPos,double timeToHoldPose) {
+    public HoldAction(Pose heldPos, double timeToHoldPose) {
         super();
-        this.OnStart = () -> ComplexFollower.hold(holdTargetPos);
+        this.OnStart = () -> ComplexFollower.hold(heldPos);
         this.DoneCondition = () -> ComplexFollower.isDoneFollowingTimer(timeToHoldPose);
-        this.OnDone = () -> ComplexFollower.interrupt();
+        this.OnDone = ComplexFollower::interrupt;
     }
+
     public HoldAction(double timeToHoldPose) {
         super();
-        this.OnStart = () -> ComplexFollower.hold(true);
+        this.OnStart = ComplexFollower::hold;
         this.DoneCondition = () -> ComplexFollower.isDoneFollowingTimer(timeToHoldPose);
-        this.OnDone = () -> ComplexFollower.interrupt();
+        this.OnDone = ComplexFollower::interrupt;
     }
 }

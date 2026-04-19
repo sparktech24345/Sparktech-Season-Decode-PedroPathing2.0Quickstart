@@ -4,6 +4,9 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.ButtonPressedEvent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.ButtonReleasedEvent;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -14,21 +17,11 @@ public class Button {
     private final ElapsedTime HoldTimer = new ElapsedTime();
 
 
-    public boolean IsToggledOnPress = false;
-    public boolean IsToggledAfterPress = false;
-    public boolean IsHeld = false;
-    public double HoldTimeMs = 0;
-    public boolean ExecuteOnPress = false;
-    public boolean ExecuteAfterPress = false;
-
-    public void Toggle() {
-        IsToggledOnPress = true;
-        IsToggledAfterPress = true;
-    }
-    public void UnToggle() {
-        IsToggledOnPress = false;
-        IsToggledAfterPress = false;
-    }
+    public boolean toggled = false;
+    public boolean held = false;
+    public double  HoldTimeMs = 0;
+    public boolean pressed = false;
+    public boolean released = false;
 
     public Button(BooleanSupplier execCond) {
         this.condB = execCond;
@@ -39,7 +32,6 @@ public class Button {
         this.condB = null;
         this.condD = execCond;
     }
-
 
     public double raw() {
         try {
@@ -54,21 +46,20 @@ public class Button {
     }
 
     public void update() {
-        boolean GamepadInput = (condB == null ? evalForTrigger((condD == null ? 0 : condD.getAsDouble())) : condB.getAsBoolean()); /// TODO this might be risky change for triggers
-        ExecuteOnPress = false;
-        ExecuteAfterPress = false;
-
-        if (!WasPressed && GamepadInput) {
-            ExecuteOnPress = true;
+        boolean input = (condB == null ? evalForTrigger((condD == null ? 0 : condD.getAsDouble())) : condB.getAsBoolean());
+        pressed = !WasPressed && input;
+        released = WasPressed && !input;
+        held = input;
+        WasPressed = input;
+        if (pressed) {
             HoldTimer.reset();
-            IsToggledOnPress = !IsToggledOnPress;
+            toggled = !toggled;
+            ComplexOpMode.publicEventBus.emit(new ButtonPressedEvent(this));
         }
-        if (WasPressed && !GamepadInput) {
-            ExecuteAfterPress = true;
+        else if (released) {
             HoldTimeMs = HoldTimer.milliseconds();
-            IsToggledAfterPress = !IsToggledAfterPress;
+            toggled = !toggled;
+            ComplexOpMode.publicEventBus.emit(new ButtonReleasedEvent(this));
         }
-        IsHeld = GamepadInput;
-        WasPressed = GamepadInput;
     }
 }

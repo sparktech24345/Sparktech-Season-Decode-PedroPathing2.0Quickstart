@@ -4,89 +4,141 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import java.util.HashMap;
 
-public class ComplexGamepad {
+public enum ComplexGamepad {
+    A1,
+    B1,
+    X1,
+    Y1,
 
-    private static Gamepad gamepad1;
-    private static Gamepad gamepad2;
+    DPAD_UP1,
+    DPAD_DOWN1,
+    DPAD_RIGHT1,
+    DPAD_LEFT1,
 
-    private static HashMap<String, Button> controlMap = null;
+    START1,
+    BACK1,
 
-    private static void put(String name, Button button) {
-        controlMap.put(name, button);
+    LEFT_STICK_X1,
+    LEFT_STICK_Y1,
+
+    RIGHT_STICK_X1,
+    RIGHT_STICK_Y1,
+
+    LEFT_TRIGGER1,
+    RIGHT_TRIGGER1,
+
+    LEFT_BUMPER1,
+    RIGHT_BUMPER1,
+
+
+    A2,
+    B2,
+    X2,
+    Y2,
+
+    DPAD_UP2,
+    DPAD_DOWN2,
+    DPAD_RIGHT2,
+    DPAD_LEFT2,
+
+    START2,
+    BACK2,
+
+    LEFT_STICK_X2,
+    LEFT_STICK_Y2,
+
+    RIGHT_STICK_X2,
+    RIGHT_STICK_Y2,
+
+    LEFT_TRIGGER2,
+    RIGHT_TRIGGER2,
+
+    LEFT_BUMPER2,
+    RIGHT_BUMPER2;
+
+    public static Gamepad gamepad1;
+    public static Gamepad gamepad2;
+    private Button button;
+    private static boolean init_ = false;
+
+    public void populate(Button button) {
+        this.button = button;
+    }
+
+    public static boolean isInit() {
+        return init_;
     }
 
     public static void init(Gamepad gpad1, Gamepad gpad2) {
+        init_ = true;
         SetGamepads(gpad1, gpad2);
     }
 
     public static void SetGamepads(Gamepad gpad1, Gamepad gpad2) {
-        gamepad1 = gpad1;
-        gamepad2 = gpad2;
-        controlMap = new HashMap<>(36);
+        ComplexGamepad.gamepad1 = gpad1;
+        ComplexGamepad.gamepad2 = gpad2;
 
-        if (gamepad1 != null) {
-            put("A1", new Button(() -> gamepad1.a));
-            put("B1", new Button(() -> gamepad1.b));
-            put("X1", new Button(() -> gamepad1.x));
-            put("Y1", new Button(() -> gamepad1.y));
+        ComplexGamepad.A1.populate(new Button(() -> gpad1.a));
+        ComplexGamepad.B1.populate(new Button(() -> gpad1.b));
+        ComplexGamepad.X1.populate(new Button(() -> gpad1.x));
+        ComplexGamepad.Y1.populate(new Button(() -> gpad1.y));
 
-            put("DPAD_UP1", new Button(() -> gamepad1.dpad_up));
-            put("DPAD_DOWN1", new Button(() -> gamepad1.dpad_down));
-            put("DPAD_RIGHT1", new Button(() -> gamepad1.dpad_right));
-            put("DPAD_LEFT1", new Button(() -> gamepad1.dpad_left));
+        ComplexGamepad.DPAD_UP1.populate(new Button(() -> gpad1.dpad_up));
+        ComplexGamepad.DPAD_DOWN1.populate(new Button(() -> gpad1.dpad_down));
+        ComplexGamepad.DPAD_RIGHT1.populate(new Button(() -> gpad1.dpad_right));
+        ComplexGamepad.DPAD_LEFT1.populate(new Button(() -> gpad1.dpad_left));
 
-            put("START1", new Button(() -> gamepad1.start));
-            put("BACK1", new Button(() -> gamepad1.back));
+        ComplexGamepad.START1.populate(new Button(() -> gpad1.start));
+        ComplexGamepad.BACK1.populate(new Button(() -> gpad1.back));
 
-            put("LEFT_STICK_X1", new Button(() -> gamepad1.left_stick_x));
-            put("LEFT_STICK_Y1", new Button(() -> gamepad1.left_stick_y));
+        ComplexGamepad.LEFT_STICK_X1.populate(new Button(() -> gpad1.left_stick_x));
+        ComplexGamepad.LEFT_STICK_Y1.populate(new Button(() -> gpad1.left_stick_y));
 
-            put("RIGHT_STICK_X1", new Button(() -> gamepad1.right_stick_x));
-            put("RIGHT_STICK_Y1", new Button(() -> gamepad1.right_stick_y));
+        ComplexGamepad.RIGHT_STICK_X1.populate(new Button(() -> gpad1.right_stick_x));
+        ComplexGamepad.RIGHT_STICK_Y1.populate(new Button(() -> gpad1.right_stick_y));
 
-            put("LEFT_TRIGGER1", new Button(() -> gamepad1.left_trigger));
-            put("RIGHT_TRIGGER1", new Button(() -> gamepad1.right_trigger));
+        ComplexGamepad.LEFT_TRIGGER1.populate(new Button(() -> gpad1.left_trigger));
+        ComplexGamepad.RIGHT_TRIGGER1.populate(new Button(() -> gpad1.right_trigger));
 
-            put("LEFT_BUMPER1", new Button(() -> gamepad1.left_bumper));
-            put("RIGHT_BUMPER1", new Button(() -> gamepad1.right_bumper));
+        ComplexGamepad.LEFT_BUMPER1.populate(new Button(() -> gpad1.left_bumper));
+        ComplexGamepad.RIGHT_BUMPER1.populate(new Button(() -> gpad1.right_bumper));
 
-        }
-        if (gamepad2 != null) {
-            put("A2", new Button(() -> gamepad2.a));
-            put("B2", new Button(() -> gamepad2.b));
-            put("X2", new Button(() -> gamepad2.x));
-            put("Y2", new Button(() -> gamepad2.y));
 
-            put("DPAD_UP2", new Button(() -> gamepad2.dpad_up));
-            put("DPAD_DOWN2", new Button(() -> gamepad2.dpad_down));
-            put("DPAD_RIGHT2", new Button(() -> gamepad2.dpad_right));
-            put("DPAD_LEFT2", new Button(() -> gamepad2.dpad_left));
+        ComplexGamepad.A2.populate(new Button(() -> gpad2.a));
+        ComplexGamepad.B2.populate(new Button(() -> gpad2.b));
+        ComplexGamepad.X2.populate(new Button(() -> gpad2.x));
+        ComplexGamepad.Y2.populate(new Button(() -> gpad2.y));
 
-            put("START2", new Button(() -> gamepad2.start));
-            put("BACK2", new Button(() -> gamepad2.back));
+        ComplexGamepad.DPAD_UP2.populate(new Button(() -> gpad2.dpad_up));
+        ComplexGamepad.DPAD_DOWN2.populate(new Button(() -> gpad2.dpad_down));
+        ComplexGamepad.DPAD_RIGHT2.populate(new Button(() -> gpad2.dpad_right));
+        ComplexGamepad.DPAD_LEFT2.populate(new Button(() -> gpad2.dpad_left));
 
-            put("LEFT_STICK_X2", new Button(() -> gamepad2.left_stick_x));
-            put("LEFT_STICK_Y2", new Button(() -> gamepad2.left_stick_y));
+        ComplexGamepad.START2.populate(new Button(() -> gpad2.start));
+        ComplexGamepad.BACK2.populate(new Button(() -> gpad2.back));
 
-            put("RIGHT_STICK_X2", new Button(() -> gamepad2.right_stick_x));
-            put("RIGHT_STICK_Y2", new Button(() -> gamepad2.right_stick_y));
+        ComplexGamepad.LEFT_STICK_X2.populate(new Button(() -> gpad2.left_stick_x));
+        ComplexGamepad.LEFT_STICK_Y2.populate(new Button(() -> gpad2.left_stick_y));
 
-            put("LEFT_TRIGGER2", new Button(() -> gamepad2.left_trigger));
-            put("RIGHT_TRIGGER2", new Button(() -> gamepad2.right_trigger));
+        ComplexGamepad.RIGHT_STICK_X2.populate(new Button(() -> gpad2.right_stick_x));
+        ComplexGamepad.RIGHT_STICK_Y2.populate(new Button(() -> gpad2.right_stick_y));
 
-            put("LEFT_BUMPER2", new Button(() -> gamepad2.left_bumper));
-            put("RIGHT_BUMPER2", new Button(() -> gamepad2.right_bumper));
-        }
+        ComplexGamepad.LEFT_TRIGGER2.populate(new Button(() -> gpad2.left_trigger));
+        ComplexGamepad.RIGHT_TRIGGER2.populate(new Button(() -> gpad2.right_trigger));
+
+        ComplexGamepad.LEFT_BUMPER2.populate(new Button(() -> gpad2.left_bumper));
+        ComplexGamepad.RIGHT_BUMPER2.populate(new Button(() -> gpad2.right_bumper));
     }
 
-    public static Button get(String str) {
-        return controlMap.get(str);
+    public Button get() {
+        return button;
     }
 
     // MUST BE INCLUDED IN MAIN LOOP FOR THE BOOLEANS TO WORK
     public static void update() {
-        for (Button button : controlMap.values()) {
-            button.update();
+        for (ComplexGamepad b : ComplexGamepad.values()) {
+            if (b == null) continue;
+            b.button.update();
         }
     }
 }

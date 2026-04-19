@@ -1,58 +1,45 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.farZoneCameraAdder;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.rotationForInitSmallTriangle;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.*;
 
 import android.graphics.Color;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.HoldAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BezierCurveTypes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Config;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
-import java.io.IOException;
 import java.util.List;
 
-@Config
+@com.acmerobotics.dashboard.config.Config
 @Autonomous(name = "Small Triangle Auto BLUE", group = "AAA")
-public class SmallTriangleNew extends OpMode {
-    private RobotController robot;
+public class SmallTriangleNew extends ComplexOpMode {
     //private AutoRecorder recorder;
     public Limelight3A limelight3A;
-    public static MainConfig cfg;
+    public static Config cfg;
     private boolean shouldFire;
     public static boolean isMoving;
     ElapsedTime timer = new ElapsedTime();
@@ -83,8 +70,8 @@ public class SmallTriangleNew extends OpMode {
     public static double velocity = 1480;
     public static double angle = 266;
     public static double rotationNeededForCameraScan = 13; // about 13 degrees to scan with limelight
-    public static int camId =23;
-    public static int wentTooNumber2 =23;
+    public static int camId = 23;
+    public static int wentTooNumber2 = 23;
     private Pose starter = pose( 0, 12.85, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.5, 8, 90);
     private Pose parkPose = pose(1, 22, 90);
@@ -104,43 +91,38 @@ public class SmallTriangleNew extends OpMode {
     private Pose bezierHelper1 = pose(32, 4, 90);
 
     @Override
-    public void init() {
-        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
-            @Override
-            public void main_loop() {
-                controls();
-                telemetry();
-            }
+    public void telemetry() {
+        publicTelemetry.addData("robot rotation", Math.toDegrees(ComplexFollower.getCurrentPose().getHeading()));
+        publicTelemetry.addData("robot Y", ComplexFollower.getCurrentPose().getY());
+        publicTelemetry.addData("robot X", ComplexFollower.getCurrentPose().getX());
+        publicTelemetry.addData("current velocity", TurretSpinMotor.getVelocity());
+    }
 
-            private void telemetry() {
-                        RobotController.telemetry.addData("robot rotation", Math.toDegrees(robot.getCurrentPose().getHeading()));
-                        RobotController.telemetry.addData("robot Y", robot.getCurrentPose().getY());
-                        RobotController.telemetry.addData("robot X", robot.getCurrentPose().getX());
-                        RobotController.telemetry.addData("current velocity",robot.getMotorComponent("TurretSpinMotor").getVelocity());
-            }
-            private void controls() {
-                isMoving = ComplexFollower.instance().isBusy();
-                if(shouldCheckColorSensors) HandleColors();
-                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
-                firingTurret(shouldFire);
-                pulseIntake(doIntakePulse);
-                if(timer.milliseconds() > 29000 + 800){
-                    EmergencyOverrideAtTheEnd();
-                    timer.reset();
-                }
-            }
-        };
+    @Override
+    public void update() {
+        // recorder.update();
+        isMoving = ComplexFollower.instance().isBusy();
+        if (shouldCheckColorSensors) HandleColors();
+        if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
+        firingTurret(shouldFire);
+        pulseIntake(doIntakePulse);
+        if (timer.milliseconds() > 29000 + 800) {
+            EmergencyOverrideAtTheEnd();
+            timer.reset();
+        }
+    }
+
+    @Override
+    public void initialize() {
         makeConfig();
-        ComponentMakerMethods.MakeComponents(robot);
-        ComponentMakerMethods.MakeStates(robot);
-        robot.init(OpModes.Autonomous);
+        Components.init();
         //recorder = new AutoRecorder();
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         convertPoses();
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
         shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
-        wentTooNumber2  =0;
+        wentTooNumber2 = 0;
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(2);
@@ -148,38 +130,34 @@ public class SmallTriangleNew extends OpMode {
     }
 
     @Override
-    public void init_loop() {
-        if(doOnce) ComplexFollower.resetAndInit(true);
+    public void init_update() {
+        if (doOnce) {
+            ComplexFollower.unInit();
+            ComplexFollower.init(ConstantsDecode::createFollowerDecodeFarAuto);
+        }
         doOnce = false;
-        robot.init_loop();
-        robot.getMotorComponent("TurretRotateMotor").setTarget(cfg.rotationForInitSmallTriangle);
+        TurretRotateMotor.setState(cfg.rotationForInitSmallTriangle);
         useCamera();
-        RobotController.telemetry.addData("id", camId);
+        publicTelemetry.addData("id", camId);
     }
 
     @Override
-    public void start() {
+    public void on_start() {
         ComplexFollower.setPose(starter);
         timer.reset();
         makeAuto();
     }
 
     @Override
-    public void loop() {
-        //recorder.update();
-        robot.loop();
-    }
-
-    @Override
-    public void stop() {
+    public void on_stop() {
         //recorder.save();
         passPose();
     }
     private void makeAuto() {
-        robot.addToQueue(
+        publicQueuer.addToQueue(
                 // preload
                 new GeneralAction(() -> shouldFire = true), // prep outtake
-                new StateAction("IntakeMotor","FULL"),
+                new StateAction(IntakeMotor.states.FULL),
                 new DelayAction(1100), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1200),
@@ -262,15 +240,15 @@ public class SmallTriangleNew extends OpMode {
 
 
 
-                new StateAction("IntakeMotor","OFF"),
+                new StateAction(IntakeMotor.states.OFF),
                 new GeneralAction(turnStuffOff),
                 new MoveAction(parkPose)
         );
     }
     public Runnable scanForBallsAndPlanPath = () -> {
         int cameraCase = (int) getBallNumber();
-        //if(wentTooNumber2 >0) cameraCase = 1; not needed with new rolers
-        switch (cameraCase){
+        //if (wentTooNumber2 >0) cameraCase = 1; not needed with new rolers
+        switch (cameraCase) {
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
             //case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
@@ -278,16 +256,16 @@ public class SmallTriangleNew extends OpMode {
         }
     };
     Runnable checkEmptyIntake = () -> {
-        if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.NoBall || calculatedRightSensorDetectedBall == BallColorSet_Decode.NoBall){
+        if (calculatedLeftSensorDetectedBall == BallColorSet_Decode.NoBall || calculatedRightSensorDetectedBall == BallColorSet_Decode.NoBall) {
             // go to collect again
-            robot.executeNow(
+            publicQueuer.executeNow(
                     new GeneralAction(scanForBallsAndPlanPath),
                     new MoveAction(true)
             );
         }
 
     };
-    public boolean checkIfNoBall(){
+    public boolean checkIfNoBall() {
         return calculatedLeftSensorDetectedBall == BallColorSet_Decode.NoBall || calculatedRightSensorDetectedBall == BallColorSet_Decode.NoBall;
     }
 
@@ -317,102 +295,100 @@ public class SmallTriangleNew extends OpMode {
         ballToFire = ballColorQueue.pull();
 
         if (ballToFire == calculatedRightSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
-            robot.executeNow(new ActionSequence(
-                    new StateAction("RightGateServo", "OPEN"),
+            publicQueuer.executeNow(new ActionSequence(
+                    new StateAction(RightGateServo.states.OPEN),
                     new DelayAction(300),
                     new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
-                    new StateAction("RightGateServo", "CLOSED")
+                    new StateAction(RightGateServo.states.CLOSED)
             ));
         }
         else if (ballToFire == calculatedLeftSensorDetectedBall && ballToFire != BallColorSet_Decode.NoBall) {
-            robot.executeNow(new ActionSequence(
-                    new StateAction("LeftGateServo", "OPEN"),
+            publicQueuer.executeNow(new ActionSequence(
+                    new StateAction(LeftGateServo.states.OPEN),
                     new DelayAction(300),
                     new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
-                    new StateAction("LeftGateServo", "CLOSED")
+                    new StateAction(LeftGateServo.states.CLOSED)
             ));
         }
         else
         {
-            if(calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall){
-                robot.executeNow(new ActionSequence(
-                        new StateAction("LeftGateServo", "OPEN"),
+            if (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall) {
+                publicQueuer.executeNow(new ActionSequence(
+                        new StateAction(LeftGateServo.states.OPEN),
                         new DelayAction(300),
                         new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction(LeftGateServo.states.CLOSED)
                 ));
             }
-            else if(calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall){
-                robot.executeNow(new ActionSequence(
-                        new StateAction("RightGateServo", "OPEN"),
+            else if (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall) {
+                publicQueuer.executeNow(new ActionSequence(
+                        new StateAction(RightGateServo.states.OPEN),
                         new DelayAction(300),
                         new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
-                        new StateAction("RightGateServo", "CLOSED")
+                        new StateAction(RightGateServo.states.CLOSED)
                 ));
             }
-            else{
-                robot.executeNow(new ActionSequence(
-                        new StateAction("RightGateServo", "OPEN"),
-                        new StateAction("LeftGateServo", "OPEN"),
+            else {
+                publicQueuer.executeNow(new ActionSequence(
+                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction(LeftGateServo.states.OPEN),
                         new DelayAction(500),
                         new GeneralAction(() -> calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall),
                         new GeneralAction(() -> calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall),
-                        new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction(RightGateServo.states.CLOSED),
+                        new StateAction(LeftGateServo.states.CLOSED)
                 ));
             }
 
         }
         ballToFire = BallColorSet_Decode.NoBall;
     };
-    Runnable fireUnsortedBalls = () -> {
-        robot.executeNow(new ActionSequence(
-                new StateAction("RightGateServo", "OPEN"),
-                new DelayAction(timerToCloseGate),
-                new StateAction("RightGateServo", "CLOSED"),
-                new DelayAction(timer3),
-                new StateAction("LeftGateServo", "OPEN"),
-                new DelayAction(timer4),
-                new StateAction("RightGateServo", "OPEN"),
-                new DelayAction(1000),
-                new StateAction("RightGateServo", "CLOSED"),
-                new StateAction("LeftGateServo", "CLOSED")
-        ));
-    };
+    Runnable fireUnsortedBalls = () -> publicQueuer.executeNow(new ActionSequence(
+            new StateAction(RightGateServo.states.OPEN),
+            new DelayAction(timerToCloseGate),
+            new StateAction(RightGateServo.states.CLOSED),
+            new DelayAction(timer3),
+            new StateAction(LeftGateServo.states.OPEN),
+            new DelayAction(timer4),
+            new StateAction(RightGateServo.states.OPEN),
+            new DelayAction(1000),
+            new StateAction(RightGateServo.states.CLOSED),
+            new StateAction(LeftGateServo.states.CLOSED)
+    ));
     Runnable turnStuffOff = () -> {
         shouldFire = false;
         doIntakePulse = false;
         shouldRemoveBalls = false;
 
-        robot.getMotorComponent("TurretSpinMotor")
+        TurretSpinMotor
                 .setOperationMode(MotorComponent.MotorModes.Power)
-                .setTarget(0);
-        robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
-        robot.getTurretComponent("TurretRotateMotor").setTarget(0);
+                .setState(0);
+        publicQueuer.executeNow(new StateAction(TurretAngle.states.DEFAULT));
+        TurretRotateMotor.setState(0);
     };
     public void firingTurret(boolean shouldFire) {
-        double distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXRightPanel, cfg.targetYRightPanel);
-        double rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetXRightPanel, cfg.targetYRightPanel);
+        double distanceToWallOdometry = calculateDistanceToWallInMeters(ComplexFollower.getCurrentPose(), cfg.targetXRightPanel, cfg.targetYRightPanel);
+        double rotationToWallOdometry = - calculateHeadingAdjustment(ComplexFollower.getCurrentPose(), Math.toDegrees(ComplexFollower.getCurrentPose().getHeading()), cfg.targetXRightPanel, cfg.targetYRightPanel);
         //rotationToWallOdometry += cfg.autoZoneAdderFar;
 
-        if(shouldFire){
+        if (shouldFire) {
 
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry)/* + cfg.autoVelAdder*/;
-            robot.getMotorComponent("TurretSpinMotor")
+            TurretSpinMotor
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
-                    .setTarget(targetVelocity);
+                    .setState(targetVelocity);
 
 
             double turretAngleVal = distanceToAngleFunction(distanceToWallOdometry);
-            robot.getServoComponent("TurretAngle")
-                    .setTarget(turretAngleVal);
+            TurretAngle
+                    .setState(turretAngleVal);
 
-            if(shouldHoldTurretForCameraScan)
-                rotationToWallOdometry = - calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), cfg.targetForCameraX, cfg.targetForCameraY);;
+            if (shouldHoldTurretForCameraScan)
+                rotationToWallOdometry = - calculateHeadingAdjustment(ComplexFollower.getCurrentPose(), Math.toDegrees(ComplexFollower.getCurrentPose().getHeading()), cfg.targetForCameraX, cfg.targetForCameraY);
 
-            if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
-            robot.getTurretComponent("TurretRotateMotor")
-                .setTarget(rotationToWallOdometry)
+            if (rotationToWallOdometry < 0) rotationToWallOdometry += 360;
+            TurretRotateMotor
+                .setState(rotationToWallOdometry)
             ;
         }
     }
@@ -426,7 +402,7 @@ public class SmallTriangleNew extends OpMode {
         actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors,true);
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
-        if(shouldResetRightSensorBall && resetLeftBallColorTimer.milliseconds() > 450){
+        if (shouldResetRightSensorBall && resetLeftBallColorTimer.milliseconds() > 450) {
             shouldResetRightSensorBall = false;
             calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
         }
@@ -453,31 +429,31 @@ public class SmallTriangleNew extends OpMode {
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
-        RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-        RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-        RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+        publicTelemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+        publicTelemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+        publicTelemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-        RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-        RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-        RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+        publicTelemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+        publicTelemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+        publicTelemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
-        RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-        RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+        publicTelemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+        publicTelemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
     public static int lastGateState = 0;
-    protected void pulseIntake(boolean shouldPulseIntake){
-        if(shouldPulseIntake){
+    protected void pulseIntake(boolean shouldPulseIntake) {
+        if (shouldPulseIntake) {
             doIntakePulse = false;
-            robot.executeNow(new ActionSequence(
+            publicQueuer.executeNow(new ActionSequence(
                     new DelayAction(50),
-                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new StateAction(IntakeMotor.states.FULL_REVERSE),
                     new DelayAction(45),
-                    new StateAction("IntakeMotor","FULL")
+                    new StateAction(IntakeMotor.states.FULL)
             ));
         }
     }
-    public void makeConfig(){
-        cfg = new MainConfig(MainConfig.Configs.Blue);
+    public void makeConfig() {
+        cfg = Config.getConfig("blue");
     }
     public void useCamera() {
         limelight3A.reloadPipeline();
@@ -490,7 +466,7 @@ public class SmallTriangleNew extends OpMode {
         for (LLResultTypes.FiducialResult fr : fiducialResults) {
             camId = fr.getFiducialId();
         }
-        if(camId < 21 || camId > 23) camId = 23;
+        if (camId < 21 || camId > 23) camId = 23;
     }
     public void convertPoses() {
         starter = convertPose(starter);
@@ -518,8 +494,9 @@ public class SmallTriangleNew extends OpMode {
         globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
-    public double getBallNumber(){
-//        if(shouldSwitchChannel){
+    public double getBallNumber() {
+
+//        if (shouldSwitchChannel) {
 //            limelight3A.pipelineSwitch(1);
 //            shouldSwitchChannel = false;
 //        }
@@ -530,15 +507,15 @@ public class SmallTriangleNew extends OpMode {
             double[] pythonData = llResult.getPythonOutput();
             if (pythonData.length > 0) {
                 double firstValue = pythonData[0];
-                RobotController.telemetry.addData("Python Val 1", firstValue);
+                publicTelemetry.addData("Python Val 1", firstValue);
                 return firstValue;
             }
         }
         return 0;
     }
-    public void EmergencyOverrideAtTheEnd(){
-        robot.clearMainQueue();
-        robot.executeNow(new ActionSequence(
+    public void EmergencyOverrideAtTheEnd() {
+        publicQueuer.clearQueue();
+        publicQueuer.executeNow(new ActionSequence(
                 new HoldAction(500),
                 new GeneralAction(turnStuffOff)
         ));

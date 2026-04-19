@@ -24,15 +24,10 @@ public class PerformanceProfiler {
     }
 
     public void end() {
-        RobotController.telemetry.addData(name, () -> {
-            switch(unit) {
-                case SECONDS:
-                    return timer.seconds();
-                case NANOSECONDS:
-                    return timer.nanoseconds();
-                default:
-                    return timer.milliseconds();
-            }
+        ComplexOpMode.publicTelemetry.addData(name, () -> switch (unit) {
+            case SECONDS -> timer.seconds();
+            case NANOSECONDS -> timer.nanoseconds();
+            default -> timer.milliseconds();
         });
     }
 }

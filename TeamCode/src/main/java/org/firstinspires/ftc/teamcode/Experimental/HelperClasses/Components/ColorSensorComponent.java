@@ -1,28 +1,28 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.hardwareMap;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode.publicHardwareMap;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Color;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GenericColor;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
-
-import java.util.HashMap;
 
 public class ColorSensorComponent extends Component {
     protected ColorSensor sensor;
     protected Color detectedColor;
     protected GenericColor.Colors formattedColor;
+    protected String name;
 
-    public ColorSensorComponent(ColorSensor sensor) {
+    public ColorSensorComponent(ColorSensor sensor, String name) {
         this.sensor = sensor;
+        this.name = name;
         detectedColor = new Color(sensor.argb());
         formattedColor = detectedColor.getColor();
     }
-    public ColorSensorComponent(String hardwareName){
-        this.sensor = hardwareMap.get(ColorSensor.class, hardwareName);
+    public ColorSensorComponent(String hardwareName) {
+        this.sensor = publicHardwareMap.get(ColorSensor.class, hardwareName);
+        this.name = hardwareName;
         detectedColor = new Color(sensor.argb());
         formattedColor = detectedColor.getColor();
     }
@@ -44,10 +44,11 @@ public class ColorSensorComponent extends Component {
         formattedColor = detectedColor.getColor();
     }
 
-    public void telemetry(String name) {
-        RobotController.telemetry.addData(name + " r", detectedColor.r());
-        RobotController.telemetry.addData(name + " g", detectedColor.g());
-        RobotController.telemetry.addData(name + " b", detectedColor.b());
-        RobotController.telemetry.addData(name + " a", detectedColor.a());
+    @Override
+    public void telemetry() {
+        ComplexOpMode.publicTelemetry.addData(name + " r", detectedColor.r());
+        ComplexOpMode.publicTelemetry.addData(name + " g", detectedColor.g());
+        ComplexOpMode.publicTelemetry.addData(name + " b", detectedColor.b());
+        ComplexOpMode.publicTelemetry.addData(name + " a", detectedColor.a());
     }
 }

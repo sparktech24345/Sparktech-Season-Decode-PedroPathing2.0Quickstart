@@ -21,12 +21,7 @@
  */
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.backLeftName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.backRightName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.currentOpModes;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.frontLeftName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.frontRightName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.hardwareMap;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;

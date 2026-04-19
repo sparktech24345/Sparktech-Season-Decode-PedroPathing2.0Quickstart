@@ -9,7 +9,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-public class TurretComponent extends MotorComponent {
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.StateSet;
+
+import dev.frozenmilk.dairy.cachinghardware.CachingDcMotorEx;
+
+public class TurretComponent<S extends StateSet<MotorComponent<S>>> extends MotorComponent<S> {
 
     private double kV = 0.0, kA = 0.0, kStatic = 0.0;
     private double lastX = 0, lastY = 0, lastAngle = 0;
@@ -23,25 +27,30 @@ public class TurretComponent extends MotorComponent {
     // Since you observed ~1s, we use this to offset robot velocity drift.
     private double ballTimeInAir = 1.0;
 
-    public TurretComponent setFeedforwardCoefficients(double kV, double kA, double kStatic) {
+    public TurretComponent(S states_class) {
+        super(states_class);
+    }
+
+    public TurretComponent<S> setFeedforwardCoefficients(double kV, double kA, double kStatic) {
         this.kV = kV;
         this.kA = kA;
         this.kStatic = kStatic;
         return this;
     }
 
-    public void setBallTimeInAir(double seconds) {
+    public TurretComponent<S> setBallTimeInAir(double seconds) {
         this.ballTimeInAir = seconds;
+        return this;
     }
 
-    public void updateRobotPose(Pose robotPose) {
+    public TurretComponent<S> updateRobotPose(Pose robotPose) {
         double x = robotPose.getX();
         double y = robotPose.getY();
         double angle = Math.toDegrees(robotPose.getHeading());
 
         double currentTime = timer.seconds();
         double dt = currentTime - lastTimestamp;
-        if (dt <= 0) return;
+        if (dt <= 0) return this;
 
         double deltaAngle = angle - lastAngle;
         while (deltaAngle > 180) deltaAngle -= 360;
@@ -55,6 +64,7 @@ public class TurretComponent extends MotorComponent {
         this.lastY = y;
         this.lastAngle = angle;
         this.lastTimestamp = currentTime;
+        return this;
     }
 
     /**

@@ -32,13 +32,6 @@ public class GlobalStorage {
     public static boolean evalForTrigger(double val) {
         return val >= 0.4;
     }
-    public static boolean TriggerEval(double val) {
-        return val > 0.4;
-    }
-    public static <Tx, Ty> Pair<Tx, Ty> make_pair(Tx arg1, Ty arg2) { return new Pair<>(arg1, arg2); }
-
-    // INSTANCES
-    public static RobotController robotController = null;
 
 
     // CONSTANTS

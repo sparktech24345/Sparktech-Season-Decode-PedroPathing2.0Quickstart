@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
 public class DriveTrain {
@@ -20,7 +20,12 @@ public class DriveTrain {
     private static String backRight  = backRightName;
     private static double slowdownMultiplier = 1;
     private static boolean init_ = false;
+    private static HardwareMap hmap = null;
+    private static DcMotor.ZeroPowerBehavior motor_zero_power = DcMotor.ZeroPowerBehavior.BRAKE;
 
+    public static void setHardwareMap(HardwareMap map) {
+        hmap = map;
+    }
 
     public static void init(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         frontLeft = LeftFront;
@@ -30,7 +35,7 @@ public class DriveTrain {
         init();
     }
 
-    public static boolean wasInitialized() { return init_; }
+    public static boolean isInit() { return init_; }
 
     public static void setSlowdown(double slowdownMultiplier) {
         DriveTrain.slowdownMultiplier = slowdownMultiplier;
@@ -45,26 +50,23 @@ public class DriveTrain {
     public static void init() {
         if (currentOpModes == OpModes.TeleOP) {
             init_ = true;
-            RFDrive = hardwareMap.get(DcMotor.class, frontRight);
-            LFDrive = hardwareMap.get(DcMotor.class, frontLeft);
-            RBDrive = hardwareMap.get(DcMotor.class, backRight);
-            LBDrive = hardwareMap.get(DcMotor.class, backLeft);
+            RFDrive = hmap.get(DcMotor.class, frontRight);
+            LFDrive = hmap.get(DcMotor.class, frontLeft);
+            RBDrive = hmap.get(DcMotor.class, backRight);
+            LBDrive = hmap.get(DcMotor.class, backLeft);
 
-            RFDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            LFDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            RBDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            LBDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            setMotorZeroPowerBehavior(motor_zero_power);
 
             LFDrive.setDirection(DcMotorSimple.Direction.REVERSE);
             LBDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         }
     }
 
-    public static void loop() {
+    public static void update() {
 
-        double vertical     = -ComplexGamepad.get("LEFT_STICK_Y1").raw();
-        double horizontal   = -ComplexGamepad.get("LEFT_STICK_X1").raw();
-        double pivot        = ComplexGamepad.get("RIGHT_STICK_X1").raw();
+        double vertical     = -ComplexGamepad.LEFT_STICK_Y1.get().raw();
+        double horizontal   = -ComplexGamepad.LEFT_STICK_X1.get().raw();
+        double pivot        = ComplexGamepad.RIGHT_STICK_X1.get().raw();
 
         if (directionFlip) {
             horizontal = - horizontal;
@@ -80,6 +82,19 @@ public class DriveTrain {
         LFDrive.setPower(FrontLeftPow * slowdownMultiplier);
         RBDrive.setPower(BackRightPow * slowdownMultiplier);
         LBDrive.setPower(BackLeftPow * slowdownMultiplier);
+    }
+
+    public static DcMotor.ZeroPowerBehavior getMotorZeroPowerBehavior() {
+        return motor_zero_power;
+    }
+
+    public static void setMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior motor_zero_power) {
+        if (motor_zero_power == DcMotor.ZeroPowerBehavior.UNKNOWN) return;
+        DriveTrain.motor_zero_power = motor_zero_power;
+        RFDrive.setZeroPowerBehavior(motor_zero_power);
+        LFDrive.setZeroPowerBehavior(motor_zero_power);
+        RBDrive.setZeroPowerBehavior(motor_zero_power);
+        LBDrive.setZeroPowerBehavior(motor_zero_power);
     }
 
     public void telemetry() {}

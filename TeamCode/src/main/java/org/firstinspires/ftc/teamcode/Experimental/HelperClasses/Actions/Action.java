@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions;
 
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode.publicTelemetry;
 
 import java.util.function.BooleanSupplier;
 
@@ -43,29 +42,27 @@ public abstract class Action {
     }
 
     public void telemetry() {
-        MultipleTelemetry tel = RobotController.telemetry;
-        tel.addData("at action", name);
-        tel.addData("started", start);
-        tel.addData("finished", done);
-        tel.addData("name", name);
+        publicTelemetry.addData("started", start);
+        publicTelemetry.addData("finished", done);
+        publicTelemetry.addData("name", name);
     }
 
-    public Action setStartCondition(BooleanSupplier start) {
+    public Action startIf(BooleanSupplier start) {
         this.StartCondition = start;
         return this;
     }
 
-    public Action setDoneCondition(BooleanSupplier done) {
+    public Action finishIf(BooleanSupplier done) {
         this.DoneCondition = done;
         return this;
     }
 
-    public Action setOnStart(Runnable onStart) {
+    public Action onStart(Runnable onStart) {
         this.OnStart = onStart;
         return this;
     }
 
-    public Action setOnDone(Runnable onDone) {
+    public Action onFinish(Runnable onDone) {
         this.OnDone = onDone;
         return this;
     }

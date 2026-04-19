@@ -2,15 +2,12 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.State;
+
 public class StateAction extends Action {
 
-    public StateAction(String ComponentName, String PositionName) {
+    public StateAction(State state) {
         super();
-        this.Execution = () -> robotController.getComponent(ComponentName).loadState(PositionName);
-    }
-
-    public StateAction(String ComponentName, double TargetPosition) {
-        super();
-        this.Execution = () -> robotController.getComponent(ComponentName).setTarget(TargetPosition);
+        this.Execution = () -> state.owner().setState(state);
     }
 }

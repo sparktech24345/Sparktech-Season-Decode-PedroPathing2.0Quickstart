@@ -1,0 +1,13 @@
+package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem;
+
+public class Event {
+    private boolean cancelled = false;
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void cancel() {
+        this.cancelled = true;
+    }
+}

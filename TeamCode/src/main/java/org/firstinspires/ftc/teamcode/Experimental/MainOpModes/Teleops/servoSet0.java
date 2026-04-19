@@ -31,8 +31,8 @@ public class servoSet0 extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if(gamepad1.a) servoPos +=0.0002;
-            if(gamepad1.b) servoPos -=0.0002;
+            if(gamepad1.a) servoPos += 0.0002;
+            if(gamepad1.b) servoPos -= 0.0002;
             if(gamepad1.y) servoPos = 0;
             if(gamepad1.x) servoPos = (double) 30 / 360;
 

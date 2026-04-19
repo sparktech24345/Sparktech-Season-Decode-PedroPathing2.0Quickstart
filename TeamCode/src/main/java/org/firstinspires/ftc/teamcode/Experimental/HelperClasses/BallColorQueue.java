@@ -54,7 +54,7 @@ public class BallColorQueue {
     }
     public void spitOutQueueInTelemetry() {
         for (int i = 0; i < MAX_SIZE; i++) {
-            RobotController.telemetry.addData(
+            ComplexOpMode.publicTelemetry.addData(
                     "Ball number in queue " + i,
                     queue[i]
             );

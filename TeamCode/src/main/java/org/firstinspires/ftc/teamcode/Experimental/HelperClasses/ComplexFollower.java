@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.function.Function;
 
 public class ComplexFollower {
 
@@ -35,18 +36,26 @@ public class ComplexFollower {
 
     private static ElapsedTime follow_timer;
 
-    public static void init(HardwareMap hardwareMap) {
-        init(hardwareMap, startPos);
-    }
-    public static void init(HardwareMap hardwareMap,boolean isFar) {
-        init(hardwareMap, startPos,isFar);
+    private static boolean init_ = false;
+
+    public static void setHardwareMap(HardwareMap map) {
+        hmap = map;
     }
 
-    public static void init(HardwareMap hardwareMap, Pose startingPose) {
-        hmap = hardwareMap;
+    /**
+     *
+     * @param follower_build_function The build function to use for the follower. (Ex: Constants::createFollower)
+     *                                  The function must take a HardwareMap and return a Follower.
+     */
+    public static void init(Function<HardwareMap, Follower> follower_build_function) {
+        init(follower_build_function, startPos);
+    }
+
+    public static void init(Function<HardwareMap, Follower> follower_build_function, Pose startingPose) {
+        if (init_) return;
+        follower = follower_build_function.apply(hmap);
        // follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
         //com.pedropathing.util.Constants.setConstants(FConstantsForPinpoint.class, LConstantsForPinpoint.class);
-        follower = ConstantsDecode.createFollowerDecode(hardwareMap);
         follower.setStartingPose(startingPose);
         lastTargetPose = startingPose;
         follower.update();
@@ -58,22 +67,14 @@ public class ComplexFollower {
         Drawing.drawDebug(follower);
         follower.activateAllPIDFs();
     }
-    public static void init(HardwareMap hardwareMap, Pose startingPose,boolean isFar) {
-        hmap = hardwareMap;
-       // follower = new Follower(hardwareMap, FConstantsForPinpoint.class, LConstantsForPinpoint.class);
-        //com.pedropathing.util.Constants.setConstants(FConstantsForPinpoint.class, LConstantsForPinpoint.class);
-        if(isFar) follower = ConstantsDecode.createFollowerDecodeFarAuto(hardwareMap);
-        else follower = ConstantsDecode.createFollowerDecode(hardwareMap);
-        follower.setStartingPose(startingPose);
-        lastTargetPose = startingPose;
-        follower.update();
-        currentPos = startPos;
-        currentX = currentPos.getX();
-        currentY = currentPos.getY();
-        currentHeading = currentPos.getHeading();
-        currentTargetPos = startPos;
-        Drawing.drawDebug(follower);
-        follower.activateAllPIDFs();
+
+    public static void unInit() {
+        init_ = false;
+        reset();
+    }
+
+    public static boolean isInit() {
+        return init_;
     }
 
     public static void reset() {
@@ -85,12 +86,6 @@ public class ComplexFollower {
         currentPos = startPos;
         pathToFollow = null;
         follower = null;
-    }
-
-    public static void resetAndInit(boolean isFar) {
-        reset();
-        if (hmap == null) return;
-        init(hmap,isFar);
     }
 
     public static double followingForMS() {
@@ -112,14 +107,14 @@ public class ComplexFollower {
         if (follower == null) return;
         follower.setPose(pose);
     }
-    public static void hold(Pose holdPose){
+    public static void hold(Pose holdPose) {
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
 
         follower.holdPoint(holdPose,false);
     }
-    public static void hold(boolean holdCurrentPos){
+    public static void hold() {
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
@@ -305,14 +300,14 @@ public class ComplexFollower {
 
     public static void telemetry() {
         if (follower == null) {
-            RobotController.telemetry.addData("[ERROR] Follower", "Follower instance is null!");
+            ComplexOpMode.publicTelemetry.addData("[ERROR] Follower", "Follower instance is null!");
             return;
         }
-        RobotController.telemetry.addData("Follower is busy", follower.isBusy());
-        RobotController.telemetry.addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, Math.toDegrees(currentHeading)));
-        RobotController.telemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), Math.toDegrees(currentTargetPos.getHeading())));
-        RobotController.telemetry.addData("Absolute Angle",Math.toDegrees(follower.getTotalHeading()));
-        RobotController.telemetry.addData("Follower velocity", follower.getVelocity().getMagnitude());
-        RobotController.telemetry.addData("Is done?", isDone);
+        ComplexOpMode.publicTelemetry.addData("Follower is busy", follower.isBusy());
+        ComplexOpMode.publicTelemetry.addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, Math.toDegrees(currentHeading)));
+        ComplexOpMode.publicTelemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), Math.toDegrees(currentTargetPos.getHeading())));
+        ComplexOpMode.publicTelemetry.addData("Absolute Angle",Math.toDegrees(follower.getTotalHeading()));
+        ComplexOpMode.publicTelemetry.addData("Follower velocity", follower.getVelocity().getMagnitude());
+        ComplexOpMode.publicTelemetry.addData("Is done?", isDone);
     }
 }
