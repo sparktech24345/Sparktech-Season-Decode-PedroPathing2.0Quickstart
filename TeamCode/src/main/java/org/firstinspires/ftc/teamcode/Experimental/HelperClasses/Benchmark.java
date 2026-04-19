@@ -9,8 +9,8 @@ import java.text.MessageFormat;
 public class Benchmark {
 
     public static class TimeSpec {
-        double time_nano;
-        public TimeSpec(double nanos) {
+        private final long time_nano;
+        public TimeSpec(long nanos) {
             this.time_nano = nanos;
         }
 
@@ -25,9 +25,9 @@ public class Benchmark {
         public double get_s() {
             return time_nano * 1e-9;
         }
-    };
+    }
 
-    private double time_nano;
+    private long time_nano;
     private final String name;
 
     public Benchmark() {
