@@ -479,7 +479,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 new MoveAction(middleBigTriangleShooting),//false,BezierCurveTypes.TangentHeading,0),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1200),
+                new DelayAction(1000),
                 /// finished preload and path
 
 
@@ -490,7 +490,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(secondRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1200),
+                new DelayAction(1000),
                 /// end of second row firing
 
 
@@ -507,7 +507,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1200),
+                new DelayAction(1000),
                 ///finished gate collect
 
 
@@ -520,7 +520,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1200),
+                new DelayAction(1000),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 ///finished gate collect number 2
 
@@ -537,7 +537,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
                 ///firing here
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1200),
+                new DelayAction(1000),
                 /// no more third row
 
 
