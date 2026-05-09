@@ -13,14 +13,15 @@
             <goBILDA5202SeriesMotor name="turretFlyWheelMotorLeft" port="1" />
             <goBILDA5202SeriesMotor name="turretRotateMotor" port="2" />
             <goBILDA5202SeriesMotor name="intakeMotor" port="3" />
-            <Servo name="leftTiltServo" port="0" />
-            <Servo name="rightTiltServo" port="1" />
+            <Servo name="CameraRotateServo" port="0" />
+            <Servo name="PTOServo" port="1" />
             <Servo name="rightGateServo" port="2" />
             <Servo name="leftGateServo" port="3" />
             <Servo name="turretAngleServo" port="4" />
-            <AnalogInput name="laserAnalogInput" port="0" />
-            <RevColorSensorV3 name="colorSensorRight" port="0" bus="3" />
+            <AnalogInput name="distanceSensor" port="0" />
+            <ControlHubImuBHI260AP name="imu" port="0" bus="0" />
             <goBILDAPinpoint name="pinpoint" port="0" bus="2" />
+            <RevColorSensorV3 name="colorSensorRight" port="0" bus="3" />
         </LynxModule>
     </LynxUsbDevice>
     <EthernetDevice name="limelight" serialNumber="EthernetOverUsb:eth0:172.29.0.28" name="limelight" port="-1" ipAddress="172.29.0.1" />

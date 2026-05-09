@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.usedTargetX;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.usedTargetY;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.ballInAirTime;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.lookAheadSeconds;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer1ForSorting;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer2ForSorting;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vMultiplier;
 
 import static java.lang.Double.min;
 import static java.lang.Math.max;
@@ -51,12 +49,8 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import kotlinx.coroutines.Delay;
 
 @Config
 @Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
@@ -176,7 +170,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
-                if(shouldUseColorSensors) HandleColors();
+                if(shouldUseColorSensors) handleColors();
                 firingTurret(shouldFire);
                 pulseIntake(doIntakePulse);
                 checkToFireUnsortedBalls(shouldFireUnsortedBalls);
@@ -572,7 +566,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
-                    .setTarget(targetVelocity);
+                    .setTarget(targetVelocity * vMultiplier);
 
 
             // ----------------------- Angle Stuff -----------------------
@@ -838,7 +832,7 @@ public class BigTriangleArtefactAuto extends OpMode {
             robot.executeNow(new StateAction("IntakeMotor","OFF"));
     };
 
-    protected void HandleColors() {
+    protected void handleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
         rightSensorColors = colorSensorRight.getNormalizedColors();
 

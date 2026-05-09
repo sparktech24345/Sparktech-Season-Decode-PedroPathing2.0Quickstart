@@ -32,8 +32,6 @@ public class ShootingHoodAndMotors extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Servo leftTiltServo = hardwareMap.get(Servo.class, leftTiltServoName);
-        Servo rightTiltServo = hardwareMap.get(Servo.class, rightTiltServoName);
 
         Servo rightGateServo = hardwareMap.get(Servo.class, rightGateServoName);
         Servo leftGateServo = hardwareMap.get(Servo.class, leftGateServoName);
@@ -50,9 +48,6 @@ public class ShootingHoodAndMotors extends LinearOpMode {
 
         while (opModeInInit()) {
 
-            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);// poses are syncronized, in bot = 1, out of bot = 0
-            if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
-
             if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
             if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
 
@@ -60,9 +55,6 @@ public class ShootingHoodAndMotors extends LinearOpMode {
         }
 
         while (opModeIsActive()) {
-            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);
-            if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
-
             if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
             if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
 

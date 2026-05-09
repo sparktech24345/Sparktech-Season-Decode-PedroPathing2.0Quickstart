@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.farZoneCameraAdder;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.rotationForInitSmallTriangle;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vMultiplier;
 
 import android.graphics.Color;
 
@@ -32,19 +31,16 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.General
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.HoldAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BezierCurveTypes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
-import java.io.IOException;
 import java.util.List;
 
 @Config
@@ -129,7 +125,7 @@ public class SmallTriangleNew extends OpMode {
             }
             private void controls() {
                 isMoving = ComplexFollower.instance().isBusy();
-                if(shouldCheckColorSensors) HandleColors();
+                if(shouldCheckColorSensors) handleColors();
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPoseNEW) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 firingTurret(shouldFire);
@@ -408,7 +404,7 @@ public class SmallTriangleNew extends OpMode {
 
         if(shouldFire){
 
-            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry)/* + cfg.autoVelAdder*/;
+            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) * vMultiplier/* + cfg.autoVelAdder*/;
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                     .setTarget(targetVelocity);
@@ -427,7 +423,7 @@ public class SmallTriangleNew extends OpMode {
             ;
         }
     }
-    protected void HandleColors() {
+    protected void handleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
         rightSensorColors = colorSensorRight.getNormalizedColors();
 

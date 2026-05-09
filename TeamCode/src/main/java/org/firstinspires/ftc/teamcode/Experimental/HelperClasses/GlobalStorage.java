@@ -51,10 +51,10 @@ public class GlobalStorage {
 
 
     // HARDWARE NAMES
-    public static String frontRightName         = "frontleft";
-    public static String frontLeftName          = "frontright";
-    public static String backRightName          = "backleft";
-    public static String backLeftName           = "backright";
+    public static String frontRightName         = "frontright";
+    public static String frontLeftName          = "frontleft";
+    public static String backRightName          = "backright";
+    public static String backLeftName           = "backleft";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
     public static double ballColorTresholdBlue = 20;
     public static double ballColorTresholdGreen = 20;
@@ -75,9 +75,11 @@ public class GlobalStorage {
 
     public static String rightGateServoName = "rightGateServo"; // port 2
     public static String leftGateServoName = "leftGateServo"; // port 3
-    public static String rightTiltServoName = "rightTiltServo"; // port 1
-    public static String leftTiltServoName = "leftTiltServo"; // port 0
+    public static String rightTiltServoName = "rightTiltServo"; // port
+    public static String leftTiltServoName = "leftTiltServo"; // port
     public static String turretAngleServoName = "turretAngleServo"; // port 4
+    public static String CameraRotateServoName = "CameraRotateServo"; // port 0
+    public static String PTOServoName = "PTOServo"; // port 1
     public static String colorSensorRightName = "colorSensorRight";
     public static String colorSensorLeftName = "colorSensorLeft";
     public static String distanceSensorName = "distanceSensor";

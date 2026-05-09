@@ -55,14 +55,14 @@ public class MainTeleOpBlue extends LinearOpMode {
     protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
-    public static double vp =- 0.0055;//195;
-    public static double vs =- 0.1;//195;
-    public static double velp = -195;
-    public static double vd =-0;//25;
-    public static double veld =-25;
-    public static double vf = - 0.0003;//15;
-    public static double velf = -12;
-    public static double vMultiplier = 1;
+    public static double vp = 0.0055;//195;
+    public static double vs = 0.1;//195;
+    public static double velp = 180;
+    public static double vd = 0;//25;
+    public static double veld = 18;
+    public static double vf = 0.0003;//15;
+    public static double velf = 15;
+    public static double vMultiplier = 0.86; /// TODO BE CAREFULL WITH THIS
     public static boolean shouldUseSecondaryPID = false;
     public static int a;
 
@@ -196,7 +196,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         RobotController.telemetry.addData("fakeRotation", fakeRotation);
         RobotController.telemetry.addData("current cam id: ", camId);
         //colors
-        HandleColors();
+        handleColors();
 
         // Choosing which values to use
         double usedDistance = 0;
@@ -313,12 +313,14 @@ public class MainTeleOpBlue extends LinearOpMode {
             hasBallInOuttake = false;
         }
 
-        if(robot.getKey("DPAD_UP1").ExecuteOnPress){
-            if(robot.getServoComponent("TiltServos").getPosition() == 1) // if retracted then extend
-                robot.executeNow(new StateAction("TiltServos","EXTENDED"));
-            else // else retract back
-                robot.executeNow(new StateAction("TiltServos","RETRACTED"));
-        }
+
+        // ====================== Tilt Servo Stuff ===================
+//        if(robot.getKey("DPAD_UP1").ExecuteOnPress){
+//            if(robot.getServoComponent("TiltServos").getPosition() == 1) // if retracted then extend
+//                robot.executeNow(new StateAction("TiltServos","EXTENDED"));
+//            else // else retract back
+//                robot.executeNow(new StateAction("TiltServos","RETRACTED"));
+//        }
 
 
         // ====================== Sorting Stuff ======================
@@ -716,7 +718,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     // ============================ Color Stuff ============================
 
-     protected void HandleColors() {
+     protected void handleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
         rightSensorColors = colorSensorRight.getNormalizedColors();
 

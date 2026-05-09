@@ -1,6 +1,13 @@
 package org.firstinspires.ftc.teamcode.Experimental;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vd;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.veld;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.velf;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.velp;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vf;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vp;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vs;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -24,10 +31,11 @@ public class ComponentMakerMethods {
                 .addMotor(turretFlyWheelMotorLeftName)
                 .addMotor(turretFlyWheelMotorRightName)
                 .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
+                .setDirection(turretFlyWheelMotorRightName, DcMotorSimple.Direction.REVERSE)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setVelocityCoefficients(-180, 0, -18, -15)
-                .setAccelerationVelocityCoefficients(-0.0055,0,0,-0.0003,-0.1)
-                .setOperationMode(MotorComponent.MotorModes.Velocity)
+                .setVelocityCoefficients(velp, 0, veld, velf)
+                .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs)
+                .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                 .setTarget(0)
                 .setRange(-3000,3000)
         );
@@ -67,17 +75,17 @@ public class ComponentMakerMethods {
                 .addMotor(turretAngleServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
-                .setRange(0,1)
+                .setRange(0.13,0.76) // check servo set multiple 0
                 .moveDuringInit(true)
         );
-        robot.makeComponent("TiltServos", new ServoComponent()
-                .addMotor(rightTiltServoName)
-                .addMotor(leftTiltServoName)
-                .setOperationMode(ServoComponent.ServoModes.Position)
-                .setResolution(360)
-                .setRange(0,1)
-                .moveDuringInit(true)
-        );
+//        robot.makeComponent("TiltServos", new ServoComponent()
+//                .addMotor(rightTiltServoName)
+//                .addMotor(leftTiltServoName)
+//                .setOperationMode(ServoComponent.ServoModes.Position)
+//                .setResolution(360)
+//                .setRange(0,1)
+//                .moveDuringInit(true)
+//        );
     }
 
     public static void MakeStates(RobotController robot) {
@@ -95,20 +103,20 @@ public class ComponentMakerMethods {
 
 
         robot.getComponent("LeftGateServo")
-                .addState("OPEN", 72)
-                .addState("CLOSED", 227,true);
+                .addState("OPEN", 234)
+                .addState("CLOSED", 144,true);
 
         robot.getComponent("RightGateServo")
-                .addState("CLOSED", 108, true)
-                .addState("OPEN", 270);
+                .addState("CLOSED", 234, true)
+                .addState("OPEN", 151);
 
         robot.getComponent("TurretAngle")
-                .addState("DOWN_MAX", 316) // 0.88
+                .addState("DOWN_MAX", 273)
                 .addState("DEFAULT", 180, true)
-                .addState("UP_MAX",18); // 0.05
+                .addState("UP_MAX",47);
 
-        robot.getComponent("TiltServos")
-                .addState("RETRACTED", 360,true) // 1
-                .addState("EXTENDED", 198); // 0.55
+//        robot.getComponent("TiltServos")
+//                .addState("RETRACTED", 360,true) // 1
+//                .addState("EXTENDED", 198); // 0.55
     }
 }
