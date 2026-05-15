@@ -17,14 +17,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 @TeleOp(name = "servoSet0", group = "Linear OpMode")
 public class servoSet0 extends LinearOpMode {
-    public static double servoPos = 0;
+    public static double servoPos = 0.88;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        Servo servo1 = hardwareMap.get(Servo.class, "turretangle");
+//        Servo servo1 = hardwareMap.get(Servo.class, "turretAngleServo");
+        Servo servo1 = hardwareMap.get(Servo.class, "CameraRotateServo");
 
         waitForStart();
         if (isStopRequested()) return;

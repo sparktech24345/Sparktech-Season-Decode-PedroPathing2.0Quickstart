@@ -44,14 +44,19 @@ public class GlobalStorage {
 
 
     // HARDWARE NAMES
-    public static String frontRightName         = "frontleft";
-    public static String frontLeftName          = "frontright";
-    public static String backRightName          = "backleft";
-    public static String backLeftName           = "backright";
+    public static String frontRightName         = "frontright";
+    public static String frontLeftName          = "frontleft";
+    public static String backRightName          = "backright";
+    public static String backLeftName           = "backleft";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
     public static double ballColorTresholdBlue = 20;
     public static double ballColorTresholdGreen = 20;
     public static double leftSensorColorMultiplier = 0.9;
+
+    // Sensor scale: 3.3V corresponds to 1000 mm
+    public static double MAX_VOLTS = 3.3;
+    public static double MAX_DISTANCE_MM = 1000.0;
+    public static double ballInIntakeThreshold = 235;
 
     // DECODE
 
@@ -63,11 +68,14 @@ public class GlobalStorage {
 
     public static String rightGateServoName = "rightGateServo"; // port 2
     public static String leftGateServoName = "leftGateServo"; // port 3
-    public static String rightTiltServoName = "rightTiltServo"; // port 1
-    public static String leftTiltServoName = "leftTiltServo"; // port 0
+    public static String rightTiltServoName = "rightTiltServo"; // port
+    public static String leftTiltServoName = "leftTiltServo"; // port
     public static String turretAngleServoName = "turretAngleServo"; // port 4
+    public static String CameraRotateServoName = "CameraRotateServo"; // port 0
+    public static String PTOServoName = "PTOServo"; // port 1
     public static String colorSensorRightName = "colorSensorRight";
     public static String colorSensorLeftName = "colorSensorLeft";
+    public static String distanceSensorName = "distanceSensor";
 
     public static OpModes currentOpModes = OpModes.TeleOP;
     public static TeamColor currentTeamColor = TeamColor.TeamNotSet;
@@ -155,7 +163,7 @@ public class GlobalStorage {
     public static double distanceToAngleFunction(double distance) {
         int handicapAdder;
         if(distance < 1)    return closeAngle;
-        if(distance < 1.6)  handicapAdder = 20;
+        if(distance < 1.7)  handicapAdder = 25;
         else handicapAdder = 0;
         if(distance > 3) return farAngle;
 //        if(distance > 3) return farAngleGrade1 * distance + farAngleGrade0;
@@ -166,8 +174,8 @@ public class GlobalStorage {
     public static double grade0VeloClose = 1060;
     public static double grade1VeloClose = 230.5;
     public static double closeVelo = 1300; //230.49196x+1048.81104
-    public static double grade0farVelo = 770; // 1200
-    public static double grade1farVelo = 318; // 183
+    public static double grade0farVelo = 800; // 770
+    public static double grade1farVelo = 319; // 318
     // general grad \\
     public static double distanceToVelocityFunction(double  distance) {
         if (distance < 1.25) return closeVelo;

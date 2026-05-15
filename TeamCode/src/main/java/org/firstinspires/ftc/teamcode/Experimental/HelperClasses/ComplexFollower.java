@@ -35,6 +35,7 @@ public class ComplexFollower {
     private static HardwareMap hmap;
 
     private static ElapsedTime follow_timer;
+    private static boolean stopHolding;
 
     private static boolean init_ = false;
 
@@ -66,6 +67,7 @@ public class ComplexFollower {
         currentTargetPos = startPos;
         Drawing.drawDebug(follower);
         follower.activateAllPIDFs();
+        stopHolding = false;
     }
 
     public static void unInit() {
@@ -115,12 +117,16 @@ public class ComplexFollower {
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
 
+        currentTargetPos = holdPose;
+
         follower.holdPoint(holdPose,false);
     }
     public static void hold() {
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
+
+        currentTargetPos = currentPos;
 
         follower.holdPoint(currentPos,false);
     }
@@ -275,7 +281,10 @@ public class ComplexFollower {
         return follow_timer.milliseconds();
     }
     public static boolean isDoneFollowingTimer(double timeToPass){
-        return getFollowingTimeMilisec() >= timeToPass;
+        return getFollowingTimeMilisec() >= timeToPass || stopHolding;
+    }
+    public static void setStopHolding(boolean toSet){
+        stopHolding = toSet;
     }
 
     public static boolean isMoving() {

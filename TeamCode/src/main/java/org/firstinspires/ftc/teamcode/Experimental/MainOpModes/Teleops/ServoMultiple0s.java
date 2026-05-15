@@ -10,45 +10,61 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 @TeleOp(name = "ServoMultiple0", group = "Linear OpMode")
 public class ServoMultiple0s extends LinearOpMode {
-    public static double rightGatePos = 0.75; // 0.75 down 0.3 ish up
-    public static double leftGatePos = 0.2; // 0.2 down 0.63 up
+    public static double rightGatePos = 0.65; // 0.42 down 0.65 up
+    public static double leftGatePos = 0.40; // 0.65 down 0.40 up
     public static double leftTiltPos = 0.99;//  poses are syncronized, in bot = 1, out of bot = 0.5 is also right - 0.01
     public static double rightTiltPos = 1;
-    public static double angleServoPos = 0.4; // max down is 0.88 and max up is 0.05
+    public static double angleServoPos = 0.4; // max down is 0.82 and max up is 0.16
+    public static double PTOServoPos = 0.4;
+    public static double CameraServoPos = 0;
     public static double motorPow = 0;
+
 
     @Override
     public void runOpMode() {
-        Servo leftTiltServo = hardwareMap.get(Servo.class, leftTiltServoName);
-        Servo rightTiltServo = hardwareMap.get(Servo.class, rightTiltServoName);
+        //Servo leftTiltServo = hardwareMap.get(Servo.class, leftTiltServoName);
+        //Servo rightTiltServo = hardwareMap.get(Servo.class, rightTiltServoName);
 
         Servo rightGateServo = hardwareMap.get(Servo.class, rightGateServoName);
         Servo leftGateServo = hardwareMap.get(Servo.class, leftGateServoName);
 
         Servo turretAngleServo = hardwareMap.get(Servo.class, turretAngleServoName);
 
+        Servo PTOServo = hardwareMap.get(Servo.class, PTOServoName);
+
+        Servo CameraRotateServo = hardwareMap.get(Servo.class, CameraRotateServoName);
+
 
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, intakeMotorName);
 
 
         while (opModeInInit()) {
-            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);// poses are syncronized, in bot = 1, out of bot = 0
-            if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
+            //if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);// poses are syncronized, in bot = 1, out of bot = 0
+            //if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
 
             if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
             if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
+
+            if (PTOServo != null) PTOServo.setPosition(PTOServoPos);
+            if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
 
             if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos); // max down is 0.88 and max up is 0.05
         }
 
         while (opModeIsActive()) {
-            if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);
-            if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
+            //if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);
+            //if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
 
             if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
             if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
 
+            if (PTOServo != null) PTOServo.setPosition(PTOServoPos);
+            if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
+
             if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos);
+
+            if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
+
             motor.setPower(motorPow);
         }
     }

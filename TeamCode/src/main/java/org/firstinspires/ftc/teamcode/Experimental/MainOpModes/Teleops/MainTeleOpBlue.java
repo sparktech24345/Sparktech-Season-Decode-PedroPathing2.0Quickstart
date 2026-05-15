@@ -1,9 +1,14 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components.*;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.CameraRotateServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_DISTANCE_MM;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_VOLTS;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballInIntakeThreshold;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceSensorName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalCamId;
@@ -11,13 +16,18 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.*;
 
 import android.graphics.Color;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -25,45 +35,40 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Button;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components;
+import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexGamepad;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.NoStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Drivers;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.ButtonPressedEvent;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.EventBus;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Config;
-import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
-@com.acmerobotics.dashboard.config.Config
+@Config
 @TeleOp(name="Main TeleOp Blue", group="AAA")
-public class MainTeleOpBlue extends ComplexOpMode {
+public class MainTeleOpBlue extends LinearOpMode {
+    protected RobotController robot;
     protected VoltageSensor controlHubVoltageSensor;
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
-    public static double vp = -0.0055; //195
-    public static double vs = -0.1; //195
-    public static double velp = -195;
-    public static double vd = -0; //25
-    public static double veld = -25;
-    public static double vf = -0.0003; //15
-    public static double velf = -12;
-    public static double vMultiplier = 1;
+    public static double vp = 0.0055;//195;
+    public static double vs = 0.1;//195;
+    public static double velp = 180;
+    public static double vd = 0;//25;
+    public static double veld = 18;
+    public static double vf = 0.0003;//15;
+    public static double velf = 15;
+    public static double vMultiplier = 0.9; /// TODO BE CAREFULL WITH THIS
     public static boolean shouldUseSecondaryPID = false;
     public static int a;
 
-    public static Config cfg;
+    public static MainConfig cfg;
     public static Drivers driver = Drivers.Teo;
 
     /// ----------------- Target Pose Stuff ------------------
@@ -81,6 +86,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
     protected BallColorSet_Decode actualLeftSensorDetectedBall;
     protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
     protected BallColorSet_Decode ballToFire;
+    public static boolean hasBallInIntake = false;
     public static boolean hasBallInRightChamber = false;
     public static boolean hasBallInLeftChamber = false;
     public static boolean shouldRemoveBalls = false;
@@ -103,9 +109,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
     public static int camId = 0;
 
     /// ----------------- Limelight Stuff -----------------
-    private AnalogInput laserAnalog; // if < 110 then has ball
-    private static final double MAX_VOLTS = 3.3;
-    private static final double MAX_DISTANCE_MM = 1000.0;
+    private AnalogInput laserAnalog;
 
     /// ----------------- Imu Stuff -----------------
     int logoFacingDirectionPosition;
@@ -136,18 +140,21 @@ public class MainTeleOpBlue extends ComplexOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 50; // 550 far side
+
     public static double timer5 = 0;
     public static double timer6 = 0;
     public static double outtakeReversingTime = 180;
-    public static double timer2 = 350; // 700 far side
+    public static double timer1 = 50; // far side
+    public static double timer2 = 200; // far side
     public static double timer3 = 0; // close side
-    public static double timer4 = 150; // close side
+    public static double timer4 = 100; // close side
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
+    public static double timer_far_v2 = 120;
+    public static double timer_close_v2 = 120;
     public static double timerToFireBothFromTheLeft = 900; // close side
     public static double revUpTime = 1400;
-    public static double timerToCloseGate = 300;
+    public static double timerToCloseGate = 200;
     public static double shootSortedTime = 800;
     public static double kVTurret = 0.003;
     public static double kATurret = 0.00015;
@@ -174,72 +181,185 @@ public class MainTeleOpBlue extends ComplexOpMode {
     public static boolean wantsToFireWithIntakeUnsortedInSortingMode = false;
     public static double forcedOuttakeSpeed = 0.7;
     public static double oneTunnelDistance = 1.65;
+///==============================Camera turret stuff============================================
+    public static double  maxiTurretAngle = 195;// de schimbat
+    public static double cameraAngle;
+    public static double miniTurretAngle = 165;//de schimbat
+    public static double cameraModifier = 0;
 
     protected void robotMainLoop() {
         // all of the code
 
         // processing
         processCameraStuff();
-        processTargetStuff(ComplexFollower.getCurrentPose(), cfg.targetX, cfg.targetY);
-        distanceToWallOdometry = calculateDistanceToWallInMeters(ComplexFollower.getCurrentPose(), cfg.usedTargetX, cfg.usedTargetY);
+        processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
+        distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.usedTargetX, cfg.usedTargetY);
 
-        TurretComponent<NoStates> tempTurret = TurretRotateMotor;
+        TurretComponent tempTurret = robot.getTurretComponent("TurretRotateMotor");
         // Update pose from Odometry
-        tempTurret.updateRobotPose(ComplexFollower.getCurrentPose());
+        tempTurret.updateRobotPose(robot.getCurrentPose());
         tempTurret.setBallTimeInAir(ballInAirTime);
 
         // this uses the processed target values
         //rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, cfg.usedTargetY);
-        ComplexTelemetry.get().addData("distance to wall", distanceToWallOdometry);
-        ComplexTelemetry.get().addData("fakeRotation", fakeRotation);
-        ComplexTelemetry.get().addData("current cam id: ", camId);
+        RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
+        RobotController.telemetry.addData("fakeRotation", fakeRotation);
+        RobotController.telemetry.addData("current cam id: ", camId);
         //colors
-        HandleColors();
+        handleColors();
 
         // Choosing which values to use
         double usedDistance = 0;
         double neededAngleForTurretRotation = 0;
         usedDistance = distanceToWallOdometry;
 
-        rotationToWallOdometry = tempTurret.calculateLookaheadTarget(cfg.usedTargetX, cfg.usedTargetY, lookAheadSeconds);
+        rotationToWallOdometry = tempTurret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
 
         neededAngleForTurretRotation -= rotationToWallOdometry; /// TODO this might be to be reversed in some ways
-
+        double camAngle = tempTurret.calculateLookaheadTarget_Camera(usedTargetX,usedTargetY);
 
         if (usedDistance > 2.9) neededAngleForTurretRotation += cfg.farZoneCameraAdder;
         if (shouldShootOnCamera) {
-            if (Math.abs(TurretRotateMotor.getVelocity()) < 0.2)
+            if (Math.abs(robot.getMotorComponent("TurretRotateMotor").getVelocity()) < 0.2)
                 rotationAdder += rotationDegreesMeasuredCamera;
 
             neededAngleForTurretRotation += rotationAdder;
         }
 
         neededAngleForTurretRotation += D2_rotationAdder * D2_rotationAdderMulti;
-        //if (neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
+        //if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
         if (neededAngleForTurretRotation < 0) neededAngleForTurretRotation += 360;
 
+        if(camAngle < miniTurretAngle) {
+            cameraAngle = 180 - camAngle;
+        } else if(camAngle > maxiTurretAngle) {
+            cameraAngle = 180 + camAngle;
+        } else {
+            cameraAngle = 180;
+        }
+
+        RobotController.telemetry.addData("camera rotation target", camAngle);
+
+        robot.getServoComponent("CameraRotateServo")
+                .setTarget(cameraAngle);
+
+
+        RobotController.telemetry.addData("needed angle for turret rotation", neededAngleForTurretRotation);
+        RobotController.telemetry.addData("angle for camera", cameraAngle);
 
 
         /// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- Driver Buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        shouldShootWithoutTurret = ComplexGamepad.DPAD_DOWN1.get().toggled;
-        //shouldForceOuttake = ComplexGamepad.DPAD_UP1.get().toggled;
-        ComplexGamepad.gamepad1.setLedColor((isInSortedMode ? 0 : 255), 0, (isInSortedMode ? 255 : 0), 30000);
-        ComplexGamepad.gamepad2.setLedColor((isInSortedMode ? 0 : 255), 0, (isInSortedMode ? 255 : 0), 30000);
+        // Special situations stuff
+        if (robot.getKey("DPAD_LEFT1").ExecuteOnPress) {
+            ComplexFollower.instance().setPose(pose(0, 0, 0));
+            D2_velocityAdder = 0;
+            D2_rotationAdder = 0;
+        }
+        shouldShootWithoutTurret = robot.getKey("DPAD_DOWN1").IsToggledOnPress;
+        //shouldForceOuttake = robot.getKey("DPAD_UP1").IsToggledOnPress;
 
+        if(robot.getKey("DPAD_RIGHT1").ExecuteOnPress || robot.getKey("RIGHT_BUMPER2").ExecuteOnPress){
+            robot.executeNow(new ActionSequence( // reverse for a bit
+                    new GeneralAction(() -> wantsToTempOutputIntake = true),
+                    new DelayAction(60),
+                    new GeneralAction(() -> wantsToTempOutputIntake = false)
+                    ));
+        }
+
+
+
+        // Driver Outputting
+        if (robot.getKey("LEFT_BUMPER1").ExecuteOnPress){
+            wantsToOutput = !wantsToOutput;
+
+            wantsToFireWithIntake = false;
+            wantsToIntakeDriver = false;
+            wantsToFireWithIntakeUnsortedInSortingMode = false;
+            hasSwitchedIntakeState = true;
+        }
+        // Driver Intake
+        if (robot.getKey("RIGHT_BUMPER1").ExecuteOnPress){
+            wantsToIntakeDriver = !wantsToIntakeDriver;
+
+            wantsToFireWithIntake = false;
+            wantsToOutput = false;
+            wantsToFireWithIntakeUnsortedInSortingMode = false;
+            hasSwitchedIntakeState = true;
+        }
+        // Driver Actually Shooting
+        if (robot.getKey("RIGHT_TRIGGER1").ExecuteOnPress){
+            wantsToFireWithIntake = !wantsToFireWithIntake;
+            hasBallInOuttake = false;
+            hasJustBeganFiring = true;
+
+            wantsToIntakeDriver = false;
+            wantsToOutput = false;
+            wantsToFireWithIntakeUnsortedInSortingMode = false;
+            hasSwitchedIntakeState = true;
+        }
+        // Driver preparing for shooting
+        if(robot.getKey("LEFT_TRIGGER1").ExecuteOnPress) isTryingToFire = !isTryingToFire;
+
+
+
+
+        // Driver Switch Mode
+        if (robot.getKey("Y1").ExecuteOnPress || robot.getKey("B2").ExecuteOnPress){
+            isInSortedMode = !isInSortedMode;
+        }
+        if(isInSortedMode){
+            gamepad1.setLedColor(0,0,255,30000);
+            gamepad2.setLedColor(0,0,255,30000);
+        }
+        else{
+            gamepad1.setLedColor(255,0,0,30000);
+            gamepad2.setLedColor(255,0,0,30000);
+        }
+        // Driver fire unsorted in sorted mode
+        if (robot.getKey("X1").ExecuteOnPress){
+            wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
+            hasJustBeganFiring = true;
+
+            wantsToIntakeDriver = false;
+            wantsToOutput = false;
+            wantsToFireWithIntake = false;
+            hasSwitchedIntakeState = true;
+        }
+
+        // Slowdown
+        if (robot.getKey("B1").ExecuteOnPress) {
+            if (robot.getKey("B1").IsToggledOnPress) {
+                DriveTrain.setSlowdown(0.3);
+            } else DriveTrain.setSlowdown(1);
+        }
+
+        // force store ball in outtake sorted if can, unsorted if cannot
+        if (robot.getKey("A1").ExecuteOnPress) {
+            hasBallInOuttake = false;
+        }
+
+
+        // ====================== Tilt Servo Stuff ===================
+//        if(robot.getKey("DPAD_UP1").ExecuteOnPress){
+//            if(robot.getServoComponent("TiltServos").getPosition() == 1) // if retracted then extend
+//                robot.executeNow(new StateAction("TiltServos","EXTENDED"));
+//            else // else retract back
+//                robot.executeNow(new StateAction("TiltServos","RETRACTED"));
+//        }
 
 
         // ====================== Sorting Stuff ======================
 
-//        if (ComplexGamepad.RIGHT_BUMPER2.get().ExecuteOnPress) {
+//        if (robot.getKey("RIGHT_BUMPER2").ExecuteOnPress) {
 //            ballColorQueue.add(BallColorSet_Decode.Purple);
 //            gamepad2.setLedColor(254, 0, 254, 1000000);
 //        }
-//        if (ComplexGamepad.LEFT_BUMPER2.get().ExecuteOnPress) {
+//        if (robot.getKey("LEFT_BUMPER2").ExecuteOnPress) {
 //            ballColorQueue.add(BallColorSet_Decode.Green);
 //            gamepad2.setLedColor(0, 254, 0, 1000000);
 //        }
-//        if (ComplexGamepad.B2.get().ExecuteOnPress) {
+//        if (robot.getKey("B2").ExecuteOnPress) {
 //            ballColorQueue.clearQueue();
 //            gamepad2.setLedColor(254, 254, 254, 1000000);
 //        }
@@ -247,154 +367,197 @@ public class MainTeleOpBlue extends ComplexOpMode {
         // Enable / Disable camera
         // Adders
 
+        if (robot.getKey("DPAD_UP2").ExecuteOnPress) {
+            D2_velocityAdder += 10;
+        }
+
+        if (robot.getKey("DPAD_DOWN2").ExecuteOnPress) {
+            D2_velocityAdder -= 10;
+        }
+
+        if (robot.getKey("DPAD_DOWN2").IsHeld && robot.getKey("DPAD_UP2").IsHeld) {
+            D2_velocityAdder = 0;
+        }
+
+        if (robot.getKey("DPAD_RIGHT2").ExecuteOnPress) {
+            D2_rotationAdder += 1;
+        }
+
+        if (robot.getKey("DPAD_LEFT2").ExecuteOnPress) {
+            D2_rotationAdder -= 1;
+        }
+
+        if (robot.getKey("DPAD_RIGHT2").IsHeld && robot.getKey("DPAD_LEFT2").IsHeld) {
+            D2_rotationAdder = 0;
+        }
+
+        if(robot.getKey("RIGHT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
+            ComplexFollower.instance().setPose(pose(cfg.hpResetX, cfg.hpResetY, cfg.hpResetDeg));
+            D2_velocityAdder = 0;
+            D2_rotationAdder = 0;
+        }
+        if(robot.getKey("LEFT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
+            ComplexFollower.instance().setPose(pose(cfg.classifierResetX,cfg.classifierResetY,cfg.classifierResetDeg));
+            D2_velocityAdder = 0;
+            D2_rotationAdder = 0;
+        }
+
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
 
 
         // if switched intake states try turn off gates but can be overriden
-        if (hasSwitchedIntakeState) {
+        if(hasSwitchedIntakeState){
             outtakeGatesState = -1;
             isMovingOuttakeGates = false;
-            publicQueuer.executeNow(new StateAction(RightGateServo.states.CLOSED));
-            publicQueuer.executeNow(new StateAction(LeftGateServo.states.CLOSED));
+            robot.executeNow(new StateAction("RightGateServo", "CLOSED"));
+            robot.executeNow(new StateAction("LeftGateServo", "CLOSED"));
         }
 
 
-        // UNSORTED MODE
+        if(true){ // it includes the fire without sorting cuz one state at a time => it cant fail
+            // UNSORTED MODE
 
-        //just one channel logic
-        if (wantsToIntakeDriver) {
-            intakeGateState = 1; // always point to the right
-            if (hasBallInRightChamber /*&& hasBallInOuttake*/) intakeGateState = -1; // should be 1 is -1 for temp
-        }
-        else intakeGateState = lastGateState;
-        lastGateState = intakeGateState;
-
-
-
-        if (wantsToIntakeDriver && false) {
-            if (hasBallInRightChamber && !hasBallInOuttake) {
-                hasBallInOuttake = true;
-                isMovingOuttakeGates = true;
-                publicQueuer.executeNow(new ActionSequence(
-                        new GeneralAction(() -> {
-                            // reset remembering color logic
-                            resetLeftBallColorTimer.reset();
-                            shouldResetRightSensorBall = true;
-                        }),
-                        new StateAction(RightGateServo.states.OPEN),
-                        new DelayAction(timerToCloseGate),
-                        new StateAction(RightGateServo.states.CLOSED)
-                ));
+            //just one channel logic
+            if(wantsToIntakeDriver){
+                intakeGateState = 1; // always point to the right
+                if(hasBallInRightChamber /*&& hasBallInOuttake*/) intakeGateState = -1; // should be 1 is -1 for temp
             }
-        }
+            else intakeGateState = lastGateState;
+            lastGateState = intakeGateState;
 
-        //shooting
-        if (((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && hasJustBeganFiring) /*&& hasBallInLeftChamber*/) { // hasSwitchedIntakeState for do once logic
-            isMovingOuttakeGates = true; // wont do special move commands until state is switched
-            if (usedDistance > 2.9 /* && hasBallInLeftChamber*/ && !isInSortedMode) {
-                publicQueuer.executeNow(new ActionSequence(
-                        new StateAction(RightGateServo.states.OPEN),
-                        new DelayAction(timerToCloseGate),// 300mls
-                        new StateAction(RightGateServo.states.CLOSED),
 
-                        new DelayAction(timer1),
 
-                        new StateAction(LeftGateServo.states.OPEN),
-
-                        new DelayAction(timer2),
-
-                        new StateAction(RightGateServo.states.OPEN) // fire alternatevly so that when u fire unsorted u dont wait for the last timer
-                ));
-                hasJustBeganFiring = false;
-            }
-            else if (!isInSortedMode) {
-                publicQueuer.executeNow(new ActionSequence(
-                        new StateAction(RightGateServo.states.OPEN),
-                        new DelayAction(timerToCloseGate), // 300mls
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new DelayAction(timer3),
-                        new StateAction(LeftGateServo.states.OPEN),
-                        new DelayAction(timer4),
-                        new StateAction(RightGateServo.states.OPEN)
-                ));
-                hasJustBeganFiring = false;
-            }
-            else {
-                switch (camId) {
-                    case 21 :
-                        fireGPP();
-                        break;
-                    case 22:
-                        firePGP();
-                        break;
-                    case 23:
-                        firePPG();
-                        break;
+            if(wantsToIntakeDriver && false){
+                if(hasBallInRightChamber && !hasBallInOuttake){
+                    hasBallInOuttake = true;
+                    isMovingOuttakeGates = true;
+                    robot.executeNow(new ActionSequence(
+                            new GeneralAction(() -> {
+                                // reset remembering color logic
+                                resetLeftBallColorTimer.reset();
+                                shouldResetRightSensorBall = true;
+                            }),
+                            new StateAction("RightGateServo", "OPEN"),
+                            new DelayAction(timerToCloseGate),
+                            new StateAction("RightGateServo", "CLOSED")
+                    ));
                 }
-                hasJustBeganFiring = false;
             }
+
+            //shooting
+            if(((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && hasJustBeganFiring) /*&& hasBallInLeftChamber*/){ // hasSwitchedIntakeState for do once logic
+                isMovingOuttakeGates = true; // wont do special move commands until state is switched
+                if (usedDistance > 2.9 /* && hasBallInLeftChamber*/ && !isInSortedMode) {
+                    robot.executeNow(new ActionSequence(
+                            new StateAction("RightGateServo", "OPEN"),
+                            new DelayAction(timerToCloseGate), // 300mls
+                            new StateAction("RightGateServo", "CLOSED"),
+                            new DelayAction(timer1),
+                            new StateAction("LeftGateServo", "OPEN"),
+                            new DelayAction(timer2),
+                            new StateAction("RightGateServo", "OPEN")//                            new StateAction("LeftGateServo", "OPEN"),
+//                            new DelayAction(timer_far_v2),
+//                            new StateAction("RightGateServo", "OPEN")
+                    ));
+                    hasJustBeganFiring = false;
+                }
+                else if(!isInSortedMode){
+                    robot.executeNow(new ActionSequence(
+                            new StateAction("RightGateServo", "OPEN"),
+                            new DelayAction(timerToCloseGate), // 300mls
+                            new StateAction("RightGateServo", "CLOSED"),
+                            new DelayAction(timer3),
+                            new StateAction("LeftGateServo", "OPEN"),
+                            new DelayAction(timer4),
+                            new StateAction("RightGateServo", "OPEN")
+//                            new StateAction("LeftGateServo", "OPEN"),
+//                            new DelayAction(timer_close_v2),
+//                            new StateAction("RightGateServo", "OPEN")
+//
+                    ));
+                    hasJustBeganFiring = false;
+                }
+                else {
+                    switch (camId){
+                        case 21 :
+                            fireGPP();
+                            break;
+                        case 22:
+                            firePGP();
+                            break;
+                        case 23:
+                            firePPG();
+                            break;
+                    }
+                    hasJustBeganFiring = false;
+                }
+            }
+
         }
 
-        /// =-=-=-=-=-=  end of big if (sorting)  =-=-=-=-=-=
+        /// =-=-=-=-=-=  end of big if(sorting)  =-=-=-=-=-=
 
         // Closing gates if they arent needed
-        if (!hasBallInLeftChamber && !hasBallInRightChamber) outtakeGatesState = -1;
+        if(!hasBallInLeftChamber && !hasBallInRightChamber) outtakeGatesState = -1;
+
+        if(hasBallInLeftChamber && hasBallInRightChamber && hasBallInIntake)
+            gamepad1.rumble(0.6,0.6,100);
 
         // IntakeStuff
-        if (wantsToOutput) {
+        if(wantsToOutput){
             intakeState = -1;
             isMovingOuttakeGates = false;
             outtakeGatesState = 1;
             if (hasBallInRightChamber) intakeGateState = 1; // open to the right so you can outtake
             else if (hasBallInLeftChamber) intakeGateState = -1; // left is lower priority but checked
         }
-        else if (wantsToIntakeDriver) intakeState = 1;
-        else if (wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) intakeState = 2;
+        else if(wantsToIntakeDriver) intakeState = 1;
+        else if(wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) intakeState = 2;
         else intakeState = 0;
 
-        if (wantsToTempOutputIntake)
+        if(wantsToTempOutputIntake)
             intakeState = -1;
 
-        if ((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && Math.abs(tempTurret.getError()) > 15)
+        if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && Math.abs(tempTurret.getError()) > 15)
             intakeState = 0;
 
         hasSwitchedIntakeState = false;
 
 
 
-        if ((ComplexGamepad.Y2.get().pressed)) camId = 21; // gpp
-        if ((ComplexGamepad.X2.get().pressed)) camId = 22; // pgp
-        if ((ComplexGamepad.A2.get().pressed)) camId = 23; // ppg
+        if ((robot.getKey("Y2").ExecuteOnPress )) camId = 21; // gpp
+        if ((robot.getKey("X2").ExecuteOnPress)) camId = 22; // pgp
+        if ((robot.getKey("A2").ExecuteOnPress)) camId = 23; // ppg
 
         switch (intakeState) {
             case -1:
-                publicQueuer.executeNow(new StateAction(IntakeMotor.states.FULL_REVERSE));
+                robot.executeNow(new StateAction("IntakeMotor", "FULL_REVERSE"));
                 break;
 
             case 0:
-                publicQueuer.executeNow(new StateAction(IntakeMotor.states.OFF));
+                robot.executeNow(new StateAction("IntakeMotor", "OFF"));
                 break;
 
             case 1:
-                publicQueuer.executeNow(new StateAction(IntakeMotor.states.FULL));
+                robot.executeNow(new StateAction("IntakeMotor", "FULL"));
                 break;
             case 2:
-                publicQueuer.executeNow(new StateAction(IntakeMotor.states.FIRING_POWER));
+                robot.executeNow(new StateAction("IntakeMotor", "FIRING_POWER"));
                 break;
         }
-        if (!isMovingOuttakeGates) {
-            switch(outtakeGatesState) {
+        if(!isMovingOuttakeGates){
+            switch(outtakeGatesState){
                 case -1: // force close
-                    publicQueuer.executeNow(new StateAction(RightGateServo.states.CLOSED));
-                    publicQueuer.executeNow(new StateAction(LeftGateServo.states.CLOSED));
+                    robot.executeNow(new StateAction("RightGateServo", "CLOSED"));
+                    robot.executeNow(new StateAction("LeftGateServo", "CLOSED"));
                     break;
 
                 case 0:// do nothin
                     break;
 
                 case 1: // force open
-                    publicQueuer.executeNow(new StateAction(RightGateServo.states.OPEN));
-                    publicQueuer.executeNow(new StateAction(LeftGateServo.states.OPEN));
+                    robot.executeNow(new StateAction("RightGateServo", "OPEN"));
+                    robot.executeNow(new StateAction("LeftGateServo", "OPEN"));
                     break;
             }
         }
@@ -411,78 +574,78 @@ public class MainTeleOpBlue extends ComplexOpMode {
             // ----------------------- Power Stuff -----------------------
 
             targetVelocity = tempTurret.getTargetFlywheelVelocity(usedDistance) * vMultiplier + D2_velocityAdder;
-            if (!shouldForceOuttake) {
-                if (shouldUseSecondaryPID && Math.abs(targetVelocity - TurretSpinMotor.getVelocity()) <= OuttakePIDSwitch) {
-                    TurretSpinMotor
+            if(!shouldForceOuttake){
+                if(shouldUseSecondaryPID && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
+                    robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.Velocity)
-                            .setState((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                            .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
                             .setVelocityCoefficients(velp,0,veld,velf);
                 }
-                else {
-                    TurretSpinMotor
+                else{
+                    robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
-                            .setState((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                            .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
                             .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs);;
                 }
 
             }
-            else {
-                TurretSpinMotor
+            else{
+                robot.getMotorComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Power)
-                        .setState(forcedOuttakeSpeed);
+                        .setTarget(forcedOuttakeSpeed);
             }
 
-            if (Math.abs(TurretSpinMotor.getVelocity() - targetVelocity) <= 21)
-                gamepad1.rumble(0.4,0.4,100);
+            //if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
+            //    gamepad1.rumble(0,0,100);
+
 
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            //turretAngleVal = clamp(turretAngleVal, 262, 315);
-            TurretAngle
-                    .setState((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
+            turretAngleVal = clamp(turretAngleVal,58, 295); // fresh measured
+            robot.getServoComponent("TurretAngle")
+                    .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
 
             // ----------------------- Rotation Stuff -----------------------
 
             // Predict target (Target is at 0,0 in world space for example)
             // lookaheadSeconds should roughly match your control loop latency + motor response time
-            if (shouldShootWithoutTurret) neededAngleForTurretRotation = 0;
-            tempTurret.setFeedforwardCoefficients(kVTurret, kATurret, kSTurret);
-            tempTurret.setState(neededAngleForTurretRotation);
+            if(shouldShootWithoutTurret) neededAngleForTurretRotation = 0;
+            tempTurret.setFeedforwardCoefficients(kVTurret,kATurret,kSTurret);
+            tempTurret.setTarget(neededAngleForTurretRotation);
 
         }
         else {
             rotationAdder = 0;
 
-            if (!shouldForceOuttake) {
-
-                TurretSpinMotor
+            if(!shouldForceOuttake){
+                robot.getMotorComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
-                        .setState(TurretSpinMotor.states.OFF);
+                        .setTarget(0);
             }
-            else {
-                TurretSpinMotor
+            else{
+                robot.getMotorComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Power)
-                        .setState(forcedOuttakeSpeed);
+                        .setTarget(forcedOuttakeSpeed);
             }
 
 
 
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            publicQueuer.executeNow(new StateAction(TurretAngle.states.DEFAULT));
+            robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
 
-            TurretRotateMotor
-                    .setState(0);
+            robot.getMotorComponent("TurretRotateMotor")
+                    .setTarget(0);
 
 
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
-        ComplexFollower.telemetry();
-        ComplexTelemetry.get().addData("target vel",targetVelocity);
-        ComplexTelemetry.get().addData("actual vel", TurretSpinMotor.getVelocity());
-        ComplexTelemetry.get().addData("Intake Current", IntakeMotor.getCurrent());
+        robot.spitFollowerTelemetry();
+        RobotController.telemetry.addData("target vel",targetVelocity);
+        RobotController.telemetry.addData("actual vel",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+        RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
     }
 
 
@@ -490,149 +653,35 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
 
     @Override
-    public void initialize() {
-        Components.init();
-        ComplexFollower.init(ConstantsDecode::createFollowerDecode);
-        DriveTrain.setHardwareMap(ComplexOpMode.publicHardwareMap);
-        DriveTrain.init();
+    public void runOpMode() {
+        // init
         setStuffToDefault();
 
-        InitOtherStuff(teamPipeline);
+        robot = new RobotController(hardwareMap, new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()), gamepad1, gamepad2) {
+            @Override
+            public void main_loop() {
+
+                robotMainLoop();
+            }
+        };
+
+        robot.init(OpModes.TeleOP);
+        ComponentMakerMethods.MakeComponents(robot);
+        ComponentMakerMethods.MakeStates(robot);
+        initOtherStuff(teamPipeline);
+        robot.UseDefaultMovement();
         makeConfig();
 
-        ComplexFollower.setPose(globalRobotPose);
+        while (opModeInInit()) {
+            robot.init_loop();
+        }
+        ComplexFollower.instance().setPose(globalRobotPose);
         camId = globalCamId;
 
-        // Special situations stuff
-        EventBus.subscribe(ButtonPressedEvent.class, event -> {
-            Button b = event.getButton();
-            if (b.equals(ComplexGamepad.DPAD_LEFT1.get())) {
-                ComplexFollower.setPose(pose(0, 0, 0));
-                D2_velocityAdder = 0;
-                D2_rotationAdder = 0;
-            }
-            // Driver Intake
-            else if (b.equals(ComplexGamepad.DPAD_RIGHT1.get()) || b.equals(ComplexGamepad.RIGHT_BUMPER2.get())) {
-                publicQueuer.executeNow(new ActionSequence( // reverse for a bit
-                        new GeneralAction(() -> wantsToTempOutputIntake = true),
-                        new DelayAction(60),
-                        new GeneralAction(() -> wantsToTempOutputIntake = false)
-                ));
-            } else if (b.equals(ComplexGamepad.LEFT_BUMPER1.get())) {
-                wantsToOutput = !wantsToOutput;
-
-                wantsToFireWithIntake = false;
-                wantsToIntakeDriver = false;
-                wantsToFireWithIntakeUnsortedInSortingMode = false;
-                hasSwitchedIntakeState = true;
-            } else if (b.equals(ComplexGamepad.RIGHT_BUMPER1.get())) {
-                wantsToIntakeDriver = !wantsToIntakeDriver;
-
-                wantsToFireWithIntake = false;
-                wantsToOutput = false;
-                wantsToFireWithIntakeUnsortedInSortingMode = false;
-                hasSwitchedIntakeState = true;
-            }
-            // Driver Actually Shooting
-            else if (b.equals(ComplexGamepad.RIGHT_TRIGGER1.get())) {
-                wantsToFireWithIntake = !wantsToFireWithIntake;
-                hasBallInOuttake = false;
-                hasJustBeganFiring = true;
-
-                wantsToIntakeDriver = false;
-                wantsToOutput = false;
-                wantsToFireWithIntakeUnsortedInSortingMode = false;
-                hasSwitchedIntakeState = true;
-            }
-            // Driver preparing for shooting
-            else if (b.equals(ComplexGamepad.LEFT_TRIGGER1.get())) isTryingToFire = !isTryingToFire;
-                // Driver Switch Mode
-            else if (b.equals(ComplexGamepad.Y1.get()) || b.equals(ComplexGamepad.B2.get())) {
-                isInSortedMode = !isInSortedMode;
-            }
-            // Driver fire unsorted in sorted mode
-            else if (b.equals(ComplexGamepad.X1.get())) {
-                wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
-                hasJustBeganFiring = true;
-
-                wantsToIntakeDriver = false;
-                wantsToOutput = false;
-                wantsToFireWithIntake = false;
-                hasSwitchedIntakeState = true;
-            }
-            // Slowdown
-            else if (b.equals(ComplexGamepad.B1.get())) {
-                DriveTrain.setSlowdown((ComplexGamepad.B1.get().toggled ? 0.3 : 1));
-            }
-            // force store ball in outtake sorted if can, unsorted if cannot
-            else if (b.equals(ComplexGamepad.A1.get())) {
-                hasBallInOuttake = false;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_UP1.get())) {
-                if (TiltServos.getPosition() == TiltServos.states.RETRACTED.value()) // if retracted then extend
-                    publicQueuer.executeNow(new StateAction(TiltServos.states.EXTENDED));
-                else // else retract back
-                    publicQueuer.executeNow(new StateAction(TiltServos.states.RETRACTED));
-            }
-            // Adders
-            else if (b.equals(ComplexGamepad.DPAD_UP2.get())) {
-                D2_velocityAdder += 10;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_DOWN2.get())) {
-                D2_velocityAdder -= 10;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_RIGHT2.get())) {
-                D2_rotationAdder += 1;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_LEFT2.get())) {
-                D2_rotationAdder -= 1;
-            }
-
-            if (ComplexGamepad.DPAD_DOWN2.get().held && ComplexGamepad.DPAD_UP2.get().held) {
-                D2_velocityAdder = 0;
-            }
-
-            if (ComplexGamepad.DPAD_RIGHT2.get().held && ComplexGamepad.DPAD_LEFT2.get().held) {
-                D2_rotationAdder = 0;
-            }
-
-            if (ComplexGamepad.RIGHT_TRIGGER2.get().held && ComplexGamepad.LEFT_BUMPER2.get().held) {
-                ComplexFollower.setPose(pose(cfg.hpResetX, cfg.hpResetY, cfg.hpResetDeg));
-                D2_velocityAdder = 0;
-                D2_rotationAdder = 0;
-            }
-            if (ComplexGamepad.LEFT_TRIGGER2.get().held && ComplexGamepad.LEFT_BUMPER2.get().held) {
-                ComplexFollower.setPose(pose(cfg.classifierResetX, cfg.classifierResetY, cfg.classifierResetDeg));
-                D2_velocityAdder = 0;
-                D2_rotationAdder = 0;
-            }
-        });
-    }
-
-    @Override
-    public void update() {
-        robotMainLoop();
-    }
-
-    @Override
-    public void telemetry() {
-
-        if (ShouldSpewOutSensors) {
-            ComplexTelemetry.get().addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-            ComplexTelemetry.get().addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-            ComplexTelemetry.get().addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
-
-            ComplexTelemetry.get().addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-            ComplexTelemetry.get().addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-            ComplexTelemetry.get().addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
-
-            ComplexTelemetry.get().addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-            ComplexTelemetry.get().addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+        while (opModeIsActive()) {
+            // loop
+            robot.loop();
         }
-    }
-
-    @Override
-    public void on_stop() {
         passPose();
     }
 
@@ -675,7 +724,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
         D2_rotationAdder = 0;
     }
 
-    public void InitOtherStuff(int limelightPipeline) {
+    public void initOtherStuff(int limelightPipeline) {
         //limelight stuff
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         limelight3A.pipelineSwitch(limelightPipeline);
@@ -686,17 +735,18 @@ public class MainTeleOpBlue extends ComplexOpMode {
         //other stuff like color sensor
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
+        laserAnalog = hardwareMap.get(AnalogInput.class, distanceSensorName);
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
-        gamepad1.setLedColor(254, 254, 254, 1000000);
-        gamepad2.setLedColor(254, 0, 0, 1000000);
+        //gamepad1.setLedColor(254, 254, 254, 1000000);
+        //gamepad2.setLedColor(254, 0, 0, 1000000);
     }
 
 
     // ============================ Color Stuff ============================
 
-     protected void HandleColors() {
+     protected void handleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
         rightSensorColors = colorSensorRight.getNormalizedColors();
 
@@ -706,7 +756,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
         actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors,true);
         actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
 
-        if (shouldResetRightSensorBall && resetLeftBallColorTimer.milliseconds() > 450) {
+        if(shouldResetRightSensorBall && resetLeftBallColorTimer.milliseconds() > 450){
             shouldResetRightSensorBall = false;
             calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
         }
@@ -733,6 +783,30 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
+
+
+         /// distance sesnsor stuff
+
+         // Read sensor voltage (0.0–3.3V)
+         double volts = laserAnalog.getVoltage();
+         // Convert voltage to distance in millimeters (linear mapping)
+         double distanceMM = (volts / MAX_VOLTS) * MAX_DISTANCE_MM;
+         hasBallInIntake = distanceMM < ballInIntakeThreshold;
+
+
+         if(ShouldSpewOutSensors){
+            RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+            RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+            RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+
+            RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+            RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+            RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+
+            RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+            RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+            RobotController.telemetry.addData("Has ball in intake", hasBallInIntake);
+         }
     }
 
 
@@ -752,7 +826,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
         double targetArea = llResult.getTa();
 
-        ComplexTelemetry.get().addData("areaPercentage", targetArea);
+        RobotController.telemetry.addData("areaPercentage", targetArea);
         double a = 8.60403612;
         double b = -0.0119936722;
 
@@ -773,14 +847,14 @@ public class MainTeleOpBlue extends ComplexOpMode {
         double targetAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
 
         // Normalize to [0, 360)
-        if (targetAngleDeg < 0) targetAngleDeg += 360;
+        if (targetAngleDeg<0) targetAngleDeg += 360;
 
         // Robot heading in degrees
         // Assuming robotPose.getHeading() is in radians, 0° = facing +X, increases counterclockwise
         //double robotHeadingDeg = Math.toDegrees(robotPose.getHeading());
 
         // Normalize to [0, 360)
-        if (robotHeadingDeg < 0) robotHeadingDeg += 360;
+        if (robotHeadingDeg<0) robotHeadingDeg += 360;
 
         // Calculate smallest signed angle difference: [-180, 180]
         double angleDiff = targetAngleDeg - robotHeadingDeg;
@@ -831,8 +905,8 @@ public class MainTeleOpBlue extends ComplexOpMode {
             cfg.usedTargetY = cfg.targetYCenter;
         }
 
-        ComplexTelemetry.get().addData("Calculated Rotation", degrees);
-        ComplexTelemetry.get().addData("Target X", cfg.usedTargetX);
+        RobotController.telemetry.addData("Calculated Rotation", degrees);
+        RobotController.telemetry.addData("Target X", cfg.usedTargetX);
     }
 
     // Helper function for Linear Interpolation
@@ -846,152 +920,152 @@ public class MainTeleOpBlue extends ComplexOpMode {
     }
 
     //===== shooting sorted ======/
-    public void firePPG() {
-        int greenBallPosition;
-        if (calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
-        else if (calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
+    public void firePPG(){
+        int greenBallPosition = 3;
+        if(calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
+        else if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
         else greenBallPosition = 3; // green is on the right
         switch (greenBallPosition) {
             case 1: // green on the right
-                publicQueuer.executeNow(new ActionSequence( // left right right
-                        new StateAction(LeftGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( // left right right
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(LeftGateServo.states.CLOSED),
+                        new StateAction("LeftGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 2: // if green is on the left
-                publicQueuer.executeNow(new ActionSequence( // right right left
-                        new StateAction(RightGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(RightGateServo.states.CLOSED),
+                        new StateAction("RightGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 3: // green isnt or is in intake
-                publicQueuer.executeNow(new ActionSequence( // right left right
-                        new StateAction(RightGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(RightGateServo.states.CLOSED),
+                        new StateAction("RightGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
         }
     }
-    public void firePGP() {
-        int greenBallPosition;
-        if (calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
-        else if (calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
+    public void firePGP(){
+        int greenBallPosition = 3;
+        if(calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
+        else if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
         else greenBallPosition = 3; // green is on the right
         switch (greenBallPosition) {
             case 1: // green on the right
-                publicQueuer.executeNow(new ActionSequence( // left right left
-                        new StateAction(LeftGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( // left right left
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(LeftGateServo.states.CLOSED),
+                        new StateAction("LeftGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 2: // if green is on the left
-                publicQueuer.executeNow(new ActionSequence( // right left right
-                        new StateAction(RightGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(RightGateServo.states.CLOSED),
+                        new StateAction("RightGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 3: // green ball is in intake
-                publicQueuer.executeNow(new ActionSequence( // right right left
-                        new StateAction(RightGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(RightGateServo.states.CLOSED),
+                        new StateAction("RightGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
         }
     }
-    public void fireGPP() {
-        int greenBallPosition;
-        if (calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
-        else if (calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
+    public void fireGPP(){
+        int greenBallPosition = 3;
+        if(calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
+        else if(calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 2; // green is on the left
         else greenBallPosition = 3; // green is on the right
         switch (greenBallPosition) {
             case 1: // green on the right
-                publicQueuer.executeNow(new ActionSequence( // right right left
-                        new StateAction(RightGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(RightGateServo.states.CLOSED),
+                        new StateAction("RightGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 2: // if green is on the left
-                publicQueuer.executeNow(new ActionSequence( //left left right
-                        new StateAction(LeftGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence( //left left right
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(LeftGateServo.states.CLOSED),
+                        new StateAction("LeftGateServo", "CLOSED"),
                         new DelayAction(timer1ForSorting),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timer2ForSorting),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 3: // green ball is in intake, cant actually sort this
-                publicQueuer.executeNow(new ActionSequence(
-                        new StateAction(RightGateServo.states.OPEN),
+                robot.executeNow(new ActionSequence(
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
-                        new StateAction(RightGateServo.states.CLOSED),
+                        new StateAction("RightGateServo", "CLOSED"),
                         new DelayAction(timer3),
-                        new StateAction(LeftGateServo.states.OPEN),
+                        new StateAction("LeftGateServo", "OPEN"),
                         new DelayAction(timer4),
-                        new StateAction(RightGateServo.states.OPEN),
+                        new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(1000),
-                        new StateAction(RightGateServo.states.CLOSED),
-                        new StateAction(LeftGateServo.states.CLOSED)
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
         }
@@ -999,14 +1073,14 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
 
     // ============================ Weird Stuff ============================
-    Runnable stopMovingOuttakeGates = () -> isMovingOuttakeGates = false;
+    Runnable stopMovingOuttakeGates = () -> {isMovingOuttakeGates = false;};
     public Pose passPose() {
-        globalRobotPose = ComplexFollower.getPose(); //Math.toRadians
+        globalRobotPose = ComplexFollower.instance().getPose(); //Math.toRadians
         return globalRobotPose;
     }
     
     protected ElapsedTime flashingTimer = new ElapsedTime();
-    public void makeConfig() {
-        cfg = Config.getConfig("blue");
+    public void makeConfig(){
+        cfg = new MainConfig(MainConfig.Configs.Blue);
     }
 }

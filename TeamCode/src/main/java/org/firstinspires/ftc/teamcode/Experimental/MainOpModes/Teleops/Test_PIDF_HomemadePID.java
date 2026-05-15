@@ -28,14 +28,14 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
     DcMotorEx turretSpinL;
     DcMotorEx turretSpinR;
     PIDcontroller piDcontroller;
-    public static double P = -0.0055;
+    public static double P = 0.0055;
     public static double D = 0;
     public static double I = 0;
-    public static double F = -0.0004;
+    public static double F = 0.0004;
     public static double currentVelLeft;
     public static double currentVelRight;
     public static double targetVel;
-    public static double turretAngle = 275;
+    public static double turretAngle = 150;
     public static double motorPow = 0;
     public static double powerOverride = 0;
 
@@ -47,17 +47,18 @@ public class Test_PIDF_HomemadePID extends LinearOpMode {
         piDcontroller = new PIDcontroller(P, I, D);
 
         turretSpinR = hardwareMap.get(DcMotorEx.class, "turretFlyWheelMotorRight");
+        turretSpinR.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
-        //Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
-        //servo2.setPosition(turretAngle / 360);
+        Servo servo2 = hardwareMap.get(Servo.class, turretAngleServoName);
+        servo2.setPosition(turretAngle/360);
         DcMotorSimple intakeMotor = hardwareMap.get(DcMotorSimple.class, intakeMotorName);
 
         waitForStart();
         if (isStopRequested()) return;
         while (opModeIsActive()) {
             intakeMotor.setPower(motorPow);
-            //servo2.setPosition(turretAngle/360);
+            servo2.setPosition(turretAngle/360);
 
             currentVelLeft = turretSpinL.getVelocity();
             currentVelRight = turretSpinR.getVelocity();
