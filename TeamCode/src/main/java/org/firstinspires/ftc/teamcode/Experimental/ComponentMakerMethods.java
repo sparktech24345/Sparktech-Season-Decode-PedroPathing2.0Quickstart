@@ -75,7 +75,7 @@ public class ComponentMakerMethods {
                 .addMotor(turretAngleServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
-                .setRange(0.13,0.76) // check servo set multiple 0
+                .setRange(0.16,0.82) // check servo set multiple 0
                 .moveDuringInit(true)
         );
 //        robot.makeComponent("TiltServos", new ServoComponent()
@@ -86,6 +86,13 @@ public class ComponentMakerMethods {
 //                .setRange(0,1)
 //                .moveDuringInit(true)
 //        );
+        robot.makeComponent("CameraRotateServo", new ServoComponent()
+                .addMotor(CameraRotateServoName)
+                .setOperationMode(ServoComponent.ServoModes.Position)
+                .setResolution(360)
+                .setRange(0.13,0.76)
+                .moveDuringInit(true)
+        );
     }
 
     public static void MakeStates(RobotController robot) {
@@ -107,7 +114,7 @@ public class ComponentMakerMethods {
                 .addState("CLOSED", 144,true);
 
         robot.getComponent("RightGateServo")
-                .addState("CLOSED", 234, true)
+                .addState("CLOSED", 241, true)
                 .addState("OPEN", 151);
 
         robot.getComponent("TurretAngle")

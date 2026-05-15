@@ -24,7 +24,8 @@ public class servoSet0 extends LinearOpMode {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        Servo servo1 = hardwareMap.get(Servo.class, "turretAngleServo");
+//        Servo servo1 = hardwareMap.get(Servo.class, "turretAngleServo");
+        Servo servo1 = hardwareMap.get(Servo.class, "CameraRotateServo");
 
         waitForStart();
         if (isStopRequested()) return;

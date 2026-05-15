@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.CameraRotateServoName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_DISTANCE_MM;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_VOLTS;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballInIntakeThreshold;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceSensorName;
@@ -62,7 +64,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double veld = 18;
     public static double vf = 0.0003;//15;
     public static double velf = 15;
-    public static double vMultiplier = 0.86; /// TODO BE CAREFULL WITH THIS
+    public static double vMultiplier = 0.9; /// TODO BE CAREFULL WITH THIS
     public static boolean shouldUseSecondaryPID = false;
     public static int a;
 
@@ -138,18 +140,21 @@ public class MainTeleOpBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
-    public static double timer1 = 50; // 550 far side
+
     public static double timer5 = 0;
     public static double timer6 = 0;
     public static double outtakeReversingTime = 180;
-    public static double timer2 = 350; // 700 far side
+    public static double timer1 = 50; // far side
+    public static double timer2 = 200; // far side
     public static double timer3 = 0; // close side
-    public static double timer4 = 150; // close side
+    public static double timer4 = 100; // close side
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
+    public static double timer_far_v2 = 120;
+    public static double timer_close_v2 = 120;
     public static double timerToFireBothFromTheLeft = 900; // close side
     public static double revUpTime = 1400;
-    public static double timerToCloseGate = 300;
+    public static double timerToCloseGate = 200;
     public static double shootSortedTime = 800;
     public static double kVTurret = 0.003;
     public static double kATurret = 0.00015;
@@ -176,6 +181,11 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean wantsToFireWithIntakeUnsortedInSortingMode = false;
     public static double forcedOuttakeSpeed = 0.7;
     public static double oneTunnelDistance = 1.65;
+///==============================Camera turret stuff============================================
+    public static double  maxiTurretAngle = 195;// de schimbat
+    public static double cameraAngle;
+    public static double miniTurretAngle = 165;//de schimbat
+    public static double cameraModifier = 0;
 
     protected void robotMainLoop() {
         // all of the code
@@ -206,7 +216,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         rotationToWallOdometry = tempTurret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
 
         neededAngleForTurretRotation -= rotationToWallOdometry; /// TODO this might be to be reversed in some ways
-
+        double camAngle = tempTurret.calculateLookaheadTarget_Camera(usedTargetX,usedTargetY);
 
         if (usedDistance > 2.9) neededAngleForTurretRotation += cfg.farZoneCameraAdder;
         if (shouldShootOnCamera) {
@@ -220,6 +230,22 @@ public class MainTeleOpBlue extends LinearOpMode {
         //if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
         if (neededAngleForTurretRotation < 0) neededAngleForTurretRotation += 360;
 
+        if(camAngle < miniTurretAngle) {
+            cameraAngle = 180 - camAngle;
+        } else if(camAngle > maxiTurretAngle) {
+            cameraAngle = 180 + camAngle;
+        } else {
+            cameraAngle = 180;
+        }
+
+        RobotController.telemetry.addData("camera rotation target", camAngle);
+
+        robot.getServoComponent("CameraRotateServo")
+                .setTarget(cameraAngle);
+
+
+        RobotController.telemetry.addData("needed angle for turret rotation", neededAngleForTurretRotation);
+        RobotController.telemetry.addData("angle for camera", cameraAngle);
 
 
         /// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- Driver Buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -424,16 +450,14 @@ public class MainTeleOpBlue extends LinearOpMode {
                 if (usedDistance > 2.9 /* && hasBallInLeftChamber*/ && !isInSortedMode) {
                     robot.executeNow(new ActionSequence(
                             new StateAction("RightGateServo", "OPEN"),
-                            new DelayAction(timerToCloseGate),// 300mls
+                            new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-
                             new DelayAction(timer1),
-
                             new StateAction("LeftGateServo", "OPEN"),
-
                             new DelayAction(timer2),
-
-                            new StateAction("RightGateServo", "OPEN") // fire alternatevly so that when u fire unsorted u dont wait for the last timer
+                            new StateAction("RightGateServo", "OPEN")//                            new StateAction("LeftGateServo", "OPEN"),
+//                            new DelayAction(timer_far_v2),
+//                            new StateAction("RightGateServo", "OPEN")
                     ));
                     hasJustBeganFiring = false;
                 }
@@ -446,6 +470,10 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer4),
                             new StateAction("RightGateServo", "OPEN")
+//                            new StateAction("LeftGateServo", "OPEN"),
+//                            new DelayAction(timer_close_v2),
+//                            new StateAction("RightGateServo", "OPEN")
+//
                     ));
                     hasJustBeganFiring = false;
                 }
@@ -574,7 +602,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            //turretAngleVal = clamp(turretAngleVal, 262, 315);
+            turretAngleVal = clamp(turretAngleVal,58, 295); // fresh measured
             robot.getServoComponent("TurretAngle")
                     .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 

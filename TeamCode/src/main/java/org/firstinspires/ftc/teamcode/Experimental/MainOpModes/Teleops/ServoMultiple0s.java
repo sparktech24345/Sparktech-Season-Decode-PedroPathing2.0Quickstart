@@ -14,10 +14,11 @@ public class ServoMultiple0s extends LinearOpMode {
     public static double leftGatePos = 0.40; // 0.65 down 0.40 up
     public static double leftTiltPos = 0.99;//  poses are syncronized, in bot = 1, out of bot = 0.5 is also right - 0.01
     public static double rightTiltPos = 1;
-    public static double angleServoPos = 0.4; // max down is 0.76 and max up is 0.13
+    public static double angleServoPos = 0.4; // max down is 0.82 and max up is 0.16
     public static double PTOServoPos = 0.4;
-    public static double CameraServoPos = 0.4;
+    public static double CameraServoPos = 0;
     public static double motorPow = 0;
+
 
     @Override
     public void runOpMode() {
@@ -61,6 +62,9 @@ public class ServoMultiple0s extends LinearOpMode {
             if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
 
             if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos);
+
+            if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
+
             motor.setPower(motorPow);
         }
     }
