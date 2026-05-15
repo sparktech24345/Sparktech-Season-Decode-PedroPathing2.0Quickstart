@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode.publicTelemetry;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 
 import java.util.Map;
@@ -100,7 +100,7 @@ public class Config {
 
         "classifierResetX": 122,
         "classifierResetY": 30.5,
-        "classifierResetDeg": -135,
+        "classifierResetDeg": -135
     },
     "red": {
         "teamPipeline": 1,
@@ -153,8 +153,8 @@ public class Config {
 
         "classifierResetX": 122,
         "classifierResetY": -30.5,
-        "classifierResetDeg": 135,
-    },
+        "classifierResetDeg": 135
+    }
     }
     """;
 
@@ -165,12 +165,12 @@ public class Config {
             Map<String, Config> configs = mapper.readValue(json, mapper.getTypeFactory().constructMapType(Map.class, String.class, Config.class));
             return configs.get(cfg_name);
         } catch (JsonProcessingException e) {
-            publicTelemetry.addData("Could not load config:", e.getMessage());
-            publicTelemetry.update();
+            ComplexTelemetry.get().addData("Could not load config:", e.getMessage());
+            ComplexTelemetry.get().update();
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e2) {
-                publicTelemetry.addData("Bro can't even sleep :(", e2.getMessage());
+                ComplexTelemetry.get().addData("Bro can't even sleep :(", e2.getMessage());
             }
         }
         return null;

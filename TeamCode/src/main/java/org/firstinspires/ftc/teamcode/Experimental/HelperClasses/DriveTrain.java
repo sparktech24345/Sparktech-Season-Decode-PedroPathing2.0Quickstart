@@ -78,6 +78,20 @@ public class DriveTrain {
         double FrontLeftPow  = vertical - horizontal + pivot;
         double BackLeftPow   = vertical + horizontal + pivot;
 
+        double afrp = Math.abs(FrontRightPow);
+        double aflp = Math.abs(FrontLeftPow);
+        double abrp = Math.abs(BackRightPow);
+        double ablp = Math.abs(BackLeftPow);
+
+        double maxp = Math.max(Math.max(Math.max(afrp, aflp), abrp), ablp);
+
+        if (maxp > 1.0) {
+            FrontRightPow /= maxp;
+            FrontLeftPow /= maxp;
+            BackRightPow /= maxp;
+            BackLeftPow /= maxp;
+        }
+
         RFDrive.setPower(FrontRightPow * slowdownMultiplier);
         LFDrive.setPower(FrontLeftPow * slowdownMultiplier);
         RBDrive.setPower(BackRightPow * slowdownMultiplier);

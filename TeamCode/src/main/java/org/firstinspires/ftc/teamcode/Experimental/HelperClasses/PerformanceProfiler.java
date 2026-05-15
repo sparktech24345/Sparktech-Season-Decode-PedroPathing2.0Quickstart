@@ -24,7 +24,7 @@ public class PerformanceProfiler {
     }
 
     public void end() {
-        ComplexOpMode.publicTelemetry.addData(name, () -> switch (unit) {
+        ComplexTelemetry.get().addData(name, () -> switch (unit) {
             case SECONDS -> timer.seconds();
             case NANOSECONDS -> timer.nanoseconds();
             default -> timer.milliseconds();

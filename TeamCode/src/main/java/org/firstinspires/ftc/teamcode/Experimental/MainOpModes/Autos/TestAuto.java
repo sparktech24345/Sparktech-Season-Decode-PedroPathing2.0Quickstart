@@ -15,11 +15,13 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Benchmark;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Button;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.MoveAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.AutoRecorder;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexGamepad;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.ButtonPressedEvent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.EventBus;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.EventListener;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 
@@ -36,12 +38,12 @@ public class TestAuto extends ComplexOpMode {
     public void telemetry() {
         //ComplexFollower.telemetry();
         //queuer.telemetry();
-        publicTelemetry.addData("AAA_controls: A1", "move fata spate");
-        publicTelemetry.addData("AAA_controls: B1", "move patrat");
-        publicTelemetry.addData("AAA_controls: X1", "move triunghi");
-        publicTelemetry.addData("AAA_controls: DPAD UP1", "move fata spate + hood movement");
-        publicTelemetry.addData("AAA_controls: DPAD DOWN1", "move patrat + hood movement");
-        loop_time.into_telemetry(publicTelemetry);
+        ComplexTelemetry.get().addData("AAA_controls: A1", "move fata spate");
+        ComplexTelemetry.get().addData("AAA_controls: B1", "move patrat");
+        ComplexTelemetry.get().addData("AAA_controls: X1", "move triunghi");
+        ComplexTelemetry.get().addData("AAA_controls: DPAD UP1", "move fata spate + hood movement");
+        ComplexTelemetry.get().addData("AAA_controls: DPAD DOWN1", "move patrat + hood movement");
+        loop_time.into_telemetry(ComplexTelemetry.get());
     }
 
     @Override
@@ -53,7 +55,7 @@ public class TestAuto extends ComplexOpMode {
     public void initialize() {
         Components.init();
         recorder = new AutoRecorder();
-        publicEventBus.subscribe(ButtonPressedEvent.class, (event) -> {
+        EventBus.subscribe(ButtonPressedEvent.class, (event) -> {
             Button b = event.getButton();
             if (b.equals(ComplexGamepad.A1.get())) {
                 publicQueuer.addToQueue(new MoveAction(pose(20 * multi, 0, 0)).setName("Line p1"));

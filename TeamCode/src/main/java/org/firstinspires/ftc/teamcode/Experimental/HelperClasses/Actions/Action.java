@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode.publicTelemetry;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 
 import java.util.function.BooleanSupplier;
 
@@ -42,9 +42,9 @@ public abstract class Action {
     }
 
     public void telemetry() {
-        publicTelemetry.addData("started", start);
-        publicTelemetry.addData("finished", done);
-        publicTelemetry.addData("name", name);
+        ComplexTelemetry.get().addData("started", start);
+        ComplexTelemetry.get().addData("finished", done);
+        ComplexTelemetry.get().addData("name", name);
     }
 
     public Action startIf(BooleanSupplier start) {

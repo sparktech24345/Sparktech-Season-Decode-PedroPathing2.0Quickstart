@@ -6,21 +6,19 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.EventBus;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public abstract class ComplexOpMode extends OpMode {
 
-    public static MultipleTelemetry publicTelemetry = null;
     public static StateQueuer publicQueuer = null;
-    public static EventBus publicEventBus = null;
     public static HardwareMap publicHardwareMap = null;
 
     protected MultipleTelemetry tel;
     protected final StateQueuer queuer = new StateQueuer();
-    protected final EventBus eventBus = new EventBus();
-    protected boolean debug_telemetry = true;
     protected List<LynxModule> hubs;
 
 
@@ -28,34 +26,26 @@ public abstract class ComplexOpMode extends OpMode {
     public ComplexOpMode() {
         super();
         publicQueuer = queuer;
-        publicEventBus = eventBus;
+    }
+
+    private void benchmark_if(BooleanSupplier cond, Runnable upd, String bmname) {
+        if (cond.getAsBoolean()) {
+            Benchmark bm = new Benchmark(bmname).startTimer();
+            upd.run();
+            bm.into_telemetry(ComplexTelemetry.get());
+        }
     }
 
     public void _update(Runnable main_update) {
-        Benchmark loop = new Benchmark("[BENCHMARK] LOOP ITERATION").startTimer();
-        for (LynxModule hub : hubs) {
-            hub.clearBulkCache();
-        }
-        Benchmark queue = new Benchmark("[BENCHMARK] QUEUER UPDATE").startTimer();
-        queuer.update();
-        if (debug_telemetry) queue.into_telemetry(tel);
-        if (ComplexFollower.isInit()) {
-            Benchmark follower = new Benchmark("[BENCHMARK] FOLLOWER UPDATE").startTimer();
-            ComplexFollower.update();
-            if (debug_telemetry) follower.into_telemetry(tel);
-        }
-        if (ComplexGamepad.isInit()) {
-            Benchmark gp = new Benchmark("[BENCHMARK] FOLLOWER UPDATE").startTimer();
-            ComplexGamepad.update();
-            if (debug_telemetry) gp.into_telemetry(tel);
-        }
-        Benchmark mup = new Benchmark("[BENCHMARK] MAIN UPDATE").startTimer();
-        main_update.run();
-        if (debug_telemetry) mup.into_telemetry(tel);
-        Benchmark tele = new Benchmark("[BENCHMARK] TELEMETRY UPDATE").startTimer();
-        if (debug_telemetry) telemetry();
-        if (debug_telemetry) tele.into_telemetry(tel);
-        if (debug_telemetry) loop.into_telemetry(tel);
+        benchmark_if(() -> true, () -> {
+            for (LynxModule hub : hubs) hub.clearBulkCache();
+            benchmark_if(() -> true, publicQueuer::update, "QUEUER UPDATE");
+            benchmark_if(ComplexFollower::isInit, ComplexFollower::update, "FOLLOWER UPDATE");
+            benchmark_if(ComplexGamepad::isInit, ComplexGamepad::update, "GAMEPAD UPDATE");
+            benchmark_if(DriveTrain::isInit, DriveTrain::update, "DRIVETRAIN UPDATE");
+            benchmark_if(() -> true, main_update, "MAIN UPDATE");
+            benchmark_if(ComplexTelemetry::isInit, this::telemetry, "TELEMETRY UPDATE");
+        }, "LOOP ITERATION");
         tel.update();
     }
 
@@ -65,9 +55,9 @@ public abstract class ComplexOpMode extends OpMode {
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
+        ComplexTelemetry.addTelemetry(telemetry);
+        ComplexTelemetry.addTelemetry(FtcDashboard.getInstance().getTelemetry());
         publicHardwareMap = hardwareMap;
-        tel = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        publicTelemetry = tel;
         ComplexFollower.setHardwareMap(hardwareMap);
         ComplexGamepad.init(gamepad1, gamepad2);
         _update(this::initialize);
@@ -79,7 +69,7 @@ public abstract class ComplexOpMode extends OpMode {
     }
 
     @Override
-    public final void loop() {
+    public void loop() {
         _update(this::update);
     }
 

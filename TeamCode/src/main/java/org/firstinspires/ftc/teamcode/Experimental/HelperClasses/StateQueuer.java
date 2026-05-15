@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
-
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode.publicTelemetry;
-
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 
 import java.util.ArrayList;
@@ -63,9 +60,9 @@ public class StateQueuer {
     }
 
     public void telemetry() {
-        publicTelemetry.addData("queue len", actionQueue.size());
-        publicTelemetry.addData("instants len", instantActions.size());
-        publicTelemetry.addData("isEmpty", isEmpty());
+        ComplexTelemetry.get().addData("queue len", actionQueue.size());
+        ComplexTelemetry.get().addData("instants len", instantActions.size());
+        ComplexTelemetry.get().addData("isEmpty", isEmpty());
         if (actionQueue.isEmpty()) return;
         actionQueue.get(0).telemetry();
     }

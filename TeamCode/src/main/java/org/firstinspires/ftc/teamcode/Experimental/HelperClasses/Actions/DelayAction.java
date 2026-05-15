@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 
 import java.text.MessageFormat;
 
@@ -19,7 +20,7 @@ public class DelayAction extends Action {
         this.DoneCondition = () -> timer.milliseconds() >= waitTimeMS;
     }
     public void telemetry() {
-        MultipleTelemetry tel = ComplexOpMode.publicTelemetry;
+        MultipleTelemetry tel = ComplexTelemetry.get();
         tel.addData("at action", name);
         tel.addData("started", start);
         tel.addData("finished", done);

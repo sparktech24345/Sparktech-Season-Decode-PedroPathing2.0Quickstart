@@ -27,6 +27,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Button;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
@@ -42,7 +43,9 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Bal
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Drivers;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.ButtonPressedEvent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.EventBus;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Config;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 @com.acmerobotics.dashboard.config.Config
 @TeleOp(name="Main TeleOp Blue", group="AAA")
@@ -187,9 +190,9 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
         // this uses the processed target values
         //rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, cfg.usedTargetY);
-        publicTelemetry.addData("distance to wall", distanceToWallOdometry);
-        publicTelemetry.addData("fakeRotation", fakeRotation);
-        publicTelemetry.addData("current cam id: ", camId);
+        ComplexTelemetry.get().addData("distance to wall", distanceToWallOdometry);
+        ComplexTelemetry.get().addData("fakeRotation", fakeRotation);
+        ComplexTelemetry.get().addData("current cam id: ", camId);
         //colors
         HandleColors();
 
@@ -221,111 +224,6 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
         shouldShootWithoutTurret = ComplexGamepad.DPAD_DOWN1.get().toggled;
         //shouldForceOuttake = ComplexGamepad.DPAD_UP1.get().toggled;
-
-        // Special situations stuff
-        publicEventBus.subscribe(ButtonPressedEvent.class, event -> {
-            Button b = event.getButton();
-            if (b.equals(ComplexGamepad.DPAD_LEFT1.get())) {
-                ComplexFollower.instance().setPose(pose(0, 0, 0));
-                D2_velocityAdder = 0;
-                D2_rotationAdder = 0;
-            }
-            // Driver Intake
-            else if (b.equals(ComplexGamepad.DPAD_RIGHT1.get()) || b.equals(ComplexGamepad.RIGHT_BUMPER2.get())) {
-                publicQueuer.executeNow(new ActionSequence( // reverse for a bit
-                        new GeneralAction(() -> wantsToTempOutputIntake = true),
-                        new DelayAction(60),
-                        new GeneralAction(() -> wantsToTempOutputIntake = false)
-                ));
-            } else if (b.equals(ComplexGamepad.LEFT_BUMPER1.get())) {
-                wantsToOutput = !wantsToOutput;
-
-                wantsToFireWithIntake = false;
-                wantsToIntakeDriver = false;
-                wantsToFireWithIntakeUnsortedInSortingMode = false;
-                hasSwitchedIntakeState = true;
-            } else if (b.equals(ComplexGamepad.RIGHT_BUMPER1.get())) {
-                wantsToIntakeDriver = !wantsToIntakeDriver;
-
-                wantsToFireWithIntake = false;
-                wantsToOutput = false;
-                wantsToFireWithIntakeUnsortedInSortingMode = false;
-                hasSwitchedIntakeState = true;
-            }
-            // Driver Actually Shooting
-            else if (b.equals(ComplexGamepad.RIGHT_TRIGGER1.get())) {
-                wantsToFireWithIntake = !wantsToFireWithIntake;
-                hasBallInOuttake = false;
-                hasJustBeganFiring = true;
-
-                wantsToIntakeDriver = false;
-                wantsToOutput = false;
-                wantsToFireWithIntakeUnsortedInSortingMode = false;
-                hasSwitchedIntakeState = true;
-            }
-            // Driver preparing for shooting
-            else if (b.equals(ComplexGamepad.LEFT_TRIGGER1.get())) isTryingToFire = !isTryingToFire;
-            // Driver Switch Mode
-            else if (b.equals(ComplexGamepad.Y1.get()) || b.equals(ComplexGamepad.B2.get())) {
-                isInSortedMode = !isInSortedMode;
-            }
-            // Driver fire unsorted in sorted mode
-            else if (b.equals(ComplexGamepad.X1.get())) {
-                wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
-                hasJustBeganFiring = true;
-
-                wantsToIntakeDriver = false;
-                wantsToOutput = false;
-                wantsToFireWithIntake = false;
-                hasSwitchedIntakeState = true;
-            }
-            // Slowdown
-            else if (b.equals(ComplexGamepad.B1.get())) {
-                DriveTrain.setSlowdown((ComplexGamepad.B1.get().toggled ? 0.3 : 1));
-            }
-            // force store ball in outtake sorted if can, unsorted if cannot
-            else if (b.equals(ComplexGamepad.A1.get())) {
-                hasBallInOuttake = false;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_UP1.get())) {
-                if (TiltServos.getPosition() == TiltServos.states.RETRACTED.value()) // if retracted then extend
-                    publicQueuer.executeNow(new StateAction(TiltServos.states.EXTENDED));
-                else // else retract back
-                    publicQueuer.executeNow(new StateAction(TiltServos.states.RETRACTED));
-            }
-            // Adders
-            else if (b.equals(ComplexGamepad.DPAD_UP2.get())) {
-                D2_velocityAdder += 10;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_DOWN2.get())) {
-                D2_velocityAdder -= 10;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_RIGHT2.get())) {
-                D2_rotationAdder += 1;
-            }
-            else if (b.equals(ComplexGamepad.DPAD_LEFT2.get())) {
-                D2_rotationAdder -= 1;
-            }
-
-            if (ComplexGamepad.DPAD_DOWN2.get().held && ComplexGamepad.DPAD_UP2.get().held) {
-                D2_velocityAdder = 0;
-            }
-
-            if (ComplexGamepad.DPAD_RIGHT2.get().held && ComplexGamepad.DPAD_LEFT2.get().held) {
-                D2_rotationAdder = 0;
-            }
-
-            if (ComplexGamepad.RIGHT_TRIGGER2.get().held && ComplexGamepad.LEFT_BUMPER2.get().held) {
-                ComplexFollower.instance().setPose(pose(cfg.hpResetX, cfg.hpResetY, cfg.hpResetDeg));
-                D2_velocityAdder = 0;
-                D2_rotationAdder = 0;
-            }
-            if (ComplexGamepad.LEFT_TRIGGER2.get().held && ComplexGamepad.LEFT_BUMPER2.get().held) {
-                ComplexFollower.instance().setPose(pose(cfg.classifierResetX, cfg.classifierResetY, cfg.classifierResetDeg));
-                D2_velocityAdder = 0;
-                D2_rotationAdder = 0;
-            }
-        });
         ComplexGamepad.gamepad1.setLedColor((isInSortedMode ? 0 : 255), 0, (isInSortedMode ? 255 : 0), 30000);
         ComplexGamepad.gamepad2.setLedColor((isInSortedMode ? 0 : 255), 0, (isInSortedMode ? 255 : 0), 30000);
 
@@ -582,9 +480,9 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
         ComplexFollower.telemetry();
-        publicTelemetry.addData("target vel",targetVelocity);
-        publicTelemetry.addData("actual vel", TurretSpinMotor.getVelocity());
-        publicTelemetry.addData("Intake Current", IntakeMotor.getCurrent());
+        ComplexTelemetry.get().addData("target vel",targetVelocity);
+        ComplexTelemetry.get().addData("actual vel", TurretSpinMotor.getVelocity());
+        ComplexTelemetry.get().addData("Intake Current", IntakeMotor.getCurrent());
     }
 
 
@@ -594,13 +492,121 @@ public class MainTeleOpBlue extends ComplexOpMode {
     @Override
     public void initialize() {
         Components.init();
+        ComplexFollower.init(ConstantsDecode::createFollowerDecode);
+        DriveTrain.setHardwareMap(ComplexOpMode.publicHardwareMap);
+        DriveTrain.init();
         setStuffToDefault();
 
         InitOtherStuff(teamPipeline);
         makeConfig();
 
-        ComplexFollower.instance().setPose(globalRobotPose);
+        ComplexFollower.setPose(globalRobotPose);
         camId = globalCamId;
+
+        // Special situations stuff
+        EventBus.subscribe(ButtonPressedEvent.class, event -> {
+            Button b = event.getButton();
+            if (b.equals(ComplexGamepad.DPAD_LEFT1.get())) {
+                ComplexFollower.setPose(pose(0, 0, 0));
+                D2_velocityAdder = 0;
+                D2_rotationAdder = 0;
+            }
+            // Driver Intake
+            else if (b.equals(ComplexGamepad.DPAD_RIGHT1.get()) || b.equals(ComplexGamepad.RIGHT_BUMPER2.get())) {
+                publicQueuer.executeNow(new ActionSequence( // reverse for a bit
+                        new GeneralAction(() -> wantsToTempOutputIntake = true),
+                        new DelayAction(60),
+                        new GeneralAction(() -> wantsToTempOutputIntake = false)
+                ));
+            } else if (b.equals(ComplexGamepad.LEFT_BUMPER1.get())) {
+                wantsToOutput = !wantsToOutput;
+
+                wantsToFireWithIntake = false;
+                wantsToIntakeDriver = false;
+                wantsToFireWithIntakeUnsortedInSortingMode = false;
+                hasSwitchedIntakeState = true;
+            } else if (b.equals(ComplexGamepad.RIGHT_BUMPER1.get())) {
+                wantsToIntakeDriver = !wantsToIntakeDriver;
+
+                wantsToFireWithIntake = false;
+                wantsToOutput = false;
+                wantsToFireWithIntakeUnsortedInSortingMode = false;
+                hasSwitchedIntakeState = true;
+            }
+            // Driver Actually Shooting
+            else if (b.equals(ComplexGamepad.RIGHT_TRIGGER1.get())) {
+                wantsToFireWithIntake = !wantsToFireWithIntake;
+                hasBallInOuttake = false;
+                hasJustBeganFiring = true;
+
+                wantsToIntakeDriver = false;
+                wantsToOutput = false;
+                wantsToFireWithIntakeUnsortedInSortingMode = false;
+                hasSwitchedIntakeState = true;
+            }
+            // Driver preparing for shooting
+            else if (b.equals(ComplexGamepad.LEFT_TRIGGER1.get())) isTryingToFire = !isTryingToFire;
+                // Driver Switch Mode
+            else if (b.equals(ComplexGamepad.Y1.get()) || b.equals(ComplexGamepad.B2.get())) {
+                isInSortedMode = !isInSortedMode;
+            }
+            // Driver fire unsorted in sorted mode
+            else if (b.equals(ComplexGamepad.X1.get())) {
+                wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
+                hasJustBeganFiring = true;
+
+                wantsToIntakeDriver = false;
+                wantsToOutput = false;
+                wantsToFireWithIntake = false;
+                hasSwitchedIntakeState = true;
+            }
+            // Slowdown
+            else if (b.equals(ComplexGamepad.B1.get())) {
+                DriveTrain.setSlowdown((ComplexGamepad.B1.get().toggled ? 0.3 : 1));
+            }
+            // force store ball in outtake sorted if can, unsorted if cannot
+            else if (b.equals(ComplexGamepad.A1.get())) {
+                hasBallInOuttake = false;
+            }
+            else if (b.equals(ComplexGamepad.DPAD_UP1.get())) {
+                if (TiltServos.getPosition() == TiltServos.states.RETRACTED.value()) // if retracted then extend
+                    publicQueuer.executeNow(new StateAction(TiltServos.states.EXTENDED));
+                else // else retract back
+                    publicQueuer.executeNow(new StateAction(TiltServos.states.RETRACTED));
+            }
+            // Adders
+            else if (b.equals(ComplexGamepad.DPAD_UP2.get())) {
+                D2_velocityAdder += 10;
+            }
+            else if (b.equals(ComplexGamepad.DPAD_DOWN2.get())) {
+                D2_velocityAdder -= 10;
+            }
+            else if (b.equals(ComplexGamepad.DPAD_RIGHT2.get())) {
+                D2_rotationAdder += 1;
+            }
+            else if (b.equals(ComplexGamepad.DPAD_LEFT2.get())) {
+                D2_rotationAdder -= 1;
+            }
+
+            if (ComplexGamepad.DPAD_DOWN2.get().held && ComplexGamepad.DPAD_UP2.get().held) {
+                D2_velocityAdder = 0;
+            }
+
+            if (ComplexGamepad.DPAD_RIGHT2.get().held && ComplexGamepad.DPAD_LEFT2.get().held) {
+                D2_rotationAdder = 0;
+            }
+
+            if (ComplexGamepad.RIGHT_TRIGGER2.get().held && ComplexGamepad.LEFT_BUMPER2.get().held) {
+                ComplexFollower.setPose(pose(cfg.hpResetX, cfg.hpResetY, cfg.hpResetDeg));
+                D2_velocityAdder = 0;
+                D2_rotationAdder = 0;
+            }
+            if (ComplexGamepad.LEFT_TRIGGER2.get().held && ComplexGamepad.LEFT_BUMPER2.get().held) {
+                ComplexFollower.setPose(pose(cfg.classifierResetX, cfg.classifierResetY, cfg.classifierResetDeg));
+                D2_velocityAdder = 0;
+                D2_rotationAdder = 0;
+            }
+        });
     }
 
     @Override
@@ -612,16 +618,16 @@ public class MainTeleOpBlue extends ComplexOpMode {
     public void telemetry() {
 
         if (ShouldSpewOutSensors) {
-            publicTelemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-            publicTelemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-            publicTelemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+            ComplexTelemetry.get().addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+            ComplexTelemetry.get().addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+            ComplexTelemetry.get().addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-            publicTelemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-            publicTelemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-            publicTelemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+            ComplexTelemetry.get().addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+            ComplexTelemetry.get().addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+            ComplexTelemetry.get().addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
-            publicTelemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-            publicTelemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+            ComplexTelemetry.get().addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+            ComplexTelemetry.get().addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
         }
     }
 
@@ -746,7 +752,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
         double targetArea = llResult.getTa();
 
-        publicTelemetry.addData("areaPercentage", targetArea);
+        ComplexTelemetry.get().addData("areaPercentage", targetArea);
         double a = 8.60403612;
         double b = -0.0119936722;
 
@@ -825,8 +831,8 @@ public class MainTeleOpBlue extends ComplexOpMode {
             cfg.usedTargetY = cfg.targetYCenter;
         }
 
-        publicTelemetry.addData("Calculated Rotation", degrees);
-        publicTelemetry.addData("Target X", cfg.usedTargetX);
+        ComplexTelemetry.get().addData("Calculated Rotation", degrees);
+        ComplexTelemetry.get().addData("Target X", cfg.usedTargetX);
     }
 
     // Helper function for Linear Interpolation
@@ -995,7 +1001,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
     // ============================ Weird Stuff ============================
     Runnable stopMovingOuttakeGates = () -> isMovingOuttakeGates = false;
     public Pose passPose() {
-        globalRobotPose = ComplexFollower.instance().getPose(); //Math.toRadians
+        globalRobotPose = ComplexFollower.getPose(); //Math.toRadians
         return globalRobotPose;
     }
     

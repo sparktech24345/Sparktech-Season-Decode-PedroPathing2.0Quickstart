@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Color;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GenericColor;
 
 public class ColorSensorComponent extends Component {
@@ -46,9 +47,9 @@ public class ColorSensorComponent extends Component {
 
     @Override
     public void telemetry() {
-        ComplexOpMode.publicTelemetry.addData(name + " r", detectedColor.r());
-        ComplexOpMode.publicTelemetry.addData(name + " g", detectedColor.g());
-        ComplexOpMode.publicTelemetry.addData(name + " b", detectedColor.b());
-        ComplexOpMode.publicTelemetry.addData(name + " a", detectedColor.a());
+        ComplexTelemetry.get().addData(name + " r", detectedColor.r());
+        ComplexTelemetry.get().addData(name + " g", detectedColor.g());
+        ComplexTelemetry.get().addData(name + " b", detectedColor.b());
+        ComplexTelemetry.get().addData(name + " a", detectedColor.a());
     }
 }

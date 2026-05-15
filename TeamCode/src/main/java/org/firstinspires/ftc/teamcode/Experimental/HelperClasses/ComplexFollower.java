@@ -102,6 +102,9 @@ public class ComplexFollower {
     public static Pose getCurrentPose() {
         return currentPos;
     }
+    public static Pose getPose() {
+        return getCurrentPose();
+    }
 
     public static void setPose(Pose pose) {
         if (follower == null) return;
@@ -300,14 +303,14 @@ public class ComplexFollower {
 
     public static void telemetry() {
         if (follower == null) {
-            ComplexOpMode.publicTelemetry.addData("[ERROR] Follower", "Follower instance is null!");
+            ComplexTelemetry.get().addData("[ERROR] Follower", "Follower instance is null!");
             return;
         }
-        ComplexOpMode.publicTelemetry.addData("Follower is busy", follower.isBusy());
-        ComplexOpMode.publicTelemetry.addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, Math.toDegrees(currentHeading)));
-        ComplexOpMode.publicTelemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), Math.toDegrees(currentTargetPos.getHeading())));
-        ComplexOpMode.publicTelemetry.addData("Absolute Angle",Math.toDegrees(follower.getTotalHeading()));
-        ComplexOpMode.publicTelemetry.addData("Follower velocity", follower.getVelocity().getMagnitude());
-        ComplexOpMode.publicTelemetry.addData("Is done?", isDone);
+        ComplexTelemetry.get().addData("Follower is busy", follower.isBusy());
+        ComplexTelemetry.get().addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, Math.toDegrees(currentHeading)));
+        ComplexTelemetry.get().addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), Math.toDegrees(currentTargetPos.getHeading())));
+        ComplexTelemetry.get().addData("Absolute Angle",Math.toDegrees(follower.getTotalHeading()));
+        ComplexTelemetry.get().addData("Follower velocity", follower.getVelocity().getMagnitude());
+        ComplexTelemetry.get().addData("Is done?", isDone);
     }
 }

@@ -22,6 +22,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
@@ -121,15 +122,15 @@ public class BigTriangleArtefactAuto extends ComplexOpMode {
 
     @Override
     public void telemetry() {
-        publicTelemetry.addData("robot rotation", Math.toDegrees(ComplexFollower.getCurrentPose().getHeading()));
-        publicTelemetry.addData("robot Y", ComplexFollower.getCurrentPose().getY());
-        publicTelemetry.addData("robot X", ComplexFollower.getCurrentPose().getX());
-        publicTelemetry.addData("current velocity", TurretSpinMotor.getVelocity());
-        publicTelemetry.addData("is moving",isMoving);
-        publicTelemetry.addData("Intake Current",IntakeMotor.getCurrent());
-        publicTelemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-        publicTelemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
-        publicTelemetry.addData("Current cam id", camId);
+        ComplexTelemetry.get().addData("robot rotation", Math.toDegrees(ComplexFollower.getCurrentPose().getHeading()));
+        ComplexTelemetry.get().addData("robot Y", ComplexFollower.getCurrentPose().getY());
+        ComplexTelemetry.get().addData("robot X", ComplexFollower.getCurrentPose().getX());
+        ComplexTelemetry.get().addData("current velocity", TurretSpinMotor.getVelocity());
+        ComplexTelemetry.get().addData("is moving",isMoving);
+        ComplexTelemetry.get().addData("Intake Current",IntakeMotor.getCurrent());
+        ComplexTelemetry.get().addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+        ComplexTelemetry.get().addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+        ComplexTelemetry.get().addData("Current cam id", camId);
 
     }
 
@@ -185,9 +186,9 @@ public class BigTriangleArtefactAuto extends ComplexOpMode {
         //if (ComplexGamepad.A1.get(o.IsHeld) shouldMakeSortedAuto = true;
         TurretRotateMotor.setState(cfg.rotationForInitCloseZone);
         useCamera();
-        publicTelemetry.addData("id: ", camId);
-        publicTelemetry.addData("shouldMakeSortedAuto: ", shouldMakeSortedAuto);
-        publicTelemetry.addData("shouldMakeAutoWithout3rdRow: ", shouldMakeAutoWithout3rdRow);
+        ComplexTelemetry.get().addData("id: ", camId);
+        ComplexTelemetry.get().addData("shouldMakeSortedAuto: ", shouldMakeSortedAuto);
+        ComplexTelemetry.get().addData("shouldMakeAutoWithout3rdRow: ", shouldMakeAutoWithout3rdRow);
     }
 
     @Override
@@ -751,16 +752,16 @@ public class BigTriangleArtefactAuto extends ComplexOpMode {
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
-        publicTelemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-        publicTelemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-        publicTelemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+        ComplexTelemetry.get().addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+        ComplexTelemetry.get().addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+        ComplexTelemetry.get().addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-        publicTelemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-        publicTelemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-        publicTelemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+        ComplexTelemetry.get().addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+        ComplexTelemetry.get().addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+        ComplexTelemetry.get().addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
-        publicTelemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-        publicTelemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+        ComplexTelemetry.get().addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+        ComplexTelemetry.get().addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
     public static int lastGateState = 1;
     public void makeConfig() {
@@ -870,20 +871,20 @@ public class BigTriangleArtefactAuto extends ComplexOpMode {
                 maxX = min(maxX, min(x1, x2));
                 maxY = min(maxY, min(y1, y2));
 
-                publicTelemetry.addData("Ball Corners No." + index, x1 + "  " + y1 + " ::: " + x2 + "  " + y2);
+                ComplexTelemetry.get().addData("Ball Corners No." + index, x1 + "  " + y1 + " ::: " + x2 + "  " + y2);
 
 
             }
 
             //detectedBalls = max(detectedBalls,countedBalls);
 //            detectedBalls = countedBalls;
-            publicTelemetry.addData("BALLS LIST", ball_colors);
+            ComplexTelemetry.get().addData("BALLS LIST", ball_colors);
 
 
 
 
-            publicTelemetry.addData("maxX", maxX);
-            publicTelemetry.addData("maxY", maxY);
+            ComplexTelemetry.get().addData("maxX", maxX);
+            ComplexTelemetry.get().addData("maxY", maxY);
 
             if (shouldHoldTurretForClassifierScan || moveToZero) {
                 if (maxY == 0) detectedBalls = 0; // y este cu susul in jos sus = 0 jos = max
@@ -911,8 +912,8 @@ public class BigTriangleArtefactAuto extends ComplexOpMode {
             else detectedBalls = countedBalls;
 
         }
-        publicTelemetry.addData("Counted Balls", countedBalls);
-        publicTelemetry.addData("Calculated Balls", detectedBalls);
+        ComplexTelemetry.get().addData("Counted Balls", countedBalls);
+        ComplexTelemetry.get().addData("Calculated Balls", detectedBalls);
         limelight3A.captureSnapshot("Classifier scan" + timer.milliseconds());
     };
     public Runnable countBallsInClassifierWithDelay = () -> {

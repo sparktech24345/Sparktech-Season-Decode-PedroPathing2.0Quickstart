@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.ButtonPressedEvent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.ButtonReleasedEvent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.EventBus;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -34,15 +35,9 @@ public class Button {
     }
 
     public double raw() {
-        try {
-            return condD.getAsDouble();
-        } catch (NullPointerException e1) {
-            try {
-                return eval(condB.getAsBoolean());
-            } catch (NullPointerException e2) {
-                return 0;
-            }
-        }
+        if (condD != null) return condD.getAsDouble();
+        if (condB != null) return eval(condB.getAsBoolean());
+        return 0;
     }
 
     public void update() {
@@ -54,12 +49,12 @@ public class Button {
         if (pressed) {
             HoldTimer.reset();
             toggled = !toggled;
-            ComplexOpMode.publicEventBus.emit(new ButtonPressedEvent(this));
+            EventBus.emit(new ButtonPressedEvent(this));
         }
         else if (released) {
             HoldTimeMs = HoldTimer.milliseconds();
             toggled = !toggled;
-            ComplexOpMode.publicEventBus.emit(new ButtonReleasedEvent(this));
+            EventBus.emit(new ButtonReleasedEvent(this));
         }
     }
 }

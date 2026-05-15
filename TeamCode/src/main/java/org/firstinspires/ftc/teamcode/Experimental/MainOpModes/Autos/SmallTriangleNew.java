@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexOpMode;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
@@ -92,10 +93,10 @@ public class SmallTriangleNew extends ComplexOpMode {
 
     @Override
     public void telemetry() {
-        publicTelemetry.addData("robot rotation", Math.toDegrees(ComplexFollower.getCurrentPose().getHeading()));
-        publicTelemetry.addData("robot Y", ComplexFollower.getCurrentPose().getY());
-        publicTelemetry.addData("robot X", ComplexFollower.getCurrentPose().getX());
-        publicTelemetry.addData("current velocity", TurretSpinMotor.getVelocity());
+        ComplexTelemetry.get().addData("robot rotation", Math.toDegrees(ComplexFollower.getCurrentPose().getHeading()));
+        ComplexTelemetry.get().addData("robot Y", ComplexFollower.getCurrentPose().getY());
+        ComplexTelemetry.get().addData("robot X", ComplexFollower.getCurrentPose().getX());
+        ComplexTelemetry.get().addData("current velocity", TurretSpinMotor.getVelocity());
     }
 
     @Override
@@ -138,7 +139,7 @@ public class SmallTriangleNew extends ComplexOpMode {
         doOnce = false;
         TurretRotateMotor.setState(cfg.rotationForInitSmallTriangle);
         useCamera();
-        publicTelemetry.addData("id", camId);
+        ComplexTelemetry.get().addData("id", camId);
     }
 
     @Override
@@ -429,16 +430,16 @@ public class SmallTriangleNew extends ComplexOpMode {
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
 
-        publicTelemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-        publicTelemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-        publicTelemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+        ComplexTelemetry.get().addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+        ComplexTelemetry.get().addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+        ComplexTelemetry.get().addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-        publicTelemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-        publicTelemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-        publicTelemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+        ComplexTelemetry.get().addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+        ComplexTelemetry.get().addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+        ComplexTelemetry.get().addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
-        publicTelemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-        publicTelemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+        ComplexTelemetry.get().addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+        ComplexTelemetry.get().addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
     }
     public static int lastGateState = 0;
     protected void pulseIntake(boolean shouldPulseIntake) {
@@ -507,7 +508,7 @@ public class SmallTriangleNew extends ComplexOpMode {
             double[] pythonData = llResult.getPythonOutput();
             if (pythonData.length > 0) {
                 double firstValue = pythonData[0];
-                publicTelemetry.addData("Python Val 1", firstValue);
+                ComplexTelemetry.get().addData("Python Val 1", firstValue);
                 return firstValue;
             }
         }
