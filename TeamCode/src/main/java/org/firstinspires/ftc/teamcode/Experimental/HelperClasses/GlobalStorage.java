@@ -56,9 +56,9 @@ public class GlobalStorage {
     public static String backRightName          = "backright";
     public static String backLeftName           = "backleft";
     public static ColorSet_ITD currentTeamITD = ColorSet_ITD.Undefined;
-    public static double ballColorTresholdBlue = 20;
-    public static double ballColorTresholdGreen = 20;
-    public static double leftSensorColorMultiplier = 0.9;
+    public static double ballColorTresholdBlue = 6;
+    public static double ballColorTresholdGreen = 6;
+    public static double leftSensorColorMultiplier = 0.6;
 
     // Sensor scale: 3.3V corresponds to 1000 mm
     public static double MAX_VOLTS = 3.3;

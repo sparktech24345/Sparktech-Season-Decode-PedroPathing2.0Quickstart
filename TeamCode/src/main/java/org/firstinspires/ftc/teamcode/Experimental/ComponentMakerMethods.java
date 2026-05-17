@@ -110,11 +110,11 @@ public class ComponentMakerMethods {
 
 
         robot.getComponent("LeftGateServo")
-                .addState("OPEN", 234)
-                .addState("CLOSED", 144,true);
+                .addState("OPEN", 232)
+                .addState("CLOSED", 136.8,true);
 
         robot.getComponent("RightGateServo")
-                .addState("CLOSED", 241, true)
+                .addState("CLOSED", 244.8, true)
                 .addState("OPEN", 151);
 
         robot.getComponent("TurretAngle")
