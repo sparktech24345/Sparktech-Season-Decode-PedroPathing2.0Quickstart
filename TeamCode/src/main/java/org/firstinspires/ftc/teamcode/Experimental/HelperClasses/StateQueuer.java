@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 
 public class StateQueuer {
+    public static StateQueuer MainQueuer = new StateQueuer();
 
     private final Vector<Action> actionQueue = new Vector<>();
     private final Vector<Action> instantActions = new Vector<>();
@@ -42,6 +43,27 @@ public class StateQueuer {
 
     public boolean isEmpty() { return actionQueue.isEmpty() && instantActions.isEmpty(); }
 
+    public void clearQueue() {
+        actionQueue.clear();
+    }
+
+    public void clearInstants() {
+        instantActions.clear();
+    }
+
+    public void clear() {
+        actionQueue.clear();
+        instantActions.clear();
+    }
+
+    public void telemetry() {
+        ComplexTelemetry.get().addData("queue len", actionQueue.size());
+        ComplexTelemetry.get().addData("instants len", instantActions.size());
+        ComplexTelemetry.get().addData("isEmpty", isEmpty());
+        if (actionQueue.isEmpty()) return;
+        actionQueue.get(0).telemetry();
+    }
+
     public void update() {
         for (int i = 0; i < instantActions.size();) {
             Action action = instantActions.get(i);
@@ -57,22 +79,5 @@ public class StateQueuer {
             if (isDone) actionQueue.remove(0);
             else break;
         }
-    }
-
-    public void telemetry() {
-        ComplexTelemetry.get().addData("queue len", actionQueue.size());
-        ComplexTelemetry.get().addData("instants len", instantActions.size());
-        ComplexTelemetry.get().addData("isEmpty", isEmpty());
-        if (actionQueue.isEmpty()) return;
-        actionQueue.get(0).telemetry();
-    }
-
-    public void clearQueue() {
-        actionQueue.clear();
-    }
-
-    public void stopAll() {
-        actionQueue.clear();
-        instantActions.clear();
     }
 }

@@ -23,6 +23,7 @@ public class MotorComponent<S extends StateSet<MotorComponent<S>>> extends Motor
 
     public final S states;
     public MotorComponent(S class_states) {
+        super();
         this.states = class_states;
         this.states.init(this);
         setState(this.states.defaultState());

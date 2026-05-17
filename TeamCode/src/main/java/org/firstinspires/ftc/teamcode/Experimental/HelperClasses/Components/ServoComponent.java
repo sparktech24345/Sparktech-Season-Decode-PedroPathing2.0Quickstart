@@ -17,6 +17,7 @@ public class ServoComponent<S extends StateSet<ServoComponent<S>>> extends Motor
 
     public final S states;
     public ServoComponent(S class_states) {
+        super();
         this.states = class_states;
         this.states.init(this);
         setState(this.states.defaultState());

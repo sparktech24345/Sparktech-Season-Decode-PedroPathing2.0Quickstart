@@ -22,13 +22,12 @@ public abstract class MotorizedComponent<T extends MotorizedComponent<T>> {
 
     public final T setState(State state) {
         if (state.owner() != this || state.value() == target) return self();
-        target = state.value();
-        this.update();
-        return self();
+        return setState(state.value());
     }
 
     public T setState(double value) {
         target = value;
+        this.update();
         return self();
     }
 

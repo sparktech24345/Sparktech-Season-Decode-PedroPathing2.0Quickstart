@@ -7,6 +7,6 @@ public class BigTriangleArtefactAutoBLUEWithout3rdRow extends BigTriangleArtefac
     @Override
     public void methodToOverWrite(){
         super.methodToOverWrite();
-        shouldMakeAutoWithout3rdRow = true;
+        //shouldMakeAutoWithout3rdRow = true;
     }
 }

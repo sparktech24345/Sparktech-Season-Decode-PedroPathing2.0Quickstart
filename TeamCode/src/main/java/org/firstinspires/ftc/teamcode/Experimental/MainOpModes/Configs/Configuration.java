@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs;
 
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.acmerobotics.dashboard.config.Config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,8 +11,8 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Tea
 
 import java.util.Map;
 
-@com.acmerobotics.dashboard.config.Config
-public class Config {
+@Config
+public class Configuration {
 
     public int    teamPipeline = 0;
 
@@ -158,11 +158,11 @@ public class Config {
     }
     """;
 
-    public static Config getConfig(String cfg_name) {
+    public static Configuration getConfig(String cfg_name) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonReadFeature.ALLOW_JAVA_COMMENTS.mappedFeature(), true);
         try {
-            Map<String, Config> configs = mapper.readValue(json, mapper.getTypeFactory().constructMapType(Map.class, String.class, Config.class));
+            Map<String, Configuration> configs = mapper.readValue(json, mapper.getTypeFactory().constructMapType(Map.class, String.class, Configuration.class));
             return configs.get(cfg_name);
         } catch (JsonProcessingException e) {
             ComplexTelemetry.get().addData("Could not load config:", e.getMessage());

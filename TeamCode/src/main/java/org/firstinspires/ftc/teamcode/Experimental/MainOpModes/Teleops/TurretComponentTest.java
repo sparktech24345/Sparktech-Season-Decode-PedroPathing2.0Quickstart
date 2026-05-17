@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.turretRotationMotorName;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Config;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components.TurretRotateMotor;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.TurretRotateStates;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Configuration;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -24,11 +27,10 @@ public class TurretComponentTest extends LinearOpMode {
     public static double ks = 0.06;
     public static double testAdder = 0;
     public static boolean shouldTestEncoder = true;
-    public static Config cfg = Config.getConfig("blue");
-    TurretComponent<NoStates> turret;
+    public static Configuration cfg = Configuration.getConfig("blue");
     /*
                 .setFeedforwardCoefficients(0.0008, 0.00005, 0.04)
-                .addMotor(turretRotationMotorName)
+                .addMotor(TurretRotateMotorRotationMotorName)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
                 // We set the multiplier to 1 because feedforward handles the 'kick' now
                 .setPositionCoefficients(0.027, 0, 0.0015, 1)*/
@@ -37,43 +39,31 @@ public class TurretComponentTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         Telemetry tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-        turret = (TurretComponent<NoStates>) new TurretComponent<>(new NoStates())
-                .setFeedforwardCoefficients(0.0008, 0.00005, 0.04)
-                .addMotor(turretRotationMotorName)
-                .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
-                // We set the multiplier to 1 because feedforward handles the 'kick' now
-                .setPositionCoefficients(0.027, 0, 0.0015, 1)
-                // kV: velocity power, kA: acceleration burst, kStatic: friction bypass
-                .setOperationMode(MotorComponent.MotorModes.Position)
-                .setState(turret.states.ZERO)
-                .setResolution(5)
-                .setRange(0, 360);
-
 
         waitForStart();
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            turret.setPositionCoefficients(p, 0, d, zeroPower);
-            turret.setFeedforwardCoefficients(kv, ka, ks);
+            TurretRotateMotor.setPositionCoefficients(p, 0, d, zeroPower);
+            TurretRotateMotor.setFeedforwardCoefficients(kv, ka, ks);
 
-            turret.updateRobotPose(new Pose(0,0,0));
+            TurretRotateMotor.updateRobotPose(new Pose(0,0,0));
 
             // Predict target (Target is at 0,0 in world space for example)
             // lookaheadSeconds should roughly match your control loop latency + motor response time
-            double futureTarget = turret.calculateLookaheadTarget(cfg.usedTargetX, cfg.usedTargetY, 0.08) + testAdder;
+            double futureTarget = TurretRotateMotor.calculateLookaheadTarget(cfg.usedTargetX, cfg.usedTargetY, 0.08) + testAdder;
 
-            turret.setState(futureTarget);
-            if(shouldTestEncoder){ turret.setOperationMode(MotorComponent.MotorModes.Power); turret.setState(0);}
-            turret.update();
+            TurretRotateMotor.setState(futureTarget);
+            if(shouldTestEncoder){ TurretRotateMotor.setOperationMode(MotorComponent.MotorModes.Power); TurretRotateMotor.setState(0);}
+            TurretRotateMotor.update();
 
             sleep(50);
 
-            tel.addData("POS",turret.getPosition());
-            tel.addData("Absolute POS",turret.getAbsolutePosition());
-            tel.addData("CURRENT",turret.getCurrent());
-            tel.addData("TARGET POS",testAdder + turret.calculateLookaheadTarget(cfg.usedTargetX, cfg.usedTargetY, 0.08));
-            tel.addData("SPEED", turret.getPower());
+            tel.addData("POS",TurretRotateMotor.getPosition());
+            tel.addData("Absolute POS",TurretRotateMotor.getAbsolutePosition());
+            tel.addData("CURRENT",TurretRotateMotor.getCurrent());
+            tel.addData("TARGET POS",testAdder + TurretRotateMotor.calculateLookaheadTarget(cfg.usedTargetX, cfg.usedTargetY, 0.08));
+            tel.addData("SPEED", TurretRotateMotor.getPower());
             tel.update();
         }
     }

@@ -7,6 +7,6 @@ public class BigTriangleArtefactAutoREDSORTED extends BigTriangleArtefactAutoRED
     @Override
     public void methodToOverWrite() {
         super.methodToOverWrite();
-        shouldMakeSortedAuto = true;
+        //shouldMakeSortedAuto = true;
     }
 }

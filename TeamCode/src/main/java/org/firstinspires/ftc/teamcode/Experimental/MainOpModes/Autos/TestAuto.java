@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StateQueuer.MainQueuer;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -58,20 +59,20 @@ public class TestAuto extends ComplexOpMode {
         EventBus.subscribe(ButtonPressedEvent.class, (event) -> {
             Button b = event.getButton();
             if (b.equals(ComplexGamepad.A1.get())) {
-                publicQueuer.addToQueue(new MoveAction(pose(20 * multi, 0, 0)).setName("Line p1"));
-                //publicQueuer.addToQueue(new DelayAction(500));
-                publicQueuer.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Line p2"));
+                MainQueuer.addToQueue(new MoveAction(pose(20 * multi, 0, 0)).setName("Line p1"));
+                //MainQueuer.addToQueue(new DelayAction(500));
+                MainQueuer.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Line p2"));
             }
             else if (b.equals(ComplexGamepad.B1.get())) {
-                publicQueuer.addToQueue(new MoveAction(pose(20 * multi, 0, 0)).setName("Square p1"));
-                publicQueuer.addToQueue(new MoveAction(pose(20 * multi, 20 * multi, 0)).setName("Square p2"));
-                publicQueuer.addToQueue(new MoveAction(pose(0, 20, 0)).setName("Square p3"));
-                publicQueuer.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Square p4"));
+                MainQueuer.addToQueue(new MoveAction(pose(20 * multi, 0, 0)).setName("Square p1"));
+                MainQueuer.addToQueue(new MoveAction(pose(20 * multi, 20 * multi, 0)).setName("Square p2"));
+                MainQueuer.addToQueue(new MoveAction(pose(0, 20, 0)).setName("Square p3"));
+                MainQueuer.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Square p4"));
             }
             else if (b.equals(ComplexGamepad.X1.get())) {
-                publicQueuer.addToQueue(new MoveAction(pose(10 * multi, 20 * multi, 0)).setName("Triangle p1"));
-                publicQueuer.addToQueue(new MoveAction(pose(20 * multi, 0, 0)).setName("Triangle p2"));
-                publicQueuer.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Triangle p3"));
+                MainQueuer.addToQueue(new MoveAction(pose(10 * multi, 20 * multi, 0)).setName("Triangle p1"));
+                MainQueuer.addToQueue(new MoveAction(pose(20 * multi, 0, 0)).setName("Triangle p2"));
+                MainQueuer.addToQueue(new MoveAction(pose(0, 0, 0)).setName("Triangle p3"));
             }
             else if (b.equals(ComplexGamepad.DPAD_UP1.get())) {
                 ComplexFollower.follow(ComplexFollower.getCurrentPose().plus(new Pose(5, 0, 0)));

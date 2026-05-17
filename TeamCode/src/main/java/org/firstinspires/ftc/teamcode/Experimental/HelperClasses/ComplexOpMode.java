@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.StateQueuer.MainQueuer;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -14,7 +16,6 @@ import java.util.function.BooleanSupplier;
 
 public abstract class ComplexOpMode extends OpMode {
 
-    public static StateQueuer publicQueuer = null;
     public static HardwareMap publicHardwareMap = null;
 
     protected MultipleTelemetry tel;
@@ -22,10 +23,8 @@ public abstract class ComplexOpMode extends OpMode {
     protected List<LynxModule> hubs;
 
 
-
     public ComplexOpMode() {
         super();
-        publicQueuer = queuer;
     }
 
     private void benchmark_if(BooleanSupplier cond, Runnable upd, String bmname) {
@@ -36,10 +35,18 @@ public abstract class ComplexOpMode extends OpMode {
         }
     }
 
+    private void disableTelemetry() {
+        ComplexTelemetry.disable();
+    }
+
+    private void enableTelemetry() {
+        ComplexTelemetry.enable();
+    }
+
     public void _update(Runnable main_update) {
         benchmark_if(() -> true, () -> {
             for (LynxModule hub : hubs) hub.clearBulkCache();
-            benchmark_if(() -> true, publicQueuer::update, "QUEUER UPDATE");
+            benchmark_if(() -> true, MainQueuer::update, "QUEUER UPDATE");
             benchmark_if(ComplexFollower::isInit, ComplexFollower::update, "FOLLOWER UPDATE");
             benchmark_if(ComplexGamepad::isInit, ComplexGamepad::update, "GAMEPAD UPDATE");
             benchmark_if(DriveTrain::isInit, DriveTrain::update, "DRIVETRAIN UPDATE");

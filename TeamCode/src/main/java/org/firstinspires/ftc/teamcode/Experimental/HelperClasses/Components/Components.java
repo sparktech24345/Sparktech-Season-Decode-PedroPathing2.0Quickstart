@@ -5,22 +5,29 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.CameraRotateStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.LeftGateServoStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.NoStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.RightGateServoStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.TiltServosStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.TurretAngleStates;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.TurretRotateStates;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.States.ComponentsStates.TurretSpinStates;
 
+import java.util.ArrayList;
+
 public class Components {
+    public static ArrayList<MotorizedComponent<?>> motors = new ArrayList<>();
+
     public static MotorComponent<IntakeMotorStates> IntakeMotor;
     public static MotorComponent<TurretSpinStates> TurretSpinMotor;
-    public static TurretComponent<NoStates> TurretRotateMotor;
+    public static TurretComponent<TurretRotateStates> TurretRotateMotor;
     public static ServoComponent<LeftGateServoStates> LeftGateServo;
     public static ServoComponent<RightGateServoStates> RightGateServo;
     public static ServoComponent<TurretAngleStates> TurretAngle;
     public static ServoComponent<TiltServosStates> TiltServos;
+    public static ServoComponent<CameraRotateStates> CameraRotateServo;
 
     public static void init() {
         IntakeMotor = new MotorComponent<>(new IntakeMotorStates())
@@ -41,7 +48,7 @@ public class Components {
                 .setRange(-3000, 3000)
         ;
 
-        TurretRotateMotor = (TurretComponent<NoStates>) new TurretComponent<>(new NoStates())
+        TurretRotateMotor = (TurretComponent<TurretRotateStates>) new TurretComponent<>(new TurretRotateStates())
                 .setFeedforwardCoefficients(0.0008, 0.0001, 0.04)
                 .addMotor(turretRotationMotorName)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
@@ -80,6 +87,12 @@ public class Components {
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0, 1)
+        ;
+        CameraRotateServo = new ServoComponent<>(new CameraRotateStates())
+                .addMotor(CameraRotateServoName)
+                .setOperationMode(ServoComponent.ServoModes.Position)
+                .setResolution(360)
+                .setRange(0.13, 0.76)
         ;
     }
 }

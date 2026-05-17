@@ -5,12 +5,12 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Config;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Configuration;
 
 @Autonomous(name = "Small Triangle Auto RED",group = "AAA")
 public class SmallTriangleAutoRedNew extends SmallTriangleNew {
     public void makeConfig() {
-        cfg = Config.getConfig("red");
+        cfg = Configuration.getConfig("red");
     }
     @Override
     public Pose convertPose(Pose pose) {
