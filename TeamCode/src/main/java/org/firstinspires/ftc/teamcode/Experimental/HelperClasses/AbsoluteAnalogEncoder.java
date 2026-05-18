@@ -35,7 +35,7 @@ public class AbsoluteAnalogEncoder {
 
     private double pastPosition = 1;
     public double getCurrentPosition() {
-        double pos = Angle.norm((!inverted ? 1 - getVoltage() / analogRange : getVoltage() / analogRange) * Math.PI*2 - offset);
+        double pos = Angle.norm((!inverted ? 1 - getVoltage() / analogRange : getVoltage() / analogRange) * java.lang.Math.PI*2 - offset);
         if(!VALUE_REJECTION || Math.abs(Angle.normDelta(pastPosition)) > 0.1 || Math.abs(Angle.normDelta(pos)) < 1) pastPosition = pos;
         return pastPosition;
     }

@@ -36,12 +36,12 @@ public class Button {
 
     public double raw() {
         if (condD != null) return condD.getAsDouble();
-        if (condB != null) return eval(condB.getAsBoolean());
+        if (condB != null) return Math.eval(condB.getAsBoolean());
         return 0;
     }
 
     public void update() {
-        boolean input = (condB == null ? evalForTrigger((condD == null ? 0 : condD.getAsDouble())) : condB.getAsBoolean());
+        boolean input = (condB == null ? Math.triggerEval((condD == null ? 0 : condD.getAsDouble())) : condB.getAsBoolean());
         pressed = !WasPressed && input;
         released = WasPressed && !input;
         held = input;

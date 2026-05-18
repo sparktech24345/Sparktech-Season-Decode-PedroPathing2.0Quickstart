@@ -1,16 +1,16 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Math;
+
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_DISTANCE_MM;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_VOLTS;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballInIntakeThreshold;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceSensorName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalCamId;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
@@ -570,13 +570,13 @@ public class MainTeleOpBlue extends ComplexOpMode {
                 if (shouldUseSecondaryPID && Math.abs(targetVelocity - TurretSpinMotor.getVelocity()) <= OuttakePIDSwitch) {
                     TurretSpinMotor
                             .setOperationMode(MotorComponent.MotorModes.Velocity)
-                            .setState((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                            .setState((Math.eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
                             .setVelocityCoefficients(velp, 0, veld, velf);
                 }
                 else {
                     TurretSpinMotor
                             .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
-                            .setState((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                            .setState((Math.eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
                             .setAccelerationVelocityCoefficients(vp, 0, vd, vf, vs);;
                 }
 
@@ -595,7 +595,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
             turretAngleVal = clamp(turretAngleVal, 58, 295); // fresh measured
-            TurretAngle.setState((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
+            TurretAngle.setState((Math.eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
 
             // ----------------------- Rotation Stuff -----------------------
@@ -824,7 +824,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
         double a = 8.60403612;
         double b = -0.0119936722;
 
-        distanceMeasuredCamera = Math.log(targetArea / a) / b;
+        distanceMeasuredCamera = java.lang.Math.log(targetArea / a) / b;
     }
 
     // ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == Odometry Stuff ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
@@ -838,7 +838,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
         double dy = targetY - y;
 
         // Angle from robot to target (in radians → degrees)
-        double targetAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
+        double targetAngleDeg = java.lang.Math.toDegrees(java.lang.Math.atan2(dy, dx));
 
         // Normalize to [0, 360)
         if (targetAngleDeg < 0) targetAngleDeg += 360;
@@ -872,9 +872,9 @@ public class MainTeleOpBlue extends ComplexOpMode {
         // same X -> 0 or 180
         // same Y -> +90 or -90
         // left negative, right positive
-        double angleRadians = Math.atan2(dx, dy);
+        double angleRadians = java.lang.Math.atan2(dx, dy);
 
-        return Math.toDegrees(angleRadians) + 90;
+        return java.lang.Math.toDegrees(angleRadians) + 90;
     }
 
     public static void processTargetStuff(Pose pose, double targetX, double targetY) {
@@ -910,7 +910,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
 
     public static double calculateDistanceToWallInMeters(Pose robotPose, double targetX, double targetY) {
-        return calculateDistance(robotPose, new Pose(targetX, targetY, 0), true);
+        return Math.calculateDistance(robotPose, new Pose(targetX, targetY, 0), true);
     }
 
     // ==  ==  = shooting sorted ==  ==  == /

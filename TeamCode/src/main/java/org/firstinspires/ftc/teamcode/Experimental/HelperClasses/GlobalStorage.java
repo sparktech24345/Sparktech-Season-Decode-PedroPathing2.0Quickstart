@@ -23,16 +23,6 @@ public class GlobalStorage {
         return val;
     }
 
-    public static double eval(boolean val) {
-        return (val ? 1 : 0);
-    }
-    public static boolean eval(double val) {
-        return val != 0;
-    }
-    public static boolean evalForTrigger(double val) {
-        return val >= 0.4;
-    }
-
 
     // CONSTANTS
 
@@ -95,61 +85,15 @@ public class GlobalStorage {
     public static int globalCamId = 0;
 
     public static double normalizeTurretRotationForServo(double targetDegrees) {
-        targetDegrees  = clamp(targetDegrees,-121.5,121.5);
+        targetDegrees = clamp(targetDegrees, -121.5, 121.5);
         return - targetDegrees + 121.5;
     }
 
     public static Pose pose(double x, double y, double degrees) {
-        return new Pose(x, y, Math.toRadians(degrees));
+        return new Pose(x, y, java.lang.Math.toRadians(degrees));
     }
 
-    public static double degreesToOuttakeTurretServo(double degrees) {
-        double realDown = 76; // unghi real, masurate in cad, a nu se schimba
-        double realUp = 58; // tot areal, unghi pana la blocker mecanic
 
-        double servoDown = 136.8; // servo down * 360 actually 0.38
-        double servoUp = 36; // servo up * 360 actually 0.1
-
-        clamp(degrees, realUp, realDown); // maxing it out
-
-        //interpolation
-        return servoDown + (degrees - realDown) * (servoUp - servoDown) / (realUp - realDown);
-    }
-
-    public static double voltageMultiplierForMotor(double voltage){
-        voltage = clamp(voltage,11,14);
-        //set points for function
-        double voltajA = 12.7;
-        double multiplierA = 0.9;
-
-        double voltajB = 12;
-        double multiplierB = 1;
-
-        return multiplierA + (voltage - voltajA) * (multiplierB - multiplierA) / (voltajB - voltajA);
-    }
-
-    public static double calculateDistance(Pose pose1, Pose pose2, boolean convertToMeters) {
-
-        double correctedX = pose1.getX();
-        if(correctedX < 0) correctedX = 0; /// if 0 is less then 0 that means you have exited field, this might be risky though
-
-        double dx = pose2.getX() - correctedX;
-        double dy = pose2.getY() - pose1.getY();
-
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (convertToMeters)
-            // Assuming your Pose coordinates are in INCHES (FTC standard)
-            distance *= 0.0254; // inches to meters
-
-        return distance;
-    }
-
-    public static double calculateDistanceNonZero(Pose pose1, Pose pose2, boolean convertToMeters) {
-        double distance = calculateDistance(pose1, pose2, convertToMeters);
-        if (distance == 0) return 0.00001;
-        return distance;
-    }
 
     public static double farAngle = 105; // old 70
     public static double farAngleGrade0 = 177;

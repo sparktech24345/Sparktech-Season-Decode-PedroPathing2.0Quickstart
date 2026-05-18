@@ -27,7 +27,7 @@ public class AutoRecorder {
             if (Math.abs(timer.milliseconds() - lastSaveMs) >= 25) {
                 lastSaveMs = timer.milliseconds();
                 pose = ComplexFollower.instance().getPose();
-                TimedPoseData pose_data = new TimedPoseData(pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()), timer.milliseconds());
+                TimedPoseData pose_data = new TimedPoseData(pose.getX(), pose.getY(), java.lang.Math.toDegrees(pose.getHeading()), timer.milliseconds());
                 poses.add(pose_data);
             }
         }

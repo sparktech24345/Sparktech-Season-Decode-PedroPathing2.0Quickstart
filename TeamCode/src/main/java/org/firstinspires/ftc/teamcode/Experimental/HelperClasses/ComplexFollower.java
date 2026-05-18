@@ -316,9 +316,9 @@ public class ComplexFollower {
             return;
         }
         ComplexTelemetry.get().addData("Follower is busy", follower.isBusy());
-        ComplexTelemetry.get().addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, Math.toDegrees(currentHeading)));
-        ComplexTelemetry.get().addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), Math.toDegrees(currentTargetPos.getHeading())));
-        ComplexTelemetry.get().addData("Absolute Angle",Math.toDegrees(follower.getTotalHeading()));
+        ComplexTelemetry.get().addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, java.lang.Math.toDegrees(currentHeading)));
+        ComplexTelemetry.get().addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), java.lang.Math.toDegrees(currentTargetPos.getHeading())));
+        ComplexTelemetry.get().addData("Absolute Angle", java.lang.Math.toDegrees(follower.getTotalHeading()));
         ComplexTelemetry.get().addData("Follower velocity", follower.getVelocity().getMagnitude());
         ComplexTelemetry.get().addData("Is done?", isDone);
     }
