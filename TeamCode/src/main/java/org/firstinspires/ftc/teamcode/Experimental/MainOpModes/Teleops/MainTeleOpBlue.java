@@ -603,8 +603,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            turretAngleVal = clamp(turretAngleVal,36, 324); // fresh measured
-            turretAngleOverride = clamp(turretAngleOverride,36, 324); // fresh measured
+            turretAngleVal = clamp(turretAngleVal,18, 324); // fresh measured
+            turretAngleOverride = clamp(turretAngleOverride,18, 324); // fresh measured
             robot.getServoComponent("TurretAngle")
                     .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
