@@ -166,7 +166,6 @@ public abstract class RobotController implements RobotControllerInterface {
 
         //this and telemtry takes about 0.1
         if (DriveTrain.wasInitialized()) DriveTrain.loop();
-        telemetry.update();
     }
 
     public void loop() {
@@ -174,6 +173,7 @@ public abstract class RobotController implements RobotControllerInterface {
         runUpdates();
         // main loop takes under 0.5 milsec and is not the problem
         main_loop();
+        telemetry.update();
 //        if(tickMS < 35) try {
 //            Thread.sleep((long) (35 - tickMS));
 //        } catch (InterruptedException e) {

@@ -30,6 +30,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -41,6 +42,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAc
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Benchmark;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
@@ -50,6 +52,9 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
+import org.firstinspires.ftc.teamcode.R;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 @Config
 @TeleOp(name="Main TeleOp Blue", group="AAA")
@@ -78,12 +83,12 @@ public class MainTeleOpBlue extends LinearOpMode {
     protected NormalizedColorSensor colorSensorLeft;
     protected NormalizedRGBA rightSensorColors;
     protected NormalizedRGBA leftSensorColors;
-    final float[] hsvRightSensorColors = new float[3];
-    final float[] hsvLeftSensorColors = new float[3];
+    // final float[] hsvRightSensorColors = new float[3];
+    // final float[] hsvLeftSensorColors = new float[3];
     public static int ballCounter = 0;
-    protected BallColorSet_Decode actualRightSensorDetectedBall;
+    protected AtomicReference<BallColorSet_Decode> actualRightSensorDetectedBall;
     protected BallColorSet_Decode calculatedRightSensorDetectedBall;
-    protected BallColorSet_Decode actualLeftSensorDetectedBall;
+    protected AtomicReference<BallColorSet_Decode> actualLeftSensorDetectedBall;
     protected BallColorSet_Decode calculatedLeftSensorDetectedBall;
     protected BallColorSet_Decode ballToFire;
     public static boolean hasBallInIntake = false;
@@ -653,6 +658,25 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     // ============================ Init Stuff ============================
 
+    public AtomicReference<Double> sensors_ms = new AtomicReference<>(0.0);
+
+    public class ColorSensorThread extends Thread {
+        public void run() {
+            while (!isStopRequested()) {
+                Benchmark sensors = new Benchmark("Color sensors").startTimer();
+                leftSensorColors = colorSensorLeft.getNormalizedColors();
+                rightSensorColors = colorSensorRight.getNormalizedColors();
+
+                //Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
+                //Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
+                // TODO: check why these 2 commented lines were here before since the hsv values arent used
+
+                actualLeftSensorDetectedBall.set(BallColorSet_Decode.getColorForStorage(leftSensorColors, true));
+                actualRightSensorDetectedBall.set(BallColorSet_Decode.getColorForStorage(rightSensorColors));
+                sensors_ms.set(sensors.getTimer().get_ms());
+            }
+        }
+    }
 
     @Override
     public void runOpMode() {
@@ -671,10 +695,13 @@ public class MainTeleOpBlue extends LinearOpMode {
         ComponentMakerMethods.MakeComponents(robot);
         ComponentMakerMethods.MakeStates(robot);
         initOtherStuff(teamPipeline);
+        ColorSensorThread colorSensorThread = new ColorSensorThread();
+        colorSensorThread.start();
         robot.UseDefaultMovement();
         makeConfig();
 
         while (opModeInInit()) {
+            RobotController.telemetry.addData("Sensors update time (ms):", sensors_ms);
             robot.init_loop();
         }
         ComplexFollower.instance().setPose(globalRobotPose);
@@ -682,6 +709,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         while (opModeIsActive()) {
             // loop
+            RobotController.telemetry.addData("Sensors update time (ms):", sensors_ms);
             robot.loop();
         }
         passPose();
@@ -724,6 +752,11 @@ public class MainTeleOpBlue extends LinearOpMode {
         // ------------------ Driver 2 adders --------------------
         D2_velocityAdder = 0;
         D2_rotationAdder = 0;
+
+        leftSensorColors = new NormalizedRGBA();
+        leftSensorColors.blue = leftSensorColors.green = leftSensorColors.red = leftSensorColors.alpha = 0;
+        rightSensorColors = new NormalizedRGBA();
+        rightSensorColors.blue = rightSensorColors.green = rightSensorColors.red = rightSensorColors.alpha = 0;
     }
 
     public void initOtherStuff(int limelightPipeline) {
@@ -749,43 +782,32 @@ public class MainTeleOpBlue extends LinearOpMode {
     // ============================ Color Stuff ============================
 
      protected void handleColors() {
-        leftSensorColors = colorSensorLeft.getNormalizedColors();
-        rightSensorColors = colorSensorRight.getNormalizedColors();
 
-        Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
-        Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
-
-        actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors,true);
-        actualRightSensorDetectedBall = BallColorSet_Decode.getColorForStorage(rightSensorColors);
-
-        if(shouldResetRightSensorBall && resetLeftBallColorTimer.milliseconds() > 450){
+        if(shouldResetRightSensorBall && resetLeftBallColorTimer.milliseconds() > 450) {
             shouldResetRightSensorBall = false;
             calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
         }
 
-
-
         if (!shouldRemoveBalls) { // when not moving balls out of chambers they dont have permission to change to no ball
-            if (actualLeftSensorDetectedBall != BallColorSet_Decode.NoBall)
-                calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
+            if (actualLeftSensorDetectedBall.get() != BallColorSet_Decode.NoBall)
+                calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall.get();
 
-            if (actualRightSensorDetectedBall != BallColorSet_Decode.NoBall)
-                calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
+            if (actualRightSensorDetectedBall.get() != BallColorSet_Decode.NoBall)
+                calculatedRightSensorDetectedBall = actualRightSensorDetectedBall.get();
         }
         else {
-            calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall;
-            calculatedRightSensorDetectedBall = actualRightSensorDetectedBall;
+            calculatedLeftSensorDetectedBall = actualLeftSensorDetectedBall.get();
+            calculatedRightSensorDetectedBall = actualRightSensorDetectedBall.get();
         }
 
-         if (actualLeftSensorDetectedBall == null) actualLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
-         if (actualRightSensorDetectedBall == null) actualRightSensorDetectedBall = BallColorSet_Decode.NoBall;
+         if (actualLeftSensorDetectedBall.get() == null) actualLeftSensorDetectedBall.set(BallColorSet_Decode.NoBall);
+         if (actualRightSensorDetectedBall.get() == null) actualRightSensorDetectedBall.set(BallColorSet_Decode.NoBall);
 
          if (calculatedLeftSensorDetectedBall == null) calculatedLeftSensorDetectedBall = BallColorSet_Decode.NoBall;
          if (calculatedRightSensorDetectedBall == null) calculatedRightSensorDetectedBall = BallColorSet_Decode.NoBall;
 
         hasBallInLeftChamber = (calculatedLeftSensorDetectedBall != BallColorSet_Decode.NoBall);
         hasBallInRightChamber = (calculatedRightSensorDetectedBall != BallColorSet_Decode.NoBall);
-
 
          /// distance sesnsor stuff
 
@@ -796,18 +818,18 @@ public class MainTeleOpBlue extends LinearOpMode {
          hasBallInIntake = distanceMM < ballInIntakeThreshold;
 
 
-         if(ShouldSpewOutSensors){
-            RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-            RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-            RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+         if(ShouldSpewOutSensors) {
+             RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+             RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+             RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-            RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-            RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-            RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+             RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+             RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+             RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
-            RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-            RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
-            RobotController.telemetry.addData("Has ball in intake", hasBallInIntake);
+             RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+             RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+             RobotController.telemetry.addData("Has ball in intake", hasBallInIntake);
          }
     }
 
