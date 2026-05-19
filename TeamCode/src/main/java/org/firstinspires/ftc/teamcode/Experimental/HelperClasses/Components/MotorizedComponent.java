@@ -10,6 +10,10 @@ public abstract class MotorizedComponent<T extends MotorizedComponent<T>> {
     protected double min_range = 1;
     protected double max_range = -1;
 
+    public MotorizedComponent() {
+        Components.motors.add(this);
+    }
+
     public T self() {
         return (T) this;
     }
@@ -27,7 +31,7 @@ public abstract class MotorizedComponent<T extends MotorizedComponent<T>> {
 
     public T setState(double value) {
         target = value;
-        this.update();
+        // this.update();
         return self();
     }
 

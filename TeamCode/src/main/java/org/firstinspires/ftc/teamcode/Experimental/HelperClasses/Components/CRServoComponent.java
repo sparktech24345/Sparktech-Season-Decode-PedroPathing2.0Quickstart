@@ -19,6 +19,7 @@ public class CRServoComponent<S extends StateSet<CRServoComponent<S>>> extends M
 
     public final S states;
     public CRServoComponent(S class_states) {
+        super();
         this.states = class_states;
         this.states.init(this);
         setState(this.states.defaultState());

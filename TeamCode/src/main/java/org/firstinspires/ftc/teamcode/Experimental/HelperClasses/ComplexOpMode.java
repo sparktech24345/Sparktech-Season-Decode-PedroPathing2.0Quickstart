@@ -51,6 +51,9 @@ public abstract class ComplexOpMode extends OpMode {
             benchmark_if(ComplexFollower::isInit, ComplexFollower::update, "FOLLOWER UPDATE");
             benchmark_if(ComplexGamepad::isInit, ComplexGamepad::update, "GAMEPAD UPDATE");
             benchmark_if(DriveTrain::isInit, DriveTrain::update, "DRIVETRAIN UPDATE");
+            benchmark_if(() -> true, () -> {
+                for (var component : Components.motors) component.update();
+            }, "COMPONENTS UPDATE");
             benchmark_if(() -> true, main_update, "MAIN UPDATE");
             benchmark_if(ComplexTelemetry::isInit, this::telemetry, "TELEMETRY UPDATE");
         }, "LOOP ITERATION");
@@ -75,6 +78,7 @@ public abstract class ComplexOpMode extends OpMode {
 
     @Override
     public final void init_loop() {
+        tel.addData("is JNI working?", Math.max(10.0, 20.0) == 20.0);
         _update(this::init_update);
     }
 

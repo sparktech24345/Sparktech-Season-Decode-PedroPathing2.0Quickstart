@@ -176,21 +176,21 @@ public class MotorComponent<S extends StateSet<MotorComponent<S>>> extends Motor
         switch (motorCurrentMode) {
             // ================== state stuff ==================
             case Power:
-                for (DcMotorEx motor : motorMap.values())
+                for (CachingDcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
 
             case Position:
                 targetPower = pidControllerForPosition.calculate(target,mainMotor.getCurrentPosition() * resolution);
                 if(Math.abs(mainMotor.getVelocity()) < 0.0001) targetPower *= zeroVelocityMultiplier;
-                for (DcMotorEx motor : motorMap.values())
+                for (CachingDcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
 
             case Velocity:
                 mainMotor.setVelocity(target);
                 targetPower = mainMotor.getPower();
-                for (DcMotorEx motor : motorMap.values())
+                for (CachingDcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
 
@@ -198,7 +198,7 @@ public class MotorComponent<S extends StateSet<MotorComponent<S>>> extends Motor
                 if(target == 0) targetPower = 0;
                 else targetPower = VPIDController.calculate(target,mainMotor.getVelocity()) + target * vpidF + vpidS * Math.signum(target);
 
-                for (DcMotorEx motor : motorMap.values())
+                for (CachingDcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
         }
