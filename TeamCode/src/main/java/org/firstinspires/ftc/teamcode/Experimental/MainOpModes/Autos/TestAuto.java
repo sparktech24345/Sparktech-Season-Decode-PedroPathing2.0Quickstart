@@ -54,7 +54,7 @@ public class TestAuto extends ComplexOpMode {
     }
     @Override
     public void initialize() {
-        Components.init();
+        //Components.init();
         recorder = new AutoRecorder();
         EventBus.subscribe(ButtonPressedEvent.class, (event) -> {
             Button b = event.getButton();

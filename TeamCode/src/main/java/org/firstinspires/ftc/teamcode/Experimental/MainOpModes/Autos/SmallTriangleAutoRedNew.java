@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexTelemetry;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Configuration;
 
-@Autonomous(name = "Small Triangle Auto RED",group = "AAA")
+//@Autonomous(name = "Small Triangle Auto RED",group = "AAA")
 public class SmallTriangleAutoRedNew extends SmallTriangleNew {
     public void makeConfig() {
         cfg = Configuration.getConfig("red");

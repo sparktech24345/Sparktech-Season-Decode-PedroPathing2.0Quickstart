@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Components;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.EventSystem.EventBus;
 
 import java.util.List;
@@ -58,6 +59,7 @@ public abstract class ComplexOpMode extends OpMode {
 
     @Override
     public final void init() {
+        tel = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
@@ -67,6 +69,7 @@ public abstract class ComplexOpMode extends OpMode {
         publicHardwareMap = hardwareMap;
         ComplexFollower.setHardwareMap(hardwareMap);
         ComplexGamepad.init(gamepad1, gamepad2);
+        Components.init();
         _update(this::initialize);
     }
 

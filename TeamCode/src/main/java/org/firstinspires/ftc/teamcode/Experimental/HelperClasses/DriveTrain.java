@@ -2,17 +2,16 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
 public class DriveTrain {
 
-    private static DcMotor RFDrive;
-    private static DcMotor LFDrive;
-    private static DcMotor RBDrive;
-    private static DcMotor LBDrive;
+    private static DcMotorEx RFDrive;
+    private static DcMotorEx LFDrive;
+    private static DcMotorEx RBDrive;
+    private static DcMotorEx LBDrive;
     private static boolean directionFlip = false;
     private static String frontLeft  = frontLeftName;
     private static String frontRight = frontRightName;
@@ -21,7 +20,7 @@ public class DriveTrain {
     private static double slowdownMultiplier = 1;
     private static boolean init_ = false;
     private static HardwareMap hmap = null;
-    private static DcMotor.ZeroPowerBehavior motor_zero_power = DcMotor.ZeroPowerBehavior.BRAKE;
+    private static DcMotorEx.ZeroPowerBehavior motor_zero_power = DcMotorEx.ZeroPowerBehavior.BRAKE;
 
     public static void setHardwareMap(HardwareMap map) {
         hmap = map;
@@ -50,15 +49,15 @@ public class DriveTrain {
     public static void init() {
         if (currentOpModes == OpModes.TeleOP) {
             init_ = true;
-            RFDrive = hmap.get(DcMotor.class, frontRight);
-            LFDrive = hmap.get(DcMotor.class, frontLeft);
-            RBDrive = hmap.get(DcMotor.class, backRight);
-            LBDrive = hmap.get(DcMotor.class, backLeft);
+            RFDrive = hmap.get(DcMotorEx.class, frontRight);
+            LFDrive = hmap.get(DcMotorEx.class, frontLeft);
+            RBDrive = hmap.get(DcMotorEx.class, backRight);
+            LBDrive = hmap.get(DcMotorEx.class, backLeft);
 
             setMotorZeroPowerBehavior(motor_zero_power);
 
-            LFDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-            LBDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+            LFDrive.setDirection(DcMotorEx.Direction.REVERSE);
+            LBDrive.setDirection(DcMotorEx.Direction.REVERSE);
         }
     }
 
@@ -98,12 +97,12 @@ public class DriveTrain {
         LBDrive.setPower(BackLeftPow * slowdownMultiplier);
     }
 
-    public static DcMotor.ZeroPowerBehavior getMotorZeroPowerBehavior() {
+    public static DcMotorEx.ZeroPowerBehavior getMotorZeroPowerBehavior() {
         return motor_zero_power;
     }
 
-    public static void setMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior motor_zero_power) {
-        if (motor_zero_power == DcMotor.ZeroPowerBehavior.UNKNOWN) return;
+    public static void setMotorZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior motor_zero_power) {
+        if (motor_zero_power == DcMotorEx.ZeroPowerBehavior.UNKNOWN) return;
         DriveTrain.motor_zero_power = motor_zero_power;
         RFDrive.setZeroPowerBehavior(motor_zero_power);
         LFDrive.setZeroPowerBehavior(motor_zero_power);

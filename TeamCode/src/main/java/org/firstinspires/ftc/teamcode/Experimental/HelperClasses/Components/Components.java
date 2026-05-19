@@ -92,13 +92,13 @@ public class Components {
                 .setResolution(360)
                 .setRange(0.05, 0.9)
         ;
-        TiltServos = new ServoComponent<>(new TiltServosStates())
-                .addMotor(rightTiltServoName)
-                .addMotor(leftTiltServoName)
-                .setOperationMode(ServoComponent.ServoModes.Position)
-                .setResolution(360)
-                .setRange(0, 1)
-        ;
+//        TiltServos = new ServoComponent<>(new TiltServosStates())
+//                .addMotor(rightTiltServoName)
+//                .addMotor(leftTiltServoName)
+//                .setOperationMode(ServoComponent.ServoModes.Position)
+//                .setResolution(360)
+//                .setRange(0, 1)
+//        ;
         CameraRotateServo = new ServoComponent<>(new CameraRotateStates())
                 .addMotor(CameraRotateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)

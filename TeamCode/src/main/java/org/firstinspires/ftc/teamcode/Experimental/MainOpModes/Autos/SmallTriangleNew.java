@@ -43,6 +43,7 @@ import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Configura
 import java.util.List;
 
 //@Config
+//Disabled
 //@Autonomous(name = "Small Triangle Auto BLUE", group = "AAA")
 public class SmallTriangleNew /*extends OpMode*/ {
 //    private RobotController robot;

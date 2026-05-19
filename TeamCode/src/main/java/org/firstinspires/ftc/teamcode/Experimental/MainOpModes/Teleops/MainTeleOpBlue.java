@@ -199,7 +199,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
         ComplexTelemetry.get().addData("fakeRotation", fakeRotation);
         ComplexTelemetry.get().addData("current cam id: ", camId);
         //colors
-        handleColors();
+        //handleColors();
 
         // Choosing which values to use
         double usedDistance = 0;
@@ -646,6 +646,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
     public void initialize() {
         setStuffToDefault();
 
+        DriveTrain.setHardwareMap(publicHardwareMap);
         DriveTrain.init();
         ComplexFollower.init(ConstantsDecode::createFollowerDecode);
 

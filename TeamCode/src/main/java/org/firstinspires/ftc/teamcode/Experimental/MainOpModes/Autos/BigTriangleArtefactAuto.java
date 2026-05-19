@@ -24,6 +24,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -50,8 +51,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 //
-@Config
-@Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
+//@Config
+//@Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
 public class BigTriangleArtefactAuto /*extends OpMode*/ {
 //    public RobotController robot;
 //    private AutoRecorder recorder;
