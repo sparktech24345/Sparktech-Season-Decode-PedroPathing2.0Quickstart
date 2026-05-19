@@ -10,11 +10,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 @TeleOp(name = "ServoMultiple0", group = "Linear OpMode")
 public class ServoMultiple0s extends LinearOpMode {
-    public static double rightGatePos = 0.65; // 0.42 down 0.65 up
-    public static double leftGatePos = 0.40; // 0.65 down 0.40 up
+    public static double rightGatePos = 0.68; // 0.42 down 0.68 up
+    public static double leftGatePos = 0.38; // 0.64 down 0.38 up
     public static double leftTiltPos = 0.99;//  poses are syncronized, in bot = 1, out of bot = 0.5 is also right - 0.01
     public static double rightTiltPos = 1;
-    public static double angleServoPos = 0.4; // max down is 0.82 and max up is 0.16
+    public static double angleServoPos = 0.4; // max down is 0.9 and max up is 0.1
     public static double PTOServoPos = 0.4;
     public static double CameraServoPos = 0;
     public static double motorPow = 0;

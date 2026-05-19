@@ -139,9 +139,9 @@ public class MainTeleOpBlue extends ComplexOpMode {
     public static double timer6 = 0;
     public static double outtakeReversingTime = 180;
     public static double timer1 = 50; // far side
-    public static double timer2 = 200; // far side
+    public static double timer2 = 280; // far side
     public static double timer3 = 0; // close side
-    public static double timer4 = 100; // close side
+    public static double timer4 = 280; // close side
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
     public static double timer_far_v2 = 120;
@@ -444,7 +444,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
                             new StateAction(RightGateServo.states.OPEN),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction(RightGateServo.states.CLOSED),
-                            new DelayAction(timer1),
+//                            new DelayAction(timer1),
                             new StateAction(LeftGateServo.states.OPEN),
                             new DelayAction(timer2),
                             new StateAction(RightGateServo.states.OPEN)//                            new StateAction(LeftGateServo.states.OPEN),
@@ -458,7 +458,7 @@ public class MainTeleOpBlue extends ComplexOpMode {
                             new StateAction(RightGateServo.states.OPEN),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction(RightGateServo.states.CLOSED),
-                            new DelayAction(timer3),
+//                            new DelayAction(timer3),
                             new StateAction(LeftGateServo.states.OPEN),
                             new DelayAction(timer4),
                             new StateAction(RightGateServo.states.OPEN)
@@ -594,7 +594,8 @@ public class MainTeleOpBlue extends ComplexOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = distanceToAngleFunction(usedDistance);
-            turretAngleVal = clamp(turretAngleVal, 58, 295); // fresh measured
+            turretAngleVal = clamp(turretAngleVal,18, 324); // fresh measured
+            turretAngleOverride = clamp(turretAngleOverride,18, 324); // fresh measured
             TurretAngle.setState((Math.eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
 
 

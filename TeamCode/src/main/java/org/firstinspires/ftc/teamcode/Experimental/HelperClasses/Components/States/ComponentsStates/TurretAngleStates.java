@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Stat
 public class TurretAngleStates extends StateSet<ServoComponent<TurretAngleStates>> {
 
     public final State DEFAULT  = state(180);
-    public final State DOWN_MAX = state(316);
+    public final State DOWN_MAX = state(324);
     public final State UP_MAX   = state( 18);
 
     public TurretAngleStates() {

@@ -7,8 +7,8 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Stat
 
 public class LeftGateServoStates extends StateSet<ServoComponent<LeftGateServoStates>> {
 
-    public final State CLOSED = state(227);
-    public final State OPEN   = state(72);
+    public final State CLOSED = state(136.8);
+    public final State OPEN   = state(232);
 
     public LeftGateServoStates() {
         super();

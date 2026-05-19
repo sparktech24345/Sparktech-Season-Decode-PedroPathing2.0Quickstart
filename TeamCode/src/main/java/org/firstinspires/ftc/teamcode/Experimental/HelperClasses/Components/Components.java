@@ -1,6 +1,16 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.kATurret;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.kSTurret;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.kVTurret;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vd;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.veld;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.velf;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.velp;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vf;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vp;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vs;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -41,15 +51,16 @@ public class Components {
                 .addMotor(turretFlyWheelMotorLeftName)
                 .addMotor(turretFlyWheelMotorRightName)
                 .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
+                .setDirection(turretFlyWheelMotorRightName, DcMotorSimple.Direction.REVERSE)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setVelocityCoefficients(-180, 0, -18, -15)
-                .setAccelerationVelocityCoefficients(-0.0055,0,0,-0.0003,-0.1)
-                .setOperationMode(MotorComponent.MotorModes.Velocity)
-                .setRange(-3000, 3000)
+                .setVelocityCoefficients(velp, 0, veld, velf)
+                .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs)
+                .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
+                .setRange(-3000,3000)
         ;
 
         TurretRotateMotor = (TurretComponent<TurretRotateStates>) new TurretComponent<>(new TurretRotateStates())
-                .setFeedforwardCoefficients(0.0008, 0.0001, 0.04)
+                .setFeedforwardCoefficients(kVTurret, kATurret, kSTurret)
                 .addMotor(turretRotationMotorName)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
                 // We set the multiplier to 1 because feedforward handles the 'kick' now
@@ -79,7 +90,7 @@ public class Components {
                 .addMotor(turretAngleServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
-                .setRange(0, 1)
+                .setRange(0.05, 0.9)
         ;
         TiltServos = new ServoComponent<>(new TiltServosStates())
                 .addMotor(rightTiltServoName)
