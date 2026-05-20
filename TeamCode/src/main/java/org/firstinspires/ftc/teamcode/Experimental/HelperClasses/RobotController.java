@@ -8,6 +8,7 @@ import com.pedropathing.localization.*;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
@@ -26,6 +27,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public static HardwareMap hardwareMap = null;
     public static MultipleTelemetry telemetry = null;
+    protected VoltageSensor controlHubVoltageSensor;
     public static StateQueuer queuer = null;
 //    private List<LynxModule> allHubs;
     private double tickMS = 0;
@@ -33,6 +35,7 @@ public abstract class RobotController implements RobotControllerInterface {
     private HashMap<String, RobotState> states = new HashMap<>();
     private HashMap<String, Component> components = new HashMap<>();
     private DriveTrain movement = null;
+    public static double currentVoltage = 12;
 
     private void init_all() {
         //loop time improving thingy
@@ -46,6 +49,8 @@ public abstract class RobotController implements RobotControllerInterface {
         ComplexFollower.update();
         queuer = new StateQueuer();
         robotController = this;
+
+        controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
     }
 
     public RobotController() {
@@ -133,6 +138,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void init_loop() {
         tickTimer.reset();
+        currentVoltage = controlHubVoltageSensor.getVoltage();
         ComplexGamepad.update();
         ComplexFollower.update();
         for (Component c : components.values()) {
@@ -170,6 +176,7 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void loop() {
         tickTimer.reset();
+        currentVoltage = controlHubVoltageSensor.getVoltage();
         runUpdates();
         // main loop takes under 0.5 milsec and is not the problem
         main_loop();

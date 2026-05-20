@@ -60,14 +60,14 @@ import java.util.concurrent.atomic.AtomicReference;
 @TeleOp(name="Main TeleOp Blue", group="AAA")
 public class MainTeleOpBlue extends LinearOpMode {
     protected RobotController robot;
-    protected VoltageSensor controlHubVoltageSensor;
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
-    public static double vp = 0.0055;//195;
-    public static double vs = 0.1;//195;
+    //public static double targetVoltageForSpinMotors = 12.6;
+    public static double vp = 0.001;//195;
+    public static double vs = 0.19;//195;
     public static double velp = 180;
     public static double vd = 0;//25;
     public static double veld = 18;
-    public static double vf = 0.0003;//15;
+    public static double vf = 0.0004;//15;
     public static double velf = 15;
     public static double vMultiplier = 0.9; /// TODO BE CAREFULL WITH THIS
     public static boolean shouldUseSecondaryPID = false;
@@ -581,7 +581,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             targetVelocity = tempTurret.getTargetFlywheelVelocity(usedDistance) * vMultiplier + D2_velocityAdder;
             if(!shouldForceOuttake){
-                if(shouldUseSecondaryPID && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
+                if(shouldUseSecondaryPID /*always false */ && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
                     robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.Velocity)
                             .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
@@ -591,7 +591,10 @@ public class MainTeleOpBlue extends LinearOpMode {
                     robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                             .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-                            .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs);;
+                            .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs)
+//                            .setVoltageCompensation(true)
+//                            .setTargetVoltage(targetVoltageForSpinMotors)
+                    ;
                 }
 
             }
@@ -771,8 +774,6 @@ public class MainTeleOpBlue extends LinearOpMode {
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         laserAnalog = hardwareMap.get(AnalogInput.class, distanceSensorName);
-
-        controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
 
         //gamepad1.setLedColor(254, 254, 254, 1000000);
         //gamepad2.setLedColor(254, 0, 0, 1000000);

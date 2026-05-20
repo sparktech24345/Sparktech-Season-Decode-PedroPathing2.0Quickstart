@@ -59,6 +59,9 @@ public class ConstantsDecode {
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
 
+            .useVoltageCompensation(true) // might be interesting
+            .nominalVoltage(12.6)
+
             .xVelocity(77.90633)
             .yVelocity(59.8);
 

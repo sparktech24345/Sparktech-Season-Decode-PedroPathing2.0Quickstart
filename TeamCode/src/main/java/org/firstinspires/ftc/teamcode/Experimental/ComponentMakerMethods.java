@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 
 public class ComponentMakerMethods {
 
-
+    public static double normalVoltageForBot = 12.6;
     public static void MakeComponents(RobotController robot) {
         robot.makeComponent("IntakeMotor", new MotorComponent()
                 .addMotor(intakeMotorName)
@@ -38,6 +38,8 @@ public class ComponentMakerMethods {
                 .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                 .setTarget(0)
                 .setRange(-3000,3000)
+                .setVoltageCompensation(true)
+                .setTargetVoltage(normalVoltageForBot)
         );
 
         robot.makeComponent("TurretRotateMotor", new TurretComponent()
@@ -51,6 +53,8 @@ public class ComponentMakerMethods {
                 .setTarget(0)
                 .setResolution(5)
                 .setRange(0, 360)
+                .setVoltageCompensation(true)
+                .setTargetVoltage(normalVoltageForBot)
                 .moveDuringInit(true)
         );
 

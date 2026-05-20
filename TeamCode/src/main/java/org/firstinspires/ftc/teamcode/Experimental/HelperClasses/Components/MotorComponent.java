@@ -32,7 +32,9 @@ public class MotorComponent extends Component {
     protected double velocity = 0;
     protected double zeroVelocityMultiplier = 0;
     protected boolean isOverriden = false;
-    
+    protected boolean voltageCompensation = false;
+    protected double targetVoltage = 12;
+
     public MotorComponent addMotor(String hardwareMapName) {
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, hardwareMapName);
         if (motorMap.isEmpty()) {
@@ -51,6 +53,15 @@ public class MotorComponent extends Component {
 
     public MotorComponent setResolution(double res) {
         resolution = res;
+        return this;
+    }
+
+    public MotorComponent setVoltageCompensation(boolean val) {
+        this.voltageCompensation = val;
+        return this;
+    }
+    public MotorComponent setTargetVoltage(double targetVoltage) {
+        this.targetVoltage = targetVoltage;
         return this;
     }
 
@@ -179,6 +190,7 @@ public class MotorComponent extends Component {
         switch (motorCurrentMode) {
             // ================== state stuff ==================
             case Power:
+                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
@@ -186,6 +198,7 @@ public class MotorComponent extends Component {
             case Position:
                 targetPower = pidControllerForPosition.calculate(target,mainMotor.getCurrentPosition() / resolution);
                 if(Math.abs(mainMotor.getVelocity()) < 0.0001) targetPower *= zeroVelocityMultiplier;
+                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
@@ -193,6 +206,7 @@ public class MotorComponent extends Component {
             case Velocity:
                 mainMotor.setVelocity(target);
                 targetPower = mainMotor.getPower();
+                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
                 break;
@@ -200,6 +214,8 @@ public class MotorComponent extends Component {
             case AcceleratingVelocity:
                 if(target == 0) targetPower = 0;
                 else targetPower = VPIDController.calculate(target,mainMotor.getVelocity()) + target * vpidF + vpidS * Math.signum(target);
+
+                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
 
                 for (DcMotorEx motor : motorMap.values())
                     motor.setPower(targetPower);
