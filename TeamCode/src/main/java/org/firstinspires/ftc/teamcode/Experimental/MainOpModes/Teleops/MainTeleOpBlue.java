@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
@@ -145,6 +146,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     /// ----------------- Outtake Priorities -----------------
     public static double turretAngleOverride = 0;
     public static double turretVelocityOverride = 0;
+    public static double turretAimOverride = 0;
 
     public static double timer5 = 0;
     public static double timer6 = 0;
@@ -250,6 +252,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
         RobotController.telemetry.addData("needed angle for turret rotation", neededAngleForTurretRotation);
+        RobotController.telemetry.addData("TurretRotate power", tempTurret.getPower());
         RobotController.telemetry.addData("angle for camera", cameraAngle);
 
 
@@ -587,7 +590,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
                             .setVelocityCoefficients(velp,0,veld,velf);
                 }
-                else{
+                else {
                     robot.getMotorComponent("TurretSpinMotor")
                             .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                             .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
@@ -598,7 +601,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 }
 
             }
-            else{
+            else {
                 robot.getMotorComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Power)
                         .setTarget(forcedOuttakeSpeed);
@@ -642,7 +645,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
 
-            double turretAngleVal = distanceToAngleFunction(usedDistance);
+            // double turretAngleVal = distanceToAngleFunction(usedDistance);
+            // TODO: check why tf was this here ^
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
 
             robot.getMotorComponent("TurretRotateMotor")
