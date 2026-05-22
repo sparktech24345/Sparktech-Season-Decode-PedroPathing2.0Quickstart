@@ -64,13 +64,13 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static Pose farStart = pose(120, 24, 90); // no more reversing X
     //public static double targetVoltageForSpinMotors = 12.6;
     public static double vp = 0.001;//195;
-    public static double vs = 0.19;//195;
+    public static double vs = 0.18;//195;
     public static double velp = 180;
     public static double vd = 0;//25;
     public static double veld = 18;
-    public static double vf = 0.0004;//15;
+    public static double vf = 0.00031; //0.0004
     public static double velf = 15;
-    public static double vMultiplier = 0.9; /// TODO BE CAREFULL WITH THIS
+    public static double vMultiplier = 0.9; /// TODO BE CAREFUL WITH THIS
     public static boolean shouldUseSecondaryPID = false;
     public static int a;
 
@@ -659,6 +659,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         robot.spitFollowerTelemetry();
         RobotController.telemetry.addData("target vel",targetVelocity);
         RobotController.telemetry.addData("actual vel",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+        RobotController.telemetry.addData("actual pow",robot.getMotorComponent("TurretSpinMotor").getPower());
         RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
     }
 
