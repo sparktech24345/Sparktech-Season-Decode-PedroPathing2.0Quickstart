@@ -22,6 +22,9 @@ public class MainConfig {
     public static double targetX;
     public static double targetY;
 
+    public static double camTargetX;
+    public static double camTargetY;
+
     public static double targetXAutoClose;
     public static double targetYAutoClose;
 
@@ -84,6 +87,9 @@ public class MainConfig {
                 targetX = 130;
                 targetY = 53;
 
+                camTargetX = 120;
+                camTargetY = 41;
+
                 targetXAutoClose = 127;
                 targetYAutoClose = 50;
 
@@ -93,7 +99,7 @@ public class MainConfig {
                 targetXRightPanel = 127;
                 targetYRightPanel = 48;
 
-                targetXLeftPanel = 129;
+                targetXLeftPanel = 123;
                 targetYLeftPanel = 55;
 
                 usedTargetX = 131;
@@ -137,6 +143,9 @@ public class MainConfig {
                 targetX = 130;
                 targetY = -53;
 
+                camTargetX = 120;
+                camTargetY = -41;
+
                 targetXAutoClose = 127;
                 targetYAutoClose = -43;
 
@@ -146,7 +155,7 @@ public class MainConfig {
                 targetXRightPanel = 127;
                 targetYRightPanel = -43; //
 
-                targetXLeftPanel = 125;
+                targetXLeftPanel = 121;
                 targetYLeftPanel = -55;
 
                 usedTargetX = 131;

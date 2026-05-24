@@ -112,6 +112,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public Pose getCurrentPose() {
         return ComplexFollower.instance().getPose();
     }
+    public static double getDrivetrainCumulativePower(){return DriveTrain.getDrivetrainsCumulativePower();}
 
     public RobotController UseDefaultMovement(String LeftFront, String RightFront, String LeftBack, String RightBack) {
         DriveTrain.init(frontLeftName, frontRightName, backLeftName, backLeftName);

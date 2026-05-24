@@ -1,24 +1,29 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.CameraRotateServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.CalculatedByCameraBotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_DISTANCE_MM;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_VOLTS;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.airSortingFunctionAngle;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.airSortingFunctionVelocity;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballInIntakeThreshold;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateCameraAngle;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.camOffsetX;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.convertCamAngleToServoValue;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceSensorName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.eval;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalCamId;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.relocalizeRobot;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.*;
-
-import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -30,47 +35,42 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Experimental.ComponentMakerMethods;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.ActionSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Benchmark;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Drivers;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
-import org.firstinspires.ftc.teamcode.R;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 @Config
 @TeleOp(name="Main TeleOp Blue", group="AAA")
 public class MainTeleOpBlue extends LinearOpMode {
     protected RobotController robot;
-    public static Pose farStart = pose(120, 24, 90); // no more reversing X
     //public static double targetVoltageForSpinMotors = 12.6;
     public static double vp = 0.001;//195;
     public static double vs = 0.18;//195;
     public static double velp = 180;
     public static double vd = 0;//25;
     public static double veld = 18;
-    public static double vf = 0.00031; //0.0004
+    public static double vf = 0.00032; //0.0004
     public static double velf = 15;
-    public static double vMultiplier = 0.9; /// TODO BE CAREFUL WITH THIS
+    public static double vMultiplier = 1;
     public static boolean shouldUseSecondaryPID = false;
     public static int a;
 
@@ -112,6 +112,9 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double angleDecreaseValue = 10;
     public static double rightSideAngleBias = -2;
     public static double velocityDeltaCompensation = 80;
+    public static double flywheelVelocity = 0;
+    public static double lastFlywheelVelocity = 0;
+    public static boolean shouldToAirSort = false;
     public static int camId = 0;
 
     /// ----------------- Limelight Stuff -----------------
@@ -180,6 +183,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     public static double D2_velocityAdderMulti = 1;
     public static double D2_rotationAdderMulti = 1;
+    public static double batteryToFireThreshold = 50;
 
     /// ================================== Driver Stuff  ==================================
 
@@ -190,15 +194,15 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double oneTunnelDistance = 1.65;
 ///==============================Camera turret stuff============================================
     public static double  maxiTurretAngle = 195;// de schimbat
-    public static double cameraAngle;
+    public static double cameraAngle=0;
+    public static double cameraAngleOverite=0;
     public static double miniTurretAngle = 165;//de schimbat
     public static double cameraModifier = 0;
 
     protected void robotMainLoop() {
-        // all of the code
+        // all the code
 
         // processing
-        processCameraStuff();
         processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.usedTargetX, cfg.usedTargetY);
 
@@ -223,7 +227,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         rotationToWallOdometry = tempTurret.calculateLookaheadTarget(usedTargetX, usedTargetY, lookAheadSeconds);
 
         neededAngleForTurretRotation -= rotationToWallOdometry; /// TODO this might be to be reversed in some ways
-        double camAngle = tempTurret.calculateLookaheadTarget_Camera(usedTargetX,usedTargetY);
+
 
         if (usedDistance > 2.9) neededAngleForTurretRotation += cfg.farZoneCameraAdder;
         if (shouldShootOnCamera) {
@@ -237,23 +241,21 @@ public class MainTeleOpBlue extends LinearOpMode {
         //if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
         if (neededAngleForTurretRotation < 0) neededAngleForTurretRotation += 360;
 
-        if(camAngle < miniTurretAngle) {
-            cameraAngle = 180 - camAngle;
-        } else if(camAngle > maxiTurretAngle) {
-            cameraAngle = 180 + camAngle;
-        } else {
-            cameraAngle = 180;
-        }
+        double camAngle = - calculateCameraAngle(camTargetX,camTargetY,robot.getCurrentPose(),camOffsetX,0);
+        cameraAngle = convertCamAngleToServoValue(camAngle);
+        cameraAngle = clamp(cameraAngle,0,360); // de notat ca are range de 310 grade defapt
 
         RobotController.telemetry.addData("camera rotation target", camAngle);
-
         robot.getServoComponent("CameraRotateServo")
-                .setTarget(cameraAngle);
+                .setTarget((eval(cameraAngleOverite) ? cameraAngleOverite : cameraAngle));
 
 
         RobotController.telemetry.addData("needed angle for turret rotation", neededAngleForTurretRotation);
         RobotController.telemetry.addData("TurretRotate power", tempTurret.getPower());
         RobotController.telemetry.addData("angle for camera", cameraAngle);
+
+
+        processCameraStuff(camAngle);
 
 
         /// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- Driver Buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -349,30 +351,13 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
         // ====================== Tilt Servo Stuff ===================
-//        if(robot.getKey("DPAD_UP1").ExecuteOnPress){
-//            if(robot.getServoComponent("TiltServos").getPosition() == 1) // if retracted then extend
-//                robot.executeNow(new StateAction("TiltServos","EXTENDED"));
-//            else // else retract back
-//                robot.executeNow(new StateAction("TiltServos","RETRACTED"));
-//        }
+        if(robot.getKey("DPAD_UP1").ExecuteOnPress){
+            if(robot.getServoComponent("TiltServos").getPosition() == 0.85) // if retracted then extend
+                robot.executeNow(new StateAction("TiltServos","EXTENDED"));
+            else // else retract back
+                robot.executeNow(new StateAction("TiltServos","RETRACTED"));
+        }
 
-
-        // ====================== Sorting Stuff ======================
-
-//        if (robot.getKey("RIGHT_BUMPER2").ExecuteOnPress) {
-//            ballColorQueue.add(BallColorSet_Decode.Purple);
-//            gamepad2.setLedColor(254, 0, 254, 1000000);
-//        }
-//        if (robot.getKey("LEFT_BUMPER2").ExecuteOnPress) {
-//            ballColorQueue.add(BallColorSet_Decode.Green);
-//            gamepad2.setLedColor(0, 254, 0, 1000000);
-//        }
-//        if (robot.getKey("B2").ExecuteOnPress) {
-//            ballColorQueue.clearQueue();
-//            gamepad2.setLedColor(254, 254, 254, 1000000);
-//        }
-
-        // Enable / Disable camera
         // Adders
 
         if (robot.getKey("DPAD_UP2").ExecuteOnPress) {
@@ -509,8 +494,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         // Closing gates if they arent needed
         if(!hasBallInLeftChamber && !hasBallInRightChamber) outtakeGatesState = -1;
 
-        if(hasBallInLeftChamber && hasBallInRightChamber && hasBallInIntake)
-            gamepad1.rumble(0.6,0.6,100);
+//        if(hasBallInLeftChamber && hasBallInRightChamber && hasBallInIntake)
+//            gamepad1.rumble(0.6,0.6,100);
 
         // IntakeStuff
         if(wantsToOutput){
@@ -529,6 +514,11 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && Math.abs(tempTurret.getError()) > 15)
             intakeState = 0;
+
+        double fakeVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier + D2_velocityAdder;
+        if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && RobotController.currentVoltage < 10 && fakeVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold)
+            intakeState = 0;
+        RobotController.telemetry.addData("velocity difrence",fakeVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold);
 
         hasSwitchedIntakeState = false;
 
@@ -582,7 +572,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         if (isTryingToFire) {
             // ----------------------- Power Stuff -----------------------
 
-            targetVelocity = tempTurret.getTargetFlywheelVelocity(usedDistance) * vMultiplier + D2_velocityAdder;
+            targetVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier + D2_velocityAdder;
+            if(RobotController.currentVoltage < 10 || RobotController.getDrivetrainCumulativePower() >3.85) targetVelocity += 30;
+            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(usedDistance) *vMultiplier + D2_velocityAdder;
             if(!shouldForceOuttake){
                 if(shouldUseSecondaryPID /*always false */ && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
                     robot.getMotorComponent("TurretSpinMotor")
@@ -607,17 +599,20 @@ public class MainTeleOpBlue extends LinearOpMode {
                         .setTarget(forcedOuttakeSpeed);
             }
 
-            //if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
-            //    gamepad1.rumble(0,0,100);
+            if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
+                gamepad1.rumble(0.4,0.4,100);
 
 
 
                 // ----------------------- Angle Stuff -----------------------
-            double turretAngleVal = distanceToAngleFunction(usedDistance);
+            double turretAngleVal = 0;
+            turretAngleVal = distanceToAngleFunction(usedDistance);
+            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(usedDistance);
+            RobotController.telemetry.addData("angle function output",turretAngleVal);
+            turretAngleVal = (eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal);
             turretAngleVal = clamp(turretAngleVal,18, 324); // fresh measured
-            turretAngleOverride = clamp(turretAngleOverride,18, 324); // fresh measured
             robot.getServoComponent("TurretAngle")
-                    .setTarget((eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal));
+                    .setTarget(turretAngleVal);
 
 
             // ----------------------- Rotation Stuff -----------------------
@@ -655,10 +650,18 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         }
 
+        // checking if it has fired a ball
+        lastFlywheelVelocity = flywheelVelocity;
+        flywheelVelocity = robot.getMotorComponent("TurretSpinMotor").getVelocity();
+        if(wantsToFireWithIntake && lastFlywheelVelocity - flywheelVelocity >= 100){
+            //ballCounter++;
+            shouldToAirSort = false;
+        }
+
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
         robot.spitFollowerTelemetry();
         RobotController.telemetry.addData("target vel",targetVelocity);
-        RobotController.telemetry.addData("actual vel",robot.getMotorComponent("TurretSpinMotor").getVelocity());
+        RobotController.telemetry.addData("actual vel",flywheelVelocity);
         RobotController.telemetry.addData("actual pow",robot.getMotorComponent("TurretSpinMotor").getPower());
         RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
     }
@@ -699,8 +702,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         passPose();
     }
 
-    public void setStuffToDefault() { // occasionally copy paste declarations here so we don't have surprises
+    public void setStuffToDefault(){ // occasionally copy and paste declarations here so we don't have surprises
         ballCounter = 0;
+        shouldToAirSort = false;
         shouldShootOnCamera = false;
         shouldRemoveBalls = false;
         shouldPullFromQueue = false;
@@ -741,7 +745,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public void initOtherStuff(int limelightPipeline) {
         //limelight stuff
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(limelightPipeline);
+        limelight3A.pipelineSwitch(1); // relocalization
         limelight3A.reloadPipeline();
         limelight3A.setPollRateHz(100); // poll 100 times per second
         limelight3A.start();
@@ -823,25 +827,49 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     // ============================ Camera Stuff ============================
 
-    public void processCameraStuff() {
-        LLResult llResult = limelight3A.getLatestResult();
+    public void processCameraStuff(double camangle) {
+        LLResult result = limelight3A.getLatestResult();
+        RobotController.telemetry.addData("Is Valid",result.isValid());
+        RobotController.telemetry.addData("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
 
-        double tempRotation = llResult.getTx();
-        // rotation
-        if (tempRotation == 0 || Math.abs(tempRotation) > 30)
-            rotationDegreesMeasuredCamera = lastRotationDegreesMeasuredCamera;
-        else rotationDegreesMeasuredCamera = tempRotation;
-        lastRotationDegreesMeasuredCamera = rotationDegreesMeasuredCamera;
+        if (result != null) {
+            if (result.isValid()) {
+                Pose3D botpose = result.getBotpose();
+                RobotController.telemetry.addData("tx", result.getTx());
+                RobotController.telemetry.addData("ty", result.getTy());
+                RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
+                RobotController.telemetry.addData("Botpose", botpose.toString());
+                RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
+                RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
+                RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
 
-        // distance
+                Pose tempPose = relocalizeRobot(botpose.getPosition().x,botpose.getPosition().y,botpose.getOrientation().getYaw(AngleUnit.DEGREES),camOffsetX,0,camangle);
 
-        double targetArea = llResult.getTa();
+                double fieldlenght = 23.7*6; // in robot units
+                double magicConverterToInchX = 39.37;
+                double magicConverterToInchY = 39.37;
 
-        RobotController.telemetry.addData("areaPercentage", targetArea);
-        double a = 8.60403612;
-        double b = -0.0119936722;
+                double x = tempPose.getX() * magicConverterToInchX;
+                x+= fieldlenght/2;
+                double y =0;
 
-        distanceMeasuredCamera = Math.log(targetArea / a) / b;
+                if(currentTeamColor == TeamColor.Blue){
+                    y = - tempPose.getY() * magicConverterToInchY;
+                    y -= fieldlenght/6; // one pad worth
+                }
+                else{
+                    y = botpose.getPosition().y * magicConverterToInchY;
+                    y -= fieldlenght/6; // one pad worth
+                }
+
+                CalculatedByCameraBotPose = new Pose(x,y,Math.toRadians(tempPose.getHeading()));
+                RobotController.telemetry.addData("Bots Calculated Estimative Position",CalculatedByCameraBotPose.toString());
+                RobotController.telemetry.addData("Bots Wanna be Position",tempPose.toString());
+
+
+
+            }
+        }
     }
 
     // ============================ Odometry Stuff ============================

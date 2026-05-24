@@ -125,7 +125,6 @@ public class TurretComponent extends MotorComponent {
     }
 
     public double calculateLookaheadTarget_Camera(double targetX, double targetY) {
-        // Use smoothed velocities to predict FUTURE position
         double predX_cam = lastX_cam;
         double predY_cam = lastY_cam;
 
@@ -140,14 +139,6 @@ public class TurretComponent extends MotorComponent {
         while (relative < -180) relative += 360;
 
         return relative;
-    }
-
-    /**
-     * Your provided velocity function integrated into the component
-     * @return The required RPM/Velocity for your flywheel
-     */
-    public double getTargetFlywheelVelocity(double currentDistanceToTarget) {
-        return distanceToVelocityFunction(currentDistanceToTarget);
     }
 
     @Override

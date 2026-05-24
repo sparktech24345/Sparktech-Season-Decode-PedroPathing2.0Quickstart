@@ -5,6 +5,8 @@ import android.util.Pair;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.MotifSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
@@ -75,8 +77,8 @@ public class GlobalStorage {
 
     public static String rightGateServoName = "rightGateServo"; // port 2
     public static String leftGateServoName = "leftGateServo"; // port 3
-    public static String rightTiltServoName = "rightTiltServo"; // port
-    public static String leftTiltServoName = "leftTiltServo"; // port
+    public static String rightTiltServoName = "rightTiltServo"; // port 0 expansion
+    public static String leftTiltServoName = "leftTiltServo"; // port 1 expansion
     public static String turretAngleServoName = "turretAngleServo"; // port 4
     public static String CameraRotateServoName = "CameraRotateServo"; // port 0
     public static String PTOServoName = "PTOServo"; // port 1
@@ -96,6 +98,7 @@ public class GlobalStorage {
     //function for firing stuff
     public static Pose globalRobotPose = new Pose();
     public static Pose futureMoveActionTargetPose = new Pose();
+    public static Pose CalculatedByCameraBotPose = new Pose();
     public static int teamPipeline = 0;
     public static double redThreshold = 40;
 
@@ -158,48 +161,135 @@ public class GlobalStorage {
         return distance;
     }
 
-    public static double farAngle = 105; // old 70
-    public static double farAngleGrade0 = 177;
-    public static double farAngleGrade1 = -21;
-    public static double normalAngle = 160;
+    // hard vibe coding from here on down because math is hard
 
-    public static double closeAngle = 295;
-    public static double almostCloseAngle = 210;
-    public static double grade1angle = -49;//-49.13547x+232.62596
-    public static double grade0angle = 233;//-49.13547x+232.62596
+    // ==========================================
+    // ANGLE STUFF & FUNCTION
+    // ==========================================
+    public static double closeAngle = 320;       // Max lob at 0.8m
+    public static double farAngle = 100;
+    public static double grade1angle = -205.0;
+    public static double grade0angle = 485.0;
+
     public static double distanceToAngleFunction(double distance) {
-        int handicapAdder;
-        if(distance < 1)    return closeAngle;
-        if(distance < 1.7)  handicapAdder = 25;
-        else handicapAdder = 0;
-        if(distance > 3) return farAngle;
-//        if(distance > 3) return farAngleGrade1 * distance + farAngleGrade0;
-
-        return grade1angle * distance + grade0angle + handicapAdder;
-
+        if (distance <= 0.8) return closeAngle;
+        if (distance >= 2.0) return farAngle; // Bottomed out at 100
+        return grade1angle * distance + grade0angle;
     }
-    public static double grade0VeloClose = 1060;
-    public static double grade1VeloClose = 230.5;
-    public static double closeVelo = 1300; //230.49196x+1048.81104
-    public static double grade0farVelo = 800; // 770
-    public static double grade1farVelo = 319; // 318
-    // general grad \\
-    public static double distanceToVelocityFunction(double  distance) {
-        if (distance < 1.25) return closeVelo;
-        if (distance > 3) return grade1farVelo * distance + grade0farVelo;
+    public static double airSortingFunctionAngle(double distance) {
+        if (distance <= 0.8) return closeAngle;
+        if (distance >= 2.0) return farAngle; // Bottomed out at 100
+        return grade1angle * distance + grade0angle;
+    }
+
+    // ==========================================
+    // VELOCITY STUFF & FUNCTION
+    // ==========================================
+    public static double closeVelo = 1140;
+    public static double grade1farVelo = 290;
+    public static double grade0farVelo = 555;
+    public static double grade1VeloClose = 200;
+    public static double grade0VeloClose = 840;
+
+    public static double distanceToVelocityFunction(double distance) {
+        if (distance <= 1.0) return closeVelo;
+        if (distance > 2.9)  return grade1farVelo * distance + grade0farVelo;
+
         return grade1VeloClose * distance + grade0VeloClose;
     }
-//    public static double grade0VeloClose = 1280;
-//    public static double grade1VeloClose = 100;
-//    public static double grade0farVelo = 760;
-//    public static double grade1farVelo = 320;
-//    public static double distanceToVelocityFunction(double distance) {
-//        if (distance > 2.9) return grade1farVelo * distance + grade0farVelo;;
-//        return grade1VeloClose * distance + grade0VeloClose;
-//    }
 
+    public static double airSortingFunctionVelocity(double distance) {
+        if (distance <= 1.0) return closeVelo;
+        if (distance > 2.9)  return grade1farVelo * distance + grade0farVelo;
+
+        return grade1VeloClose * distance + grade0VeloClose;
+    }
+
+    // ==========================================
+    // UTILITY
+    // ==========================================
     public static double interpolate(double x, double x1, double x2, double y1, double y2) {
         double tangent = (y2 - y1) / (x2 - x1);
         return (y1 + tangent * (x - x1));
+    }
+
+    public static double camOffsetX = 6.2;
+    //
+    public static double calculateCameraAngle(
+            double targetX, double targetY,
+            Pose robotpose,
+            double camOffsetX, double camOffsetY) {
+
+        double robotX = robotpose.getX();
+        double robotY = robotpose.getY();
+        double robotAngle = Math.toDegrees(robotpose.getHeading());
+
+        // Pasul 1: Transformăm unghiul robotului în radiani pentru funcțiile matematice
+        double robotRad = Math.toRadians(robotAngle);
+
+        // Pasul 2: Rotim offset-ul camerei în funcție de unghiul actual al robotului
+        // (Folosim matricea de rotație standard pentru a afla unde se află camera în teren)
+        double rotatedCamX = camOffsetX * Math.cos(robotRad) - camOffsetY * Math.sin(robotRad);
+        double rotatedCamY = camOffsetX * Math.sin(robotRad) + camOffsetY * Math.cos(robotRad);
+
+        // Poziția absolută a camerei în sistemul de coordonate al terenului
+        double absoluteCamX = robotX + rotatedCamX;
+        double absoluteCamY = robotY + rotatedCamY;
+
+        // Pasul 3: Calculăm diferența pe X și Y de la cameră la țintă
+        double deltaX = targetX - absoluteCamX;
+        double deltaY = targetY - absoluteCamY;
+
+        // Pasul 4: Calculăm unghiul absolut (în teren) către țintă folosind Math.atan2
+        double absoluteTargetAngleRad = Math.atan2(deltaY, deltaX);
+        double absoluteTargetAngleDeg = Math.toDegrees(absoluteTargetAngleRad);
+
+        // Pasul 5: Unghiul camerei trebuie să fie relativ la corpul robotului
+        double relativeCamAngle = absoluteTargetAngleDeg - robotAngle;
+
+        // Pasul 6: Normalizăm unghiul în intervalul [-180, 180] grade
+        while (relativeCamAngle > 180) relativeCamAngle -= 360;
+        while (relativeCamAngle <= -180) relativeCamAngle += 360;
+
+        return relativeCamAngle;
+    }
+    public static double convertCamAngleToServoValue(double relativeAngle) {
+        double servoValue = 0.49 + (relativeAngle * (0.29 / 90.0));
+
+        if (servoValue < 0.0) servoValue = 0.0;
+        if (servoValue > 1.0) servoValue = 1.0;
+
+        return servoValue * 360;
+    }
+
+    public static Pose relocalizeRobot(
+            double camX, double camY, double camDegrees,
+            double camOffsetX, double camOffsetY, double servoAngle) {
+
+        // --- PASUL 1: Calculăm unghiul absolut al robotului ---
+        // Mai întâi, convertim unghiul inversat al camerei în unghiul absolut al capului camerei (în sistemul robotului)
+        double absoluteCamAngle = 180.0 - camDegrees;
+
+        // Deoarece servoAngle este unghiul camerei FAȚĂ de robot (Camera = Robot + Servo),
+        // înseamnă că unghiul absolut al robotului este: Robot = Camera - Servo
+        double robotAngle = absoluteCamAngle - servoAngle;
+
+        // Normalizăm unghiul robotului între [-180, 180]
+        while (robotAngle > 180)  robotAngle -= 360;
+        while (robotAngle <= -180) robotAngle += 360;
+
+        // --- PASUL 2: Rotim offset-ul fizic al camerei în coordonate globale ---
+        double robotRad = Math.toRadians(robotAngle);
+
+        // Calculăm unde se află poziția relativă a camerei față de centrul robotului la acest unghi
+        double rotatedOffsetX = camOffsetX * Math.cos(robotRad) - camOffsetY * Math.sin(robotRad);
+        double rotatedOffsetY = camOffsetX * Math.sin(robotRad) + camOffsetY * Math.cos(robotRad);
+
+        // --- PASUL 3: Aflăm poziția robotului ---
+        // Robotul se află la poziția camerei MINUS acest offset rotit
+        double robotX = camX - rotatedOffsetX;
+        double robotY = camY - rotatedOffsetY;
+
+        return pose(robotX, robotY, robotAngle); // pose = return new Pose(x, y, Math.toRadians(degrees)); fyi
     }
 }

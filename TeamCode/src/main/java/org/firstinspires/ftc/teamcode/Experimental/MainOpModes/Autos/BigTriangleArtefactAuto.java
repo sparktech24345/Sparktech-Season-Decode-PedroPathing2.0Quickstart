@@ -560,7 +560,7 @@ public class BigTriangleArtefactAuto extends OpMode {
             // ----------------------- Power Stuff -----------------------
 
             //double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
-            double targetVelocity = turret.getTargetFlywheelVelocity(distanceToWallOdometry);
+            double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
 
             if(shouldBoostOnTheGoVelocityLogic) targetVelocity += velocityAdderOnTheGo;
 

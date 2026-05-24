@@ -20,6 +20,7 @@ public class DriveTrain {
     private static String backRight  = backRightName;
     private static double slowdownMultiplier = 1;
     private static boolean init_ = false;
+    private static double drivetrainCumulativePower = 0;
 
 
     public static void init(String LeftFront, String RightFront, String LeftBack, String RightBack) {
@@ -41,6 +42,7 @@ public class DriveTrain {
     public static boolean getDirectionFlip() {
         return DriveTrain.directionFlip;
     }
+    public static double getDrivetrainsCumulativePower(){return drivetrainCumulativePower;}
 
     public static void init() {
         if (currentOpModes == OpModes.TeleOP) {
@@ -75,6 +77,8 @@ public class DriveTrain {
         double BackRightPow  = vertical - horizontal - pivot;
         double FrontLeftPow  = vertical - horizontal + pivot;
         double BackLeftPow   = vertical + horizontal + pivot;
+
+        drivetrainCumulativePower = Math.abs(FrontRightPow) + Math.abs(BackRightPow) + Math.abs(FrontLeftPow) + Math.abs(FrontLeftPow) ;
 
         RFDrive.setPower(FrontRightPow * slowdownMultiplier);
         LFDrive.setPower(FrontLeftPow * slowdownMultiplier);

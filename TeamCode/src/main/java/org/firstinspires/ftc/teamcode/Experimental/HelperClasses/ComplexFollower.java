@@ -282,6 +282,11 @@ public class ComplexFollower {
         if(follow_timer == null) return 0;
         return follow_timer.milliseconds();
     }
+
+    public static Follower getFollowerInstance(){
+        return follower;
+    }
+
     public static boolean isDoneFollowingTimer(double timeToPass){
         return getFollowingTimeMilisec() >= timeToPass || stopHolding;
     }

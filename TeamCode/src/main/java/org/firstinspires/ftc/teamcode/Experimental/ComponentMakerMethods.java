@@ -82,19 +82,19 @@ public class ComponentMakerMethods {
                 .setRange(0.16,0.82) // check servo set multiple 0
                 .moveDuringInit(true)
         );
-//        robot.makeComponent("TiltServos", new ServoComponent()
-//                .addMotor(rightTiltServoName)
-//                .addMotor(leftTiltServoName)
-//                .setOperationMode(ServoComponent.ServoModes.Position)
-//                .setResolution(360)
-//                .setRange(0,1)
-//                .moveDuringInit(true)
-//        );
+        robot.makeComponent("TiltServos", new ServoComponent()
+                .addMotor(rightTiltServoName)
+                .addMotor(leftTiltServoName)
+                .setOperationMode(ServoComponent.ServoModes.Position)
+                .setResolution(360)
+                .setRange(0,1)
+                .moveDuringInit(true)
+        );
         robot.makeComponent("CameraRotateServo", new ServoComponent()
                 .addMotor(CameraRotateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
-                .setRange(0.13,0.76)
+                .setRange(0,1)
                 .moveDuringInit(true)
         );
     }
@@ -126,8 +126,11 @@ public class ComponentMakerMethods {
                 .addState("DEFAULT", 180, true)
                 .addState("UP_MAX",47);
 
-//        robot.getComponent("TiltServos")
-//                .addState("RETRACTED", 360,true) // 1
-//                .addState("EXTENDED", 198); // 0.55
+        robot.getComponent("CameraRotateServo")
+                .addState("MIDDLE", 0.49*360, true);
+
+        robot.getComponent("TiltServos")
+                .addState("RETRACTED", 0.85*360,true) // 0.85
+                .addState("EXTENDED", 0.05*360); // 0.05
     }
 }
