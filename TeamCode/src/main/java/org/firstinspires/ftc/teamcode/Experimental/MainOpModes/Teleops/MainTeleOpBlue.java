@@ -845,7 +845,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 Pose tempPose = relocalizeRobot(botpose.getPosition().x,botpose.getPosition().y,botpose.getOrientation().getYaw(AngleUnit.DEGREES),camOffsetX,0,camangle);
 
-                double fieldlenght = 23.7*6; // in robot units
+                double fieldlenght = 23.7*6; // in robot units 23.72 x 23.61 y
                 double magicConverterToInchX = 39.37;
                 double magicConverterToInchY = 39.37;
 
