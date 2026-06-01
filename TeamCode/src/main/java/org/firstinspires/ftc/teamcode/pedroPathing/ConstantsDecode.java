@@ -3,33 +3,27 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
+import com.pedropathing.control.PredictiveBrakingController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
+
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
-import com.pedropathing.ftc.localization.CustomIMU;
-import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
-import com.pedropathing.ftc.localization.constants.ThreeWheelIMUConstants;
-import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
-import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyPinpointConstants;
-import org.firstinspires.ftc.teamcode.pedroPathing.CustomSparkyUtil.SparkyPinpointDriver;
 
-import java.nio.file.Path;
+
+
 
 public class ConstantsDecode {
+    public static PredictiveBrakingCoefficients predictiveBrakingCoefficients =
+            new PredictiveBrakingCoefficients(0.25,0.075,0.001).withMaximumBrakingPower(0.4);
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(14.3)
             .forwardZeroPowerAcceleration(-27.81051833)
@@ -45,6 +39,9 @@ public class ConstantsDecode {
 
             .useSecondaryDrivePIDF(false)
             .useSecondaryTranslationalPIDF(false)
+
+            .predictiveBrakingCoefficients(predictiveBrakingCoefficients)
+            .headingPIDFCoefficients(new PIDFCoefficients(1.3, 0, 0.045, 0.0005))
             ;
 
     public static MecanumConstants mecanumConstants = new MecanumConstants()
@@ -60,7 +57,7 @@ public class ConstantsDecode {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
 
             .useVoltageCompensation(true) // might be interesting
-            .nominalVoltage(12.6)
+            .nominalVoltage(12.8)
 
             .xVelocity(77.90633)
             .yVelocity(59.8);
@@ -68,8 +65,8 @@ public class ConstantsDecode {
     public static PinpointConstants pinpointConstants = new PinpointConstants()
             .hardwareMapName("pinpoint")
             .distanceUnit(DistanceUnit.METER)
-            .forwardPodY(-0.1165)
-            .strafePodX(-0.155)
+            .forwardPodY(-0.1119) // -0.1165
+            .strafePodX(-0.18467) // -0.155
             .yawScalar(1.000977114)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
@@ -82,7 +79,7 @@ public class ConstantsDecode {
             100,
             1.6,
             10,
-            1
+            0.97
     );
     public static PathConstraints pathConstraintsFarAuto = new PathConstraints(
             0.995,
@@ -92,7 +89,7 @@ public class ConstantsDecode {
             100,
             2,
             10,
-            1
+            0.97
     );
 
     public static Follower createFollowerDecode(HardwareMap hardwareMap) {

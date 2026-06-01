@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.draw;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;

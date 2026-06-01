@@ -115,6 +115,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double flywheelVelocity = 0;
     public static double lastFlywheelVelocity = 0;
     public static boolean shouldToAirSort = false;
+    public static double timeToTurnAirSortOff = 230;
     public static int camId = 0;
 
     /// ----------------- Limelight Stuff -----------------
@@ -160,6 +161,8 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer4 = 280; // close side
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
+    public static double mainTimerForSorting = 280;
+    public static double timerBothOnOneChannelTimerForSorting = 600;
     public static double timer_far_v2 = 120;
     public static double timer_close_v2 = 120;
     public static double timerToFireBothFromTheLeft = 900; // close side
@@ -437,6 +440,14 @@ public class MainTeleOpBlue extends LinearOpMode {
                 }
             }
 
+            if(!wantsToFireWithIntake && camId == 21 && calculatedLeftSensorDetectedBall == BallColorSet_Decode.Purple && calculatedRightSensorDetectedBall == BallColorSet_Decode.Purple)
+                shouldToAirSort = true;
+
+            if(camId != 21) shouldToAirSort = false;
+            if(!wantsToFireWithIntake && (calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green || calculatedRightSensorDetectedBall == BallColorSet_Decode.Green))
+                shouldToAirSort = false;
+
+
             //shooting
             if(((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && hasJustBeganFiring) /*&& hasBallInLeftChamber*/){ // hasSwitchedIntakeState for do once logic
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
@@ -655,7 +666,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         flywheelVelocity = robot.getMotorComponent("TurretSpinMotor").getVelocity();
         if(wantsToFireWithIntake && lastFlywheelVelocity - flywheelVelocity >= 100){
             //ballCounter++;
-            shouldToAirSort = false;
+            //shouldToAirSort = false; wayy too litle too late
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
@@ -967,13 +978,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // left right right
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timerToCloseGate),
-                        new StateAction("LeftGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
+                        new StateAction("LeftGateServo", "OPEN"), // left left
+                        new DelayAction(timerBothOnOneChannelTimerForSorting),
+                        new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
@@ -981,13 +988,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( // right right left
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToCloseGate),
-                        new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
+                        new StateAction("RightGateServo", "OPEN"), // right right
+                        new DelayAction(timerBothOnOneChannelTimerForSorting),
+                        new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
@@ -995,13 +998,12 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 3: // green isnt or is in intake
                 robot.executeNow(new ActionSequence( // right left right
-                        new StateAction("RightGateServo", "OPEN"),
+                        new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
+                        new StateAction("LeftGateServo", "OPEN"), // left
+                        new DelayAction(mainTimerForSorting),
+                        new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
@@ -1009,6 +1011,8 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
         }
     }
+    /*
+                            */
     public void firePGP(){
         int greenBallPosition = 3;
         if(calculatedRightSensorDetectedBall == BallColorSet_Decode.Green) greenBallPosition = 1; // green is on the right
@@ -1017,27 +1021,25 @@ public class MainTeleOpBlue extends LinearOpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // left right left
-                        new StateAction("LeftGateServo", "OPEN"),
+                        new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
+                        new StateAction("RightGateServo", "OPEN"), // right
+                        new DelayAction(mainTimerForSorting),
+                        new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 2: // if green is on the left
-                robot.executeNow(new ActionSequence( // right left right
-                        new StateAction("RightGateServo", "OPEN"),
+                robot.executeNow(new ActionSequence(// right left right
+                        new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
+                        new StateAction("LeftGateServo", "OPEN"), // left
+                        new DelayAction(mainTimerForSorting),
+                        new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
@@ -1045,13 +1047,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 3: // green ball is in intake
                 robot.executeNow(new ActionSequence( // right right left
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToCloseGate),
-                        new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
+                        new StateAction("RightGateServo", "OPEN"), // right right
+                        new DelayAction(timerBothOnOneChannelTimerForSorting),
+                        new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
@@ -1066,42 +1064,37 @@ public class MainTeleOpBlue extends LinearOpMode {
         else greenBallPosition = 3; // green is on the right
         switch (greenBallPosition) {
             case 1: // green on the right
-                robot.executeNow(new ActionSequence( // right right left
-                        new StateAction("RightGateServo", "OPEN"),
+                robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
+                        new StateAction("LeftGateServo", "OPEN"), // left
+                        new DelayAction(mainTimerForSorting),
+                        new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 2: // if green is on the left
-                robot.executeNow(new ActionSequence( //left left right
-                        new StateAction("LeftGateServo", "OPEN"),
+                robot.executeNow(new ActionSequence( //left right left
+                        new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        new DelayAction(timer1ForSorting),
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer2ForSorting),
-                        new StateAction("RightGateServo", "OPEN"),
+                        new StateAction("RightGateServo", "OPEN"), // right
+                        new DelayAction(mainTimerForSorting),
+                        new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
-            case 3: // green ball is in intake, cant actually sort this
-                robot.executeNow(new ActionSequence(
-                        new StateAction("RightGateServo", "OPEN"),
-                        new DelayAction(timerToCloseGate),
-                        new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer3),
-                        new StateAction("LeftGateServo", "OPEN"),
-                        new DelayAction(timer4),
-                        new StateAction("RightGateServo", "OPEN"),
+            case 3: // green ball is in intake, cant actually sort this airsort needed
+                robot.executeNow(new ActionSequence( // it willl fire right right left and try air sort
+                        new StateAction("RightGateServo", "OPEN"), // right right
+                        new GeneralAction(turnAirSortOff),
+                        new DelayAction(timerBothOnOneChannelTimerForSorting),
+                        new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(1000),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
@@ -1113,6 +1106,12 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     // ============================ Weird Stuff ============================
     Runnable stopMovingOuttakeGates = () -> {isMovingOuttakeGates = false;};
+    Runnable turnAirSortOff = () -> {
+        robot.executeNow(new ActionSequence(
+                new DelayAction(timeToTurnAirSortOff),
+                new GeneralAction(() -> shouldToAirSort = false)
+        ));
+    };
     public Pose passPose() {
         globalRobotPose = ComplexFollower.instance().getPose(); //Math.toRadians
         return globalRobotPose;

@@ -177,9 +177,7 @@ public class GlobalStorage {
         return grade1angle * distance + grade0angle;
     }
     public static double airSortingFunctionAngle(double distance) {
-        if (distance <= 0.8) return closeAngle;
-        if (distance >= 2.0) return farAngle; // Bottomed out at 100
-        return grade1angle * distance + grade0angle;
+        return closeAngle;
     }
 
     // ==========================================
@@ -187,9 +185,10 @@ public class GlobalStorage {
     // ==========================================
     public static double closeVelo = 1140;
     public static double grade1farVelo = 290;
-    public static double grade0farVelo = 555;
+    public static double grade0farVelo = 570;
     public static double grade1VeloClose = 200;
     public static double grade0VeloClose = 840;
+    public static double airSortBias = 70;
 
     public static double distanceToVelocityFunction(double distance) {
         if (distance <= 1.0) return closeVelo;
@@ -199,10 +198,10 @@ public class GlobalStorage {
     }
 
     public static double airSortingFunctionVelocity(double distance) {
-        if (distance <= 1.0) return closeVelo;
-        if (distance > 2.9)  return grade1farVelo * distance + grade0farVelo;
+        if (distance <= 1.0) return closeVelo + airSortBias;
+        if (distance > 2.9)  return grade1farVelo * distance + grade0farVelo + airSortBias;
 
-        return grade1VeloClose * distance + grade0VeloClose;
+        return grade1VeloClose * distance + grade0VeloClose + airSortBias;
     }
 
     // ==========================================
