@@ -98,7 +98,6 @@ public class GlobalStorage {
     //function for firing stuff
     public static Pose globalRobotPose = new Pose();
     public static Pose futureMoveActionTargetPose = new Pose();
-    public static Pose CalculatedByCameraBotPose = new Pose();
     public static int teamPipeline = 0;
     public static double redThreshold = 40;
 
@@ -189,6 +188,7 @@ public class GlobalStorage {
     public static double grade1VeloClose = 200;
     public static double grade0VeloClose = 840;
     public static double airSortBias = 70;
+    public static double timeToTurnAirSortOff = 230;
 
     public static double distanceToVelocityFunction(double distance) {
         if (distance <= 1.0) return closeVelo;
@@ -258,37 +258,59 @@ public class GlobalStorage {
         if (servoValue < 0.0) servoValue = 0.0;
         if (servoValue > 1.0) servoValue = 1.0;
 
-        return servoValue * 360;
+        return servoValue * 360; // ServoCompopnent devides by 360 before giving to servo so must pass it *360 before division
     }
 
     public static Pose relocalizeRobot(
-            double camX, double camY, double camDegrees,
-            double camOffsetX, double camOffsetY, double servoAngle) {
+            double rawCamX, double rawCamY, double camDegrees, TeamColor color,
+            double camOffsetX, double camOffsetY, double servoAngle,int numberOfTaggs) {
 
-        // --- PASUL 1: Calculăm unghiul absolut al robotului ---
-        // Mai întâi, convertim unghiul inversat al camerei în unghiul absolut al capului camerei (în sistemul robotului)
-        double absoluteCamAngle = 180.0 - camDegrees;
+        // --- PASUL 1: Configurația punctului de pornire (Snippet-ul tău) ---
+        double xStart = 0;
+        double yStart = 0;
+        if (color == TeamColor.Blue) {
+            xStart = -1.56; // for 2 tags
+            yStart = -0.385;
 
-        // Deoarece servoAngle este unghiul camerei FAȚĂ de robot (Camera = Robot + Servo),
-        // înseamnă că unghiul absolut al robotului este: Robot = Camera - Servo
-        double robotAngle = absoluteCamAngle - servoAngle;
+            if(numberOfTaggs == 1){
+                xStart = -1.54;
+                yStart = -0.305;
+            }
+        } else {
+            xStart = -1.57;
+            yStart = 0.4;
+            if(numberOfTaggs == 1){
+                xStart = -1.56;
+                yStart = 0.15;
+            }
+        }
 
-        // Normalizăm unghiul robotului între [-180, 180]
+        // --- PASUL 2: Calculăm unghiul fizic al turelei ---
+        double servoValue = servoAngle / 360.0;
+        double relativeTurretAngle = (servoValue - 0.49) * (90.0 / 0.29);
+
+        // --- PASUL 3: Rezolvăm Heading-ul Absolut al Robotului ---
+        // Potrivirea telemetry confirmă că adunarea unghiurilor rezolvă orientarea corectă
+        double robotAngle = camDegrees + relativeTurretAngle + 180.0;
+
+        // Normalizăm unghiul în intervalul [-180, 180] grade
         while (robotAngle > 180)  robotAngle -= 360;
         while (robotAngle <= -180) robotAngle += 360;
 
-        // --- PASUL 2: Rotim offset-ul fizic al camerei în coordonate globale ---
+        // --- PASUL 4: Rotim offset-ul curent al camerei ---
         double robotRad = Math.toRadians(robotAngle);
-
-        // Calculăm unde se află poziția relativă a camerei față de centrul robotului la acest unghi
         double rotatedOffsetX = camOffsetX * Math.cos(robotRad) - camOffsetY * Math.sin(robotRad);
         double rotatedOffsetY = camOffsetX * Math.sin(robotRad) + camOffsetY * Math.cos(robotRad);
 
-        // --- PASUL 3: Aflăm poziția robotului ---
-        // Robotul se află la poziția camerei MINUS acest offset rotit
-        double robotX = camX - rotatedOffsetX;
-        double robotY = camY - rotatedOffsetY;
+        // --- PASUL 5: Scalare și Aliniere la Originea Terenului (0, 0) ---
+        double scaleFactor = 40.6; // Multiplicatorul tău pentru pseudo-inches
 
-        return pose(robotX, robotY, robotAngle); // pose = return new Pose(x, y, Math.toRadians(degrees)); fyi
+        // Pentru a preveni deplasarea poziției de start din cauza turelei,
+        // scădem diferența dintre offset-ul rotit actual și offset-ul fizic inițial (la 0 grade).
+        double robotX = -scaleFactor * (rawCamX + xStart) + rotatedOffsetX - camOffsetX;
+        double robotY = -scaleFactor * (rawCamY - yStart) + rotatedOffsetY - camOffsetY;
+
+        // Returnează poziția calibrată gata de trimis în odometrie
+        return pose(robotX, robotY, robotAngle);
     }
 }

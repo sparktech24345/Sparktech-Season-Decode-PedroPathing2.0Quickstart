@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.CalculatedByCameraBotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_DISTANCE_MM;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_VOLTS;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.airSortingFunctionAngle;
@@ -23,6 +22,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.relocalizeRobot;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.timeToTurnAirSortOff;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -79,6 +79,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     /// ----------------- Target Pose Stuff ------------------
 
+    public static double robotToGoalAbsoluteAngle = 0;
+
     /// ----------------- Color Sensor Stuff ------------------
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
@@ -115,7 +117,6 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double flywheelVelocity = 0;
     public static double lastFlywheelVelocity = 0;
     public static boolean shouldToAirSort = false;
-    public static double timeToTurnAirSortOff = 230;
     public static int camId = 0;
 
     /// ----------------- Limelight Stuff -----------------
@@ -179,6 +180,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean isMovingOuttakeGates = false;
     public static boolean hasSwitchedIntakeState = false;
     public static double fakeRotation = 0;
+    public static double cameraImaginaryX = 110;
     public static Pose farPark = pose(117, 12, 90);
 
     public static double D2_velocityAdder = 0;
@@ -245,6 +247,10 @@ public class MainTeleOpBlue extends LinearOpMode {
         if (neededAngleForTurretRotation < 0) neededAngleForTurretRotation += 360;
 
         double camAngle = - calculateCameraAngle(camTargetX,camTargetY,robot.getCurrentPose(),camOffsetX,0);
+        double middleOfTheFieldY =0;
+        if(currentTeamColor == TeamColor.Blue) middleOfTheFieldY = -16; else middleOfTheFieldY = 16;
+        if(robotToGoalAbsoluteAngle > 20 && robotToGoalAbsoluteAngle < 38 && usedDistance > 3.4) // the params for the small triangle
+            camAngle = - calculateCameraAngle(cameraImaginaryX,middleOfTheFieldY,robot.getCurrentPose(),camOffsetX,0);
         cameraAngle = convertCamAngleToServoValue(camAngle);
         cameraAngle = clamp(cameraAngle,0,360); // de notat ca are range de 310 grade defapt
 
@@ -258,7 +264,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         RobotController.telemetry.addData("angle for camera", cameraAngle);
 
 
-        processCameraStuff(camAngle);
+        processCameraStuff(cameraAngle); // pass the thing that the servo gets
 
 
         /// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- Driver Buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -445,6 +451,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             if(camId != 21) shouldToAirSort = false;
             if(!wantsToFireWithIntake && (calculatedLeftSensorDetectedBall == BallColorSet_Decode.Green || calculatedRightSensorDetectedBall == BallColorSet_Decode.Green))
+                shouldToAirSort = false;
+            if(!isInSortedMode)
                 shouldToAirSort = false;
 
 
@@ -722,7 +730,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         hasBallInOuttake = false;
         wantsToTempOutputIntake = false;
         shouldResetRightSensorBall = false;
-        if (ballColorQueue == null) ballColorQueue = new BallColorQueue();
+        if (ballColorQueue == null) ballColorQueue = new BallColorQueue(); robotToGoalAbsoluteAngle = 0;
         ballColorQueue.clearQueue();
         ballToFire = BallColorSet_Decode.NoBall;
         sortingShootTimer.reset();
@@ -854,27 +862,10 @@ public class MainTeleOpBlue extends LinearOpMode {
                 RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
                 RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
 
-                Pose tempPose = relocalizeRobot(botpose.getPosition().x,botpose.getPosition().y,botpose.getOrientation().getYaw(AngleUnit.DEGREES),camOffsetX,0,camangle);
+                Pose tempPose = relocalizeRobot(botpose.getPosition().x,botpose.getPosition().y,botpose.getOrientation().getYaw(AngleUnit.DEGREES),
+                        currentTeamColor,camOffsetX,0,
+                        camangle,result.getBotposeTagCount());
 
-                double fieldlenght = 23.7*6; // in robot units 23.72 x 23.61 y
-                double magicConverterToInchX = 39.37;
-                double magicConverterToInchY = 39.37;
-
-                double x = tempPose.getX() * magicConverterToInchX;
-                x+= fieldlenght/2;
-                double y =0;
-
-                if(currentTeamColor == TeamColor.Blue){
-                    y = - tempPose.getY() * magicConverterToInchY;
-                    y -= fieldlenght/6; // one pad worth
-                }
-                else{
-                    y = botpose.getPosition().y * magicConverterToInchY;
-                    y -= fieldlenght/6; // one pad worth
-                }
-
-                CalculatedByCameraBotPose = new Pose(x,y,Math.toRadians(tempPose.getHeading()));
-                RobotController.telemetry.addData("Bots Calculated Estimative Position",CalculatedByCameraBotPose.toString());
                 RobotController.telemetry.addData("Bots Wanna be Position",tempPose.toString());
 
 
@@ -934,18 +925,18 @@ public class MainTeleOpBlue extends LinearOpMode {
     }
 
     public static void processTargetStuff(Pose pose, double targetX, double targetY) {
-        double degrees = Math.abs(angleFromTargetToRobot(pose, targetX, targetY));
+        robotToGoalAbsoluteAngle = Math.abs(angleFromTargetToRobot(pose, targetX, targetY));
 
-        if (degrees < 30) {
+        if (robotToGoalAbsoluteAngle < 30) {
             // alpha is 1.0 at 0 degrees (Full Right) and 0.0 at 30 degrees (Center)
-            double alpha = (30.0 - degrees) / 30.0;
+            double alpha = (30.0 - robotToGoalAbsoluteAngle) / 30.0;
             cfg.usedTargetX = lerp(cfg.targetXCenter, cfg.targetXRightPanel, alpha);
             cfg.usedTargetY = lerp(cfg.targetYCenter, cfg.targetYRightPanel, alpha);
 
-        } else if (degrees > 65) {
+        } else if (robotToGoalAbsoluteAngle > 65) {
             // alpha is 0.0 at 65 degrees (Center) and 1.0 at 90+ degrees (Full Left)
             // clamp alpha between 0 and 1 to prevent the target from sliding off the goal
-            double alpha = Math.min(1.0, (degrees - 65.0) / 25.0);
+            double alpha = Math.min(1.0, (robotToGoalAbsoluteAngle - 65.0) / 25.0);
             cfg.usedTargetX = lerp(cfg.targetXCenter, cfg.targetXLeftPanel, alpha);
             cfg.usedTargetY = lerp(cfg.targetYCenter, cfg.targetYLeftPanel, alpha);
 
@@ -955,7 +946,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             cfg.usedTargetY = cfg.targetYCenter;
         }
 
-        RobotController.telemetry.addData("Calculated Rotation", degrees);
+        RobotController.telemetry.addData("Calculated Rotation", robotToGoalAbsoluteAngle);
         RobotController.telemetry.addData("Target X", cfg.usedTargetX);
     }
 
@@ -981,7 +972,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left left
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -991,7 +982,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -1004,7 +995,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -1027,7 +1018,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -1040,17 +1031,17 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
                 break;
             case 3: // green ball is in intake
-                robot.executeNow(new ActionSequence( // right right left
+                robot.executeNow(new ActionSequence( // right right left1000
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -1071,7 +1062,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -1084,7 +1075,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -1095,7 +1086,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new GeneralAction(turnAirSortOff),
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(1000),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));

@@ -34,6 +34,9 @@ public class MainConfig {
     public static double targetXRightPanel;
     public static double targetYRightPanel;
 
+    public static double targetXForFarAuto;
+    public static double targetYForFarAuto;
+
     public static double targetXLeftPanel;
     public static double targetYLeftPanel;
 
@@ -55,7 +58,6 @@ public class MainConfig {
     public static double classifierResetX;
     public static double classifierResetY;
     public static double classifierResetDeg;
-
     public static TeamColor currentTeamColor;
 
     public MainConfig() {}
@@ -98,6 +100,9 @@ public class MainConfig {
 
                 targetXRightPanel = 127;
                 targetYRightPanel = 48;
+
+                targetXForFarAuto = 128;
+                targetYForFarAuto = 51.5;
 
                 targetXLeftPanel = 123;
                 targetYLeftPanel = 55;
@@ -154,6 +159,9 @@ public class MainConfig {
 
                 targetXRightPanel = 127;
                 targetYRightPanel = -43; //
+
+                targetXForFarAuto = 128;
+                targetYForFarAuto = -44.5; //
 
                 targetXLeftPanel = 121;
                 targetYLeftPanel = -55;
