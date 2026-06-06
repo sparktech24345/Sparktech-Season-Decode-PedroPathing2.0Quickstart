@@ -131,6 +131,6 @@ public class ComponentMakerMethods {
 
         robot.getComponent("TiltServos")
                 .addState("RETRACTED", 0.85*360,true) // 0.85
-                .addState("EXTENDED", 0.4*360); // 0.05
+                .addState("EXTENDED", 0.2*360); // 0.05
     }
 }

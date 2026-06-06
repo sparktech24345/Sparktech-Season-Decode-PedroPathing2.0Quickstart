@@ -126,11 +126,13 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose thirdRowCollectDone = pose(27, 45, 90); // third row done
     private Pose secondRowCollectDone = pose(48.7 + 1.5, 43.5, 90);
     private Pose firstRowCollectDone = pose(77.5 - 0.5, 38 + 2, 90);
-    private Pose gateCollect = pose(48 + 4.2, 46, 45); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
-    private Pose gateCollectSpecial = pose(47.9 + 4.2, 45, 45);
-    private Pose gateActualCollect = pose(51.9 + 4.2, 45, 55); // and this       aaaaaaaaaaaaaaaaa old y 46.2
-    private Pose gateActualCollectSpecial = pose(51 + 4.2, 45, 55);
-    private Pose gateHelperPoint = pose(30 + 4.2, 31, 55); // helper for the collect aaaaaaaaaaaaaaaaaaaaaa
+    private Pose gateCollect = pose(48 + 0.3 + 6, 45.5, 45); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
+    private Pose gateCollectSpecial = pose(47.9 + 0.3 + 6, 45.5,45);
+
+    private Pose gateActualCollect = pose(51.9 + 0.3 + 4, 45.5, 55); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
+    private Pose gateActualCollectSpecial = pose(51 + 0.3 + 4, 45.5, 55);
+
+    private Pose gateHelperPoint = pose(30 + 0.3 + 4, 36, 55); // helper for the collect aaaaaaaaaaaaaaaaaaaaaa
     private Pose gateHold = pose(50.8, 44, 90); // not used
     private Pose tipBigTriangleShooting = pose(67, 0, 180);
     private Pose tipBigTriangleShootingTurned90Deg = pose(67, 0, 90);
@@ -182,6 +184,10 @@ public class BigTriangleArtefactAuto extends OpMode {
                 pulseIntake(doIntakePulse);
                 checkToFireUnsortedBalls(shouldFireUnsortedBalls);
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateActualCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateActualCollectSpecial) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateCollectSpecial) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateHelperPoint) && !ComplexFollower.done()) ComplexFollower.interrupt();
 
                 robot.getServoComponent("CameraRotateServo")
                         .setTarget(cameraAngleOverite);
@@ -402,7 +408,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> collectNumber++),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(gateCollectSpecial,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollectSpecial,980),  //1100 at full 21, switched with new sensor
+                new HoldAction(gateActualCollectSpecial,1500),  //1100 at full 21, switched with new sensor
                 //new DelayAction(350),
                 new GeneralAction(() -> doIntakePulse = true),
 //                new GeneralAction(() -> shouldFireUnsortedBalls = true),

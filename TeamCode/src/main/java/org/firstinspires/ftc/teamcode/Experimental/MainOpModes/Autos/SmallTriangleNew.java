@@ -104,8 +104,8 @@ public class SmallTriangleNew extends OpMode {
     private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.6, 9.5, 90);
     private Pose parkPose = pose(1, 23.5, 90);
-    private Pose fininshHPCollectPose = pose(0,44,90); // hp collect
-    private Pose fininshHPCollectPoseNEW = pose(0,44,90); // hp collect
+    private Pose fininshHPCollectPose = pose(0.5,44,90); // hp collect
+    private Pose fininshHPCollectPoseNEW = pose(0.5,44,90); // hp collect
     private Pose secondZoneCameraCollect = pose(17.8 + 1, 44, 90); /// CHECK THIS slightly more up spot
     private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
     private Pose thirdRowCollectDone = pose(30, 42, 90); // third row done
