@@ -83,7 +83,7 @@ public class MainConfig {
 
                 //autoVelAdder = -20;
 
-                rotationForInitClsoeZone = 250;
+                rotationForInitClsoeZone = 135;
                 rotationForInitSmallTriangle = 90;
 
                 targetX = 130;
@@ -142,7 +142,7 @@ public class MainConfig {
 
                 //autoVelAdder = -20;
 
-                rotationForInitClsoeZone = 100;
+                rotationForInitClsoeZone = -135;
                 rotationForInitSmallTriangle = 270;
 
                 targetX = 130;

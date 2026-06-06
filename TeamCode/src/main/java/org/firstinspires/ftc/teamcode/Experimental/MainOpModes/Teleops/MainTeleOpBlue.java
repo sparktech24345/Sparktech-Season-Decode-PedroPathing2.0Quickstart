@@ -200,7 +200,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 ///==============================Camera turret stuff============================================
     public static double  maxiTurretAngle = 195;// de schimbat
     public static double cameraAngle=0;
-    public static double cameraAngleOverite=0;
+    public static double cameraAngleOverite=176;
     public static double miniTurretAngle = 165;//de schimbat
     public static double cameraModifier = 0;
 
@@ -281,7 +281,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         if(robot.getKey("DPAD_RIGHT1").ExecuteOnPress || robot.getKey("RIGHT_BUMPER2").ExecuteOnPress){
             robot.executeNow(new ActionSequence( // reverse for a bit
                     new GeneralAction(() -> wantsToTempOutputIntake = true),
-                    new DelayAction(60),
+                    new DelayAction(45),
                     new GeneralAction(() -> wantsToTempOutputIntake = false)
                     ));
         }
@@ -377,9 +377,9 @@ public class MainTeleOpBlue extends LinearOpMode {
             D2_velocityAdder -= 10;
         }
 
-        if (robot.getKey("DPAD_DOWN2").IsHeld && robot.getKey("DPAD_UP2").IsHeld) {
-            D2_velocityAdder = 0;
-        }
+//        if (robot.getKey("DPAD_DOWN2").IsHeld && robot.getKey("DPAD_UP2").IsHeld) {
+//            D2_velocityAdder = 0;
+//        }
 
         if (robot.getKey("DPAD_RIGHT2").ExecuteOnPress) {
             D2_rotationAdder += 1;
@@ -389,9 +389,9 @@ public class MainTeleOpBlue extends LinearOpMode {
             D2_rotationAdder -= 1;
         }
 
-        if (robot.getKey("DPAD_RIGHT2").IsHeld && robot.getKey("DPAD_LEFT2").IsHeld) {
-            D2_rotationAdder = 0;
-        }
+//        if (robot.getKey("DPAD_RIGHT2").IsHeld && robot.getKey("DPAD_LEFT2").IsHeld) {
+//            D2_rotationAdder = 0;
+//        }
 
         if(robot.getKey("RIGHT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
             ComplexFollower.instance().setPose(pose(cfg.hpResetX, cfg.hpResetY, cfg.hpResetDeg));
@@ -529,7 +529,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         else intakeState = 0;
 
         if(wantsToTempOutputIntake)
-            intakeState = -1;
+            intakeState = 0;
 
         if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && Math.abs(tempTurret.getError()) > 15)
             intakeState = 0;
