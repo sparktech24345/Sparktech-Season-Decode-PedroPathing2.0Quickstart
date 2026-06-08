@@ -103,6 +103,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean wantsToTempOutputIntake = false;
     public static boolean shouldResetRightSensorBall = false;
     public static boolean ShouldSpewOutSensors = false;
+    public static boolean disableTurret = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
 
     /// ----------------- Limelight Stuff -----------------
@@ -285,6 +286,8 @@ public class MainTeleOpBlue extends LinearOpMode {
                     new GeneralAction(() -> wantsToTempOutputIntake = false)
                     ));
         }
+
+        if(robot.getKey("LEFT_STICK_BUTTON1").ExecuteOnPress) disableTurret = !disableTurret;
 
 
 
@@ -677,6 +680,12 @@ public class MainTeleOpBlue extends LinearOpMode {
             //shouldToAirSort = false; wayy too litle too late
         }
 
+
+        if(disableTurret){
+            tempTurret.setOperationMode(MotorComponent.MotorModes.Power).setTarget(0);
+            robot.getMotorComponent("TurretSpinMotor").setOperationMode(MotorComponent.MotorModes.Power).setTarget(0);
+        }
+
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
         robot.spitFollowerTelemetry();
         RobotController.telemetry.addData("target vel",targetVelocity);
@@ -730,6 +739,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         hasBallInOuttake = false;
         wantsToTempOutputIntake = false;
         shouldResetRightSensorBall = false;
+        disableTurret = false;
         if (ballColorQueue == null) ballColorQueue = new BallColorQueue(); robotToGoalAbsoluteAngle = 0;
         ballColorQueue.clearQueue();
         ballToFire = BallColorSet_Decode.NoBall;

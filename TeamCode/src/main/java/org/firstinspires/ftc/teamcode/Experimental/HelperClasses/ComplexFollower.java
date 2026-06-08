@@ -313,7 +313,8 @@ public class ComplexFollower {
 
     public static void interrupt() {
         if (follower == null) return;
-        if (follower.isBusy()) follower.breakFollowing();
+//        if (follower.isBusy()) follower.breakFollowing();
+        follower.breakFollowing();
     }
 
     public static void telemetry() {

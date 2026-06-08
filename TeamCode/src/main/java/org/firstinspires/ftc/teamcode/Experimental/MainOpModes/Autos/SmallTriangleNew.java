@@ -103,10 +103,11 @@ public class SmallTriangleNew extends OpMode {
     public static int wentTooNumber2 =23;
     private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.6, 9.5, 90);
+    private Pose small_triangle_shootForSpecial = pose(5, 2, 90);
     private Pose parkPose = pose(1, 23.5, 90);
     private Pose fininshHPCollectPose = pose(0.5,44,90); // hp collect
     private Pose fininshHPCollectPoseNEW = pose(0.5,44,90); // hp collect
-    private Pose secondZoneCameraCollect = pose(17.8 + 1, 44, 90); /// CHECK THIS slightly more up spot
+    private Pose secondZoneCameraCollect = pose(19 + 1, 44, 90); /// CHECK THIS slightly more up spot
     private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
     private Pose thirdRowCollectDone = pose(30, 42, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
@@ -119,6 +120,7 @@ public class SmallTriangleNew extends OpMode {
     private Pose autoCloseStart = pose(123.1, 30.4, -129);
     private Pose gateOpen = pose(60.1, 36.7, 90);
     private Pose bezierHelper1 = pose(32, 4, 90);
+    private Pose bezierHelper2 = pose(22, -12, 75);
 
     @Override
     public void init() {
@@ -281,10 +283,10 @@ public class SmallTriangleNew extends OpMode {
 
 
 
-                // 7th cycle, camera collecting
+                // 7th cycle, camera collecting CUSTOM CYCLE
                 new GeneralAction(scanForBallsAndPlanPath),
                 // actual collect and firing
-                new MoveAction(true),
+                new MoveAction(secondZoneCameraCollect,BezierCurveTypes.ConstantHeading,bezierHelper2.getHeading(), bezierHelper2),
                 new DelayAction(300),
                 new GeneralAction(() -> doIntakePulse = true),
 //                new GeneralAction(() -> shouldFireUnsortedBalls = true),
@@ -713,6 +715,7 @@ public class SmallTriangleNew extends OpMode {
         autoCloseStart = convertPose(autoCloseStart);
         gateOpen = convertPose(gateOpen);
         bezierHelper1 = convertPose(bezierHelper1);
+        bezierHelper2 = convertPose(bezierHelper2);
     }
     public Pose convertPose(Pose pose) {
         return pose;

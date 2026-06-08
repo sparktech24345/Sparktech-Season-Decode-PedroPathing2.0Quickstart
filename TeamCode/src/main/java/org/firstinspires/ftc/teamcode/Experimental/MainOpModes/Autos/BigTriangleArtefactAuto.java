@@ -126,11 +126,11 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose thirdRowCollectDone = pose(27, 45, 90); // third row done
     private Pose secondRowCollectDone = pose(48.7 + 1.5, 43.5, 90);
     private Pose firstRowCollectDone = pose(77.5 - 0.5, 38 + 2, 90);
-    private Pose gateCollect = pose(48 + 0.3 + 6, 45.5, 45); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
-    private Pose gateCollectSpecial = pose(47.9 + 0.3 + 6, 45.5,45);
+    private Pose gateCollect = pose(48 + 0.3 + 4.5, 46, 55); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
+    private Pose gateCollectSpecial = pose(47.9 + 0.3 + 4.5, 46,55);
 
-    private Pose gateActualCollect = pose(51.9 + 0.3 + 4, 45.5, 55); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
-    private Pose gateActualCollectSpecial = pose(51 + 0.3 + 4, 45.5, 55);
+    private Pose gateActualCollect = pose(51.9 + 0.3 + 2.5, 46, 60); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
+    private Pose gateActualCollectSpecial = pose(51 + 0.3 + 2.5, 46, 60);
 
     private Pose gateHelperPoint = pose(30 + 0.3 + 4, 36, 55); // helper for the collect aaaaaaaaaaaaaaaaaaaaaa
     private Pose gateHold = pose(50.8, 44, 90); // not used
@@ -138,7 +138,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose tipBigTriangleShootingTurned90Deg = pose(67, 0, 90);
     private Pose middleBigTriangleShooting = pose(87, 0, 180);
     private Pose middleBigTriangleShootingTurned90Deg = pose(87, 0, 90);
-    private Pose parkedBigTriangleShooting = pose(98, 4.5, 180);
+    private Pose parkedBigTriangleShooting = pose(115, 4.5, 180);
     private Pose gateOpen = pose(59, 44, 90); // actual gate opener
     private Pose gateOpenHelper = pose(48, 30, 90);
     private Pose gateSecond = pose(57, 30, 90);
