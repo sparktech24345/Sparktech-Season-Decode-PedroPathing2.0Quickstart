@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
-@Autonomous(name="Big Triangle Auto RED ! SORTED !", group = "AAA")
+@Autonomous(name="\uD83D\uDD34 Big Triangle Auto RED ! SORTED !", group = "AAA")// 🔴
 public class BigTriangleArtefactAutoREDSORTED extends BigTriangleArtefactAutoRED {
     @Override
     public void methodToOverWrite(){

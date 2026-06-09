@@ -29,6 +29,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
+@Disabled
 @Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
 public class BigTriangleArtefactAuto extends OpMode {
     public RobotController robot;
@@ -107,7 +109,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     public static double velocityAdderOnTheGo = 210;
     public static double rotationOnTheGo = 2;
     public static double angleOnTheGo = 170; // old 155
-    public static double cameraAngleOverite = 176;
+    public static double cameraAngleOverite = 0;
     BallColorQueue ballColorQueue = new BallColorQueue();
     public static boolean shouldFire = false;
     public static boolean shouldFireUnsortedBalls = false;
@@ -179,7 +181,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
             private void controls() { // this will happen in a loop
                 isMoving = ComplexFollower.instance().isBusy();
-                if(shouldUseColorSensors) handleColors();
+                if(true) handleColors(); // for now always do this
                 firingTurret(shouldFire);
                 pulseIntake(doIntakePulse);
                 checkToFireUnsortedBalls(shouldFireUnsortedBalls);
@@ -189,25 +191,16 @@ public class BigTriangleArtefactAuto extends OpMode {
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateCollectSpecial) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(gateHelperPoint) && !ComplexFollower.done()) ComplexFollower.interrupt();
 
-                robot.getServoComponent("CameraRotateServo")
-                        .setTarget(cameraAngleOverite);
-
-//                if (    (hasBallInIntake && hasBallInLeftChamber && hasBallInRightChamber)
-//                        && ComplexFollower.getTarget().equals(gateActualCollect)
-//                        && !shouldMakeAutoWithout3rdRow
-//                        && !shouldMakeSortedAuto){
-//                    ComplexFollower.setStopHolding(true);
-//                    hasLeftIntentionally = true;
-//                }
+                cameraStuffUpdates(cfg.targetForClassifierX,cfg.targetForClassifierY);
 
                 distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.targetXAutoClose, cfg.targetYAutoClose);
 
-
                 if (startAuto) {
                     startAuto = false;
-                    if(shouldMakeAutoWithout3rdRow) makeLeverAutoWithout3rdRow();
-                    else if(shouldMakeSortedAuto) makeSortedAuto();
-                    else makeLeverAuto();
+//                    if(shouldMakeAutoWithout3rdRow) makeLeverAutoWithout3rdRow();
+//                    else if(shouldMakeSortedAuto) makeSortedAuto();
+//                    else makeLeverAuto();
+                    makeSortedAuto();
                     shouldMakeSortedAuto = false;
                     shouldMakeAutoWithout3rdRow = false;
                 }
@@ -275,102 +268,6 @@ public class BigTriangleArtefactAuto extends OpMode {
             throw new RuntimeException(e);
         }
     }
-    /// =============================== Lever Auto ============================
-
-
-    public void makeLeverAuto(){
-        robot.addToQueue(
-                /// prep and firing preload
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(() -> shouldFire = true),
-                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = true),
-                new GeneralAction(makeFireUnsortedBalls(550)),
-                new MoveAction(middleBigTriangleShooting),//false,BezierCurveTypes.TangentHeading,0),
-                //new DelayAction(800),
-                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = false),
-                /// finished preload and path
-
-
-
-                /// second row
-                new GeneralAction(() -> collectNumber++),
-                //new MoveAction(second_row_ready),
-                new MoveAction(secondRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
-                new GeneralAction(() -> shouldFireUnsortedBalls = true),
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
-                //new GeneralAction(fireUnsortedBalls),
-                new DelayAction(675),
-                /// end of second row firing
-
-
-                /// collecting lever pose
-                new GeneralAction(() -> collectNumber++),
-                new GeneralAction(() -> shouldUseColorSensors = true),
-                new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1100),  //1100 at full 21, switched with new sensor
-                //new DelayAction(350),
-                new GeneralAction(() -> doIntakePulse = true),
-                new GeneralAction(() -> shouldFireUnsortedBalls = true),
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
-                //new GeneralAction(fireUnsortedBalls),
-                new DelayAction(675),
-                ///finished gate collect
-
-
-                /// collecting lever pose number 2
-                new GeneralAction(() -> collectNumber++),
-                new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1100), //1100 at full 21, switched with new sensor
-                //new DelayAction(800),
-                new GeneralAction(() -> doIntakePulse = true),
-                new GeneralAction(() -> shouldFireUnsortedBalls = true),
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
-                //new GeneralAction(fireUnsortedBalls),
-                new DelayAction(675),
-                ///finished gate collect number 2
-
-
-                /// collecting lever pose number 3
-                new GeneralAction(() -> collectNumber++),
-                new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1100), //1100 at full 21, switched with new sensor
-                //new DelayAction(800),
-                new GeneralAction(() -> shouldUseColorSensors = false),
-                new GeneralAction(() -> doIntakePulse = true),
-                new GeneralAction(() -> shouldFireUnsortedBalls = true),
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
-                //new GeneralAction(fireUnsortedBalls),
-                new DelayAction(675),
-                ///finished gate collect number 3
-
-
-                /// collecting the first row
-                new GeneralAction(() -> collectNumber++),
-                new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
-                new GeneralAction(() -> doIntakePulse = true),
-                new GeneralAction(() -> shouldFireUnsortedBalls = true),
-                new MoveAction(tipBigTriangleShooting),
-                //new GeneralAction(fireUnsortedBalls),
-                new DelayAction(675),
-                /// end of first row firing
-
-
-                /// beginning of third row collect
-                new GeneralAction(() -> collectNumber++),
-                new MoveAction(thirdRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
-                new GeneralAction(() -> doIntakePulse = true),
-                new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1300),
-                ///end of third row firing
-
-                //shut up after parking
-                new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(turnStuffOff)
-        );
-    }
-
-
 
      ///  =============================== Make Sorted Auto ===============================
 
@@ -387,7 +284,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 /// finished preload and path
 
 
-//                new GeneralAction(() -> limelight3A.pipelineSwitch(8)), // preactivly switch pipeline
+                new GeneralAction(() -> limelight3A.pipelineSwitch(5)), // preactivly switch pipeline this one is temp with masc color detection
 
                 /// second row ( unsorted speed )
                 /// second row
@@ -400,7 +297,6 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(750),
                 /// end of second row firing
-
 
                 /// unsorted lever
 
@@ -420,26 +316,24 @@ public class BigTriangleArtefactAuto extends OpMode {
 
 
 
-
-
-                /// collecting lever pose 2nd time and sorted`12
+                /// collecting lever pose 2nd time and sorted first time
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
                 new HoldAction(gateActualCollect,1530),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
-                // gate holding comes here
-//                new MoveAction(gateSecond),
-//                new HoldAction(gateOpen,1200), /// no more doing this
                 new GeneralAction(() -> doIntakePulse = true),
+
+                //before leaving to the position of firing trigger a delay actioned thing to scan and process the classifier ( count the balls) probably needs timer tuned
+                new GeneralAction(countBallsInClassifierWithDelay),
+                new GeneralAction(processCameraScanning),
+
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
+                new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1100),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 ///finished gate collect
-
-
-//                new GeneralAction(() -> limelight3A.pipelineSwitch(9)), // preactivly switch pipeline
 
 
                 /// collecting the first row
@@ -447,12 +341,15 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
-//                new DelayAction(200),
-//                new GeneralAction(countBallsInClassifierWithDelay),
+
+
+                //before leaving to the position of firing trigger a delay actioned thing to scan and process the classifier ( count the balls) probably needs timer tuned
+                new GeneralAction(countBallsInClassifierWithDelay),
+                new GeneralAction(processCameraScanning),
+
+
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
-//                new DelayAction(200),
-//                new GeneralAction(processCameraScanning),
-//                new DelayAction(150),
+                new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1100),
                 new GeneralAction(() -> shouldUseColorSensors = false),
@@ -465,14 +362,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
 //                new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = true),
+
+                //before leaving to the position of firing trigger a delay actioned thing to scan and process the classifier ( count the balls) probably needs timer tuned
+                new GeneralAction(countBallsInClassifierWithEndOfAutoDelay),
+                new GeneralAction(processCameraScanning),
+
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
-//                new DelayAction(300),
-//                new GeneralAction(countBallsInClassifier),
-//                new DelayAction(300),
-//                new GeneralAction(processCameraScanning),
-//                new DelayAction(200),
-//                new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = false),
-//                new DelayAction(150),
+                new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1100),
                 new GeneralAction(() -> shouldUseColorSensors = false),
@@ -483,86 +379,6 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(turnStuffOff)
         );
     }
-
-
-    public void makeLeverAutoWithout3rdRow(){
-        robot.addToQueue(
-                /// prep and firing preload
-                new StateAction("IntakeMotor","FULL"),
-                new GeneralAction(() -> shouldFire = true),
-                new GeneralAction(() -> shouldUseColorSensors = false),
-                new MoveAction(middleBigTriangleShooting),//false,BezierCurveTypes.TangentHeading,0),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
-                /// finished preload and path
-
-
-
-                /// second row
-                new GeneralAction(() -> collectNumber++),
-                //new MoveAction(second_row_ready),
-                new MoveAction(secondRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
-                /// end of second row firing
-
-
-                /// collecting lever pose
-                new GeneralAction(() -> collectNumber++),
-                new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,1400), //1200
-                //new DelayAction(350),
-                new GeneralAction(() -> doIntakePulse = true),
-
-                /// give balls cuz u have third row stuff
-                new MoveAction(gateSecond),
-                new HoldAction(gateOpen,1000),
-
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
-                ///finished gate collect
-
-
-                /// collecting lever pose number 2
-                new GeneralAction(() -> collectNumber++),
-                new MoveAction(gateCollect,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new HoldAction(gateActualCollect,2100), //1800
-                //new DelayAction(800),
-                new GeneralAction(() -> doIntakePulse = true),
-                new GeneralAction(() -> shouldUseColorSensors = true),
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
-                new GeneralAction(() -> shouldUseColorSensors = false),
-                ///finished gate collect number 2
-
-
-                /// collecting the first row
-                new GeneralAction(() -> collectNumber++),
-                new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
-                new GeneralAction(() -> doIntakePulse = true),
-                new GeneralAction(() -> shouldUseColorSensors = true),
-                //new MoveAction(tipBigTriangleShooting),
-                new GeneralAction(() -> shouldUseColorSensors = false),
-                /// end of first row firing
-
-                new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
-                ///firing here
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
-                /// no more third row
-
-
-                //shut up after parking
-                new StateAction("IntakeMotor","OFF"),
-                new GeneralAction(turnStuffOff)
-        );
-    }
-
-
-
 
     /// Runnables
     public static double FAR_TARGET_VELOCITY = 1240;
@@ -951,7 +767,25 @@ public class BigTriangleArtefactAuto extends OpMode {
         globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
-    public Runnable countBallsInClassifier = () -> {
+    public Runnable countBallsInClassifierWithColorDetection = () -> {
+        double countedBalls = 0;
+
+        LLResult llResult = limelight3A.getLatestResult();
+        limelight3A.captureSnapshot("HpSnap");
+
+        if (llResult != null) {
+            double[] pythonData = llResult.getPythonOutput();
+            if (pythonData.length > 0) {
+                countedBalls = pythonData[0] + pythonData[1];
+                RobotController.telemetry.addData("counted balls via masc detection", countedBalls);
+            }
+        }
+
+        detectedBalls = (int) countedBalls;
+
+        limelight3A.captureSnapshot("Classifier scan" + timer.milliseconds());
+    };
+    public Runnable countBallsInClassifierWithBallDetection = () -> {
         List<String> ball_colors = new ArrayList<>();
         int countedBalls = 0;
         LLResult result = limelight3A.getLatestResult();
@@ -1041,10 +875,24 @@ public class BigTriangleArtefactAuto extends OpMode {
         RobotController.telemetry.addData("shouldHoldTurretForClassifierScanNumber2", shouldHoldTurretForClassifierScanNumber2);
         limelight3A.captureSnapshot("Classifier scan" + timer.milliseconds());
     };
+    public void cameraStuffUpdates(double targetX, double targetY){
+        double camAngle = - calculateCameraAngle(targetX,targetY,robot.getCurrentPose(),camOffsetX,0);
+        double cameraAngle = convertCamAngleToServoValue(camAngle);
+        cameraAngle = clamp(cameraAngle,0,360); // de notat ca are range de 310 grade defapt
+
+        robot.getServoComponent("CameraRotateServo")
+                .setTarget((eval(cameraAngleOverite) ? cameraAngleOverite : cameraAngle));
+    }
     public Runnable countBallsInClassifierWithDelay = () -> {
         robot.executeNow(new ActionSequence(
-                new DelayAction(600),
-                new GeneralAction(countBallsInClassifier)
+                new DelayAction(500),
+                new GeneralAction(countBallsInClassifierWithColorDetection)
+        ));
+    };
+    public Runnable countBallsInClassifierWithEndOfAutoDelay = () -> {
+        robot.executeNow(new ActionSequence(
+                new DelayAction(750),
+                new GeneralAction(countBallsInClassifierWithColorDetection)
         ));
     };
     public Runnable processClassifierAndSwitchMotif = () -> {
@@ -1060,6 +908,12 @@ public class BigTriangleArtefactAuto extends OpMode {
         //backup
         if(camId > 23) camId -= 3;
     };
+    public Runnable runAirSortChecks = () -> {
+        if(camId == 21 && calculatedLeftSensorDetectedBall == BallColorSet_Decode.Purple && calculatedRightSensorDetectedBall == BallColorSet_Decode.Purple)
+            shouldToAirSort = true;
+
+        if(camId != 21) shouldToAirSort = false;
+    };
     Runnable turnAirSortOff = () -> {
         robot.executeNow(new ActionSequence(
                 new DelayAction(timeToTurnAirSortOff),
@@ -1068,10 +922,6 @@ public class BigTriangleArtefactAuto extends OpMode {
     };
     public Runnable processCameraScanning = () -> {
         robot.executeNow(new GeneralAction(processClassifierAndSwitchMotif)
-//                new ActionSequence(
-//                        new DelayAction(500),
-//
-//                )
         );
     };
     public void methodToOverWrite(){

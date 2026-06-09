@@ -59,7 +59,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 @Config
-@TeleOp(name="Main TeleOp Blue", group="AAA")
+@TeleOp(name="\uD83D\uDD35 Main TeleOp Blue", group="AAA") // 🔵
 public class MainTeleOpBlue extends LinearOpMode {
     protected RobotController robot;
     //public static double targetVoltageForSpinMotors = 12.6;

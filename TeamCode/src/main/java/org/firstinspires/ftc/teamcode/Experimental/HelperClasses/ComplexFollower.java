@@ -172,6 +172,9 @@ public class ComplexFollower {
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
 
+        currentTargetPos = targetPos;
+
+
         Pose toUsePose;
 //        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;
 //        else toUsePose = lastTargetPose;
@@ -208,6 +211,9 @@ public class ComplexFollower {
         if (follower == null) return;
         if (follow_timer == null) follow_timer = new ElapsedTime();
         else follow_timer.reset();
+
+        currentTargetPos = targetPos;
+
 
         Pose toUsePose;
 //        if(lastTargetPose.distanceFrom(currentPos) > 5) toUsePose = currentPos;

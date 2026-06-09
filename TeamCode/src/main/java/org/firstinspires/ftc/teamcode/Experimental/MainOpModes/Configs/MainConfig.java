@@ -73,7 +73,7 @@ public class MainConfig {
                 targetForCameraX = 11.5; // this is the hp stuff prev 12
                 targetForCameraY = 50;
 
-                targetForClassifierX = 75;
+                targetForClassifierX = 80;
                 targetForClassifierY = 47;
 
                 targetForClassifierXNumber2= 85;
@@ -92,8 +92,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = 41;
 
-                targetXAutoClose = 127;
-                targetYAutoClose = 50;
+                targetXAutoClose = 128.5;
+                targetYAutoClose = 51.5;
 
                 targetXCenter = 128; // 130
                 targetYCenter = 53;
@@ -132,7 +132,7 @@ public class MainConfig {
                 targetForCameraY = -50;
 
 
-                targetForClassifierX = 75;
+                targetForClassifierX = 80;
                 targetForClassifierY = -47;
 
                 targetForFirstClassifierScan = 345;
@@ -151,8 +151,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = -41;
 
-                targetXAutoClose = 127;
-                targetYAutoClose = -43;
+                targetXAutoClose = 128;
+                targetYAutoClose = -44.5;
 
                 targetXCenter = 128; // 130
                 targetYCenter = -53;

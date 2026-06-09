@@ -54,7 +54,7 @@ import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfi
 import java.util.List;
 
 @Config
-@Autonomous(name = "Small Triangle Auto BLUE", group = "AAA")
+@Autonomous(name = "\uD83D\uDD35 Small Triangle Auto BLUE", group = "AAA") // 🔵
 public class SmallTriangleNew extends OpMode {
     private RobotController robot;
     //private AutoRecorder recorder;

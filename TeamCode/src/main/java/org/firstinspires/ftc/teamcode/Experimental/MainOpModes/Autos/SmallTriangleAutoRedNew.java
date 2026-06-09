@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Tea
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
-@Autonomous(name = "Small Triangle Auto RED",group = "AAA")
+@Autonomous(name = "\uD83D\uDD34 Small Triangle Auto RED",group = "AAA") // 🔴
 public class SmallTriangleAutoRedNew extends SmallTriangleNew {
     public void makeConfig(){
         cfg = new MainConfig(MainConfig.Configs.Red);
