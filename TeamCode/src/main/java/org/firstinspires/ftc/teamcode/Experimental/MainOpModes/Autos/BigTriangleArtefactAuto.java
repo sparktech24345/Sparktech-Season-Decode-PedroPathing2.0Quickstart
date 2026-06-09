@@ -323,12 +323,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new GeneralAction(() -> doIntakePulse = true),
+                new MoveAction(tipBigTriangleShootingTurned90Deg),
 
-                //before leaving to the position of firing trigger a delay actioned thing to scan and process the classifier ( count the balls) probably needs timer tuned
-                new GeneralAction(countBallsInClassifierWithDelay),
+                // the camera should already be turned to the correct position
+                new GeneralAction(countBallsInClassifierWithColorDetection),
                 new GeneralAction(processCameraScanning),
 
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1100),
@@ -341,14 +341,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(firstRowCollectDone,true,BezierCurveTypes.LinearHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
+                new MoveAction(tipBigTriangleShootingTurned90Deg),
 
-
-                //before leaving to the position of firing trigger a delay actioned thing to scan and process the classifier ( count the balls) probably needs timer tuned
-                new GeneralAction(countBallsInClassifierWithDelay),
+                // the camera should already be turned to the correct position
+                new GeneralAction(countBallsInClassifierWithColorDetection),
                 new GeneralAction(processCameraScanning),
 
-
-                new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1100),
@@ -363,11 +361,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> shouldUseColorSensors = true),
 //                new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = true),
 
-                //before leaving to the position of firing trigger a delay actioned thing to scan and process the classifier ( count the balls) probably needs timer tuned
-                new GeneralAction(countBallsInClassifierWithEndOfAutoDelay),
+                new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
+
+                // the camera should already be turned to the correct position
+                new GeneralAction(countBallsInClassifierWithColorDetection),
                 new GeneralAction(processCameraScanning),
 
-                new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
                 new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1100),
