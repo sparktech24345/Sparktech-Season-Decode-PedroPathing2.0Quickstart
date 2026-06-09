@@ -157,10 +157,10 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer5 = 0;
     public static double timer6 = 0;
     public static double outtakeReversingTime = 180;
-    public static double timer1 = 50; // far side
-    public static double timer2 = 280; // far side
+    public static double timer1 = 10; // smol
+    public static double timer2 = 320; // far side
     public static double timer3 = 0; // close side
-    public static double timer4 = 280; // close side
+    public static double timer4 = 320; // close side
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
     public static double mainTimerForSorting = 280;
@@ -467,7 +467,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer1),
+                            new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer2),
                             new StateAction("RightGateServo", "OPEN")//                            new StateAction("LeftGateServo", "OPEN"),
@@ -482,7 +482,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer3),
+                            new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer4),
                             new StateAction("RightGateServo", "OPEN")
@@ -1002,6 +1002,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
@@ -1025,6 +1026,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(timer1),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
@@ -1038,6 +1040,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
@@ -1069,6 +1072,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
@@ -1082,6 +1086,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(timer1),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left

@@ -44,6 +44,7 @@ public class MainConfig {
     public static double usedTargetY;
 
     public static double targetForCameraX;
+    public static double targetForCameraX2ndTime;
     public static double targetForCameraY;
     public static double targetForClassifierX;
     public static double targetForClassifierXNumber2;
@@ -70,7 +71,8 @@ public class MainConfig {
                 farZoneCameraAdder = 0;
                 autoZoneAdderFar = 0;
 
-                targetForCameraX = 11.5; // this is the hp stuff prev 12
+                targetForCameraX = 10.5; // this is the hp stuff prev 12
+                targetForCameraX2ndTime = 46; // this is the hp stuff prev 12
                 targetForCameraY = 50;
 
                 targetForClassifierX = 80;
@@ -128,7 +130,8 @@ public class MainConfig {
                 autoZoneAdderFar = 0;
 
 
-                targetForCameraX = 11.5; // this is the hp stuff prev 12
+                targetForCameraX = 10.5; // this is the hp stuff prev 12
+                targetForCameraX2ndTime = 46; // this is the hp stuff prev 12
                 targetForCameraY = -50;
 
 

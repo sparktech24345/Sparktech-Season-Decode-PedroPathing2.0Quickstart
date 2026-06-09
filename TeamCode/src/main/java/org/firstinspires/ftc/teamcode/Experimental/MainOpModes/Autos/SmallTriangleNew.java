@@ -1,17 +1,14 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.camTargetX;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.camTargetY;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.currentTeamColor;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.ballInAirTime;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.cameraImaginaryX;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.mainTimerForSorting;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer1;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer2;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer3;
-import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer4;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerBothOnOneChannelTimerForSorting;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToCloseGate;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vMultiplier;
@@ -62,6 +59,7 @@ public class SmallTriangleNew extends OpMode {
     public static MainConfig cfg;
     private boolean shouldFire;
     public static boolean isMoving;
+    public static boolean scanning2nd;
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime resetLeftBallColorTimer = new ElapsedTime();
     public static boolean doIntakePulse = false;
@@ -101,15 +99,16 @@ public class SmallTriangleNew extends OpMode {
     public static double rotationNeededForCameraScan = 13; // about 13 degrees to scan with limelight
     public static int camId =23;
     public static int wentTooNumber2 =23;
+    public static int cameraCase =0;
     private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.6, 9.5, 90);
     private Pose small_triangle_shootForSpecial = pose(5, 2, 90);
     private Pose parkPose = pose(1, 23.5, 90);
-    private Pose fininshHPCollectPose = pose(0.5,44,90); // hp collect
-    private Pose fininshHPCollectPoseNEW = pose(0.5,44,90); // hp collect
-    private Pose secondZoneCameraCollect = pose(19 + 1, 44, 90); /// CHECK THIS slightly more up spot
-    private Pose thirdZoneCameraCollect = pose(33.96, 44, 90);
-    private Pose thirdRowCollectDone = pose(30, 42, 90); // third row done
+    private Pose fininshHPCollectPose = pose(0.5,45,90); // hp collect
+    private Pose fininshHPCollectPoseNEW = pose(0.5,45,90); // hp collect
+    private Pose secondZoneCameraCollect = pose(18, 45, 90); /// CHECK THIS slightly more up spot
+    private Pose thirdZoneCameraCollect = pose(37, 45, 90);
+    private Pose thirdRowCollectDone = pose(30, 43, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
     private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
     private Pose gateCollect = pose(53.8, 40.2, 70);
@@ -141,10 +140,16 @@ public class SmallTriangleNew extends OpMode {
                 isMoving = ComplexFollower.instance().isBusy();
                 if(shouldCheckColorSensors) handleColors();
                 checkToFireUnsortedBalls(shouldFireUnsortedBalls);
-                if (ComplexFollower.followingForMS() > 1800 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
-                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(fininshHPCollectPoseNEW) && !ComplexFollower.done()) ComplexFollower.interrupt();
-                if (ComplexFollower.followingForMS() > 2000 && ComplexFollower.getTarget().equals(small_triangle_shoot) && !ComplexFollower.done()) ComplexFollower.interrupt();
-                cameraStuffUpdates(cfg.targetForCameraX,cfg.targetForCameraY);
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(fininshHPCollectPose) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(fininshHPCollectPoseNEW) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(small_triangle_shoot) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(secondZoneCameraCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(thirdZoneCameraCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(thirdRowCollectDone) && !ComplexFollower.done()) ComplexFollower.interrupt();
+
+                if(scanning2nd) cameraStuffUpdates(cfg.targetForCameraX2ndTime,cfg.targetForCameraY,false);
+                else    cameraStuffUpdates(cfg.targetForCameraX,cfg.targetForCameraY,false);
+
                 firingTurret(shouldFire);
                 pulseIntake(doIntakePulse);
                 if(timer.milliseconds() > 29000 + 800){
@@ -165,6 +170,8 @@ public class SmallTriangleNew extends OpMode {
         shouldFire = false; lastGateState = 0; resetLeftBallColorTimer.reset();
         shouldRemoveBalls = false;shouldResetRightSensorBall = false; doIntakePulse = false;
         shouldFireUnsortedBalls = false;
+        scanning2nd = false;
+        cameraCase = 0;
         wentTooNumber2  =0;
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
@@ -176,13 +183,17 @@ public class SmallTriangleNew extends OpMode {
     public void init_loop() {
         if(doOnce) ComplexFollower.resetAndInit(true);
         doOnce = false;
-        robot.init_loop();
         robot.getTurretComponent("TurretRotateMotor").setTarget(cfg.rotationForInitSmallTriangle);
         double middleOfTheFieldY =0;
-        if(currentTeamColor == TeamColor.Blue) middleOfTheFieldY = -16; else middleOfTheFieldY = 16;
-        cameraStuffUpdates(cameraImaginaryX,middleOfTheFieldY);
+        if(currentTeamColor == TeamColor.Blue) middleOfTheFieldY = -16;
+        else middleOfTheFieldY = 16;
+
+        cameraStuffUpdates(cameraImaginaryX,middleOfTheFieldY,true);
         useCamera();
         RobotController.telemetry.addData("id", camId);
+        RobotController.telemetry.addData("camx", cameraImaginaryX);
+        RobotController.telemetry.addData("camy", middleOfTheFieldY);
+        robot.init_loop();
     }
 
     @Override
@@ -210,12 +221,14 @@ public class SmallTriangleNew extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(900), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new DelayAction(900),
                 // end of preload
+
+                new GeneralAction( () ->limelight3A.pipelineSwitch(7)),
 
                 //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPose),
-                new DelayAction(550),
+                new DelayAction(300),
                 //new GeneralAction(() -> doIntakePulse = true),
 //                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
@@ -232,82 +245,67 @@ public class SmallTriangleNew extends OpMode {
                 new MoveAction(small_triangle_shoot),
 //                new DelayAction(400),
                 new GeneralAction(fireUnsortedBalls),
-                new GeneralAction(() -> limelight3A.pipelineSwitch(7)), // switch channel only once
+                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
                 new DelayAction(1000),
                 // finished third row shooting
 
 
                 // 4th cycle, camera collecting
-                new GeneralAction(scanForBallsAndPlanPath),
-                // actual collect and firing
                 new MoveAction(true),
                 new DelayAction(300),
                 new GeneralAction(() -> doIntakePulse = true),
-//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
-//                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
+                new DelayAction(900),
                 // finished firing camera cycle
 
 
 
                 // 5th cycle, camera collecting
-                new GeneralAction(scanForBallsAndPlanPath),
-                // actual collect and firing
                 new MoveAction(true),
                 new DelayAction(300),
                 new GeneralAction(() -> doIntakePulse = true),
-//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
-//                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
+                new DelayAction(900),
                 // finished firing camera cycle
 
 
 
 
                 // 6th cycle, camera collecting
-                new GeneralAction(scanForBallsAndPlanPath),
-                // actual collect and firing
                 new MoveAction(true),
                 new DelayAction(300),
                 new GeneralAction(() -> doIntakePulse = true),
-//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
-//                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
+                new DelayAction(900),
                 // finished firing camera cycle
 
 
 
                 // 7th cycle, camera collecting CUSTOM CYCLE
-                new GeneralAction(scanForBallsAndPlanPath),
-                // actual collect and firing
-                new MoveAction(secondZoneCameraCollect,BezierCurveTypes.ConstantHeading,bezierHelper2.getHeading(), bezierHelper2),
+                //new MoveAction(secondZoneCameraCollect,BezierCurveTypes.ConstantHeading,bezierHelper2.getHeading(), bezierHelper2),
+                new MoveAction(true),
                 new DelayAction(300),
                 new GeneralAction(() -> doIntakePulse = true),
-//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
-//                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
+                new DelayAction(900),
                 // finished firing camera cycle
 
                 
                 // 8th cycle, camera collecting
-                new GeneralAction(scanForBallsAndPlanPath),
-                // actual collect and firing
                 new MoveAction(true),
                 new DelayAction(300),
                 new GeneralAction(() -> doIntakePulse = true),
-//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
-//                new DelayAction(150),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new DelayAction(900),
                 // finished firing camera cycle
 
 
@@ -318,13 +316,12 @@ public class SmallTriangleNew extends OpMode {
         );
     }
     public Runnable scanForBallsAndPlanPath = () -> {
-        int cameraCase = (int) getBallNumber();
 //        if(wentTooNumber2 >0) cameraCase = 1; not needed with new rolers
         //if(wentTooNumber2 >0) cameraCase = 1; // temporary untuill we get camera back
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
-            //case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
+            case 3: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
         }
     };
@@ -374,7 +371,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left left
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -384,7 +381,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -397,7 +394,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -420,7 +417,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -433,7 +430,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -443,7 +440,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -464,7 +461,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -477,7 +474,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -488,7 +485,7 @@ public class SmallTriangleNew extends OpMode {
                         new GeneralAction(turnAirSortOff),
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
                 ));
@@ -501,13 +498,13 @@ public class SmallTriangleNew extends OpMode {
                 new StateAction("RightGateServo", "OPEN"),
                 new DelayAction(timerToCloseGate),
                 new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer1),
+                new DelayAction(timer1),
                 new StateAction("LeftGateServo", "OPEN"),
                 new DelayAction(timer2),
                 new StateAction("RightGateServo", "OPEN"),//
 
                 // close gates
-                new DelayAction(600),
+                new DelayAction(400),
                 new StateAction("RightGateServo", "CLOSED"),
                 new StateAction("LeftGateServo", "CLOSED")
         ));
@@ -520,42 +517,18 @@ public class SmallTriangleNew extends OpMode {
                     new StateAction("RightGateServo", "OPEN"),
                     new DelayAction(timerToCloseGate),
                     new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer1),
+                    new DelayAction(timer1),
                     new StateAction("LeftGateServo", "OPEN"),
                     new DelayAction(timer2),
                     new StateAction("RightGateServo", "OPEN"),//
 
                     // close gates
-                    new DelayAction(600),
+                    new DelayAction(400),
                     new StateAction("RightGateServo", "CLOSED"),
                     new StateAction("LeftGateServo", "CLOSED")
             ));
         }
     }
-    public Runnable makeFireUnsortedBalls (double timeToWait){
-        return  () -> {
-            robot.executeNow(new ActionSequence(
-                    new DelayAction(timeToWait),
-                    new StateAction("RightGateServo", "OPEN"),
-                    new DelayAction(timerToCloseGate),
-                    new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer1),
-                    new StateAction("LeftGateServo", "OPEN"),
-                    new DelayAction(timer2),
-                    new StateAction("RightGateServo", "OPEN"),//
-
-                    // close gates
-                    new DelayAction(600),
-                    new StateAction("RightGateServo", "CLOSED"),
-                    new StateAction("LeftGateServo", "CLOSED")
-            ));
-        };
-    }
-
-
-
-
-
 
     Runnable turnAirSortOff = () -> {
         robot.executeNow(new ActionSequence(
@@ -584,12 +557,14 @@ public class SmallTriangleNew extends OpMode {
         if(shouldFire){
             turret.setBallTimeInAir(ballInAirTime);
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) * vMultiplier/* + cfg.autoVelAdder*/;
+            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(distanceToWallOdometry);
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                     .setTarget(targetVelocity);
 
 
             double turretAngleVal = distanceToAngleFunction(distanceToWallOdometry);
+            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(distanceToWallOdometry);
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
@@ -601,13 +576,14 @@ public class SmallTriangleNew extends OpMode {
             ;
         }
     }
-    public void cameraStuffUpdates(double targetX, double targetY){
+    public void cameraStuffUpdates(double targetX, double targetY,boolean inInit){
         double camAngle = - calculateCameraAngle(targetX,targetY,robot.getCurrentPose(),camOffsetX,0);
+        if(inInit) camAngle = - calculateCameraAngle(targetX,targetY,starter,camOffsetX,0);
         double cameraAngle = convertCamAngleToServoValue(camAngle);
         cameraAngle = clamp(cameraAngle,0,360); // de notat ca are range de 310 grade defapt
 
-        robot.getServoComponent("CameraRotateServo")
-                .setTarget((eval(cameraAngleOverite) ? cameraAngleOverite : cameraAngle));
+        robot.getServoComponent("CameraRotateServo").setTarget(cameraAngle);
+        RobotController.telemetry.addData("tester pose for camera)",cameraAngle);
     }
     protected void handleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
@@ -724,24 +700,68 @@ public class SmallTriangleNew extends OpMode {
         globalRobotPose = ComplexFollower.instance().getPose();
         return globalRobotPose;
     }
-    public double getBallNumber(){
-//        if(shouldSwitchChannel){
-//            limelight3A.pipelineSwitch(1);
-//            shouldSwitchChannel = false;
-//        }
+    public static int neededCase = 0;
+    public static int zone1 = 0,zone2 = 0,zone3 = 0;
+    Runnable getBallNumber = () ->{
+        if(zone1 >=3) neededCase = 1;
+        else if(zone2 >=3) neededCase = 2;
+        else{
+            if(zone3>zone2 && zone3>zone1) neededCase = 3;
+            else if(zone2>zone1) neededCase = 2;
+            else if(zone1!= 0) neededCase =1;
+            else neededCase = 0;
+        }
+        zone1 = 0;
+        zone2 = 0;
+        zone3 = 0;
+
+        cameraCase = neededCase;
+    };
+    public Runnable cameraDetect1 = () -> {
         LLResult llResult = limelight3A.getLatestResult();
         limelight3A.captureSnapshot("HpSnap");
 
         if (llResult != null) {
             double[] pythonData = llResult.getPythonOutput();
             if (pythonData.length > 0) {
-                double firstValue = pythonData[0];
-                RobotController.telemetry.addData("Python Val 1", firstValue);
-                return firstValue;
+                if(currentTeamColor == TeamColor.Blue){
+                    zone1 =(int)pythonData[0];
+                    zone2=(int)pythonData[1];
+                }
+                else {
+                    zone1 =(int)pythonData[1];
+                    zone2=(int)pythonData[0];
+                }
             }
         }
-        return 0;
-    }
+    };
+    public Runnable cameraDetect2 = () -> {
+        LLResult llResult = limelight3A.getLatestResult();
+        limelight3A.captureSnapshot("HpSnap");
+
+        if (llResult != null) {
+            double[] pythonData = llResult.getPythonOutput();
+            if (pythonData.length > 0) {
+                if(currentTeamColor == TeamColor.Blue) zone3=(int)pythonData[1];
+                else zone3=(int)pythonData[0];
+            }
+
+        }
+    };
+    public Runnable scanBallsGetBallAndCalculateTrajectory = () -> {
+        robot.executeNow(new ActionSequence(
+                new DelayAction(100),
+                new GeneralAction(cameraDetect1),
+                new GeneralAction(() -> scanning2nd = true),
+                new DelayAction(350),
+                new GeneralAction(cameraDetect2),
+                new DelayAction(40),
+
+                new GeneralAction(getBallNumber),
+                new GeneralAction(scanForBallsAndPlanPath),
+                new GeneralAction(() -> scanning2nd = false)
+        ));
+    };
     public void EmergencyOverrideAtTheEnd(){
         robot.clearMainQueue();
         robot.executeNow(new ActionSequence(
