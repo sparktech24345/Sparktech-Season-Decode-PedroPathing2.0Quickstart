@@ -467,7 +467,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-                            new DelayAction(timer1),
+                            //new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer2),
                             new StateAction("RightGateServo", "OPEN")//                            new StateAction("LeftGateServo", "OPEN"),
@@ -482,7 +482,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-                            new DelayAction(timer1),
+                            //new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer4),
                             new StateAction("RightGateServo", "OPEN")
@@ -1002,7 +1002,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1),
+                        //new DelayAction(timer1),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
@@ -1026,7 +1026,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        new DelayAction(timer1),
+                        //new DelayAction(timer1),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
@@ -1040,7 +1040,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1),
+                        //new DelayAction(timer1),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
@@ -1072,7 +1072,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new DelayAction(timer1),
+                        //new DelayAction(timer1),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
@@ -1086,7 +1086,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        new DelayAction(timer1),
+                        //new DelayAction(timer1),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left

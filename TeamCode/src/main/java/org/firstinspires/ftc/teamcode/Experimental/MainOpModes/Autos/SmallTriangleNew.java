@@ -498,7 +498,7 @@ public class SmallTriangleNew extends OpMode {
                 new StateAction("RightGateServo", "OPEN"),
                 new DelayAction(timerToCloseGate),
                 new StateAction("RightGateServo", "CLOSED"),
-                new DelayAction(timer1),
+                //new DelayAction(timer1),
                 new StateAction("LeftGateServo", "OPEN"),
                 new DelayAction(timer2),
                 new StateAction("RightGateServo", "OPEN"),//
@@ -517,7 +517,7 @@ public class SmallTriangleNew extends OpMode {
                     new StateAction("RightGateServo", "OPEN"),
                     new DelayAction(timerToCloseGate),
                     new StateAction("RightGateServo", "CLOSED"),
-                    new DelayAction(timer1),
+                    //new DelayAction(timer1),
                     new StateAction("LeftGateServo", "OPEN"),
                     new DelayAction(timer2),
                     new StateAction("RightGateServo", "OPEN"),//
