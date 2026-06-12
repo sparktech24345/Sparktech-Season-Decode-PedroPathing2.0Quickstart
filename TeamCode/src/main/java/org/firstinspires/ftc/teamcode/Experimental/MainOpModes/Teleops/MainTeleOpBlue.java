@@ -164,7 +164,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
     public static double mainTimerForSorting = 280;
-    public static double timerBothOnOneChannelTimerForSorting = 600;
+    public static double timerBothOnOneChannelTimerForSorting = 850;
     public static double timer_far_v2 = 120;
     public static double timer_close_v2 = 120;
     public static double timerToFireBothFromTheLeft = 900; // close side

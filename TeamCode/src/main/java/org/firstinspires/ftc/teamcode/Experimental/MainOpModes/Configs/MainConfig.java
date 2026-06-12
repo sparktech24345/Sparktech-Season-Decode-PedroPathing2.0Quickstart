@@ -78,7 +78,7 @@ public class MainConfig {
                 targetForClassifierX = 80;
                 targetForClassifierY = 47;
 
-                targetForClassifierXNumber2= 85;
+                targetForClassifierXNumber2= 90;
                 targetForClassifierYNumber2 = 50;
 
                 targetForFirstClassifierScan = 0;
@@ -94,8 +94,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = 41;
 
-                targetXAutoClose = 128.5;
-                targetYAutoClose = 51.5;
+                targetXAutoClose = 129;
+                targetYAutoClose = 51.8;
 
                 targetXCenter = 128; // 130
                 targetYCenter = 53;
@@ -140,7 +140,7 @@ public class MainConfig {
 
                 targetForFirstClassifierScan = 345;
 
-                targetForClassifierXNumber2= 85;
+                targetForClassifierXNumber2= 90;
                 targetForClassifierYNumber2 = -50;
 
                 //autoVelAdder = -20;
@@ -154,8 +154,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = -41;
 
-                targetXAutoClose = 128;
-                targetYAutoClose = -44.5;
+                targetXAutoClose = 129;
+                targetYAutoClose = -44.8;
 
                 targetXCenter = 128; // 130
                 targetYCenter = -53;
