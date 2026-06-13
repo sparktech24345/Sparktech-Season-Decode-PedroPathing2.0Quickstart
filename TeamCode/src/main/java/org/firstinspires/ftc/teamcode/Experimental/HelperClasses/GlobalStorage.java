@@ -184,9 +184,9 @@ public class GlobalStorage {
     // ==========================================
     public static double closeVelo = 1140;
     public static double grade1farVelo = 290;
-    public static double grade0farVelo = 570;
+    public static double grade0farVelo = 595;
     public static double grade1VeloClose = 200;
-    public static double grade0VeloClose = 840;
+    public static double grade0VeloClose = 860; // was 840
     public static double airSortBias = 70;
     public static double timeToTurnAirSortOff = 230;
 
@@ -263,13 +263,13 @@ public class GlobalStorage {
 
     public static Pose relocalizeRobot(
             double rawCamX, double rawCamY, double camDegrees, TeamColor color,
-            double camOffsetX, double camOffsetY, double servoAngle,int numberOfTaggs) {
+            double camOffsetX, double camOffsetY, double servoAngle, int numberOfTaggs) {
 
-        // --- PASUL 1: Configurația punctului de pornire (Snippet-ul tău) ---
+        // --- PASUL 1: Configurația punctului de pornire (Valorile tale calibrate) ---
         double xStart = 0;
         double yStart = 0;
         if (color == TeamColor.Blue) {
-            xStart = -1.56; // for 2 tags
+            xStart = -1.56;
             yStart = -0.385;
 
             if(numberOfTaggs == 1){
@@ -285,32 +285,34 @@ public class GlobalStorage {
             }
         }
 
-        // --- PASUL 2: Calculăm unghiul fizic al turelei ---
+        // --- PASUL 2: Calculăm Heading-ul Absolut al Șasiului Robotului ---
         double servoValue = servoAngle / 360.0;
         double relativeTurretAngle = (servoValue - 0.49) * (90.0 / 0.29);
-
-        // --- PASUL 3: Rezolvăm Heading-ul Absolut al Robotului ---
-        // Potrivirea telemetry confirmă că adunarea unghiurilor rezolvă orientarea corectă
         double robotAngle = camDegrees + relativeTurretAngle + 180.0;
 
-        // Normalizăm unghiul în intervalul [-180, 180] grade
         while (robotAngle > 180)  robotAngle -= 360;
         while (robotAngle <= -180) robotAngle += 360;
 
-        // --- PASUL 4: Rotim offset-ul curent al camerei ---
-        double robotRad = Math.toRadians(robotAngle);
-        double rotatedOffsetX = camOffsetX * Math.cos(robotRad) - camOffsetY * Math.sin(robotRad);
-        double rotatedOffsetY = camOffsetX * Math.sin(robotRad) + camOffsetY * Math.cos(robotRad);
+        // --- PASUL 3: Unghiul Absolut al Turelei pe Teren ---
+        // Orientarea camerei în spațiu este dictată de peretele cu AprilTag-uri
+        double turretWorldAngle = camDegrees + 180.0;
+        while (turretWorldAngle > 180)  turretWorldAngle -= 360;
+        while (turretWorldAngle <= -180) turretWorldAngle += 360;
 
-        // --- PASUL 5: Scalare și Aliniere la Originea Terenului (0, 0) ---
-        double scaleFactor = 40.6; // Multiplicatorul tău pentru pseudo-inches
+        double turretRad = Math.toRadians(turretWorldAngle);
 
-        // Pentru a preveni deplasarea poziției de start din cauza turelei,
-        // scădem diferența dintre offset-ul rotit actual și offset-ul fizic inițial (la 0 grade).
-        double robotX = -scaleFactor * (rawCamX + xStart) + rotatedOffsetX - camOffsetX;
-        double robotY = -scaleFactor * (rawCamY - yStart) + rotatedOffsetY - camOffsetY;
+        // --- PASUL 4: Rotirea Offset-ului structural după Unghiul Turelei ---
+        double rotatedOffsetX = camOffsetX * Math.cos(turretRad) - camOffsetY * Math.sin(turretRad);
+        double rotatedOffsetY = camOffsetX * Math.sin(turretRad) + camOffsetY * Math.cos(turretRad);
 
-        // Returnează poziția calibrată gata de trimis în odometrie
+        // --- PASUL 5: Calculul Poziției Globale (0, 0) ---
+        double scaleFactor = 39;
+
+        // IMPORTANT: rawCamX și rawCamY NU se mai rotesc (sunt deja field-aligned din Limelight)
+        // Corectăm semnele offset-ului conform geometriei vectoriale (- rotated + original)
+        double robotX = -scaleFactor * (rawCamX + xStart) - rotatedOffsetX + camOffsetX;
+        double robotY = -scaleFactor * (rawCamY - yStart) - rotatedOffsetY + camOffsetY;
+
         return pose(robotX, robotY, robotAngle);
     }
 }

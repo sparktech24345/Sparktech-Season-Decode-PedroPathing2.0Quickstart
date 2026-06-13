@@ -102,12 +102,11 @@ public class SmallTriangleNew extends OpMode {
     public static int cameraCase =0;
     private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(1.6, 9.5, 90);
-    private Pose small_triangle_shootForSpecial = pose(5, 2, 90);
     private Pose parkPose = pose(1, 23.5, 90);
     private Pose fininshHPCollectPose = pose(0.5,45,90); // hp collect
     private Pose fininshHPCollectPoseNEW = pose(0.5,45,90); // hp collect
     private Pose secondZoneCameraCollect = pose(18, 45, 90); /// CHECK THIS slightly more up spot
-    private Pose thirdZoneCameraCollect = pose(37, 45, 90);
+    private Pose thirdZoneCameraCollect = pose(34, 45, 90);
     private Pose thirdRowCollectDone = pose(30, 43, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
     private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
@@ -120,6 +119,11 @@ public class SmallTriangleNew extends OpMode {
     private Pose gateOpen = pose(60.1, 36.7, 90);
     private Pose bezierHelper1 = pose(32, 4, 90);
     private Pose bezierHelper2 = pose(22, -12, 75);
+
+    // sweep collect
+
+    private Pose bezierHelper3 = pose(4, 49, 50);
+    private Pose weirdHpCollect =  pose(38.5,45,50);
 
     @Override
     public void init() {
@@ -219,7 +223,7 @@ public class SmallTriangleNew extends OpMode {
                 // preload
                 new GeneralAction(() -> shouldFire = true), // prep outtake
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(900), // revving up outtake
+                new DelayAction(1050), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(900),
                 // end of preload
@@ -228,7 +232,7 @@ public class SmallTriangleNew extends OpMode {
 
                 //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPose),
-                new DelayAction(300),
+                new DelayAction(150),
                 //new GeneralAction(() -> doIntakePulse = true),
 //                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
@@ -273,8 +277,6 @@ public class SmallTriangleNew extends OpMode {
                 // finished firing camera cycle
 
 
-
-
                 // 6th cycle, camera collecting
                 new MoveAction(true),
                 new DelayAction(300),
@@ -288,10 +290,11 @@ public class SmallTriangleNew extends OpMode {
 
 
                 // 7th cycle, camera collecting CUSTOM CYCLE
-                //new MoveAction(secondZoneCameraCollect,BezierCurveTypes.ConstantHeading,bezierHelper2.getHeading(), bezierHelper2),
-                new MoveAction(true),
-                new DelayAction(300),
+                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
+//                new MoveAction(true),
+                new DelayAction(50), // past 300
                 new GeneralAction(() -> doIntakePulse = true),
+                new DelayAction(100),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
@@ -300,9 +303,11 @@ public class SmallTriangleNew extends OpMode {
 
                 
                 // 8th cycle, camera collecting
-                new MoveAction(true),
-                new DelayAction(300),
+                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
+//                new MoveAction(true),
+                new DelayAction(50), //past 300
                 new GeneralAction(() -> doIntakePulse = true),
+                new DelayAction(100),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(900),
@@ -692,6 +697,7 @@ public class SmallTriangleNew extends OpMode {
         gateOpen = convertPose(gateOpen);
         bezierHelper1 = convertPose(bezierHelper1);
         bezierHelper2 = convertPose(bezierHelper2);
+        bezierHelper3 = convertPose(bezierHelper3);
     }
     public Pose convertPose(Pose pose) {
         return pose;
@@ -703,10 +709,11 @@ public class SmallTriangleNew extends OpMode {
     public static int neededCase = 0;
     public static int zone1 = 0,zone2 = 0,zone3 = 0;
     Runnable getBallNumber = () ->{
+        int zoner3 = zone3-1;
         if(zone1 >=3) neededCase = 1;
         else if(zone2 >=3) neededCase = 2;
         else{
-            if(zone3>zone2 && zone3>zone1) neededCase = 3;
+            if(zoner3>zone2 && zoner3>zone1) neededCase = 3;
             else if(zone2>zone1) neededCase = 2;
             else if(zone1!= 0) neededCase =1;
             else neededCase = 0;
@@ -714,6 +721,7 @@ public class SmallTriangleNew extends OpMode {
         zone1 = 0;
         zone2 = 0;
         zone3 = 0;
+        zoner3 = 0;
 
         cameraCase = neededCase;
     };

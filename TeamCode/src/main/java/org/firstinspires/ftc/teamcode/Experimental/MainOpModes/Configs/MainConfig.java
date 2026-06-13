@@ -94,8 +94,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = 41;
 
-                targetXAutoClose = 129;
-                targetYAutoClose = 51.8;
+                targetXAutoClose = 130;
+                targetYAutoClose = 50.6;
 
                 targetXCenter = 128; // 130
                 targetYCenter = 53;
@@ -103,11 +103,11 @@ public class MainConfig {
                 targetXRightPanel = 127;
                 targetYRightPanel = 48;
 
-                targetXForFarAuto = 128;
-                targetYForFarAuto = 51.5;
+                targetXForFarAuto = 123;
+                targetYForFarAuto = 54;
 
                 targetXLeftPanel = 123;
-                targetYLeftPanel = 55;
+                targetYLeftPanel = 54;
 
                 usedTargetX = 131;
                 usedTargetY = 40;
@@ -154,8 +154,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = -41;
 
-                targetXAutoClose = 129;
-                targetYAutoClose = -44.8;
+                targetXAutoClose = 130;
+                targetYAutoClose = -43.5;
 
                 targetXCenter = 128; // 130
                 targetYCenter = -53;
@@ -163,11 +163,11 @@ public class MainConfig {
                 targetXRightPanel = 127;
                 targetYRightPanel = -43; //
 
-                targetXForFarAuto = 128.5;
-                targetYForFarAuto = -45.5; //
+                targetXForFarAuto = 123;
+                targetYForFarAuto = -54.3; //
 
-                targetXLeftPanel = 121;
-                targetYLeftPanel = -55;
+                targetXLeftPanel = 123;
+                targetYLeftPanel = -54;
 
                 usedTargetX = 131;
                 usedTargetY = -40;

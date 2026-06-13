@@ -201,7 +201,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 ///==============================Camera turret stuff============================================
     public static double  maxiTurretAngle = 195;// de schimbat
     public static double cameraAngle=0;
-    public static double cameraAngleOverite=176;
+    public static double cameraAngleOverite=176; // 176 is middle
     public static double miniTurretAngle = 165;//de schimbat
     public static double cameraModifier = 0;
 
@@ -249,7 +249,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         double camAngle = - calculateCameraAngle(camTargetX,camTargetY,robot.getCurrentPose(),camOffsetX,0);
         double middleOfTheFieldY =0;
-        if(currentTeamColor == TeamColor.Blue) middleOfTheFieldY = -16; else middleOfTheFieldY = 16;
+        if(currentTeamColor == TeamColor.Blue) middleOfTheFieldY = -15; else middleOfTheFieldY = 15;
         if(robotToGoalAbsoluteAngle > 20 && robotToGoalAbsoluteAngle < 38 && usedDistance > 3.4) // the params for the small triangle
             camAngle = - calculateCameraAngle(cameraImaginaryX,middleOfTheFieldY,robot.getCurrentPose(),camOffsetX,0);
         cameraAngle = convertCamAngleToServoValue(camAngle);
@@ -287,8 +287,11 @@ public class MainTeleOpBlue extends LinearOpMode {
                     ));
         }
 
-        if(robot.getKey("LEFT_STICK_BUTTON1").ExecuteOnPress) disableTurret = !disableTurret;
-
+        if(robot.getKey("LEFT_STICK_BUTTON2").ExecuteOnPress) disableTurret = !disableTurret;
+        if(robot.getKey("RIGHT_STICK_BUTTON2").ExecuteOnPress) {
+            if (cameraAngleOverite == 0) cameraAngleOverite = 176;
+            else cameraAngleOverite = 0;
+        }
 
 
         // Driver Outputting
@@ -467,7 +470,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-                            //new DelayAction(timer1),
+//                            new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer2),
                             new StateAction("RightGateServo", "OPEN")//                            new StateAction("LeftGateServo", "OPEN"),
@@ -482,7 +485,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-                            //new DelayAction(timer1),
+//                            new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer4),
                             new StateAction("RightGateServo", "OPEN")

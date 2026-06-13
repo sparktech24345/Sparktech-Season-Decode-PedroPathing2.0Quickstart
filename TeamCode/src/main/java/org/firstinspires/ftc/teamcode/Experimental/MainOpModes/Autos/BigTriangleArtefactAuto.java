@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.Ma
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.ballInAirTime;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateDistanceToWallInMeters;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.calculateHeadingAdjustment;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.cameraAngle;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.mainTimerForSorting;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer1;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timer1ForSorting;
@@ -25,6 +26,7 @@ import android.graphics.Color;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.command.Robot;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -107,8 +109,8 @@ public class BigTriangleArtefactAuto extends OpMode {
     private AnalogInput laserAnalog;
 
     /// other stuff
-    public static double velocityAdderOnTheGo = 200;
-    public static double rotationOnTheGo = 7;
+    public static double velocityAdderOnTheGo = 220;
+    public static double rotationOnTheGo = 2;
     public static double angleOnTheGo = 150; // old 155
     public static double cameraAngleOverite = 0;
     BallColorQueue ballColorQueue = new BallColorQueue();
@@ -127,7 +129,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose fininshHPCollectPose = pose(-1.2,48.5,90); // hp collect
     private Pose secondZoneCameraCollect = pose(14.8, 48.5, 90);
     private Pose thirdZoneCameraCollect = pose(30.96, 48.5, 90);
-    private Pose thirdRowCollectDone = pose(27, 47, 90); // third row done
+    private Pose thirdRowCollectDone = pose(27, 47+1, 90); // third row done
     private Pose secondRowCollectDone = pose(48.7 + 1.5, 44.5, 90);
     private Pose firstRowCollectDone = pose(77.5 - 0.5, 40.3, 90);
 
@@ -330,19 +332,19 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(gateCollect),//BezierCurveTypes.LinearHeading,0,gateHelperPoint),
                 new DelayAction(1),
                 new HoldAction(gateActualCollect,2000),
+                new GeneralAction(() -> cameraAngleOverite = 196),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
 
                 // the camera should already be turned to the correct position
-                new DelayAction(100),
+                new DelayAction(200),
                 new GeneralAction(countBallsInClassifierWithBallDetection),
                 new GeneralAction(processCameraScanning),
 
-                new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
-                new DelayAction(1250),
+                new DelayAction(1200),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 ///finished gate collect
 
@@ -354,15 +356,18 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
-
+                new GeneralAction(() -> cameraAngleOverite = 193),
                 // the camera should already be turned to the correct position
-                new DelayAction(250),
+                new DelayAction(200),
                 new GeneralAction(countBallsInClassifierWithBallDetection),
+                new GeneralAction(processCameraScanning),
                 new GeneralAction(processCameraScanning),
 
                 new GeneralAction(runAirSortChecks),
+                new GeneralAction(runAirSortChecks),
+                new DelayAction(125), // if it needs to airsort
                 new GeneralAction(fireSortedBalls),
-                new DelayAction(1250),
+                new DelayAction(1200),
                 new GeneralAction(() -> shouldUseColorSensors = false),
                 /// end of first row firing
 
@@ -374,15 +379,14 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
 //                new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = true),
-
+                new GeneralAction(() -> cameraAngleOverite = 257),
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
 
                 // the camera should already be turned to the correct position
-                new DelayAction(100),
+                new DelayAction(200),
                 new GeneralAction(countBallsInClassifierWithBallDetection),
                 new GeneralAction(processCameraScanning),
 
-                new GeneralAction(runAirSortChecks),
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1400),
                 new GeneralAction(() -> shouldUseColorSensors = false),
@@ -886,6 +890,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         RobotController.telemetry.addData("Calculated Balls", detectedBalls);
         RobotController.telemetry.addData("moveToZero", moveToZero);
         RobotController.telemetry.addData("shouldHoldTurretForClassifierScanNumber2", shouldHoldTurretForClassifierScanNumber2);
+        RobotController.telemetry.addData("Camera Servo Angle", cameraAngle);
         limelight3A.captureSnapshot("Classifier scan" + timer.milliseconds());
     };
     public void cameraStuffUpdates(double targetX, double targetY){
@@ -895,6 +900,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
         robot.getServoComponent("CameraRotateServo")
                 .setTarget((eval(cameraAngleOverite) ? cameraAngleOverite : cameraAngle));
+        RobotController.telemetry.addData("Cam Angle", cameraAngle);
     }
     public Runnable countBallsInClassifierWithDelay = () -> {
         robot.executeNow(new ActionSequence(
@@ -924,6 +930,13 @@ public class BigTriangleArtefactAuto extends OpMode {
     public Runnable runAirSortChecks = () -> {
         if(camId == 21 && calculatedLeftSensorDetectedBall == BallColorSet_Decode.Purple && calculatedRightSensorDetectedBall == BallColorSet_Decode.Purple)
             shouldToAirSort = true;
+
+        RobotController.telemetry.addData("camId When Tried Air Sort", camId);
+        RobotController.telemetry.addData("GlobalCamId When Tried Air Sort", globalCamId);
+        RobotController.telemetry.addData("Left Balls Tried Air Sort", calculatedLeftSensorDetectedBall);
+        RobotController.telemetry.addData("Right Balls Tried Air Sort", calculatedRightSensorDetectedBall);
+        RobotController.telemetry.addData("should Air Sort", shouldToAirSort);
+        RobotController.telemetry.addData("balls counted %3", detectedBalls);
 
         if(camId != 21) shouldToAirSort = false;
     };
