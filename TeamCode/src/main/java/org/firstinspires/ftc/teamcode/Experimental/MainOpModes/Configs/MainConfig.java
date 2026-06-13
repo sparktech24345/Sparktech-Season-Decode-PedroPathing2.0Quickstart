@@ -104,7 +104,7 @@ public class MainConfig {
                 targetYRightPanel = 48;
 
                 targetXForFarAuto = 123;
-                targetYForFarAuto = 54;
+                targetYForFarAuto = 53.83;
 
                 targetXLeftPanel = 123;
                 targetYLeftPanel = 54;
@@ -164,10 +164,10 @@ public class MainConfig {
                 targetYRightPanel = -43; //
 
                 targetXForFarAuto = 123;
-                targetYForFarAuto = -54.3; //
+                targetYForFarAuto = -53.83; //
 
                 targetXLeftPanel = 123;
-                targetYLeftPanel = -54;
+                targetYLeftPanel = -53.5;
 
                 usedTargetX = 131;
                 usedTargetY = -40;
