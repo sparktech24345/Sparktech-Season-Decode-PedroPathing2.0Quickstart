@@ -20,7 +20,6 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.globalRobotPose;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftSensorColorMultiplier;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.pose;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.relocalizeRobot;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.teamPipeline;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.timeToTurnAirSortOff;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig.*;
@@ -47,6 +46,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.DelayAc
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.GeneralAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAction;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.CameraMath;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
@@ -247,26 +247,10 @@ public class MainTeleOpBlue extends LinearOpMode {
         //if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
         if (neededAngleForTurretRotation < 0) neededAngleForTurretRotation += 360;
 
-        double camAngle = - calculateCameraAngle(camTargetX,camTargetY,robot.getCurrentPose(),camOffsetX,0);
-        double middleOfTheFieldY =0;
-        if(currentTeamColor == TeamColor.Blue) middleOfTheFieldY = -15; else middleOfTheFieldY = 15;
-        if(robotToGoalAbsoluteAngle > 20 && robotToGoalAbsoluteAngle < 38 && usedDistance > 3.4) // the params for the small triangle
-            camAngle = - calculateCameraAngle(cameraImaginaryX,middleOfTheFieldY,robot.getCurrentPose(),camOffsetX,0);
-        cameraAngle = convertCamAngleToServoValue(camAngle);
-        cameraAngle = clamp(cameraAngle,0,360); // de notat ca are range de 310 grade defapt
-
-        RobotController.telemetry.addData("camera rotation target", camAngle);
-        robot.getServoComponent("CameraRotateServo")
-                .setTarget((eval(cameraAngleOverite) ? cameraAngleOverite : cameraAngle));
-
+        processAllTheCameraStuff(usedDistance);
 
         RobotController.telemetry.addData("needed angle for turret rotation", neededAngleForTurretRotation);
         RobotController.telemetry.addData("TurretRotate power", tempTurret.getPower());
-        RobotController.telemetry.addData("angle for camera", cameraAngle);
-
-
-        processCameraStuff(cameraAngle); // pass the thing that the servo gets
-
 
         /// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- Driver Buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -360,9 +344,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         // force store ball in outtake sorted if can, unsorted if cannot
-        if (robot.getKey("A1").ExecuteOnPress) {
-            hasBallInOuttake = false;
-        }
+//        if (robot.getKey("A1").ExecuteOnPress) {
+//            hasBallInOuttake = false;
+//        }
 
 
         // ====================== Tilt Servo Stuff ===================
@@ -859,31 +843,109 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     // ============================ Camera Stuff ============================
 
-    public void processCameraStuff(double camangle) {
+//    public void processCameraStuff(double camangle) {
+//        LLResult result = limelight3A.getLatestResult();
+//        RobotController.telemetry.addData("Is Valid",result.isValid());
+//        RobotController.telemetry.addData("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
+//
+//        if (result != null) {
+//            if (result.isValid()) {
+//                Pose3D botpose = result.getBotpose();
+//                RobotController.telemetry.addData("tx", result.getTx());
+//                RobotController.telemetry.addData("ty", result.getTy());
+//                RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
+//                RobotController.telemetry.addData("Botpose", botpose.toString());
+//                RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
+//                RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
+//                RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
+//
+//                Pose tempPose = relocalizeRobot(botpose.getPosition().x,botpose.getPosition().y,botpose.getOrientation().getYaw(AngleUnit.DEGREES),
+//                        currentTeamColor,camOffsetX,0,
+//                        camangle,result.getBotposeTagCount());
+//
+//                RobotController.telemetry.addData("Bots Wanna be Position",tempPose.toString());
+//
+//
+//
+//            }
+//        }
+//    }
+
+    public void processAllTheCameraStuff(double usedDistance) {
+        // 1. Gather current state vector parameters
+        double robotHeadingDeg = Math.toDegrees(robot.getCurrentPose().getHeading());
+        CameraMath.SimplePose currentRobotPose = new CameraMath.SimplePose(
+                robot.getCurrentPose().getX(),
+                robot.getCurrentPose().getY(),
+                robotHeadingDeg
+        );
+
+        // 2. Compute dynamic tracking positions
+        double camAngle = -CameraMath.calculateCameraAngle(camTargetX, camTargetY, currentRobotPose, camOffsetX, 0);
+        double middleOfTheFieldY = (currentTeamColor == TeamColor.Blue) ? -14 : 14;
+
+        if (robotToGoalAbsoluteAngle > 20 && robotToGoalAbsoluteAngle < 38 && usedDistance > 3.4) {
+            camAngle = -CameraMath.calculateCameraAngle(cameraImaginaryX, middleOfTheFieldY, currentRobotPose, camOffsetX, 0);
+        }
+
+        // 3. Command the physical turret servo hardware
+        cameraAngle = CameraMath.convertCamAngleToServoValue(camAngle);
+        cameraAngle = clamp(cameraAngle,25,325); // turret tens to uh do weird stuff when at minims
+
+        RobotController.telemetry.addData("camera rotation target", camAngle);
+
+        double activeServoAngle = (eval(cameraAngleOverite) ? cameraAngleOverite : cameraAngle);
+        robot.getServoComponent("CameraRotateServo").setTarget(activeServoAngle);
+
+        RobotController.telemetry.addData("angle for camera", cameraAngle);
+
+        // 4. Update MegaTag 2 using the absolute lens calculation matrix
+        double mt2GlobalOrientation;
+        if (cameraAngleOverite != 0) {
+            mt2GlobalOrientation = robotHeadingDeg - 180.0;
+        } else {
+            mt2GlobalOrientation = CameraMath.calculateGlobalCameraOrientationForMT2(robotHeadingDeg, activeServoAngle);
+        }
+        limelight3A.updateRobotOrientation(mt2GlobalOrientation);
+
+        RobotController.telemetry.addData("cam angle for limelight", mt2GlobalOrientation);
+        RobotController.telemetry.addData("cam angle for limelight calculated from robot", robotHeadingDeg - 180.0);
+
+        // 5. Read visual tracking calculations back from the hardware camera module
         LLResult result = limelight3A.getLatestResult();
-        RobotController.telemetry.addData("Is Valid",result.isValid());
+        RobotController.telemetry.addData("Is Valid", result != null && result.isValid());
         RobotController.telemetry.addData("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
 
-        if (result != null) {
-            if (result.isValid()) {
-                Pose3D botpose = result.getBotpose();
-                RobotController.telemetry.addData("tx", result.getTx());
-                RobotController.telemetry.addData("ty", result.getTy());
-                RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
-                RobotController.telemetry.addData("Botpose", botpose.toString());
-                RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
-                RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
-                RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
+        if (result != null && result.isValid()) {
+            Pose3D botpose = result.getBotpose_MT2();
+            RobotController.telemetry.addData("tx", result.getTx());
+            RobotController.telemetry.addData("ty", result.getTy());
+            RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
+            RobotController.telemetry.addData("Botpose", botpose.toString());
+            RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
+            RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
+            RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
 
-                Pose tempPose = relocalizeRobot(botpose.getPosition().x,botpose.getPosition().y,botpose.getOrientation().getYaw(AngleUnit.DEGREES),
-                        currentTeamColor,camOffsetX,0,
-                        camangle,result.getBotposeTagCount());
+            // Safe type conversion wrapper for local enumeration definitions
+            TeamColor mathColor = TeamColor.valueOf(currentTeamColor.name());
 
-                RobotController.telemetry.addData("Bots Wanna be Position",tempPose.toString());
+            // 6. Apply corrected structural offsets back to global coordinate maps
+            CameraMath.SimplePose fixedPose = CameraMath.relocalizeRobot(
+                    botpose.getPosition().x,
+                    botpose.getPosition().y,
+                    botpose.getOrientation().getYaw(AngleUnit.DEGREES),
+                    mathColor,
+                    camOffsetX,
+                    0,
+                    activeServoAngle,
+                    result.getBotposeTagCount()
+            );
 
+            Pose tempPose = pose(fixedPose.x, fixedPose.y, Math.toRadians(fixedPose.heading));
+            RobotController.telemetry.addData("Bots Wanna be Position", tempPose.toString());
 
-
-            }
+            if(robot.getKey("A1").ExecuteOnPress)
+                ComplexFollower.instance().setPose(new Pose(tempPose.getX(),tempPose.getY(),robot.getCurrentPose().getHeading()));
         }
     }
 
