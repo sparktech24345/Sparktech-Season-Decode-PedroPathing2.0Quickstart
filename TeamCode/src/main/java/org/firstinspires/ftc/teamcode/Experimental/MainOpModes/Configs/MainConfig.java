@@ -59,6 +59,9 @@ public class MainConfig {
     public static double classifierResetX;
     public static double classifierResetY;
     public static double classifierResetDeg;
+    public static double firstCameraPosition;
+    public static double secondCameraPosition;
+    public static double thirdCameraPosition;
     public static TeamColor currentTeamColor;
 
     public MainConfig() {}
@@ -122,6 +125,10 @@ public class MainConfig {
                 classifierResetY = 30.5;
                 classifierResetDeg = -135;
 
+                firstCameraPosition = 170;
+                secondCameraPosition = 167;
+                thirdCameraPosition =  257;
+
                 break;
             case Red:
                 teamPipeline = 1;
@@ -183,6 +190,10 @@ public class MainConfig {
                 classifierResetY = -30.5;
                 classifierResetDeg = 135;
 
+
+                firstCameraPosition = 154;
+                secondCameraPosition = 151;
+                thirdCameraPosition = 96;
 
                 break;
         }

@@ -80,6 +80,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private boolean had_balls = false;
     private int collectNumber = 0;
     public int detectedBalls;
+    public int a=0;
     private static boolean shouldToAirSort = false;
 
     /// ----------------- Color Sensor Stuff ------------------
@@ -109,7 +110,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private AnalogInput laserAnalog;
 
     /// other stuff
-    public static double velocityAdderOnTheGo = 220;
+    public static double velocityAdderOnTheGo = 200;
     public static double rotationOnTheGo = 2;
     public static double angleOnTheGo = 150; // old 155
     public static double cameraAngleOverite = 0;
@@ -137,7 +138,7 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose gateCollectSpecial = pose(55.5, 42,75); //this is actually the first one and normal one is second
     private Pose gateCollect = pose(55.5, 42, 75); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
 
-    private Pose gateActualCollectSpecial = pose(52.3, 46.5, 60); //this is actually the first one and normal one is second
+    private Pose gateActualCollectSpecial = pose(52.7, 46.5, 60); //this is actually the first one and normal one is second
     private Pose gateActualCollect = pose(52.3 + 0.5, 46.5 + 0.45, 60); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
 
     private Pose gateHelperPoint = pose(30 + 0.3 + 4, 36, 55); // helper for the collect aaaaaaaaaaaaaaaaaaaaaa
@@ -288,7 +289,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> shouldFire = true),
                 new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = true),
-                new GeneralAction(makeFireUnsortedBalls(300)), // 475 old one
+                new GeneralAction(makeFireUnsortedBalls(350)), // 475 old one
                 new MoveAction(middleBigTriangleShooting),//false,BezierCurveTypes.TangentHeading,0),
                 //new DelayAction(800),
                 new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = false),
@@ -332,7 +333,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(gateCollect),//BezierCurveTypes.LinearHeading,0,gateHelperPoint),
                 new DelayAction(1),
                 new HoldAction(gateActualCollect,2000),
-                new GeneralAction(() -> cameraAngleOverite = 196),
+                new GeneralAction(() -> cameraAngleOverite = cfg.firstCameraPosition),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new GeneralAction(() -> doIntakePulse = true),
@@ -356,7 +357,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
-                new GeneralAction(() -> cameraAngleOverite = 193),
+                new GeneralAction(() -> cameraAngleOverite = cfg.secondCameraPosition),
                 // the camera should already be turned to the correct position
                 new DelayAction(200),
                 new GeneralAction(countBallsInClassifierWithBallDetection),
@@ -378,8 +379,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(thirdRowCollectDone,true,BezierCurveTypes.TangentHeading,0),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
-//                new GeneralAction(() -> shouldHoldTurretForClassifierScanNumber2 = true),
-                new GeneralAction(() -> cameraAngleOverite = 257),
+//                new GeneralAction(() -> shouldHoldTurretForClass ifierScanNumber2 = true),
+                new GeneralAction(() -> cameraAngleOverite = cfg.thirdCameraPosition),
                 new MoveAction(parkedBigTriangleShooting,false,BezierCurveTypes.ReverseTangentHeading,0),
 
                 // the camera should already be turned to the correct position
@@ -444,6 +445,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 rotationToWallOdometry = cfg.targetForFirstClassifierScan;
             }
             if(rotationToWallOdometry < 0) rotationToWallOdometry += 360;
+            if(rotationToWallOdometry > 360) rotationToWallOdometry -= 360;
             turret.setTarget(rotationToWallOdometry);
         }
     }
@@ -812,7 +814,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
             int index = 0;
             // counting corners stuff
-            double maxX=999,maxY=999;
+            double maxX=0,maxY=0;
             double x1=0,x2=0,y1=0,y2=0;
             int counter = 0;
             List<List<Double>> listWithStuff;
@@ -840,8 +842,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 y2 = listWithStuff.get(1).get(1); // y
 
 
-                maxX = min(maxX,min(x1,x2));
-                maxY = min(maxY,min(y1,y2));
+                maxX = max(maxX,max(x1,x2));
+                maxY = max(maxY,max(y1,y2));
 
                 RobotController.telemetry.addData("Ball Corners No." + index, x1 + "  " + y1 + " ::: " + x2 + "  " + y2);
 
@@ -858,31 +860,28 @@ public class BigTriangleArtefactAuto extends OpMode {
             RobotController.telemetry.addData("maxX", maxX);
             RobotController.telemetry.addData("maxY", maxY);
 
-//            if(shouldHoldTurretForClassifierScan || moveToZero) {
-//                detectedBalls = countedBalls;
-////                if (maxY == 0) detectedBalls = 0; // y este cu susul in jos sus = 0 jos = max
-////                else if (maxY >= 265) detectedBalls = 1;
-////                else if (maxY >= 247) detectedBalls = 2;
-////                else if (maxY >= 220) detectedBalls = 3;
-////                else if (maxY >= 210) detectedBalls = 4;
-////                else if (maxY >= 200) detectedBalls = 5;
-////                else if (maxY >= 180) detectedBalls = 6;
-////                else if (maxY >= 165) detectedBalls = 7;
-////                else detectedBalls = 8; // cant detect more then 8 anyway
-//            }
-//            else if(shouldHoldTurretForClassifierScanNumber2){
-//
-//                if (maxY == 0) detectedBalls = 0; // y este cu susul in jos sus = 0 jos = max
-//                else if (maxY >= 270) detectedBalls = 1;
-//                else if (maxY >= 257) detectedBalls = 2;
-//                else if (maxY >= 242) detectedBalls = 3;
-//                else if (maxY >= 225) detectedBalls = 4;
-//                else if (maxY >= 211) detectedBalls = 5;
-//                else if (maxY >= 190) detectedBalls = 6;
-//                else if (maxY >= 170) detectedBalls = 7;
+//            if(needsToLookAtSecondPose){
+//                if (maxX == 0) detectedBalls = 0; // y este cu susul in jos sus = 0 jos = max
+//                else if (maxX <= 165) detectedBalls = 1;
+//                else if (maxX <= 225) detectedBalls = 2;
+//                else if (maxX <= 275) detectedBalls = 3;
+//                else if (maxX <= 330) detectedBalls = 4;
+//                else if (maxX <= 375) detectedBalls = 5;
+//                else if (maxX <= 420) detectedBalls = 6;
+//                else if (maxX <= 485) detectedBalls = 7;
 //                else detectedBalls = 8; // cant detect more then 8 anyway
 //            }
-//            else detectedBalls = countedBalls;
+//            else{
+//                if (maxY == 0) detectedBalls = 0;
+//                else if(maxX <= 145) detectedBalls = 1;
+//                else if(maxX <= 210) detectedBalls = 2;
+//                else if(maxX <= 275) detectedBalls = 3;
+//                else if(maxX <= 325) detectedBalls = 4;
+//                else if(maxX <= 385) detectedBalls = 5;
+//                else if(maxX <= 430) detectedBalls = 6;
+//                else if(maxX <= 480) detectedBalls = 7;
+//                else detectedBalls =8;
+//            }
             detectedBalls = countedBalls;
 
         }
@@ -926,6 +925,9 @@ public class BigTriangleArtefactAuto extends OpMode {
 
         //backup
         if(camId > 23) camId -= 3;
+        RobotController.telemetry.addData("detected balls on" + a, detectedBalls);
+        RobotController.telemetry.addData("id calculated on" + a, camId);
+        a++;
     };
     public Runnable runAirSortChecks = () -> {
         if(camId == 21 && calculatedLeftSensorDetectedBall == BallColorSet_Decode.Purple && calculatedRightSensorDetectedBall == BallColorSet_Decode.Purple)

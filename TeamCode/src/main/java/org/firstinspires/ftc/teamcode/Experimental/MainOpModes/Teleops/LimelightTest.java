@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.cameraAngle;
+
+import static java.lang.Math.max;
 
 import android.graphics.Color;
 
@@ -21,6 +24,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp(name = "Limelight Test", group = "Tests")
@@ -54,7 +58,7 @@ public class LimelightTest extends OpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(2);
+        limelight3A.pipelineSwitch(6);
         limelight3A.reloadPipeline();
         limelight3A.setPollRateHz(100);
         limelight3A.start();
@@ -67,7 +71,7 @@ public class LimelightTest extends OpMode {
 
     @Override
     public void loop() {
-        useCamera();
+        countBallsInClassifierWithBallDetection.run();
         HandleColors();
         shouldRemoveBalls = gamepad1.a;
         intakeMotor.setPower(gamepad1.left_stick_y);
@@ -75,16 +79,64 @@ public class LimelightTest extends OpMode {
         telemetry.update();
     }
 
-    public void useCamera() {
-        LLResult llResult = limelight3A.getLatestResult();
-        List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-        for (LLResultTypes.FiducialResult fr : fiducialResults) {
-            camId = fr.getFiducialId();
-        }
 
-        telemetry.addData("april tag detected id",camId);
-        telemetry.addData("ty to tag",llResult.getTy());
-    }
+        public Runnable countBallsInClassifierWithBallDetection = () -> {
+            List<String> ball_colors = new ArrayList<>();
+            int countedBalls = 0;
+            LLResult result = limelight3A.getLatestResult();
+
+
+            if (result != null && result.isValid()) {
+                List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+
+                int index = 0;
+                // counting corners stuff
+                double maxX = 0, maxY = 0;
+                double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+                int counter = 0;
+                List<List<Double>> listWithStuff;
+
+                for (LLResultTypes.DetectorResult detection : detections) {
+                    ball_colors.add(detection.getClassName());
+                    if (index >= 8) break;
+                    switch (detection.getClassName()) {
+                        case "purple":
+                        case "green": {
+                            countedBalls++;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                    index++;
+
+
+                    listWithStuff = detection.getTargetCorners(); // List<List<x,y>>
+
+                    x1 = listWithStuff.get(0).get(0); // x
+                    y1 = listWithStuff.get(0).get(1); // y
+                    x2 = listWithStuff.get(1).get(0); // x
+                    y2 = listWithStuff.get(1).get(1); // y
+
+
+                    maxX = max(maxX, max(x1, x2));
+                    maxY = max(maxY, max(y1, y2));
+
+                    RobotController.telemetry.addData("Ball Corners No." + index, x1 + "  " + y1 + " ::: " + x2 + "  " + y2);
+
+
+                }
+
+                //detectedBalls = max(detectedBalls,countedBalls);
+//            detectedBalls = countedBalls;
+                RobotController.telemetry.addData("BALLS LIST", ball_colors);
+
+
+                RobotController.telemetry.addData("maxX", maxX);
+                RobotController.telemetry.addData("maxY", maxY);
+            }
+        };
+
 
     protected void HandleColors() {
         leftSensorColors = colorSensorLeft.getNormalizedColors();
