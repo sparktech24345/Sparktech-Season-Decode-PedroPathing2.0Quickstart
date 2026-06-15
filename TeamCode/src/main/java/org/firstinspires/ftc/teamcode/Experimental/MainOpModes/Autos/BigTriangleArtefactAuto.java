@@ -476,9 +476,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left left
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 2: // if green is on the left
@@ -486,9 +489,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 3: // green isnt or is in intake
@@ -499,9 +505,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
         }
@@ -522,9 +531,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 2: // if green is on the left
@@ -535,9 +547,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 3: // green ball is in intake
@@ -545,9 +560,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
         }
@@ -566,9 +584,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 2: // if green is on the left
@@ -579,9 +600,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 3: // green ball is in intake, cant actually sort this airsort needed
@@ -590,9 +614,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new GeneralAction(turnAirSortOff),
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(600),
+                        new DelayAction(450),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
         }
@@ -609,9 +636,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new StateAction("RightGateServo", "OPEN"),//
 
                 // close gates
-                new DelayAction(600),
+                new DelayAction(450),
                 new StateAction("RightGateServo", "CLOSED"),
-                new StateAction("LeftGateServo", "CLOSED")
+                new StateAction("LeftGateServo", "CLOSED"),
+                new StateAction("IntakeMotor","FULL_REVERSE"),
+                new DelayAction(100),
+                new StateAction("IntakeMotor","FULL")
         ));
     };
     public void checkToFireUnsortedBalls(boolean shouldFire){
@@ -628,9 +658,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                     new StateAction("RightGateServo", "OPEN"),//
 
                     // close gates
-                    new DelayAction(600),
+                    new DelayAction(450),
                     new StateAction("RightGateServo", "CLOSED"),
-                    new StateAction("LeftGateServo", "CLOSED")
+                    new StateAction("LeftGateServo", "CLOSED"),
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(100),
+                    new StateAction("IntakeMotor","FULL")
             ));
         }
     }
@@ -647,9 +680,12 @@ public class BigTriangleArtefactAuto extends OpMode {
                     new StateAction("RightGateServo", "OPEN"),//
 
                     // close gates
-                    new DelayAction(600),
+                    new DelayAction(450),
                     new StateAction("RightGateServo", "CLOSED"),
-                    new StateAction("LeftGateServo", "CLOSED")
+                    new StateAction("LeftGateServo", "CLOSED"),
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(100),
+                    new StateAction("IntakeMotor","FULL")
             ));
         };
     }
@@ -727,8 +763,8 @@ public class BigTriangleArtefactAuto extends OpMode {
             doIntakePulse = false;
             robot.executeNow(new ActionSequence(
                     new DelayAction(50),
-                    new StateAction("IntakeMotor","OFF"),
-                    new DelayAction(45),
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(30),
                     new StateAction("IntakeMotor","FULL")
             ));
         }

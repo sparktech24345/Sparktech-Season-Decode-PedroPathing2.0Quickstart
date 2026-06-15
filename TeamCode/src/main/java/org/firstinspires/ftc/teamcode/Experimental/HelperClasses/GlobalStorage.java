@@ -98,6 +98,7 @@ public class GlobalStorage {
     //function for firing stuff
     public static Pose globalRobotPose = new Pose();
     public static Pose futureMoveActionTargetPose = new Pose();
+    public static Pose cameraPoseToResetWith = new Pose();
     public static int teamPipeline = 0;
     public static double redThreshold = 40;
 

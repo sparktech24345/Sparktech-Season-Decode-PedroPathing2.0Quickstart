@@ -378,7 +378,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 2: // if green is on the left
@@ -388,7 +391,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 3: // green isnt or is in intake
@@ -401,7 +407,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
         }
@@ -424,7 +433,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 2: // if green is on the left
@@ -437,7 +449,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 3: // green ball is in intake
@@ -447,7 +462,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
         }
@@ -468,7 +486,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 2: // if green is on the left
@@ -481,7 +502,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
             case 3: // green ball is in intake, cant actually sort this airsort needed
@@ -492,7 +516,10 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(400),
                         new StateAction("RightGateServo", "CLOSED"),
-                        new StateAction("LeftGateServo", "CLOSED")
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new StateAction("IntakeMotor","FULL_REVERSE"),
+                        new DelayAction(100),
+                        new StateAction("IntakeMotor","FULL")
                 ));
                 break;
         }
@@ -511,7 +538,10 @@ public class SmallTriangleNew extends OpMode {
                 // close gates
                 new DelayAction(400),
                 new StateAction("RightGateServo", "CLOSED"),
-                new StateAction("LeftGateServo", "CLOSED")
+                new StateAction("LeftGateServo", "CLOSED"),
+                new StateAction("IntakeMotor","FULL_REVERSE"),
+                new DelayAction(100),
+                new StateAction("IntakeMotor","FULL")
         ));
     };
     public void checkToFireUnsortedBalls(boolean shouldFire){
@@ -655,8 +685,8 @@ public class SmallTriangleNew extends OpMode {
             doIntakePulse = false;
             robot.executeNow(new ActionSequence(
                     new DelayAction(50),
-                    new StateAction("IntakeMotor","OFF"),
-                    new DelayAction(45),
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(30),
                     new StateAction("IntakeMotor","FULL")
             ));
         }

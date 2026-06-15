@@ -8,6 +8,7 @@ import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalSt
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateCameraAngle;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.camOffsetX;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.cameraPoseToResetWith;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
@@ -266,7 +267,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         if(robot.getKey("DPAD_RIGHT1").ExecuteOnPress || robot.getKey("RIGHT_BUMPER2").ExecuteOnPress){
             robot.executeNow(new ActionSequence( // reverse for a bit
                     new GeneralAction(() -> wantsToTempOutputIntake = true),
-                    new DelayAction(45),
+                    new DelayAction(30),
                     new GeneralAction(() -> wantsToTempOutputIntake = false)
                     ));
         }
@@ -326,15 +327,15 @@ public class MainTeleOpBlue extends LinearOpMode {
             gamepad2.setLedColor(255,0,0,30000);
         }
         // Driver fire unsorted in sorted mode
-        if (robot.getKey("X1").ExecuteOnPress){
-            wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
-            hasJustBeganFiring = true;
-
-            wantsToIntakeDriver = false;
-            wantsToOutput = false;
-            wantsToFireWithIntake = false;
-            hasSwitchedIntakeState = true;
-        }
+//        if (robot.getKey("X1").ExecuteOnPress){
+//            wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
+//            hasJustBeganFiring = true;
+//
+//            wantsToIntakeDriver = false;
+//            wantsToOutput = false;
+//            wantsToFireWithIntake = false;
+//            hasSwitchedIntakeState = true;
+//        }
 
         // Slowdown
         if (robot.getKey("B1").ExecuteOnPress) {
@@ -384,14 +385,20 @@ public class MainTeleOpBlue extends LinearOpMode {
 //        }
 
         if(robot.getKey("RIGHT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
-            ComplexFollower.instance().setPose(pose(cfg.hpResetX, cfg.hpResetY, cfg.hpResetDeg));
+            ComplexFollower.instance().setPose(cameraPoseToResetWith);
             D2_velocityAdder = 0;
             D2_rotationAdder = 0;
         }
         if(robot.getKey("LEFT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
-            ComplexFollower.instance().setPose(pose(cfg.classifierResetX,cfg.classifierResetY,cfg.classifierResetDeg));
-            D2_velocityAdder = 0;
-            D2_rotationAdder = 0;
+            double originalHeading = Math.toDegrees(robot.getCurrentPose().getHeading());
+            double headingToResetWith =0;
+
+            if(originalHeading > -45 && originalHeading < 45) headingToResetWith = 0;
+            else if(originalHeading > -135 && originalHeading < -45) headingToResetWith = -90;
+            else if(originalHeading > 45 && originalHeading < 135) headingToResetWith = 90;
+            else headingToResetWith = 180;
+
+            ComplexFollower.instance().setPose(pose(robot.getCurrentPose().getX(),robot.getCurrentPose().getY(),headingToResetWith));
         }
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Decision Making Code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
@@ -519,7 +526,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         else intakeState = 0;
 
         if(wantsToTempOutputIntake)
-            intakeState = 0;
+            intakeState = -1;
 
         if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && Math.abs(tempTurret.getError()) > 15)
             intakeState = 0;
@@ -630,6 +637,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             // lookaheadSeconds should roughly match your control loop latency + motor response time
             if(shouldShootWithoutTurret) neededAngleForTurretRotation = 0;
             tempTurret.setFeedforwardCoefficients(kVTurret,kATurret,kSTurret);
+            tempTurret.setOperationMode(MotorComponent.MotorModes.Position);
             tempTurret.setTarget(neededAngleForTurretRotation);
 
         }
@@ -944,8 +952,9 @@ public class MainTeleOpBlue extends LinearOpMode {
             Pose tempPose = pose(fixedPose.x, fixedPose.y, Math.toRadians(fixedPose.heading));
             RobotController.telemetry.addData("Bots Wanna be Position", tempPose.toString());
 
-            if(robot.getKey("A1").ExecuteOnPress)
-                ComplexFollower.instance().setPose(new Pose(tempPose.getX(),tempPose.getY(),robot.getCurrentPose().getHeading()));
+//            if(robot.getKey("A1").ExecuteOnPress)
+//                ComplexFollower.instance().setPose();
+            cameraPoseToResetWith = new Pose(tempPose.getX(),tempPose.getY(),robot.getCurrentPose().getHeading());
         }
     }
 
