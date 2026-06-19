@@ -53,6 +53,8 @@ public class ComplexGamepad {
             put("LEFT_STICK_BUTTON1", new Button(() -> gamepad1.left_stick_button));
             put("RIGHT_STICK_BUTTON1", new Button(() -> gamepad1.right_stick_button));
 
+            put("OPTIONS1", new Button(() -> gamepad1.options));
+
         }
         if (gamepad2 != null) {
             put("A2", new Button(() -> gamepad2.a));
@@ -82,6 +84,8 @@ public class ComplexGamepad {
 
             put("LEFT_STICK_BUTTON2", new Button(() -> gamepad2.left_stick_button));
             put("RIGHT_STICK_BUTTON2", new Button(() -> gamepad2.right_stick_button));
+
+            put("OPTIONS2", new Button(() -> gamepad2.options));
         }
     }
 

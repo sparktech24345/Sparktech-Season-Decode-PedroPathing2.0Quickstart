@@ -101,7 +101,7 @@ public class SmallTriangleNew extends OpMode {
     public static int wentTooNumber2 =23;
     public static int cameraCase =0;
     private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
-    private Pose small_triangle_shoot = pose(1.6, 9.5, 90);
+    private Pose small_triangle_shoot = pose(3, 9.5, 90);
     private Pose parkPose = pose(1, 23.5, 90);
     private Pose fininshHPCollectPose = pose(0.5,45,90); // hp collect
     private Pose fininshHPCollectPoseNEW = pose(0.5,45,90); // hp collect
@@ -122,8 +122,8 @@ public class SmallTriangleNew extends OpMode {
 
     // sweep collect
 
-    public static Pose bezierHelper3 = pose(10, 45, 50);
-    public static Pose weirdHpCollect =  pose(30,45,50);
+    public static Pose bezierHelper3 = pose(10, 48, 45);
+    public static Pose weirdHpCollect =  pose(30,43,45);
 
     @Override
     public void init() {
@@ -255,7 +255,7 @@ public class SmallTriangleNew extends OpMode {
 
 
                 // 4th cycle, camera collecting
-                new MoveAction(1),new MoveAction(1),
+                new MoveAction(1),
                 new DelayAction(100),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
@@ -325,7 +325,7 @@ public class SmallTriangleNew extends OpMode {
         //if(wentTooNumber2 >0) cameraCase = 1; // temporary untuill we get camera back
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
-            case 2: GlobalStorage.futureMoveActionTargetPose = weirdHpCollect; wentTooNumber2++; break;
+            case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
             case 3: GlobalStorage.futureMoveActionTargetPose = weirdHpCollect; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
         }
@@ -376,7 +376,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left left
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -389,7 +389,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -405,7 +405,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -431,7 +431,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -447,7 +447,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -460,7 +460,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -484,7 +484,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -500,7 +500,7 @@ public class SmallTriangleNew extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -514,7 +514,7 @@ public class SmallTriangleNew extends OpMode {
                         new GeneralAction(turnAirSortOff),
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(400),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -536,7 +536,7 @@ public class SmallTriangleNew extends OpMode {
                 new StateAction("RightGateServo", "OPEN"),//
 
                 // close gates
-                new DelayAction(400),
+                new DelayAction(600),
                 new StateAction("RightGateServo", "CLOSED"),
                 new StateAction("LeftGateServo", "CLOSED"),
                 new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -558,7 +558,7 @@ public class SmallTriangleNew extends OpMode {
                     new StateAction("RightGateServo", "OPEN"),//
 
                     // close gates
-                    new DelayAction(400),
+                    new DelayAction(600),
                     new StateAction("RightGateServo", "CLOSED"),
                     new StateAction("LeftGateServo", "CLOSED")
             ));
@@ -740,19 +740,24 @@ public class SmallTriangleNew extends OpMode {
     public static int neededCase = 0;
     public static int zone1 = 0,zone2 = 0,zone3 = 0;
     Runnable getBallNumber = () ->{
-        int zoner3 = zone3-1;
-        if(zone1 >=3) neededCase = 1;
-        else if(zone2 >=3) neededCase = 2;
-        else{
-            if(zoner3>zone2 && zoner3>zone1) neededCase = 3;
-            else if(zone2>zone1) neededCase = 2;
-            else if(zone1!= 0) neededCase =1;
-            else neededCase = 0;
-        }
+//        int zoner3 = zone3-1;
+//        if(zone1 >=3) neededCase = 1;
+//        else if(zone2 >=3) neededCase = 2;
+//        else{
+//            if(zoner3>zone2 && zoner3>zone1) neededCase = 3;
+//            else if(zone2>zone1) neededCase = 2;
+//            else if(zone1!= 0) neededCase =1;
+//            else neededCase = 0;
+//        }
+
+        if(zone1>=2) neededCase = 1;
+        else if(zone2>=2) neededCase = 2;
+        else neededCase = 3;
+
+
         zone1 = 0;
         zone2 = 0;
         zone3 = 0;
-        zoner3 = 0;
 
         cameraCase = neededCase;
     };

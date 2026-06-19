@@ -104,14 +104,16 @@ public class BigTriangleArtefactAuto extends OpMode {
     public static boolean shouldRemoveBalls = false;
     public static boolean shouldBoostOnTheGoVelocityLogic = false;
     public static boolean shouldUseColorSensors = false;
+    public static boolean shouldSTOPAdaptSorting = false;
 
     /// distance sensor stuff
 
     private AnalogInput laserAnalog;
 
     /// other stuff
-    public static double velocityAdderOnTheGo = 200;
-    public static double rotationOnTheGo = 2;
+    public static double velocityAdderOnTheGo = 220;
+    public static double alittleBonusVelocity = 40;
+    public static double rotationOnTheGo = 3;
     public static double angleOnTheGo = 150; // old 155
     public static double cameraAngleOverite = 0;
     BallColorQueue ballColorQueue = new BallColorQueue();
@@ -130,16 +132,17 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose fininshHPCollectPose = pose(-1.2,48.5,90); // hp collect
     private Pose secondZoneCameraCollect = pose(14.8, 48.5, 90);
     private Pose thirdZoneCameraCollect = pose(30.96, 48.5, 90);
-    private Pose thirdRowCollectDone = pose(27, 47+1, 90); // third row done
-    private Pose secondRowCollectDone = pose(48.7 + 1.5, 44.5, 90);
-    private Pose firstRowCollectDone = pose(77.5 - 0.5, 40.3, 90);
+
+    private Pose thirdRowCollectDone = pose(27, 49, 90); // third row done
+    private Pose secondRowCollectDone = pose(48.7 + 1.5, 45.5, 90);
+    private Pose firstRowCollectDone = pose(77.5 - 0.5, 42, 90);
 
 
     private Pose gateCollectSpecial = pose(55.5, 42,75); //this is actually the first one and normal one is second
     private Pose gateCollect = pose(55.5, 42, 75); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
 
-    private Pose gateActualCollectSpecial = pose(52.7, 46.5, 60); //this is actually the first one and normal one is second
-    private Pose gateActualCollect = pose(52.3 + 0.5, 46.5 + 0.45, 60); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
+    private Pose gateActualCollectSpecial = pose(52.7 + 0.6 -0.4, 46.5, 60); //this is actually the first one and normal one is second
+    private Pose gateActualCollect = pose(53.67 -0.4, 46.5 + 0.45, 60); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
 
     private Pose gateHelperPoint = pose(30 + 0.3 + 4, 36, 55); // helper for the collect aaaaaaaaaaaaaaaaaaaaaa
     private Pose gateHold = pose(50.8, 44, 90); // not used
@@ -236,6 +239,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         shouldMakeAutoWithout3rdRow = false;
         shouldHoldTurretForClassifierScan = false;
         needsToLookAtSecondPose = false;
+        shouldSTOPAdaptSorting = false;
         collectNumber = 0;
         movingTimer.reset();
         convertPoses();
@@ -289,7 +293,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> shouldFire = true),
                 new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = true),
-                new GeneralAction(makeFireUnsortedBalls(350)), // 475 old one
+                new GeneralAction(makeFireUnsortedBalls(385)), // 475 old one
                 new MoveAction(middleBigTriangleShooting),//false,BezierCurveTypes.TangentHeading,0),
                 //new DelayAction(800),
                 new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = false),
@@ -359,13 +363,14 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(tipBigTriangleShootingTurned90Deg),
                 new GeneralAction(() -> cameraAngleOverite = cfg.secondCameraPosition),
                 // the camera should already be turned to the correct position
+                
                 new DelayAction(200),
                 new GeneralAction(countBallsInClassifierWithBallDetection),
                 new GeneralAction(processCameraScanning),
-                new GeneralAction(processCameraScanning),
+//                new GeneralAction(processCameraScanning),
 
-                new GeneralAction(runAirSortChecks),
-                new GeneralAction(runAirSortChecks),
+//                new GeneralAction(runAirSortChecks),
+//                new GeneralAction(runAirSortChecks),
                 new DelayAction(125), // if it needs to airsort
                 new GeneralAction(fireSortedBalls),
                 new DelayAction(1200),
@@ -416,9 +421,10 @@ public class BigTriangleArtefactAuto extends OpMode {
             //double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry);
 
-            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(distanceToWallOdometry);
+//            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(distanceToWallOdometry);
 
             if(shouldBoostOnTheGoVelocityLogic) targetVelocity += velocityAdderOnTheGo;
+            else targetVelocity += alittleBonusVelocity;
 
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
@@ -428,7 +434,7 @@ public class BigTriangleArtefactAuto extends OpMode {
             // ----------------------- Angle Stuff -----------------------
 
             double turretAngleVal = distanceToAngleFunction(distanceToWallOdometry);
-            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(distanceToWallOdometry);
+//            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(distanceToWallOdometry);
             if(shouldBoostOnTheGoVelocityLogic) turretAngleVal = angleOnTheGo;
             robot.getServoComponent("TurretAngle")
                     .setTarget(turretAngleVal);
@@ -450,6 +456,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         }
     }
     Runnable fireSortedBalls = () -> {
+        if(shouldSTOPAdaptSorting) camId = globalCamId;
         switch (camId) {
             case 23: // ppg
                 firePPG();
@@ -476,7 +483,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left left
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -489,7 +496,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -505,7 +512,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -531,7 +538,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -547,7 +554,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -560,7 +567,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -584,7 +591,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(mainTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -600,7 +607,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(mainTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -614,7 +621,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new GeneralAction(turnAirSortOff),
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(450),
+                        new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -636,7 +643,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new StateAction("RightGateServo", "OPEN"),//
 
                 // close gates
-                new DelayAction(450),
+                new DelayAction(600),
                 new StateAction("RightGateServo", "CLOSED"),
                 new StateAction("LeftGateServo", "CLOSED"),
                 new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -658,7 +665,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                     new StateAction("RightGateServo", "OPEN"),//
 
                     // close gates
-                    new DelayAction(450),
+                    new DelayAction(600),
                     new StateAction("RightGateServo", "CLOSED"),
                     new StateAction("LeftGateServo", "CLOSED"),
                     new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -680,7 +687,7 @@ public class BigTriangleArtefactAuto extends OpMode {
                     new StateAction("RightGateServo", "OPEN"),//
 
                     // close gates
-                    new DelayAction(450),
+                    new DelayAction(600),
                     new StateAction("RightGateServo", "CLOSED"),
                     new StateAction("LeftGateServo", "CLOSED"),
                     new StateAction("IntakeMotor","FULL_REVERSE"),
@@ -950,6 +957,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         ));
     };
     public Runnable processClassifierAndSwitchMotif = () -> {
+        if(!shouldSTOPAdaptSorting){
         //int detectedBalls = countBallsInClassifier();
         // only between 0-2
         int placesToShift = detectedBalls % 3;
@@ -964,6 +972,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         RobotController.telemetry.addData("detected balls on" + a, detectedBalls);
         RobotController.telemetry.addData("id calculated on" + a, camId);
         a++;
+        }
     };
     public Runnable runAirSortChecks = () -> {
         if(camId == 21 && calculatedLeftSensorDetectedBall == BallColorSet_Decode.Purple && calculatedRightSensorDetectedBall == BallColorSet_Decode.Purple)

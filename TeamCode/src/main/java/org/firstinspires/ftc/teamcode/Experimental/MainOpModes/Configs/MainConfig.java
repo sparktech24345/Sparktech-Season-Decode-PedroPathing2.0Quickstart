@@ -74,7 +74,7 @@ public class MainConfig {
                 farZoneCameraAdder = 0;
                 autoZoneAdderFar = 0;
 
-                targetForCameraX = 10.5; // this is the hp stuff prev 12
+                targetForCameraX = 9.8; // this is the hp stuff prev 12
                 targetForCameraX2ndTime = 46; // this is the hp stuff prev 12
                 targetForCameraY = 50;
 
@@ -88,7 +88,7 @@ public class MainConfig {
 
                 //autoVelAdder = -20;
 
-                rotationForInitClsoeZone = 110;
+                rotationForInitClsoeZone = 95;
                 rotationForInitSmallTriangle = 90;
 
                 targetX = 130;
@@ -97,8 +97,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = 41;
 
-                targetXAutoClose = 130;
-                targetYAutoClose = 50.6;
+                targetXAutoClose = 127;
+                targetYAutoClose = 52;
 
                 targetXCenter = 128; // 130
                 targetYCenter = 53;
@@ -106,8 +106,8 @@ public class MainConfig {
                 targetXRightPanel = 127;
                 targetYRightPanel = 48;
 
-                targetXForFarAuto = 123;
-                targetYForFarAuto = 53.83;
+                targetXForFarAuto = 127;
+                targetYForFarAuto = 49.5;
 
                 targetXLeftPanel = 123;
                 targetYLeftPanel = 54;
@@ -137,7 +137,7 @@ public class MainConfig {
                 autoZoneAdderFar = 0;
 
 
-                targetForCameraX = 10.5; // this is the hp stuff prev 12
+                targetForCameraX = 9.8; // this is the hp stuff prev 12
                 targetForCameraX2ndTime = 46; // this is the hp stuff prev 12
                 targetForCameraY = -50;
 
@@ -152,7 +152,7 @@ public class MainConfig {
 
                 //autoVelAdder = -20;
 
-                rotationForInitClsoeZone = -110;
+                rotationForInitClsoeZone = -98;
                 rotationForInitSmallTriangle = 270;
 
                 targetX = 130;
@@ -161,8 +161,8 @@ public class MainConfig {
                 camTargetX = 120;
                 camTargetY = -41;
 
-                targetXAutoClose = 130;
-                targetYAutoClose = -43.5;
+                targetXAutoClose = 127;
+                targetYAutoClose = -42.5;
 
                 targetXCenter = 128; // 130
                 targetYCenter = -53;
@@ -170,8 +170,8 @@ public class MainConfig {
                 targetXRightPanel = 127;
                 targetYRightPanel = -43; //
 
-                targetXForFarAuto = 123;
-                targetYForFarAuto = -53.35; //
+                targetXForFarAuto = 126;
+                targetYForFarAuto = -45; //
 
                 targetXLeftPanel = 123;
                 targetYLeftPanel = -53.4;
@@ -193,7 +193,7 @@ public class MainConfig {
 
                 firstCameraPosition = 154;
                 secondCameraPosition = 151;
-                thirdCameraPosition = 96;
+                thirdCameraPosition = 102;
 
                 break;
         }

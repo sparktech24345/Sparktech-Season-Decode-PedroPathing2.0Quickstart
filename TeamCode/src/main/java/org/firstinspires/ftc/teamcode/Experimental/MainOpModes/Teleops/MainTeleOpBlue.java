@@ -165,6 +165,10 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
     public static double mainTimerForSorting = 280;
+    public static double mainTimerForSortingTeleop = 450;
+    public static double firstSortedTimer = 450;
+    public static double secondSortedTimer = 200;
+    public static double thirdSortedTimer = 450;
     public static double timerBothOnOneChannelTimerForSorting = 850;
     public static double timer_far_v2 = 120;
     public static double timer_close_v2 = 120;
@@ -277,6 +281,8 @@ public class MainTeleOpBlue extends LinearOpMode {
             if (cameraAngleOverite == 0) cameraAngleOverite = 176;
             else cameraAngleOverite = 0;
         }
+
+        if(robot.getKey("OPTIONS2").ExecuteOnPress) limelight3A.captureSnapshot("this is not here" + System.currentTimeMillis());
 
 
         // Driver Outputting
@@ -590,7 +596,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             targetVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier + D2_velocityAdder;
             if(RobotController.currentVoltage < 10 || RobotController.getDrivetrainCumulativePower() >3.85) targetVelocity += 30;
-            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(usedDistance) *vMultiplier + D2_velocityAdder;
+//            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(usedDistance) *vMultiplier + D2_velocityAdder;
             if(!shouldForceOuttake){
                 if(shouldUseSecondaryPID /*always false */ && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
                     robot.getMotorComponent("TurretSpinMotor")
@@ -623,7 +629,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = 0;
             turretAngleVal = distanceToAngleFunction(usedDistance);
-            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(usedDistance);
+//            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(usedDistance);
             RobotController.telemetry.addData("angle function output",turretAngleVal);
             turretAngleVal = (eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal);
             turretAngleVal = clamp(turretAngleVal,18, 324); // fresh measured
@@ -1030,6 +1036,13 @@ public class MainTeleOpBlue extends LinearOpMode {
             cfg.usedTargetY = cfg.targetYCenter;
         }
 
+        ///  this is an povveried
+        if(isInSortedMode){
+            cfg.usedTargetX = cfg.targetXAutoClose;
+            cfg.usedTargetY = cfg.targetYAutoClose;
+        }
+
+
         RobotController.telemetry.addData("Calculated Rotation", robotToGoalAbsoluteAngle);
         RobotController.telemetry.addData("Target X", cfg.usedTargetX);
     }
@@ -1054,7 +1067,11 @@ public class MainTeleOpBlue extends LinearOpMode {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // left right right
                         new StateAction("LeftGateServo", "OPEN"), // left left
-                        new DelayAction(timerBothOnOneChannelTimerForSorting),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("LeftGateServo", "CLOSED"),
+                        new DelayAction(secondSortedTimer),
+                        new StateAction("LeftGateServo", "OPEN"), // left left
+                        new DelayAction(thirdSortedTimer),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1063,8 +1080,12 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( // right right left
-                        new StateAction("RightGateServo", "OPEN"), // right right
-                        new DelayAction(timerBothOnOneChannelTimerForSorting),
+                        new StateAction("RightGateServo", "OPEN"), // right
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(secondSortedTimer),
+                        new StateAction("RightGateServo", "OPEN"), // right
+                        new DelayAction(thirdSortedTimer),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1076,9 +1097,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        //new DelayAction(timer1),
+                        new DelayAction(firstSortedTimer),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(mainTimerForSorting),
+                        new DelayAction(mainTimerForSortingTeleop),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1100,9 +1121,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        //new DelayAction(timer1),
+                        new DelayAction(firstSortedTimer),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(mainTimerForSorting),
+                        new DelayAction(mainTimerForSortingTeleop),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1114,9 +1135,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        //new DelayAction(timer1),
+                        new DelayAction(firstSortedTimer),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(mainTimerForSorting),
+                        new DelayAction(mainTimerForSortingTeleop),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1124,9 +1145,13 @@ public class MainTeleOpBlue extends LinearOpMode {
                 ));
                 break;
             case 3: // green ball is in intake
-                robot.executeNow(new ActionSequence( // right right left1000
-                        new StateAction("RightGateServo", "OPEN"), // right right
-                        new DelayAction(timerBothOnOneChannelTimerForSorting),
+                robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("RightGateServo", "OPEN"), // right
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(secondSortedTimer),
+                        new StateAction("RightGateServo", "OPEN"), // right
+                        new DelayAction(thirdSortedTimer),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1146,9 +1171,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
-                        //new DelayAction(timer1),
+                        new DelayAction(firstSortedTimer),
                         new StateAction("LeftGateServo", "OPEN"), // left
-                        new DelayAction(mainTimerForSorting),
+                        new DelayAction(mainTimerForSortingTeleop),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1160,9 +1185,9 @@ public class MainTeleOpBlue extends LinearOpMode {
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
-                        //new DelayAction(timer1),
+                        new DelayAction(firstSortedTimer),
                         new StateAction("RightGateServo", "OPEN"), // right
-                        new DelayAction(mainTimerForSorting),
+                        new DelayAction(mainTimerForSortingTeleop),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1171,10 +1196,15 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 3: // green ball is in intake, cant actually sort this airsort needed
                 robot.executeNow(new ActionSequence( // it willl fire right right left and try air sort
-                        new StateAction("RightGateServo", "OPEN"), // right right
-                        new GeneralAction(turnAirSortOff),
-                        new DelayAction(timerBothOnOneChannelTimerForSorting),
-                        new StateAction("LeftGateServo", "OPEN"), // left
+                        new StateAction("RightGateServo", "OPEN"),
+                        new DelayAction(timerToCloseGate),
+                        new StateAction("RightGateServo", "CLOSED"),
+                        new DelayAction(timer1),
+                        new StateAction("LeftGateServo", "OPEN"),
+                        new DelayAction(timer2),
+                        new StateAction("RightGateServo", "OPEN"),
+
+                        // close gates
                         new DelayAction(600),
                         new StateAction("RightGateServo", "CLOSED"),
                         new StateAction("LeftGateServo", "CLOSED")
