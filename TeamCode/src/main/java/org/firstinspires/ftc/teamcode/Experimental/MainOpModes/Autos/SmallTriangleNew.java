@@ -223,7 +223,7 @@ public class SmallTriangleNew extends OpMode {
                 // preload
                 new GeneralAction(() -> shouldFire = true), // prep outtake
                 new StateAction("IntakeMotor","FULL"),
-                new DelayAction(1050), // revving up outtake
+                new DelayAction(1200), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(900),
                 // end of preload
@@ -255,7 +255,8 @@ public class SmallTriangleNew extends OpMode {
 
 
                 // 4th cycle, camera collecting
-                new MoveAction(1),
+//                new MoveAction(1),
+                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
                 new DelayAction(100),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
@@ -685,7 +686,7 @@ public class SmallTriangleNew extends OpMode {
             doIntakePulse = false;
             robot.executeNow(new ActionSequence(
                     new DelayAction(50),
-                    new StateAction("IntakeMotor","FULL_REVERSE"),
+//                    new StateAction("IntakeMotor","FULL_REVERSE"),
                     new DelayAction(30),
                     new StateAction("IntakeMotor","FULL")
             ));

@@ -171,7 +171,7 @@ public class MainConfig {
                 targetYRightPanel = -43; //
 
                 targetXForFarAuto = 126;
-                targetYForFarAuto = -45; //
+                targetYForFarAuto = -45.5; //
 
                 targetXLeftPanel = 123;
                 targetYLeftPanel = -53.4;
