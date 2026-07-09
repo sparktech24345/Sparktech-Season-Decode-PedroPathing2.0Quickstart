@@ -293,6 +293,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             wantsToIntakeDriver = false;
             wantsToFireWithIntakeUnsortedInSortingMode = false;
             hasSwitchedIntakeState = true;
+            robot.executeNow(new StateAction("coupleServo", "COUPLED"));
         }
         // Driver Intake
         if (robot.getKey("RIGHT_BUMPER1").ExecuteOnPress){
@@ -302,6 +303,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             wantsToOutput = false;
             wantsToFireWithIntakeUnsortedInSortingMode = false;
             hasSwitchedIntakeState = true;
+            robot.executeNow(new StateAction("coupleServo", "DECOUPLED"));
         }
         // Driver Actually Shooting
         if (robot.getKey("RIGHT_TRIGGER1").ExecuteOnPress){
@@ -464,6 +466,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
                 if (usedDistance > 2.9 /* && hasBallInLeftChamber*/ && !isInSortedMode) {
                     robot.executeNow(new ActionSequence(
+                            new StateAction("coupleServo", "COUPLED"),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
@@ -479,6 +482,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 }
                 else if(!isInSortedMode){
                     robot.executeNow(new ActionSequence(
+                            new StateAction("coupleServo", "COUPLED"),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
@@ -1066,6 +1070,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // left right right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("LeftGateServo", "OPEN"), // left left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
@@ -1080,6 +1085,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1094,6 +1100,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 3: // green isnt or is in intake
                 robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1118,6 +1125,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // left right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
@@ -1132,6 +1140,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence(// right left right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1146,6 +1155,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 3: // green ball is in intake
                 robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1168,6 +1178,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -1182,6 +1193,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( //left right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
@@ -1196,6 +1208,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 break;
             case 3: // green ball is in intake, cant actually sort this airsort needed
                 robot.executeNow(new ActionSequence( // it willl fire right right left and try air sort
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"),
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),

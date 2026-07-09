@@ -480,6 +480,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // left right right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("LeftGateServo", "OPEN"), // left left
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("RightGateServo", "OPEN"), // right
@@ -488,11 +489,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
@@ -501,11 +504,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
             case 3: // green isnt or is in intake
                 robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -517,7 +522,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
         }
@@ -532,6 +538,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // left right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
@@ -543,11 +550,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence(// right left right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -559,11 +568,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
             case 3: // green ball is in intake
                 robot.executeNow(new ActionSequence( // right right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
                         new StateAction("LeftGateServo", "OPEN"), // left
@@ -572,7 +583,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
         }
@@ -585,6 +597,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         switch (greenBallPosition) {
             case 1: // green on the right
                 robot.executeNow(new ActionSequence( // right left right
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right
                         new DelayAction(timerToCloseGate),
                         new StateAction("RightGateServo", "CLOSED"),
@@ -596,11 +609,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
             case 2: // if green is on the left
                 robot.executeNow(new ActionSequence( //left right left
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("LeftGateServo", "OPEN"), // left
                         new DelayAction(timerToCloseGate),
                         new StateAction("LeftGateServo", "CLOSED"),
@@ -612,11 +627,13 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
             case 3: // green ball is in intake, cant actually sort this airsort needed
                 robot.executeNow(new ActionSequence( // it willl fire right right left and try air sort
+                        new StateAction("coupleServo", "COUPLED"),
                         new StateAction("RightGateServo", "OPEN"), // right right
                         new GeneralAction(turnAirSortOff),
                         new DelayAction(timerBothOnOneChannelTimerForSorting),
@@ -626,7 +643,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                         new StateAction("LeftGateServo", "CLOSED"),
                         new StateAction("IntakeMotor","FULL_REVERSE"),
                         new DelayAction(100),
-                        new StateAction("IntakeMotor","FULL")
+                        new StateAction("IntakeMotor","FULL"),
+                        new StateAction("coupleServo", "DECOUPLED")
                 ));
                 break;
         }
@@ -634,6 +652,7 @@ public class BigTriangleArtefactAuto extends OpMode {
 
     Runnable fireUnsortedBalls = () -> {
         robot.executeNow(new ActionSequence(
+                new StateAction("coupleServo", "COUPLED"),
                 new StateAction("RightGateServo", "OPEN"),
                 new DelayAction(timerToCloseGate),
                 new StateAction("RightGateServo", "CLOSED"),
@@ -648,7 +667,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new StateAction("LeftGateServo", "CLOSED"),
                 new StateAction("IntakeMotor","FULL_REVERSE"),
                 new DelayAction(100),
-                new StateAction("IntakeMotor","FULL")
+                new StateAction("IntakeMotor","FULL"),
+                new StateAction("coupleServo", "DECOUPLED")
         ));
     };
     public void checkToFireUnsortedBalls(boolean shouldFire){
@@ -656,6 +676,7 @@ public class BigTriangleArtefactAuto extends OpMode {
             shouldFireUnsortedBalls = false;
             robot.executeNow(new ActionSequence(
                     new DelayAction(40),
+                    new StateAction("coupleServo", "COUPLED"),
                     new StateAction("RightGateServo", "OPEN"),
                     new DelayAction(timerToCloseGate),
                     new StateAction("RightGateServo", "CLOSED"),
@@ -670,7 +691,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                     new StateAction("LeftGateServo", "CLOSED"),
                     new StateAction("IntakeMotor","FULL_REVERSE"),
                     new DelayAction(100),
-                    new StateAction("IntakeMotor","FULL")
+                    new StateAction("IntakeMotor","FULL"),
+                    new StateAction("coupleServo", "DECOUPLED")
             ));
         }
     }
@@ -678,6 +700,7 @@ public class BigTriangleArtefactAuto extends OpMode {
         return  () -> {
             robot.executeNow(new ActionSequence(
                     new DelayAction(timeToWait),
+                    new StateAction("coupleServo", "COUPLED"),
                     new StateAction("RightGateServo", "OPEN"),
                     new DelayAction(timerToCloseGate),
                     new StateAction("RightGateServo", "CLOSED"),
@@ -692,7 +715,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                     new StateAction("LeftGateServo", "CLOSED"),
                     new StateAction("IntakeMotor","FULL_REVERSE"),
                     new DelayAction(100),
-                    new StateAction("IntakeMotor","FULL")
+                    new StateAction("IntakeMotor","FULL"),
+                    new StateAction("coupleServo", "DECOUPLED")
             ));
         };
     }

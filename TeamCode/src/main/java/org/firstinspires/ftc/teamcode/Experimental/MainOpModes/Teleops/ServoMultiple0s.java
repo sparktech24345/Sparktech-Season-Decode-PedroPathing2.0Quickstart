@@ -17,7 +17,7 @@ public class ServoMultiple0s extends LinearOpMode {
     public static double angleServoPos = 0.4; // max down is 0.9 and max up is 0.05
     public static double CameraServoPos = 0;
     public static double motorPow = 0;
-
+    public static double coupleServoPos = 0;
 
     @Override
     public void runOpMode() {
@@ -30,6 +30,8 @@ public class ServoMultiple0s extends LinearOpMode {
         Servo turretAngleServo = hardwareMap.get(Servo.class, turretAngleServoName);
 
         Servo CameraRotateServo = hardwareMap.get(Servo.class, CameraRotateServoName);
+
+        Servo coupleServo = hardwareMap.get(Servo.class, coupleServoName);
 
 
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, intakeMotorName);
@@ -45,6 +47,8 @@ public class ServoMultiple0s extends LinearOpMode {
             if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
 
             if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos); // max down is 0.88 and max up is 0.05
+            if (coupleServo != null) coupleServo.setPosition(coupleServoPos);  // 0.16 coupled; 0.35 decoupled
+
         }
 
         while (opModeIsActive()) {
@@ -60,6 +64,10 @@ public class ServoMultiple0s extends LinearOpMode {
 
             if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
 
+            if (coupleServo != null) coupleServo.setPosition(coupleServoPos);
+
+            telemetry.addData("Pos: ", coupleServo.getPosition());
+            telemetry.update();
             motor.setPower(motorPow);
         }
     }

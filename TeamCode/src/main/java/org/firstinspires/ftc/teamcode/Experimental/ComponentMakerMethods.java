@@ -67,6 +67,15 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
+        robot.makeComponent("coupleServo", new ServoComponent()
+                .addMotor(coupleServoName)
+                .setOperationMode(ServoComponent.ServoModes.Position)
+                .setResolution(360)
+                .setRange(0, 1)
+                .moveDuringInit(true)
+
+        );
+
         robot.makeComponent("RightGateServo", new ServoComponent()
                 .addMotor(rightGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
@@ -132,5 +141,9 @@ public class ComponentMakerMethods {
         robot.getComponent("TiltServos")
                 .addState("RETRACTED", 0.85*360,true) // 0.85
                 .addState("EXTENDED", 0.2*360); // 0.05
+
+        robot.getComponent("coupleServo")
+                .addState("COUPLED", 0.16 * 360)
+                .addState("DECOUPLED", 0.35 * 360, true);
     }
 }

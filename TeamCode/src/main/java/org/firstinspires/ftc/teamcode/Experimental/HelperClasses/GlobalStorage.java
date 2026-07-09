@@ -81,6 +81,7 @@ public class GlobalStorage {
     public static String leftTiltServoName = "leftTiltServo"; // port 1 expansion
     public static String turretAngleServoName = "turretAngleServo"; // port 4
     public static String CameraRotateServoName = "CameraRotateServo"; // port 0
+    public static String coupleServoName = "coupleServo"; // port 0 expansion
     public static String PTOServoName = "PTOServo"; // port 1
     public static String colorSensorRightName = "colorSensorRight";
     public static String colorSensorLeftName = "colorSensorLeft";
