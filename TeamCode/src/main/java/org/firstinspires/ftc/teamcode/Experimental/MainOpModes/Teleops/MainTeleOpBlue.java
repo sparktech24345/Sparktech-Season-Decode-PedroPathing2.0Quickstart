@@ -557,6 +557,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         switch (intakeState) {
             case -1:
                 robot.executeNow(new StateAction("IntakeMotor", "FULL_REVERSE"));
+                robot.executeNow(new StateAction("coupleServo", "COUPLED"));
                 break;
 
             case 0:

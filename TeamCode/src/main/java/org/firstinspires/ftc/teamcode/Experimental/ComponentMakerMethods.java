@@ -143,7 +143,7 @@ public class ComponentMakerMethods {
                 .addState("EXTENDED", 0.2*360); // 0.05
 
         robot.getComponent("coupleServo")
-                .addState("COUPLED", 0.16 * 360)
-                .addState("DECOUPLED", 0.35 * 360, true);
+                .addState("COUPLED", 0.14 * 360)
+                .addState("DECOUPLED", 0.25 * 360, true);
     }
 }
