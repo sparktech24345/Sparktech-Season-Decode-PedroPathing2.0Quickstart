@@ -2,17 +2,13 @@ package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_DISTANCE_MM;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.MAX_VOLTS;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.airSortingFunctionAngle;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.airSortingFunctionVelocity;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.ballInIntakeThreshold;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateCameraAngle;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.calculateDistance;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.camOffsetX;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.cameraPoseToResetWith;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.clamp;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.convertCamAngleToServoValue;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceSensorName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToAngleFunction;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.distanceToVelocityFunction;
@@ -37,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -57,6 +54,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Tea
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotControllerInterface;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 @Config
@@ -117,7 +115,8 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double rightSideAngleBias = -2;
     public static double velocityDeltaCompensation = 80;
     public static double flywheelVelocity = 0;
-    public static double lastFlywheelVelocity = 0;
+    public static double[] velocities = {0, 0};
+    public static double angleOffsetDiff = 20.0;
     public static boolean shouldToAirSort = false;
     public static int camId = 0;
 
@@ -186,6 +185,9 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean isMovingOuttakeGates = false;
     public static boolean hasSwitchedIntakeState = false;
     public static double fakeRotation = 0;
+    public static boolean shouldAdjustAngle = false;
+    public static double angleAdjustVal = 3.0;
+    public static double angleOffset = 40.0;
     public static double cameraImaginaryX = 110;
     public static Pose farPark = pose(117, 12, 90);
 
@@ -544,7 +546,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         double fakeVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier + D2_velocityAdder;
         if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && RobotController.currentVoltage < 10 && fakeVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold)
             intakeState = 0;
-        RobotController.telemetry.addData("velocity difrence",fakeVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold);
+        RobotController.telemetry.addData("velocity difference",fakeVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold);
 
         hasSwitchedIntakeState = false;
 
@@ -593,7 +595,6 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
         /// ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  == End of logic code ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
-
         // Outtake Stuff
         double targetVelocity = 0;
         if (isTryingToFire) {
@@ -633,9 +634,9 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = 0;
-            turretAngleVal = distanceToAngleFunction(usedDistance);
+            turretAngleVal = distanceToAngleFunction(usedDistance) - (angleOffset * (usedDistance >= 2.9 ? 1 : 0));
 //            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(usedDistance);
-            RobotController.telemetry.addData("angle function output",turretAngleVal);
+            RobotController.telemetry.addData("angle function output", turretAngleVal);
             turretAngleVal = (eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal);
             turretAngleVal = clamp(turretAngleVal,18, 324); // fresh measured
             robot.getServoComponent("TurretAngle")
@@ -679,9 +680,16 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
         // checking if it has fired a ball
-        lastFlywheelVelocity = flywheelVelocity;
-        flywheelVelocity = robot.getMotorComponent("TurretSpinMotor").getVelocity();
-        if(wantsToFireWithIntake && lastFlywheelVelocity - flywheelVelocity >= 100){
+        for (int i = 0; i < velocities.length - 1; ++i) velocities[i] = velocities[i + 1];
+        velocities[velocities.length - 1] = robot.getMotorComponent("TurretSpinMotor").getVelocity();
+        double deltaVel = velocities[velocities.length - 1] - velocities[0];
+        boolean hasShotByVel = deltaVel <= -80;
+        RobotController.telemetry.addData("deltavel", deltaVel);
+        RobotController.telemetry.addData("has shot by vel", hasShotByVel);
+        RobotController.telemetry.addData("angle offset", angleOffset);
+        if (hasShotByVel && wantsToFireWithIntake) angleOffset = (angleOffset + 2 * angleOffsetDiff) % (3 * angleOffsetDiff);
+        else if (!wantsToFireWithIntake) angleOffset = 2 * angleOffsetDiff;
+        if (wantsToFireWithIntake && deltaVel >= 80) {
             //ballCounter++;
             //shouldToAirSort = false; wayy too litle too late
         }
@@ -694,10 +702,10 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
         robot.spitFollowerTelemetry();
-        RobotController.telemetry.addData("target vel",targetVelocity);
-        RobotController.telemetry.addData("actual vel",flywheelVelocity);
-        RobotController.telemetry.addData("actual pow",robot.getMotorComponent("TurretSpinMotor").getPower());
-        RobotController.telemetry.addData("Intake Current",robot.getMotorComponent("IntakeMotor").getCurrent());
+        RobotController.telemetry.addData("target vel", targetVelocity);
+        RobotController.telemetry.addData("actual vel", velocities[velocities.length - 1]);
+        RobotController.telemetry.addData("actual pow", robot.getMotorComponent("TurretSpinMotor").getPower());
+        RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
     }
 
 

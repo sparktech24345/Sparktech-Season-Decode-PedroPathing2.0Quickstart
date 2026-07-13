@@ -184,6 +184,7 @@ public class GlobalStorage {
     // ==========================================
     // VELOCITY STUFF & FUNCTION
     // ==========================================
+    public static double farVeloOffset = 20;
     public static double closeVelo = 1140;
     public static double grade1farVelo = 290;
     public static double grade0farVelo = 595;
@@ -194,7 +195,7 @@ public class GlobalStorage {
 
     public static double distanceToVelocityFunction(double distance) {
         if (distance <= 1.0) return closeVelo;
-        if (distance > 2.9)  return grade1farVelo * distance + grade0farVelo;
+        if (distance > 2.9)  return grade1farVelo * distance + grade0farVelo + farVeloOffset;
 
         return grade1VeloClose * distance + grade0VeloClose;
     }

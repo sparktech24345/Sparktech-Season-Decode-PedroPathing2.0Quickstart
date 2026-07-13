@@ -131,9 +131,9 @@ public class ComponentMakerMethods {
                 .addState("OPEN", 151);
 
         robot.getComponent("TurretAngle")
-                .addState("DOWN_MAX", 273)
+                .addState("DOWN_MAX", 320)
                 .addState("DEFAULT", 180, true)
-                .addState("UP_MAX",47);
+                .addState("UP_MAX",18);
 
         robot.getComponent("CameraRotateServo")
                 .addState("MIDDLE", 0.49*360, true);
