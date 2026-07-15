@@ -528,6 +528,7 @@ public class SmallTriangleNew extends OpMode {
 
     Runnable fireUnsortedBalls = () -> {
         robot.executeNow(new ActionSequence(
+                new StateAction("coupleServo", "COUPLED"),
                 new StateAction("RightGateServo", "OPEN"),
                 new DelayAction(timerToCloseGate),
                 new StateAction("RightGateServo", "CLOSED"),
@@ -542,13 +543,15 @@ public class SmallTriangleNew extends OpMode {
                 new StateAction("LeftGateServo", "CLOSED"),
                 new StateAction("IntakeMotor","FULL_REVERSE"),
                 new DelayAction(100),
-                new StateAction("IntakeMotor","FULL")
+                new StateAction("IntakeMotor","FULL"),
+                new StateAction("coupleServo", "DECOUPLED")
         ));
     };
     public void checkToFireUnsortedBalls(boolean shouldFire){
         if(calculateDistance(robot.getCurrentPose(),small_triangle_shoot,true) < 0.25 && shouldFire){
             shouldFireUnsortedBalls = false;
             robot.executeNow(new ActionSequence(
+                    new StateAction("coupleServo", "COUPLED"),
                     new DelayAction(80),
                     new StateAction("RightGateServo", "OPEN"),
                     new DelayAction(timerToCloseGate),
@@ -561,7 +564,8 @@ public class SmallTriangleNew extends OpMode {
                     // close gates
                     new DelayAction(600),
                     new StateAction("RightGateServo", "CLOSED"),
-                    new StateAction("LeftGateServo", "CLOSED")
+                    new StateAction("LeftGateServo", "CLOSED"),
+                    new StateAction("coupleServo", "DECOUPLED")
             ));
         }
     }

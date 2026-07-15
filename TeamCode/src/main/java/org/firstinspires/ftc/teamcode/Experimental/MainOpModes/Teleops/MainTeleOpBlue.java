@@ -187,7 +187,13 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double fakeRotation = 0;
     public static boolean shouldAdjustAngle = false;
     public static double angleAdjustVal = 3.0;
-    public static double angleOffset = 40.0;
+    public static double angleOffsetValue = 50;
+    public static double angleOffset = 50;
+    public static double delayForFirstServoAngleMove = 500;
+    public static double delayForSecondServoAngleMove = 300;
+    public static double delayForThirdServoAngleMove = 700;
+    public static double timerToLoadBallUnderOuttake = 80;
+    public static double timerToLoadBallUnderOuttakeLOADINTAKE = 30;
     public static double cameraImaginaryX = 110;
     public static Pose farPark = pose(117, 12, 90);
 
@@ -347,6 +353,9 @@ public class MainTeleOpBlue extends LinearOpMode {
 //            hasSwitchedIntakeState = true;
 //        }
 
+        if (robot.getKey("X1").ExecuteOnPress && wantsToIntakeDriver){ // load ball under outtake
+            robot.executeNow( new GeneralAction(loadBallUnderOuttake));
+        }
         // Slowdown
         if (robot.getKey("B1").ExecuteOnPress) {
             if (robot.getKey("B1").IsToggledOnPress) {
@@ -468,6 +477,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                 isMovingOuttakeGates = true; // wont do special move commands until state is switched
                 if (usedDistance > 2.9 /* && hasBallInLeftChamber*/ && !isInSortedMode) {
                     robot.executeNow(new ActionSequence(
+                            new GeneralAction(adaptServoForShooting),
                             new StateAction("coupleServo", "COUPLED"),
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
@@ -679,21 +689,20 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         }
 
-        // checking if it has fired a ball
-        for (int i = 0; i < velocities.length - 1; ++i) velocities[i] = velocities[i + 1];
-        velocities[velocities.length - 1] = robot.getMotorComponent("TurretSpinMotor").getVelocity();
-        double deltaVel = velocities[velocities.length - 1] - velocities[0];
-        boolean hasShotByVel = deltaVel <= -80;
-        RobotController.telemetry.addData("deltavel", deltaVel);
-        RobotController.telemetry.addData("has shot by vel", hasShotByVel);
-        RobotController.telemetry.addData("angle offset", angleOffset);
-        if (hasShotByVel && wantsToFireWithIntake) angleOffset = (angleOffset + 2 * angleOffsetDiff) % (3 * angleOffsetDiff);
-        else if (!wantsToFireWithIntake) angleOffset = 2 * angleOffsetDiff;
-        if (wantsToFireWithIntake && deltaVel >= 80) {
-            //ballCounter++;
-            //shouldToAirSort = false; wayy too litle too late
-        }
-
+        // checking if it has fired a ball Werid Andrei Logic
+//        for (int i = 0; i < velocities.length - 1; ++i) velocities[i] = velocities[i + 1];
+//        velocities[velocities.length - 1] = robot.getMotorComponent("TurretSpinMotor").getVelocity();
+//        double deltaVel = velocities[velocities.length - 1] - velocities[0];
+//        boolean hasShotByVel = deltaVel <= -80;
+//        RobotController.telemetry.addData("deltavel", deltaVel);
+//        RobotController.telemetry.addData("has shot by vel", hasShotByVel);
+//        RobotController.telemetry.addData("angle offset", angleOffset);
+//        if (hasShotByVel && wantsToFireWithIntake) angleOffset = (angleOffset + 2 * angleOffsetDiff) % (3 * angleOffsetDiff);
+//        else if (!wantsToFireWithIntake) angleOffset = 2 * angleOffsetDiff;
+//        if (wantsToFireWithIntake && deltaVel >= 80) {
+//            //ballCounter++;
+//            //shouldToAirSort = false; wayy too litle too late
+//        }
 
         if(disableTurret){
             tempTurret.setOperationMode(MotorComponent.MotorModes.Power).setTarget(0);
@@ -911,9 +920,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         double camAngle = -CameraMath.calculateCameraAngle(camTargetX, camTargetY, currentRobotPose, camOffsetX, 0);
         double middleOfTheFieldY = (currentTeamColor == TeamColor.Blue) ? -14 : 14;
 
-        if (robotToGoalAbsoluteAngle > 20 && robotToGoalAbsoluteAngle < 38 && usedDistance > 3.4) {
-            camAngle = -CameraMath.calculateCameraAngle(cameraImaginaryX, middleOfTheFieldY, currentRobotPose, camOffsetX, 0);
-        }
+//        if (robotToGoalAbsoluteAngle > 20 && robotToGoalAbsoluteAngle < 38 && usedDistance > 3.4) {
+//            camAngle = -CameraMath.calculateCameraAngle(cameraImaginaryX, middleOfTheFieldY, currentRobotPose, camOffsetX, 0);
+//        }
 
         // 3. Command the physical turret servo hardware
         cameraAngle = CameraMath.convertCamAngleToServoValue(camAngle);
@@ -1238,6 +1247,39 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     // ============================ Weird Stuff ============================
     Runnable stopMovingOuttakeGates = () -> {isMovingOuttakeGates = false;};
+
+    Runnable adaptServoForShooting = () -> {
+        robot.executeNow(new ActionSequence(
+                new DelayAction(delayForFirstServoAngleMove),
+                new GeneralAction( () -> angleOffset = angleOffsetValue / 2),
+                new DelayAction(delayForSecondServoAngleMove),
+                new GeneralAction( () -> angleOffset = 0),
+                new DelayAction(delayForThirdServoAngleMove),
+                new GeneralAction(() -> angleOffset = angleOffsetValue)
+        ));
+    };
+
+    Runnable loadBallUnderOuttake = () -> {
+        robot.executeNow(new ActionSequence(
+                new GeneralAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        isMovingOuttakeGates = true;
+                        if(hasBallInRightChamber) robot.executeNow(new StateAction("RightGateServo", "OPEN"));
+                        else if(hasBallInLeftChamber) robot.executeNow(new StateAction("LeftGateServo", "OPEN"));
+                        else robot.executeNow(new StateAction("RightGateServo", "OPEN"));
+                    }
+                }),
+                new DelayAction(timerToLoadBallUnderOuttakeLOADINTAKE),
+                new StateAction("coupleServo", "COUPLED"),
+                new DelayAction(timerToLoadBallUnderOuttake),
+                new StateAction("coupleServo", "DECOUPLED"),
+                new GeneralAction(() -> isMovingOuttakeGates = false),
+                new StateAction("RightGateServo", "CLOSED"),
+                new StateAction("LeftGateServo", "CLOSED")
+        ));
+    };
+
     Runnable turnAirSortOff = () -> {
         robot.executeNow(new ActionSequence(
                 new DelayAction(timeToTurnAirSortOff),

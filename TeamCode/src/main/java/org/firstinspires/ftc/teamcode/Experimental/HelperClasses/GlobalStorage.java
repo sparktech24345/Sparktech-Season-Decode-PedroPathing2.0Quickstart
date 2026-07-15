@@ -187,7 +187,7 @@ public class GlobalStorage {
     public static double farVeloOffset = 20;
     public static double closeVelo = 1140;
     public static double grade1farVelo = 290;
-    public static double grade0farVelo = 595;
+    public static double grade0farVelo = 615;
     public static double grade1VeloClose = 200;
     public static double grade0VeloClose = 860; // was 840
     public static double airSortBias = 70;
