@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfi
 
 @Autonomous(name = "\uD83D\uDD34 Small Triangle Auto RED",group = "AAA") // 🔴
 public class SmallTriangleAutoRedNew extends SmallTriangleNew {
+    @Override
     public void makeConfig(){
         cfg = new MainConfig(MainConfig.Configs.Red);
     }

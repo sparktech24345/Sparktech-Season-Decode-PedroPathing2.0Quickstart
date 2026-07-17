@@ -133,8 +133,8 @@ public class MainConfig {
                 secondCameraPosition = 167;
                 thirdCameraPosition =  257;
 
-                sharedGoalTargetX = -140;
-                sharedGoalTargetY = -11.5;
+                sharedGoalTargetX = -145;
+                sharedGoalTargetY = 1;
 
                 break;
             case Red:
@@ -204,8 +204,8 @@ public class MainConfig {
                 thirdCameraPosition = 102;
 
 
-                sharedGoalTargetX = -140;
-                sharedGoalTargetY = 11.5;
+                sharedGoalTargetX = -145;
+                sharedGoalTargetY = -1;
 
                 break;
         }

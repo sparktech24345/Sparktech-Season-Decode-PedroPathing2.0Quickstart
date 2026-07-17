@@ -17,7 +17,7 @@ public class ServoMultiple0s extends LinearOpMode {
     public static double angleServoPos = 0.4; // max down is 0.9 and max up is 0.05
     public static double CameraServoPos = 0;
     public static double motorPow = 0;
-    public static double coupleServoPos = 0;
+    public static double coupleServoPos = 0.2;
 
     @Override
     public void runOpMode() {
