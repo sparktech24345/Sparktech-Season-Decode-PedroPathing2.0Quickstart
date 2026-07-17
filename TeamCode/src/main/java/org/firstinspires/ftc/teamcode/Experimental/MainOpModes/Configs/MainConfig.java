@@ -18,6 +18,7 @@ public class MainConfig {
     public static double autoVelAdder;
     public static double rotationForInitClsoeZone;
     public static double rotationForInitSmallTriangle;
+    public static double rotationForInitSmallTriangleShared;
 
     public static double targetX;
     public static double targetY;
@@ -62,6 +63,8 @@ public class MainConfig {
     public static double firstCameraPosition;
     public static double secondCameraPosition;
     public static double thirdCameraPosition;
+    public static double sharedGoalTargetX;
+    public static double sharedGoalTargetY;
     public static TeamColor currentTeamColor;
 
     public MainConfig() {}
@@ -90,6 +93,7 @@ public class MainConfig {
 
                 rotationForInitClsoeZone = 95;
                 rotationForInitSmallTriangle = 90;
+                rotationForInitSmallTriangleShared = 270;
 
                 targetX = 130;
                 targetY = 53;
@@ -129,6 +133,9 @@ public class MainConfig {
                 secondCameraPosition = 167;
                 thirdCameraPosition =  257;
 
+                sharedGoalTargetX = -140;
+                sharedGoalTargetY = -11.5;
+
                 break;
             case Red:
                 teamPipeline = 1;
@@ -154,6 +161,7 @@ public class MainConfig {
 
                 rotationForInitClsoeZone = -98;
                 rotationForInitSmallTriangle = 270;
+                rotationForInitSmallTriangleShared = 90;
 
                 targetX = 130;
                 targetY = -53;
@@ -194,6 +202,10 @@ public class MainConfig {
                 firstCameraPosition = 154;
                 secondCameraPosition = 151;
                 thirdCameraPosition = 102;
+
+
+                sharedGoalTargetX = -140;
+                sharedGoalTargetY = 11.5;
 
                 break;
         }

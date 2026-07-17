@@ -142,7 +142,6 @@ public class GlobalStorage {
     public static double calculateDistance(Pose pose1, Pose pose2, boolean convertToMeters) {
 
         double correctedX = pose1.getX();
-        if(correctedX < 0) correctedX = 0; /// if 0 is less then 0 that means you have exited field, this might be risky though
 
         double dx = pose2.getX() - correctedX;
         double dy = pose2.getY() - pose1.getY();

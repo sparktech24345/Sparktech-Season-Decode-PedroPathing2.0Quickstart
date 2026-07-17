@@ -33,7 +33,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -54,7 +53,6 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Tea
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotControllerInterface;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 @Config
@@ -218,12 +216,18 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double miniTurretAngle = 165;//de schimbat
     public static double cameraModifier = 0;
 
+
+    ///  ============================= FRI STUFF ===============================================
+
+    public static boolean isShootingSharedGoal = false;
+
     protected void robotMainLoop() {
         // all the code
 
         // processing
         processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.usedTargetX, cfg.usedTargetY);
+        if(isShootingSharedGoal) distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.sharedGoalTargetX, cfg.sharedGoalTargetY);
 
         TurretComponent tempTurret = robot.getTurretComponent("TurretRotateMotor");
         // Update pose from Odometry
@@ -341,6 +345,9 @@ public class MainTeleOpBlue extends LinearOpMode {
         else{
             gamepad1.setLedColor(255,0,0,30000);
             gamepad2.setLedColor(255,0,0,30000);
+        }
+        if(robot.getKey("Y2").ExecuteOnPress && !isInSortedMode){
+            isShootingSharedGoal = !isShootingSharedGoal;
         }
         // Driver fire unsorted in sorted mode
 //        if (robot.getKey("X1").ExecuteOnPress){
@@ -482,7 +489,6 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer2),
                             new StateAction("RightGateServo", "OPEN")//                            new StateAction("LeftGateServo", "OPEN"),
@@ -792,6 +798,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         // ------------------ Driver 2 adders --------------------
         D2_velocityAdder = 0;
         D2_rotationAdder = 0;
+
+        isShootingSharedGoal = false;
     }
 
     public void initOtherStuff(int limelightPipeline) {
@@ -1062,6 +1070,11 @@ public class MainTeleOpBlue extends LinearOpMode {
         if(isInSortedMode){
             cfg.usedTargetX = cfg.targetXAutoClose;
             cfg.usedTargetY = cfg.targetYAutoClose;
+        }
+
+        if(isShootingSharedGoal && !isInSortedMode){
+            cfg.usedTargetX = cfg.sharedGoalTargetX;
+            cfg.usedTargetY = cfg.sharedGoalTargetY;
         }
 
 
