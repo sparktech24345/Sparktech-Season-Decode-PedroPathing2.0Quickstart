@@ -28,7 +28,7 @@ public class ConstantsDecode {
             .mass(14.3)
             .forwardZeroPowerAcceleration(-27.81051833)
             .lateralZeroPowerAcceleration(-55.7462)
-            .centripetalScaling(0.0005)
+            .centripetalScaling(0)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.04, 0, 0.004, 0.025))
             .headingPIDFCoefficients(new PIDFCoefficients(0.9, 0, 0.045, 0.0005))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03,0,0.0037,0.6,0.02))

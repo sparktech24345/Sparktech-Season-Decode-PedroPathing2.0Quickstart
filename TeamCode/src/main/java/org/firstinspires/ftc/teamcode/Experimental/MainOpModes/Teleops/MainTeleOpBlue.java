@@ -197,6 +197,8 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     public static double D2_velocityAdder = 0;
     public static double D2_rotationAdder = 0;
+    public static double sharedGoalVelAdder = 40;
+    public static double sharedGoalVelAdderEveryWhere = 20;
 
     public static double D2_velocityAdderMulti = 1;
     public static double D2_rotationAdderMulti = 1;
@@ -619,6 +621,8 @@ public class MainTeleOpBlue extends LinearOpMode {
             targetVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier + D2_velocityAdder;
             if(RobotController.currentVoltage < 10 || RobotController.getDrivetrainCumulativePower() >3.85) targetVelocity += 30;
 //            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(usedDistance) *vMultiplier + D2_velocityAdder;
+            if(isShootingSharedGoal && usedDistance > 0.8) targetVelocity += sharedGoalVelAdder;
+            targetVelocity += sharedGoalVelAdderEveryWhere;
             if(!shouldForceOuttake){
                 if(shouldUseSecondaryPID /*always false */ && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
                     robot.getMotorComponent("TurretSpinMotor")
@@ -1074,7 +1078,15 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         if(isShootingSharedGoal && !isInSortedMode){
             cfg.usedTargetX = cfg.sharedGoalTargetX;
-            cfg.usedTargetY = cfg.sharedGoalTargetY;
+            cfg.usedTargetY = cfg.sharedGoalTargetYTeleop;
+        }
+        if(isShootingSharedGoal && !isInSortedMode && distanceToWallOdometry > 1.4){
+            cfg.usedTargetX = cfg.sharedGoalTargetX;
+            cfg.usedTargetY = cfg.sharedGoalTargetYMediumTeleop;
+        }
+        if(isShootingSharedGoal && !isInSortedMode && distanceToWallOdometry > 3){
+            cfg.usedTargetX = cfg.sharedGoalTargetX;
+            cfg.usedTargetY = cfg.sharedGoalTargetYFarTeleop;
         }
 
 

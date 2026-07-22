@@ -65,6 +65,11 @@ public class MainConfig {
     public static double thirdCameraPosition;
     public static double sharedGoalTargetX;
     public static double sharedGoalTargetY;
+    public static double sharedGoalTargetYFar;
+    public static double sharedGoalTargetYMedium;
+    public static double sharedGoalTargetYTeleop;
+    public static double sharedGoalTargetYFarTeleop;
+    public static double sharedGoalTargetYMediumTeleop;
     public static TeamColor currentTeamColor;
 
     public MainConfig() {}
@@ -104,14 +109,14 @@ public class MainConfig {
                 targetXAutoClose = 127;
                 targetYAutoClose = 52;
 
-                targetXCenter = 128; // 130
+                targetXCenter = 120; // 130
                 targetYCenter = 53;
 
                 targetXRightPanel = 127;
                 targetYRightPanel = 48;
 
-                targetXForFarAuto = 127;
-                targetYForFarAuto = 49.5;
+                targetXForFarAuto = 126;
+                targetYForFarAuto = 51.75;
 
                 targetXLeftPanel = 123;
                 targetYLeftPanel = 54;
@@ -135,6 +140,13 @@ public class MainConfig {
 
                 sharedGoalTargetX = -145;
                 sharedGoalTargetY = 1;
+                sharedGoalTargetYFar = -12;
+                sharedGoalTargetYMedium = -6;
+
+
+                sharedGoalTargetYTeleop = -4 -20;
+                sharedGoalTargetYFarTeleop = -12 - 16;
+                sharedGoalTargetYMediumTeleop = -6 - 22;
 
                 break;
             case Red:
@@ -172,14 +184,14 @@ public class MainConfig {
                 targetXAutoClose = 127;
                 targetYAutoClose = -42.5;
 
-                targetXCenter = 128; // 130
+                targetXCenter = 120; // 130
                 targetYCenter = -53;
 
                 targetXRightPanel = 127;
                 targetYRightPanel = -43; //
 
                 targetXForFarAuto = 126;
-                targetYForFarAuto = -45.5; //
+                targetYForFarAuto = -47; //
 
                 targetXLeftPanel = 123;
                 targetYLeftPanel = -53.4;
@@ -206,6 +218,11 @@ public class MainConfig {
 
                 sharedGoalTargetX = -145;
                 sharedGoalTargetY = -1;
+
+
+                sharedGoalTargetYTeleop = 4 + 20;
+                sharedGoalTargetYFarTeleop = 12 + 16;
+                sharedGoalTargetYMediumTeleop = 6 + 22;
 
                 break;
         }

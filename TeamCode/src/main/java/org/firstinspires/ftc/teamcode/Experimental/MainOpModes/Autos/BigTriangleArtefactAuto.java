@@ -111,8 +111,8 @@ public class BigTriangleArtefactAuto extends OpMode {
     private AnalogInput laserAnalog;
 
     /// other stuff
-    public static double velocityAdderOnTheGo = 220;
-    public static double alittleBonusVelocity = 40;
+    public static double velocityAdderOnTheGo = 280;
+    public static double alittleBonusVelocity = 90;
     public static double rotationOnTheGo = 3;
     public static double angleOnTheGo = 150; // old 155
     public static double cameraAngleOverite = 0;
@@ -133,16 +133,16 @@ public class BigTriangleArtefactAuto extends OpMode {
     private Pose secondZoneCameraCollect = pose(14.8, 48.5, 90);
     private Pose thirdZoneCameraCollect = pose(30.96, 48.5, 90);
 
-    private Pose thirdRowCollectDone = pose(27, 49, 90); // third row done
-    private Pose secondRowCollectDone = pose(48.7 + 1.5, 45.5, 90);
-    private Pose firstRowCollectDone = pose(77.5 - 0.5, 42, 90);
+    private Pose thirdRowCollectDone = pose(29, 49, 90); // third row done
+    private Pose secondRowCollectDone = pose(49.3 + 1.5, 45.5, 90);
+    private Pose firstRowCollectDone = pose(79.5 - 0.5, 42, 90);
 
 
-    private Pose gateCollectSpecial = pose(55.5, 42,75); //this is actually the first one and normal one is second
-    private Pose gateCollect = pose(55.5, 42, 75); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
+    private Pose gateCollectSpecial = pose(56.3, 42,75); //this is actually the first one and normal one is second
+    private Pose gateCollect = pose(56.3, 42, 75); // actual stuff aaaaaaaaaaaaaaaaaaaaaa old y 47.2
 
-    private Pose gateActualCollectSpecial = pose(52.7 + 0.6 -0.4, 46.5, 60); //this is actually the first one and normal one is second
-    private Pose gateActualCollect = pose(53.67 -0.4, 46.5 + 0.45, 60); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
+    private Pose gateActualCollectSpecial = pose(52.7 + 1.4 -0.4, 46.5, 60); //this is actually the first one and normal one is second
+    private Pose gateActualCollect = pose(53.67 + 1.4 -0.4, 46.5 + 0.45, 60); // and this       aaaaaaaaaaaaaaaaa old y 45.5.2
 
     private Pose gateHelperPoint = pose(30 + 0.3 + 4, 36, 55); // helper for the collect aaaaaaaaaaaaaaaaaaaaaa
     private Pose gateHold = pose(50.8, 44, 90); // not used

@@ -100,14 +100,15 @@ public class SmallTriangleNew extends OpMode {
     public static int camId =23;
     public static int wentTooNumber2 =23;
     public static int cameraCase =0;
-    private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
-    private Pose small_triangle_shoot = pose(3, 9.5, 90);
+    private Pose starter = pose( -0.7 - 1.75, 13.4, 90); // would also be around 1.4x
+    private Pose small_triangle_shoot = pose(1, 7, 90);
     private Pose parkPose = pose(1, 23.5, 90);
-    private Pose fininshHPCollectPose = pose(0.5,45,90); // hp collect
-    private Pose fininshHPCollectPoseNEW = pose(0.5,45,90); // hp collect
+    private Pose fininshHPCollectPose = pose(-0.5,45,90); // hp collect
+    private Pose fininshHPCollectPoseNEW = pose(-0.5,44.5,90); // hp collect
+    private Pose fininshHPCollectPoseShared = pose(-2 - 18,44.5,90); /// SHARED COLLECT
     private Pose secondZoneCameraCollect = pose(18, 45, 90); /// CHECK THIS slightly more up spot
     private Pose thirdZoneCameraCollect = pose(30, 45, 90);
-    private Pose thirdRowCollectDone = pose(30, 43, 90); // third row done
+    private Pose thirdRowCollectDone = pose(26, 43, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
     private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
     private Pose gateCollect = pose(53.8, 40.2, 70);
@@ -122,8 +123,8 @@ public class SmallTriangleNew extends OpMode {
 
     // sweep collect
 
-    public static Pose bezierHelper3 = pose(10, 48, 45);
-    public static Pose weirdHpCollect =  pose(30,43,45);
+    public static Pose bezierHelper3 = pose(-5, 41, 35); /// gotta modify here even for shared
+    public static Pose weirdHpCollect =  pose(30,42,35);
 
     @Override
     public void init() {
@@ -150,6 +151,7 @@ public class SmallTriangleNew extends OpMode {
                 if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(secondZoneCameraCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(thirdZoneCameraCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(thirdRowCollectDone) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(fininshHPCollectPoseShared) && !ComplexFollower.done()) ComplexFollower.interrupt();
 
                 if(scanning2nd) cameraStuffUpdates(cfg.targetForCameraX2ndTime,cfg.targetForCameraY,false);
                 else    cameraStuffUpdates(cfg.targetForCameraX,cfg.targetForCameraY,false);
@@ -233,11 +235,9 @@ public class SmallTriangleNew extends OpMode {
                 //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPose),
                 new DelayAction(150),
-                //new GeneralAction(() -> doIntakePulse = true),
-//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot),
-//                new DelayAction(400),
                 new GeneralAction(fireUnsortedBalls),
+                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
                 new DelayAction(1150),
                 // end of hp collect and shooting
 
@@ -254,9 +254,9 @@ public class SmallTriangleNew extends OpMode {
                 // finished third row shooting
 
 
-                // 4th cycle, camera collecting
+                // SHARED stuff
 //                new MoveAction(1),
-                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
+                new MoveAction(fininshHPCollectPoseShared),
                 new DelayAction(100),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
@@ -268,7 +268,7 @@ public class SmallTriangleNew extends OpMode {
 
 
                 // 5th cycle, camera collecting
-                new MoveAction(1),
+                new MoveAction(fininshHPCollectPoseNEW),
                 new DelayAction(100),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
@@ -279,7 +279,7 @@ public class SmallTriangleNew extends OpMode {
 
 
                 // 6th cycle, camera collecting
-                new MoveAction(1),
+                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
 //                new DelayAction(300),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
@@ -292,7 +292,7 @@ public class SmallTriangleNew extends OpMode {
 
                 // 7th cycle, camera collecting CUSTOM CYCLE
 //                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
-                new MoveAction(1),
+                new MoveAction(fininshHPCollectPoseShared),
                 new DelayAction(100), // past 300
                 new GeneralAction(() -> doIntakePulse = true),
                 new DelayAction(100),
@@ -305,7 +305,7 @@ public class SmallTriangleNew extends OpMode {
                 
                 // 8th cycle, camera collecting
 //                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
-                new MoveAction(1),
+                new MoveAction(fininshHPCollectPoseNEW),
                 new DelayAction(100), //past 300
                 new GeneralAction(() -> doIntakePulse = true),
                 new DelayAction(100),
@@ -327,7 +327,7 @@ public class SmallTriangleNew extends OpMode {
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
-            case 3: GlobalStorage.futureMoveActionTargetPose = weirdHpCollect; break;
+            case 3: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseShared; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
         }
     };
@@ -597,7 +597,6 @@ public class SmallTriangleNew extends OpMode {
         if(shouldFire){
             turret.setBallTimeInAir(ballInAirTime);
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) * vMultiplier/* + cfg.autoVelAdder*/;
-            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(distanceToWallOdometry);
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                     .setTarget(targetVelocity);
@@ -690,8 +689,8 @@ public class SmallTriangleNew extends OpMode {
             doIntakePulse = false;
             robot.executeNow(new ActionSequence(
                     new DelayAction(50),
-//                    new StateAction("IntakeMotor","FULL_REVERSE"),
-                    new DelayAction(30),
+                    new StateAction("IntakeMotor","FULL_REVERSE"),
+                    new DelayAction(35),
                     new StateAction("IntakeMotor","FULL")
             ));
         }
@@ -734,6 +733,7 @@ public class SmallTriangleNew extends OpMode {
         bezierHelper2 = convertPose(bezierHelper2);
         bezierHelper3 = convertPose(bezierHelper3);
         weirdHpCollect = convertPose(weirdHpCollect);
+        fininshHPCollectPoseShared = convertPose(fininshHPCollectPoseShared);
     }
     public Pose convertPose(Pose pose) {
         return pose;

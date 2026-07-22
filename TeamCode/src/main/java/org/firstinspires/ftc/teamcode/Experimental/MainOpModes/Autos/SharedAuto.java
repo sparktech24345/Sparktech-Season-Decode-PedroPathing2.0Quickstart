@@ -92,6 +92,7 @@ public class SharedAuto extends OpMode {
     private static boolean shouldToAirSort = false;
     public static boolean shouldFireUnsortedBalls = false;
     public static double cameraAngleOverite = 0;
+    public static double bonusSpeedd = 20;
 
     protected NormalizedColorSensor colorSensorRight;
     protected NormalizedColorSensor colorSensorLeft;
@@ -124,13 +125,13 @@ public class SharedAuto extends OpMode {
     public static int camId =23;
     public static int wentTooNumber2 =23;
     public static int cameraCase =0;
-    private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
+    private Pose starter = pose( -0.7 - 1.9, 13.4, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(0, 9.5, 90);
-    private Pose parkPose = pose(1, 23.5, 90);
-    private Pose fininshHPCollectPose = pose(0,45,90); // hp collect
+    private Pose parkPose = pose(8, 28, 90);
+    private Pose fininshHPCollectPose = pose(1,45,90); // hp collect
     private Pose secondZoneCameraCollect = pose(18, 45, 90); /// CHECK THIS slightly more up spot
     private Pose thirdZoneCameraCollect = pose(30, 45, 90);
-    private Pose thirdRowCollectDone = pose(30, 43, 90); // third row done
+    private Pose thirdRowCollectDone = pose(30, 42.5, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
     private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
     private Pose tipBigTriangleShooting = pose(67, -5.3, 180);
@@ -142,15 +143,15 @@ public class SharedAuto extends OpMode {
 
 
     private Pose intermediaryEvadePipe = pose(-30 - 18,12,90); // hp collect shared
-    private Pose fininshHPCollectPoseShared = pose(-0 - 18,45,90); // hp collect shared
-    private Pose thirdRowCollectDoneShared = pose(-30 - 18, 43, 90); // third row done shared
+    private Pose fininshHPCollectPoseShared = pose(-1 - 18,46,90); // hp collect shared
+    private Pose thirdRowCollectDoneShared = pose(-28 - 18, 43, 90); // third row done shared
     private Pose bezierHelper1Shared = pose(-32 - 18, 4, 90);
     private Pose small_triangle_shootShared = pose(-18, 9.5, 90);
     // sweep collect
 
 
-    public static Pose bezierHelper3 = pose(10, 48, 45);
-    public static Pose weirdHpCollect =  pose(30,43,45);
+    public static Pose bezierHelper3 = pose(0, 48, 45);
+    public static Pose weirdHpCollect =  pose(30,41,45);
 
     @Override
     public void init() {
@@ -176,6 +177,11 @@ public class SharedAuto extends OpMode {
                 if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(secondZoneCameraCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 2800 && ComplexFollower.getTarget().equals(thirdZoneCameraCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 2800 && ComplexFollower.getTarget().equals(thirdRowCollectDone) && !ComplexFollower.done()) ComplexFollower.interrupt();
+
+                if (ComplexFollower.followingForMS() > 2800 && ComplexFollower.getTarget().equals(fininshHPCollectPoseShared) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2800 && ComplexFollower.getTarget().equals(thirdRowCollectDoneShared) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2800 && ComplexFollower.getTarget().equals(small_triangle_shootShared) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 2800 && ComplexFollower.getTarget().equals(bezierHelper1Shared) && !ComplexFollower.done()) ComplexFollower.interrupt();
 
                 if(scanning2nd) cameraStuffUpdates(cfg.targetForCameraX2ndTime,cfg.targetForCameraY,false);
                 else    cameraStuffUpdates(cfg.targetForCameraX,cfg.targetForCameraY,false);
@@ -215,7 +221,7 @@ public class SharedAuto extends OpMode {
     public void init_loop() {
         if(doOnce) ComplexFollower.resetAndInit(true);
         doOnce = false;
-        robot.getTurretComponent("TurretRotateMotor").setTarget(cfg.rotationForInitSmallTriangleShared);
+        robot.getTurretComponent("TurretRotateMotor").setTarget(cfg.rotationForInitSmallTriangle);
         double middleOfTheFieldY =0;
         if(currentTeamColor == TeamColor.Blue) middleOfTheFieldY = -16;
         else middleOfTheFieldY = 16;
@@ -253,66 +259,62 @@ public class SharedAuto extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new DelayAction(1200), // revving up outtake
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(900),
+                new DelayAction(1100),
                 // end of preload
 
                 new GeneralAction( () ->limelight3A.pipelineSwitch(7)),
-                new GeneralAction(() -> isShootingAtSharedAuto = !isShootingAtSharedAuto),
 
-                //first hp collect with the preset balls there
-                new MoveAction(fininshHPCollectPose),
+
+                // third row collecting and shooting
+                new MoveAction(thirdRowCollectDone, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1),
                 new DelayAction(150),
-                new MoveAction(small_triangle_shoot),
+                new MoveAction(small_triangle_shootShared),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
-                // end of hp collect and shooting
-
-                new GeneralAction(() -> isShootingAtSharedAuto = !isShootingAtSharedAuto),
+                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
+                new DelayAction(1050),
+                // finished third row shooting
 
 
                 // SHARED HP collect
                 new MoveAction(fininshHPCollectPoseShared),
                 new DelayAction(150),
-                new MoveAction(small_triangle_shootShared),
+                new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(900),
+                new DelayAction(1100),
                 // finished firing camera cycle
 
+                //first hp collect with the preset balls there
+                new MoveAction(fininshHPCollectPose),
+                new DelayAction(150),
+                new MoveAction(small_triangle_shootShared),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1000),
+                // end of hp collect and shooting
 
-                new GeneralAction(() -> isShootingAtSharedAuto = !isShootingAtSharedAuto),
 
                 /// SHARED first spike special stuff
                 new MoveAction(thirdRowCollectDoneShared, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1Shared),
+                new DelayAction(150),
+                new GeneralAction(() -> doIntakePulse = true),
 //                new MoveAction(intermediaryEvadePipe),
 //                new MoveAction(small_triangle_shoot),
                 new MoveAction(small_triangle_shootShared, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1Shared),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(1000),
+                new DelayAction(1200),
                 // finished firing camera cycle
 
 
                 new GeneralAction(() -> isShootingAtSharedAuto = !isShootingAtSharedAuto),
 
-                // third row collecting and shooting
-                new MoveAction(thirdRowCollectDone, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1),
-                new MoveAction(small_triangle_shootShared),
-                new GeneralAction(fireUnsortedBalls),
-                new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(1000),
-                // finished third row shooting
-
-
-                new GeneralAction(() -> isShootingAtSharedAuto = !isShootingAtSharedAuto),
-
                 // 6th cycle, camera collecting
-                new MoveAction(1),
-//                new DelayAction(300),
+                new MoveAction(fininshHPCollectPoseShared),
+                new DelayAction(150),
                 new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(900),
+                new DelayAction(1050),
                 // finished firing camera cycle
 
 
@@ -320,28 +322,26 @@ public class SharedAuto extends OpMode {
 
                 // 7th cycle, camera collecting CUSTOM CYCLE
 //                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
-                new MoveAction(1),
-                new DelayAction(100), // past 300
+                new MoveAction(fininshHPCollectPose),
+                new DelayAction(150), // past 300
                 new GeneralAction(() -> doIntakePulse = true),
-                new DelayAction(100),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(900),
+                new DelayAction(1050),
                 // finished firing camera cycle
 
                 new GeneralAction(() -> isShootingAtSharedAuto = !isShootingAtSharedAuto),
                 
-                // 8th cycle, camera collecting
-//                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
-                new MoveAction(1),
-                new DelayAction(100), //past 300
-                new GeneralAction(() -> doIntakePulse = true),
-                new DelayAction(100),
-                new MoveAction(small_triangle_shoot),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(900),
-                // finished firing camera cycle
+//                // 8th cycle, camera collecting
+////                new MoveAction(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3),
+//                new MoveAction(fininshHPCollectPoseShared),
+//                new DelayAction(50), //past 300
+//                new GeneralAction(() -> doIntakePulse = true),
+//                new MoveAction(small_triangle_shoot),
+//                new GeneralAction(fireUnsortedBalls),
+//                new DelayAction(900),
+//                // finished firing camera cycle
 
 
 
@@ -356,7 +356,7 @@ public class SharedAuto extends OpMode {
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
             case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
-            case 3: GlobalStorage.futureMoveActionTargetPose = weirdHpCollect; break;
+            case 3: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseShared; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPose; break;
         }
     };
@@ -630,10 +630,10 @@ public class SharedAuto extends OpMode {
     public void firingTurret(boolean shouldFire) {
         double targetXHere;
         double targetYHere;
-        if(isShootingAtSharedAuto) targetXHere = cfg.sharedGoalTargetX;
+        if(isShootingAtSharedAuto && false) targetXHere = cfg.sharedGoalTargetX;
         else targetXHere = cfg.targetXForFarAuto;
 
-        if(isShootingAtSharedAuto) targetYHere = cfg.sharedGoalTargetY;
+        if(isShootingAtSharedAuto && false) targetYHere = cfg.sharedGoalTargetYFar;
         else targetYHere = cfg.targetYForFarAuto;
 
         turret = robot.getTurretComponent("TurretRotateMotor");
@@ -644,6 +644,7 @@ public class SharedAuto extends OpMode {
             turret.setBallTimeInAir(ballInAirTime);
             double targetVelocity = distanceToVelocityFunction(distanceToWallOdometry) * vMultiplier/* + cfg.autoVelAdder*/;
             if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(distanceToWallOdometry);
+            if(true) targetVelocity += bonusSpeedd;
             robot.getMotorComponent("TurretSpinMotor")
                     .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                     .setTarget(targetVelocity);

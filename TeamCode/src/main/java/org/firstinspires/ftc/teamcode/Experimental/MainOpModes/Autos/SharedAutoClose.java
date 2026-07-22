@@ -326,43 +326,35 @@ public class SharedAutoClose extends OpMode {
                 new StateAction("IntakeMotor","FULL"),
                 new GeneralAction(() -> shouldFire = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
-
-//                new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = true),
-//                new GeneralAction(makeFireUnsortedBalls(385)), // 475 old one
-
                 new MoveAction(middleBigTriangleShootingSharedTurned),//false,BezierCurveTypes.TangentHeading,0),
                 new StateAction("coupleServo", "COUPLED"),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(700),
+                new DelayAction(1000),
                 new GeneralAction(() -> shouldBoostOnTheGoVelocityLogic = false),
                 /// finished preload and path
 
 
                 /// cycling shared output 0
-
                 new MoveAction(sharedColectionZoneTurned),
                 new DelayAction(150),
-                new GeneralAction(loadBallUnderOuttake),
                 new MoveAction(middleBigTriangleShootingSharedTurned),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(700),
+                new DelayAction(1000),
 
                 /// collecting the first row
-                new MoveAction(firstRowCollectDoneShared,true,BezierCurveTypes.LinearHeading,0),
+                new MoveAction(firstRowCollectDoneShared,true,BezierCurveTypes.TangentHeading,0),
                 new DelayAction(100),
-                new GeneralAction(loadBallUnderOuttake),
-                new MoveAction(tipOfSharedTriangle),
+                new MoveAction(middleBigTriangleShootingSharedTurned),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(700),
+                new DelayAction(1000),
 
                 /// second row ( unsorted speed
                 new GeneralAction(() -> collectNumber++),
                 new MoveAction(secondRowCollectDoneShared,true,BezierCurveTypes.LinearHeading,0),
                 new DelayAction(50),
-                new GeneralAction(loadBallUnderOuttake),
                 new MoveAction(middleBigTriangleShootingSharedTurned),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(700),
+                new DelayAction(1000),
                 /// end of second row firing
 
 
@@ -370,27 +362,26 @@ public class SharedAutoClose extends OpMode {
 
                 new MoveAction(sharedColectionZoneFirstPath,BezierCurveTypes.TangentHeading,sharedColectionZoneTurnedMoreLeft.getHeading(),bezierSharedHelper),
                 new DelayAction(100),
-                new GeneralAction(loadBallUnderOuttake),
+                
 //                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(middleBigTriangleShootingSharedTurned),
                 new GeneralAction(fireUnsortedBalls),
                 new DelayAction(1000),
 
-                /// cycling shared output 2
-
-                new MoveAction(sharedColectionZone),//BezierCurveTypes.TangentHeading,sharedColectionZoneTurnedMoreLeft.getHeading(),bezierSharedHelper),
-                new DelayAction(100),
-                new GeneralAction(loadBallUnderOuttake),
-//                new GeneralAction(() -> doIntakePulse = true),
-                new MoveAction(middleBigTriangleShootingSharedTurned),
-                new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+//                /// cycling shared output 2
+//
+//                new MoveAction(sharedColectionZone),//BezierCurveTypes.TangentHeading,sharedColectionZoneTurnedMoreLeft.getHeading(),bezierSharedHelper),
+//                new DelayAction(100),
+//
+////                new GeneralAction(() -> doIntakePulse = true),
+//                new MoveAction(middleBigTriangleShootingSharedTurned),
+//                new GeneralAction(fireUnsortedBalls),
+//                new DelayAction(1000),
 
                 /// cycling shared output 3
 
                 new MoveAction(sharedColectionZoneFinalPath,false,BezierCurveTypes.TangentHeading,sharedColectionZoneFinalPath.getHeading()),
                 new DelayAction(100),
-                new GeneralAction(loadBallUnderOuttake),
 //                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(parkedBigTriangleShootingShared),
                 new GeneralAction(fireUnsortedBalls),
