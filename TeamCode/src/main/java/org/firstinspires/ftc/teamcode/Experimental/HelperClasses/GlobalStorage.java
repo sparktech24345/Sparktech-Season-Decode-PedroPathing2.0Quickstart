@@ -170,7 +170,7 @@ public class GlobalStorage {
     public static double closeAngle = 320;       // Max lob at 0.8m
     public static double farAngle = 100;
     public static double grade1angle = -205.0;
-    public static double grade0angle = 485.0;
+    public static double grade0angle = 480.0;
 
     public static double distanceToAngleFunction(double distance) {
         if (distance <= 0.8) return closeAngle;
@@ -186,10 +186,10 @@ public class GlobalStorage {
     // ==========================================
     public static double farVeloOffset = 20;
     public static double closeVelo = 1140;
-    public static double grade1farVelo = 290;
-    public static double grade0farVelo = 615;
-    public static double grade1VeloClose = 200;
-    public static double grade0VeloClose = 860; // was 840
+    public static double grade1farVelo = 292;
+    public static double grade0farVelo = 665;
+    public static double grade1VeloClose = 203;
+    public static double grade0VeloClose = 880; // was 840
     public static double airSortBias = 70;
     public static double timeToTurnAirSortOff = 230;
 

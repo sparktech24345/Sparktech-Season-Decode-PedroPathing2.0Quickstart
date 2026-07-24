@@ -49,7 +49,7 @@ public class MoveAction extends Action {
         this.DoneCondition = () -> ComplexFollower.done();
     }
     public Runnable checkTarget = () -> {
-        if(GlobalStorage.futureMoveActionTargetPose == weirdHpCollect) ComplexFollower.follow(weirdHpCollect,BezierCurveTypes.ConstantHeading,bezierHelper3.getHeading(), bezierHelper3);
+        if(GlobalStorage.futureMoveActionTargetPose == weirdHpCollect) ComplexFollower.follow(weirdHpCollect,BezierCurveTypes.LinearHeading,bezierHelper3.getHeading(), bezierHelper3);
         else ComplexFollower.follow(GlobalStorage.futureMoveActionTargetPose);
     };
 }

@@ -102,6 +102,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static boolean wantsToTempOutputIntake = false;
     public static boolean shouldResetRightSensorBall = false;
     public static boolean ShouldSpewOutSensors = false;
+    public static boolean shouldSpewCameraTelemetry = false;
     public static boolean disableTurret = false;
     BallColorQueue ballColorQueue = new BallColorQueue();
 
@@ -168,6 +169,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double firstSortedTimer = 450;
     public static double secondSortedTimer = 200;
     public static double thirdSortedTimer = 450;
+
     public static double timerBothOnOneChannelTimerForSorting = 850;
     public static double timer_far_v2 = 120;
     public static double timer_close_v2 = 120;
@@ -644,6 +646,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
                 // ----------------------- Angle Stuff -----------------------
             double turretAngleVal = 0;
+//            turretAngleVal = distanceToAngleFunction(usedDistance) - (angleOffset * (usedDistance >= 2.9 ? 1 : 0));
             turretAngleVal = distanceToAngleFunction(usedDistance) - (angleOffset * (usedDistance >= 2.9 ? 1 : 0));
 //            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(usedDistance);
             RobotController.telemetry.addData("angle function output", turretAngleVal);
@@ -944,23 +947,29 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
         limelight3A.updateRobotOrientation(mt2GlobalOrientation);
 
-        RobotController.telemetry.addData("cam angle for limelight", mt2GlobalOrientation);
-        RobotController.telemetry.addData("cam angle for limelight calculated from robot", robotHeadingDeg - 180.0);
-
-        // 5. Read visual tracking calculations back from the hardware camera module
         LLResult result = limelight3A.getLatestResult();
-        RobotController.telemetry.addData("Is Valid", result != null && result.isValid());
-        RobotController.telemetry.addData("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
+
+        if(shouldSpewCameraTelemetry) {
+            RobotController.telemetry.addData("cam angle for limelight", mt2GlobalOrientation);
+            RobotController.telemetry.addData("cam angle for limelight calculated from robot", robotHeadingDeg - 180.0);
+
+            // 5. Read visual tracking calculations back from the hardware camera module
+
+            RobotController.telemetry.addData("Is Valid", result != null && result.isValid());
+            RobotController.telemetry.addData("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
+        }
 
         if (result != null && result.isValid()) {
             Pose3D botpose = result.getBotpose_MT2();
-            RobotController.telemetry.addData("tx", result.getTx());
-            RobotController.telemetry.addData("ty", result.getTy());
-            RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
-            RobotController.telemetry.addData("Botpose", botpose.toString());
-            RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
-            RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
-            RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
+            if(shouldSpewCameraTelemetry) {
+                RobotController.telemetry.addData("tx", result.getTx());
+                RobotController.telemetry.addData("ty", result.getTy());
+                RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
+                RobotController.telemetry.addData("Botpose", botpose.toString());
+                RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
+                RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
+                RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
+            }
 
             // Safe type conversion wrapper for local enumeration definitions
             TeamColor mathColor = TeamColor.valueOf(currentTeamColor.name());
