@@ -158,7 +158,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer5 = 0;
     public static double timer6 = 0;
     public static double outtakeReversingTime = 180;
-    public static double timer1 = 10; // smol
+    public static double timer1 = 15; // smol
     public static double timer2 = 320; // far side
     public static double timer3 = 0; // close side
     public static double timer4 = 320; // close side
@@ -484,7 +484,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer1),
+                            new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer2),
                             new StateAction("RightGateServo", "OPEN")//                            new StateAction("LeftGateServo", "OPEN"),
@@ -500,7 +500,7 @@ public class MainTeleOpBlue extends LinearOpMode {
                             new StateAction("RightGateServo", "OPEN"),
                             new DelayAction(timerToCloseGate), // 300mls
                             new StateAction("RightGateServo", "CLOSED"),
-//                            new DelayAction(timer1),
+                            new DelayAction(timer1),
                             new StateAction("LeftGateServo", "OPEN"),
                             new DelayAction(timer4),
                             new StateAction("RightGateServo", "OPEN")
