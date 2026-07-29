@@ -53,6 +53,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue;
 
 import java.util.List;
 
@@ -109,15 +110,18 @@ public class SmallTriangleNew extends OpMode {
     public static int camId =23;
     public static int wentTooNumber2 =23;
     public static int cameraCase =0;
+    public static int intakeWattsTimeout = 0;
     private Pose starter = pose( -0.7, 13.4, 90); // would also be around 1.4x
     private Pose small_triangle_shoot = pose(3, 9.5, 90);
     private Pose small_triangle_shoot_retracted = pose(1.67, 7, 90);
     private Pose parkPose = pose(1, 23.5, 90);
     private Pose fininshHPCollectPose = pose(0.5,39,90); // first collect from the camera bunch
     private Pose fininshHPCollectPoseNEW = pose(0.5,45.5,90); // hp collect
+    private Pose fininshHPCollectPoseNEWFarAway = pose(0.5,45.5 + 30,90); // hp collect
     private Pose fininshHPCollectPoseNEWFirstCollect = pose(0.5,45,90); // hp collect
     private Pose secondZoneCameraCollect = pose(22, 45, 90); /// CHECK THIS slightly more up spot
     private Pose thirdZoneCameraCollect = pose(24, 45, 90);
+    private Pose thirdZoneCameraCollectFarAway = pose(23.5, 45 + 30, 65); // this is also fucked up
     private Pose thirdRowCollectDone = pose(28, 41, 90); // third row done
     private Pose secondRowCollectDone = pose(51.7, 37.5, 90);
     private Pose firstRowCollectDone = pose(78.1, 35.8, 90);
@@ -165,6 +169,8 @@ public class SmallTriangleNew extends OpMode {
                 if (ComplexFollower.followingForMS() > 1500 && ComplexFollower.getTarget().equals(thirdRowCollectDone) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 3000 && ComplexFollower.getTarget().equals(weirdHpCollect) && !ComplexFollower.done()) ComplexFollower.interrupt();
                 if (ComplexFollower.followingForMS() > 3000 && ComplexFollower.getTarget().equals(weirdHpCollectFarAway) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1000 + 120 && ComplexFollower.getTarget().equals(fininshHPCollectPoseNEWFarAway) && !ComplexFollower.done()) ComplexFollower.interrupt();
+                if (ComplexFollower.followingForMS() > 1300 + 120 && ComplexFollower.getTarget().equals(thirdZoneCameraCollectFarAway) && !ComplexFollower.done()) ComplexFollower.interrupt();
 
                 if(scanning2nd) cameraStuffUpdates(cfg.targetForCameraX2ndTime,cfg.targetForCameraY,false);
                 else    cameraStuffUpdates(cfg.targetForCameraX,cfg.targetForCameraY,false);
@@ -175,6 +181,15 @@ public class SmallTriangleNew extends OpMode {
 //                    EmergencyOverrideAtTheEnd();
 //                    timer.reset();
 //                }
+
+                double intakeWatts =  robot.getMotorComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage;
+
+                if(intakeWatts > 16) intakeWattsTimeout++;
+                else intakeWattsTimeout = 0;
+
+
+
+
             }
         };
         makeConfig();
@@ -262,22 +277,26 @@ public class SmallTriangleNew extends OpMode {
 
                 // third row collecting and shooting
                 new MoveAction(thirdRowCollectDone, BezierCurveTypes.ConstantHeading,thirdRowCollectDone.getHeading(), bezierHelper1),
-                new GeneralAction(() -> doIntakePulse = true),
-//                new GeneralAction(() -> robot.executeNow(new ActionSequence(new DelayAction(140),new GeneralAction(() -> doIntakePulse = true)))),
+                new StateAction("IntakeMotor","OFF"),
+//                new GeneralAction(() -> doIntakePulse = true),
+//                new GeneralAction(() -> robot.executeNow(new ActionSequence(new DelayAction(150),new GeneralAction(() -> doIntakePulse = true)))),
 //                new GeneralAction(() -> shouldFireUnsortedBalls = true),
                 new MoveAction(small_triangle_shoot_retracted),// BezierCurveTypes.ConstantHeading,small_triangle_shoot.getHeading(), bezierHelper1),
 //                new DelayAction(400),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(1000),
+                new DelayAction(950),
                 // finished third row shooting
 
 
                 // 4th cycle, camera collecting
-//                new MoveAction(1),
-                new MoveAction(fininshHPCollectPose),
+                new MoveAction(fininshHPCollectPoseNEW),
                 new DelayAction(150),
-                new GeneralAction(() -> doIntakePulse = true),
+                new StateAction("IntakeMotor","OFF"),
+//                new MoveAction(fininshHPCollectPose),
+//                new MoveAction(fininshHPCollectPoseNEW),
+//                new HoldAction(fininshHPCollectPoseNEWFarAway,900),
+//                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
@@ -287,50 +306,57 @@ public class SmallTriangleNew extends OpMode {
 
 
                 // 5th cycle, camera collecting
-                new MoveAction(thirdZoneCameraCollect),
+                new MoveAction(1),
                 new DelayAction(150),
-                new GeneralAction(() -> doIntakePulse = true),
+                new StateAction("IntakeMotor","OFF"),
+//                new MoveAction(1),
+//                new HoldAction(fininshHPCollectPoseNEWFarAway,1000),
+//                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(900),
+                new DelayAction(950),
                 // finished firing camera cycle
 
 
                 // 6th cycle, camera collectingfininshHPCollectPoseNEW
-                new MoveAction(fininshHPCollectPoseNEW),
+                new MoveAction(1),
                 new DelayAction(150),
-                new GeneralAction(() -> doIntakePulse = true),
+                new StateAction("IntakeMotor","OFF"),
+//                new HoldAction(fininshHPCollectPoseNEWFarAway,1000),,
+//                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(900),
+                new DelayAction(950),
                 // finished firing camera cycle
 
 
 
                 // 7th cycle, camera collecting CUSTOM CYCLE
-                new MoveAction(weirdHpCollectFarAway,BezierCurveTypes.TangentHeading,bezierHelper3.getHeading(), bezierHelper3),
-                new DelayAction(100), // past 300
-                new GeneralAction(() -> doIntakePulse = true),
+                new MoveAction(1),
                 new DelayAction(100),
+                new StateAction("IntakeMotor","OFF"),
+//                new HoldAction(fininshHPCollectPoseNEWFarAway,1000),
+//                new DelayAction(100), // past 300
+//                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
                 new GeneralAction(scanBallsGetBallAndCalculateTrajectory),
-                new DelayAction(900),
+                new DelayAction(950),
                 // finished firing camera cycle
 
                 
                 // 8th cycle, camera collecting
                 new MoveAction(weirdHpCollectFarAway,BezierCurveTypes.TangentHeading,bezierHelper3.getHeading(), bezierHelper3),
+                new StateAction("IntakeMotor","OFF"),
 //                new MoveAction(secondZoneCameraCollect),
 //                new DelayAction(200), //past 300
-                new GeneralAction(() -> doIntakePulse = true),
+//                new GeneralAction(() -> doIntakePulse = true),
                 new MoveAction(small_triangle_shoot),
                 new GeneralAction(fireUnsortedBalls),
-                new DelayAction(1000),
+                new DelayAction(1050),
                 // finished firing camera cycle
-
 
 
                 new StateAction("IntakeMotor","OFF"),
@@ -343,7 +369,7 @@ public class SmallTriangleNew extends OpMode {
         //if(wentTooNumber2 >0) cameraCase = 1; // temporary untuill we get camera back
         switch (cameraCase){
             case 1: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
-            case 2: GlobalStorage.futureMoveActionTargetPose = secondZoneCameraCollect; wentTooNumber2++; break;
+            case 2: GlobalStorage.futureMoveActionTargetPose = thirdZoneCameraCollect; wentTooNumber2++; break;
 //            case 3: GlobalStorage.futureMoveActionTargetPose = weirdHpCollect; break;
             default: GlobalStorage.futureMoveActionTargetPose = fininshHPCollectPoseNEW; break;
         }
@@ -567,11 +593,12 @@ public class SmallTriangleNew extends OpMode {
     Runnable fireUnsortedBalls = () -> {
         robot.executeNow(new ActionSequence(
                 new GeneralAction(adaptServoForShooting),
+                new StateAction("IntakeMotor","FULL"),
                 new StateAction("coupleServo", "COUPLED"),
                 new StateAction("RightGateServo", "OPEN"),
                 new DelayAction(timerToCloseGate),
                 new StateAction("RightGateServo", "CLOSED"),
-//                new DelayAction(timer1),
+                new DelayAction(timer1),
                 new StateAction("LeftGateServo", "OPEN"),
                 new DelayAction(timer2),
                 new StateAction("RightGateServo", "OPEN"),//
@@ -593,7 +620,7 @@ public class SmallTriangleNew extends OpMode {
                 new StateAction("RightGateServo", "OPEN"),
                 new DelayAction(timerToCloseGate),
                 new StateAction("RightGateServo", "CLOSED"),
-//                new DelayAction(timer1),
+                new DelayAction(timer1),
                 new StateAction("LeftGateServo", "OPEN"),
                 new DelayAction(timer2),
                 new StateAction("RightGateServo", "OPEN"),//
@@ -798,6 +825,8 @@ public class SmallTriangleNew extends OpMode {
         weirdHpCollect = convertPose(weirdHpCollect);
         weirdHpCollectFarAway = convertPose(weirdHpCollectFarAway);
         fininshHPCollectPoseNEWFirstCollect = convertPose(fininshHPCollectPoseNEWFirstCollect);
+        fininshHPCollectPoseNEWFarAway = convertPose(fininshHPCollectPoseNEWFarAway);
+        thirdZoneCameraCollectFarAway = convertPose(thirdZoneCameraCollectFarAway);
     }
     public Pose convertPose(Pose pose) {
         return pose;
@@ -866,11 +895,11 @@ public class SmallTriangleNew extends OpMode {
     };
     public Runnable scanBallsGetBallAndCalculateTrajectory = () -> {
         robot.executeNow(new ActionSequence(
-                new DelayAction(100),
+                new DelayAction(300 + 350),
                 new GeneralAction(cameraDetect1),
-                new GeneralAction(() -> scanning2nd = true),
-                new DelayAction(350),
-                new GeneralAction(cameraDetect2),
+//                new GeneralAction(() -> scanning2nd = true),
+//                new DelayAction(350),
+//                new GeneralAction(cameraDetect2),
                 new DelayAction(40),
 
                 new GeneralAction(getBallNumber),

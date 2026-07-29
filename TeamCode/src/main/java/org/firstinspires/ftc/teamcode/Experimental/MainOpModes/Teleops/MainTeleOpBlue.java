@@ -159,9 +159,9 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double timer6 = 0;
     public static double outtakeReversingTime = 180;
     public static double timer1 = 15; // smol
-    public static double timer2 = 320; // far side
+    public static double timer2 = 335; // far side
     public static double timer3 = 0; // close side
-    public static double timer4 = 320; // close side
+    public static double timer4 = 335; // close side
     public static double timer1ForSorting = 200 + 150;
     public static double timer2ForSorting = 300 + 150;
     public static double mainTimerForSorting = 280;
@@ -191,8 +191,8 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double angleAdjustVal = 3.0;
     public static double angleOffsetValue = 50;
     public static double angleOffset = 50;
-    public static double delayForFirstServoAngleMove = 500;
-    public static double delayForSecondServoAngleMove = 300;
+    public static double delayForFirstServoAngleMove = 525;
+    public static double delayForSecondServoAngleMove = 330;
     public static double delayForThirdServoAngleMove = 700;
     public static double timerToLoadBallUnderOuttake = 80;
     public static double timerToLoadBallUnderOuttakeLOADINTAKE = 30;
@@ -205,6 +205,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double D2_velocityAdderMulti = 1;
     public static double D2_rotationAdderMulti = 1;
     public static double batteryToFireThreshold = 50;
+    public static double intakeWattsTimeout = 0;
 
     /// ================================== Driver Stuff  ==================================
 
@@ -639,8 +640,6 @@ public class MainTeleOpBlue extends LinearOpMode {
                         .setTarget(forcedOuttakeSpeed);
             }
 
-            if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
-                gamepad1.rumble(0.4,0.4,100);
 
 
 
@@ -712,12 +711,32 @@ public class MainTeleOpBlue extends LinearOpMode {
             robot.getMotorComponent("TurretSpinMotor").setOperationMode(MotorComponent.MotorModes.Power).setTarget(0);
         }
 
+        /// intake watts stuff
+//            if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
+//                gamepad1.rumble(0.4,0.4,100);
+        double intakeWatts =  robot.getMotorComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage;
+
+        if(intakeWatts > 16 &&
+                Math.abs(robot.getMotorComponent("IntakeMotor").getPower()) > 0.89){
+            gamepad1.rumble(0.7,0.7,100);
+        }
+        if(intakeWatts > 16) intakeWattsTimeout++;
+        else intakeWattsTimeout = 0;
+        if(intakeWattsTimeout >= 16 && wantsToIntakeDriver && false){ robot.getKey("RIGHT_BUMPER1").fakePress();}
+
+
+
+
+
+
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
         robot.spitFollowerTelemetry();
         RobotController.telemetry.addData("target vel", targetVelocity);
         RobotController.telemetry.addData("actual vel", velocities[velocities.length - 1]);
         RobotController.telemetry.addData("actual pow", robot.getMotorComponent("TurretSpinMotor").getPower());
         RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
+        RobotController.telemetry.addData("Intake Watts", robot.getMotorComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage);
+        RobotController.telemetry.addData("Intake Watts Calculated",intakeWatts);
     }
 
 
@@ -1279,6 +1298,20 @@ public class MainTeleOpBlue extends LinearOpMode {
                         else robot.executeNow(new StateAction("RightGateServo", "OPEN"));
                     }
                 }),
+                new DelayAction(timerToLoadBallUnderOuttakeLOADINTAKE),
+                new StateAction("coupleServo", "COUPLED"),
+                new DelayAction(timerToLoadBallUnderOuttake),
+                new StateAction("coupleServo", "DECOUPLED"),
+                new GeneralAction(() -> isMovingOuttakeGates = false),
+                new StateAction("RightGateServo", "CLOSED"),
+                new StateAction("LeftGateServo", "CLOSED")
+        ));
+    };
+    Runnable unstuckBalls = () -> {
+        robot.executeNow(new ActionSequence(
+                new GeneralAction(() -> isMovingOuttakeGates = true),
+                new StateAction("RightGateServo", "OPEN"),
+                new StateAction("RightGateServo", "FALSE"),
                 new DelayAction(timerToLoadBallUnderOuttakeLOADINTAKE),
                 new StateAction("coupleServo", "COUPLED"),
                 new DelayAction(timerToLoadBallUnderOuttake),

@@ -6,10 +6,12 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.Smal
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathConstraints;
 
+import org.firstinspires.ftc.robotcore.external.ExportClassToBlocks;
+import org.firstinspires.ftc.robotcore.external.ExportToBlocks;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BezierCurveTypes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage;
-
+@ExportClassToBlocks
 public class MoveAction extends Action {
 
     public MoveAction(Pose moveTargetPos) {

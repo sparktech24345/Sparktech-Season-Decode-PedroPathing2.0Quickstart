@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.MotifSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
+import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.TestAuto;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 @Config
@@ -263,4 +264,6 @@ public class GlobalStorage {
 
         return servoValue * 360; // ServoCompopnent devides by 360 before giving to servo so must pass it *360 before division
     }
+
+    public static TestAuto testAuto;
 }

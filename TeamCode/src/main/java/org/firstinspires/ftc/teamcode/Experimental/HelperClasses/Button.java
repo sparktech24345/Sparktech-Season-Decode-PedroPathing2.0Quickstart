@@ -20,6 +20,7 @@ public class Button {
     public double HoldTimeMs = 0;
     public boolean ExecuteOnPress = false;
     public boolean ExecuteAfterPress = false;
+    public boolean fakeInput = false;
 
     public void Toggle() {
         IsToggledOnPress = true;
@@ -28,6 +29,9 @@ public class Button {
     public void UnToggle() {
         IsToggledOnPress = false;
         IsToggledAfterPress = false;
+    }
+    public void fakePress(){
+        fakeInput = true;
     }
 
     public Button(BooleanSupplier execCond) {
@@ -55,6 +59,8 @@ public class Button {
 
     public void update() {
         boolean GamepadInput = (condB == null ? evalForTrigger((condD == null ? 0 : condD.getAsDouble())) : condB.getAsBoolean()); /// TODO this might be risky change for triggers
+        if(fakeInput) GamepadInput = true;
+        fakeInput = false;
         ExecuteOnPress = false;
         ExecuteAfterPress = false;
 

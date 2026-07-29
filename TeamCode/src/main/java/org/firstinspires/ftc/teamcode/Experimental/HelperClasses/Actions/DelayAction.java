@@ -3,10 +3,12 @@ package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.ExportClassToBlocks;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
 
 import java.text.MessageFormat;
 
+@ExportClassToBlocks
 public class DelayAction extends Action {
     private final ElapsedTime timer;
     private final double waitTimeMS;
