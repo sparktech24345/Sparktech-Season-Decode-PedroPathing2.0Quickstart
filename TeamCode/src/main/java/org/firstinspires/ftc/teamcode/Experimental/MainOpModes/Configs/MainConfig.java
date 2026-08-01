@@ -74,7 +74,7 @@ public class MainConfig {
                 farZoneCameraAdder = 0;
                 autoZoneAdderFar = 0;
 
-                targetForCameraX = 9.8 + 1.6; // this is the hp stuff prev 12
+                targetForCameraX = 9.8 + 1; // this is the hp stuff prev 12
                 targetForCameraX2ndTime = 46; // this is the hp stuff prev 12
                 targetForCameraY = 50;
 
@@ -137,7 +137,7 @@ public class MainConfig {
                 autoZoneAdderFar = 0;
 
 
-                targetForCameraX = 9.8 + 1.6; // this is the hp stuff prev 12
+                targetForCameraX = 9.8 + 1; // this is the hp stuff prev 12
                 targetForCameraX2ndTime = 46; // this is the hp stuff prev 12
                 targetForCameraY = -50;
 

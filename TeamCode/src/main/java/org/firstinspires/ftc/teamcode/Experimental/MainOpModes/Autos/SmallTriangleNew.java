@@ -19,6 +19,8 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.Ma
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.timerToLoadBallUnderOuttakeLOADINTAKE;
 import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.MainTeleOpBlue.vMultiplier;
 
+import static java.lang.Math.max;
+
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -265,7 +267,11 @@ public class SmallTriangleNew extends OpMode {
                 new GeneralAction(() -> rotationAdderAuto = -0.75),
                 // end of preload
 
-                new GeneralAction( () ->limelight3A.pipelineSwitch(7)),
+                new GeneralAction( () ->{
+                    if(currentTeamColor == TeamColor.Blue) limelight3A.pipelineSwitch(7);
+                    else if (currentTeamColor == TeamColor.Red) limelight3A.pipelineSwitch(9);
+                    else limelight3A.pipelineSwitch(7);
+                }),
 
                 //first hp collect with the preset balls there
                 new MoveAction(fininshHPCollectPoseNEWFirstCollect),
@@ -315,7 +321,7 @@ public class SmallTriangleNew extends OpMode {
 
                 // 5th cycle, camera collecting
                 new GeneralAction(() -> canTurnOffImtake = true),
-                new MoveAction(1),
+                new MoveAction(fininshHPCollectPoseNEW),
                 new DelayAction(150),
                 new GeneralAction(() -> canTurnOffImtake = false),
                 new GeneralAction(closeIntakeDelay),
@@ -333,7 +339,7 @@ public class SmallTriangleNew extends OpMode {
 
                 // 6th cycle, camera collectingfininshHPCollectPoseNEW
                 new GeneralAction(() -> canTurnOffImtake = true),
-                new MoveAction(1),
+                new MoveAction(secondZoneCameraCollect),
                 new DelayAction(150),
                 new GeneralAction(() -> canTurnOffImtake = false),
                 new GeneralAction(closeIntakeDelay),
@@ -351,7 +357,7 @@ public class SmallTriangleNew extends OpMode {
 
                 // 7th cycle, camera collecting CUSTOM CYCLE
                 new GeneralAction(() -> canTurnOffImtake = true),
-                new MoveAction(1),
+                new MoveAction(fininshHPCollectPoseNEW),
                 new DelayAction(100),
                 new GeneralAction(() -> canTurnOffImtake = false),
                 new GeneralAction(closeIntakeDelay),
@@ -866,7 +872,7 @@ public class SmallTriangleNew extends OpMode {
     public static int neededCase = 0;
     public static int zone1 = 0,zone2 = 0,zone3 = 0;
     Runnable getBallNumber = () ->{
-//        int zoner3 = zone3-1;
+        int zoner3 = zone3-1;
 //        if(zone1 >=3) neededCase = 1;
 //        else if(zone2 >=3) neededCase = 2;
 //        else{
@@ -912,6 +918,50 @@ public class SmallTriangleNew extends OpMode {
             }
         }
     };
+
+    public Runnable cameraDetect1AiMode = () -> {
+        LLResult result = limelight3A.getLatestResult();
+        limelight3A.captureSnapshot("HpSnap");
+
+        zone1 = 0;
+        zone2 = 0;
+        zone3 = 0;
+
+
+
+        if (result != null && result.isValid()) {
+            List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+
+            int index = 0;
+            // counting corners stuff
+            double maxX = 0, maxY = 0;
+            double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+            double medX = 0;
+            double medY = 0;
+            int counter = 0;
+            List<List<Double>> listWithStuff;
+
+            for (LLResultTypes.DetectorResult detection : detections) {
+                listWithStuff = detection.getTargetCorners(); // List<List<x,y>>
+
+                x1 = listWithStuff.get(0).get(0); // x
+                y1 = listWithStuff.get(0).get(1); // y
+                x2 = listWithStuff.get(1).get(0); // x
+                y2 = listWithStuff.get(1).get(1); // y
+
+                medX = (x1 + x2) / 2;
+                medY = (y1 + y2) / 2;
+
+                if(medX > 428 && medX <= 639) zone3++;
+                if(medX > 214 && medX <=428) zone2++;
+                else if(medX > 1) zone1++;
+
+
+                RobotController.telemetry.addData("Ball Corners No." + index, x1 + "  " + y1 + " ::: " + x2 + "  " + y2);
+            }
+        }
+    };
+
     public Runnable cameraDetect2 = () -> {
         LLResult llResult = limelight3A.getLatestResult();
         limelight3A.captureSnapshot("HpSnap");
