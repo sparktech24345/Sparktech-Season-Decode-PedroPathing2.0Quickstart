@@ -140,9 +140,9 @@ public class SmallTriangleNew extends OpMode {
 
     // sweep collect
 
-    public static Pose bezierHelper3 = pose(10, 49, 20);
+    public static Pose bezierHelper3 = pose(10, 47.5, 20);
     public static Pose weirdHpCollect =  pose(29,45,20);
-    public static Pose weirdHpCollectFarAway =  pose(46,46.5,20);
+    public static Pose weirdHpCollectFarAway =  pose(46,45.5,20);
 
     @Override
     public void init() {
