@@ -204,12 +204,9 @@ public class KidsAuto extends OpMode {
         if(RobotController.currentVoltage < 10 || RobotController.getDrivetrainCumulativePower() >3.85) targetVelocity += 30;
 //            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(usedDistance) *vMultiplier + D2_velocityAdder
         robot.getMotorComponent("TurretSpinMotor")
-                .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
-                .setTarget((eval(targetVelocity))
                 .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs)
-//                            .setVoltageCompensation(true)
-//                            .setTargetVoltage(targetVoltageForSpinMotors)
-                ;
+                .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
+                .setTarget(targetVelocity);
 
         double turretAngleVal = 0;
 //            turretAngleVal = distanceToAngleFunction(usedDistance) - (angleOffset * (usedDistance >= 2.9 ? 1 : 0));
