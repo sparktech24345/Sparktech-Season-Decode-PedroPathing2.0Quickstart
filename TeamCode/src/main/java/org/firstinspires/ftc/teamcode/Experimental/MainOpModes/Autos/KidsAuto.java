@@ -76,7 +76,7 @@ import java.util.List;
 
 @Config
 @Disabled
-@Autonomous(name = "Big Triangle Auto BLUE", group = "AAA")
+@Autonomous(name = "Kids Auto", group = "AAA")
 public class KidsAuto extends OpMode {
     public RobotController robot;
     private AutoRecorder recorder;

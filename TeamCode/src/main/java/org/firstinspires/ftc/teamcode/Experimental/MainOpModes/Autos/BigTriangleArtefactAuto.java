@@ -320,8 +320,38 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new GeneralAction(() -> collectNumber++),
                 new GeneralAction(() -> shouldUseColorSensors = true),
                 new MoveAction(gateCollectSpecial),//,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
-                new DelayAction(1),
+                new DelayAction(1 + 200),
                 new HoldAction(gateActualCollectSpecial,1800),  //1100 at full 21, switched with new sensor
+                //new DelayAction(350),
+                new GeneralAction(() -> doIntakePulse = true),
+//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
+                new MoveAction(tipBigTriangleShootingTurned90Deg),
+//                new DelayAction(150),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1000),
+
+
+                /// collecting lever pose0
+                new GeneralAction(() -> collectNumber++),
+                new GeneralAction(() -> shouldUseColorSensors = true),
+                new MoveAction(gateCollect),//,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
+                new DelayAction(1 + 200),
+                new HoldAction(gateActualCollect,1800),  //1100 at full 21, switched with new sensor
+                //new DelayAction(350),
+                new GeneralAction(() -> doIntakePulse = true),
+//                new GeneralAction(() -> shouldFireUnsortedBalls = true),
+                new MoveAction(tipBigTriangleShootingTurned90Deg),
+//                new DelayAction(150),
+                new GeneralAction(fireUnsortedBalls),
+                new DelayAction(1000),
+                ///finished gate collect
+
+                /// collecting lever pose0
+                new GeneralAction(() -> collectNumber++),
+                new GeneralAction(() -> shouldUseColorSensors = true),
+                new MoveAction(gateCollect),//,BezierCurveTypes.LinearHeading,0,gateHelperPoint),
+                new DelayAction(1 + 200),
+                new HoldAction(gateActualCollect,1800),  //1100 at full 21, switched with new sensor
                 //new DelayAction(350),
                 new GeneralAction(() -> doIntakePulse = true),
 //                new GeneralAction(() -> shouldFireUnsortedBalls = true),
@@ -337,6 +367,8 @@ public class BigTriangleArtefactAuto extends OpMode {
                 new MoveAction(gateCollect),//BezierCurveTypes.LinearHeading,0,gateHelperPoint),
                 new DelayAction(1),
                 new HoldAction(gateActualCollect,2000),
+                new MoveAction(gateCollect),
+                new DelayAction(5000),
                 new GeneralAction(() -> cameraAngleOverite = cfg.firstCameraPosition),
                 new GeneralAction(() -> doIntakePulse = true),
                 new GeneralAction(() -> shouldUseColorSensors = true),
