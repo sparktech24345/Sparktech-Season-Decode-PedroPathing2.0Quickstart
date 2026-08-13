@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.Comp
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.LogSystem.LogSystem;
 
 import java.util.HashMap;
 import java.util.List;
