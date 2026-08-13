@@ -38,6 +38,8 @@ public abstract class RobotController implements RobotControllerInterface {
     private DriveTrain movement = null;
     public static double currentVoltage = 12;
 
+    private LogSystem LogSystem;
+
     private void init_all() {
         //loop time improving thingy
 //        allHubs = hardwareMap.getAll(LynxModule.class);
@@ -52,6 +54,8 @@ public abstract class RobotController implements RobotControllerInterface {
         robotController = this;
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        LogSystem = new LogSystem();
+        LogSystem.createFile();
     }
 
     public RobotController() {
@@ -182,6 +186,7 @@ public abstract class RobotController implements RobotControllerInterface {
         runUpdates();
         // main loop takes under 0.5 milsec and is not the problem
         main_loop();
+        LogSystem.updateLoop();
         telemetry.update();
 //        if(tickMS < 35) try {
 //            Thread.sleep((long) (35 - tickMS));
