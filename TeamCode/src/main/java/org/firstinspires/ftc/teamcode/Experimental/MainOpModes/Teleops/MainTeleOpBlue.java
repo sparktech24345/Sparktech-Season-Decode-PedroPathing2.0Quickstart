@@ -737,6 +737,7 @@ public class MainTeleOpBlue extends LinearOpMode {
         RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
         RobotController.telemetry.addData("Intake Watts", robot.getMotorComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage);
         RobotController.telemetry.addData("Intake Watts Calculated",intakeWatts);
+        RobotController.telemetry.addData("llopTimer", robot.getExecMS());
     }
 
 

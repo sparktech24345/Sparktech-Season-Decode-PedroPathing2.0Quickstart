@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
@@ -29,20 +30,22 @@ public abstract class RobotController implements RobotControllerInterface {
     public static MultipleTelemetry telemetry = null;
     protected VoltageSensor controlHubVoltageSensor;
     public static StateQueuer queuer = null;
-//    private List<LynxModule> allHubs;
     private double tickMS = 0;
     private ElapsedTime tickTimer = new ElapsedTime();
+    private final ElapsedTime telemetryTimer = new ElapsedTime();
+    private final ElapsedTime voltageTimer = new ElapsedTime();
     private HashMap<String, RobotState> states = new HashMap<>();
     private HashMap<String, Component> components = new HashMap<>();
     private DriveTrain movement = null;
     public static double currentVoltage = 12;
 
     private void init_all() {
-        //loop time improving thingy
-//        allHubs = hardwareMap.getAll(LynxModule.class);
-//        for (LynxModule hub : allHubs) {
-//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO); /// TODO de jucat cu chestia asta
-//        }
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        // REMOVED setMaximumParallelCommands(8) to eliminate RS-485 serial timeouts
+        PhotonCore.enable();
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
 
         ComplexFollower.init(hardwareMap);
         ComplexFollower.setStartingPose(globalRobotPose);
@@ -51,6 +54,8 @@ public abstract class RobotController implements RobotControllerInterface {
         robotController = this;
 
         controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        telemetryTimer.reset();
+        voltageTimer.reset();
     }
 
     public RobotController() {
@@ -91,7 +96,7 @@ public abstract class RobotController implements RobotControllerInterface {
     public void spitFollowerTelemetry(){ComplexFollower.telemetry();}
 
     public Component getComponent(String componentName) {
-         return components.get(componentName);
+        return components.get(componentName);
     }
 
     public MotorComponent getMotorComponent(String componentName) {
@@ -139,7 +144,11 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void init_loop() {
         tickTimer.reset();
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
+
         currentVoltage = controlHubVoltageSensor.getVoltage();
+
         ComplexGamepad.update();
         ComplexFollower.update();
         for (Component c : components.values()) {
@@ -147,46 +156,48 @@ public abstract class RobotController implements RobotControllerInterface {
                 c.update();
             }
         }
-        telemetry.update();
+
+        // Rate-limit telemetry to 30 Hz (every 33ms) to eliminate GC/Wi-Fi spikes
+        if (telemetry != null && telemetryTimer.milliseconds() >= 33) {
+            telemetry.update();
+            telemetryTimer.reset();
+        }
+
         tickMS = tickTimer.milliseconds();
     }
 
     private void runUpdates() {
-        // time improving thingy
-//        for (LynxModule hub : allHubs) {
-//            hub.clearBulkCache();
-//        }
-
         ComplexGamepad.update();
-        // untill here about 0.6 milisec with spikes up to 1.5
-        ComplexFollower.update(); /// this is problem
-        // up to here anywhere from 7 mls to 35
-
-
-        // about 0.1 mls or lower
+        ComplexFollower.update();
         queuer.update();
 
-        //from 12 mls to spikes of 50
-        for (Component c : components.values()) { /// this is big problem
+        for (Component c : components.values()) {
             c.update();
         }
 
-        //this and telemtry takes about 0.1
         if (DriveTrain.wasInitialized()) DriveTrain.loop();
     }
 
     public void loop() {
         tickTimer.reset();
-        currentVoltage = controlHubVoltageSensor.getVoltage();
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
+
+        // Rate-limit voltage reads every 250ms to prevent ADC hardware delays on every frame
+        if (voltageTimer.milliseconds() >= 250) {
+            currentVoltage = controlHubVoltageSensor.getVoltage();
+            voltageTimer.reset();
+        }
+
         runUpdates();
-        // main loop takes under 0.5 milsec and is not the problem
         main_loop();
-        telemetry.update();
-//        if(tickMS < 35) try {
-//            Thread.sleep((long) (35 - tickMS));
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
+
+        // Rate-limit telemetry to 30 Hz (every 33ms) to eliminate GC/Wi-Fi spikes
+        if (telemetry != null && telemetryTimer.milliseconds() >= 33) {
+            telemetry.update();
+            telemetryTimer.reset();
+        }
+
         tickMS = tickTimer.milliseconds();
     }
 

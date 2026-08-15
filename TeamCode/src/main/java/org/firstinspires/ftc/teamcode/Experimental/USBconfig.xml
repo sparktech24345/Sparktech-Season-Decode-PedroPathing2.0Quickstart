@@ -18,6 +18,8 @@
             <goBILDAPinpoint name="pinpoint" port="0" bus="2" />
             <RevColorSensorV3 name="colorSensorRight" port="0" bus="3" />
         </LynxModule>
+    </LynxUsbDevice>
+    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQA55AMW" parentModuleAddress="2">
         <LynxModule name="Expansion Hub 2" port="2">
             <goBILDA5202SeriesMotor name="frontright" port="0" />
             <goBILDA5202SeriesMotor name="frontleft" port="1" />
