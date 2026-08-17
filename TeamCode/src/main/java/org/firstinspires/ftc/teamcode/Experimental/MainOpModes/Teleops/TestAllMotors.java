@@ -1,23 +1,39 @@
 package org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops;
 
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.CameraRotateServoName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorLeftName;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.colorSensorRightName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.coupleServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.intakeMotorName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftGateServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.leftTiltServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.rightGateServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.rightTiltServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.turretAngleServoName;
+import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.ServoMultiple0s.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import com.seattlesolvers.solverslib.photon.PhotonCore;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Config
 @TeleOp(name = "Test all motors and loop time", group = "Linear OpMode")
@@ -51,13 +67,14 @@ public class TestAllMotors extends LinearOpMode {
 
     // Cache to prevent redundant motor commands across loops
     private double lastMotorPower = Double.NaN;
+    Limelight3A limelight;
 
     @Override
     public void runOpMode() throws InterruptedException {
         // Bulk caching setup
         PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-//        PhotonCore.experimental.setMaximumParallelCommands(8); // Can be adjusted based on user preference - but raising this number further can cause issues
+        PhotonCore.experimental.setMaximumParallelCommands(6); // Can be adjusted based on user preference - but raising this number further can cause issues
 
         //snth
 //         REMOVED setMaximumParallelCommands(8) to prevent RS-485 serial timeouts / packet drop spikes
@@ -77,8 +94,31 @@ public class TestAllMotors extends LinearOpMode {
         DcMotorEx motor7 = hardwareMap.get(DcMotorEx.class, "backleft");
         DcMotorEx motor8 = hardwareMap.get(DcMotorEx.class, "backright");
 
+
+        ///  servo time
+        Servo leftTiltServo = hardwareMap.get(Servo.class, leftTiltServoName);
+        Servo rightTiltServo = hardwareMap.get(Servo.class, rightTiltServoName);
+        Servo rightGateServo = hardwareMap.get(Servo.class, rightGateServoName);
+        Servo leftGateServo = hardwareMap.get(Servo.class, leftGateServoName);
+        Servo turretAngleServo = hardwareMap.get(Servo.class, turretAngleServoName);
+        Servo CameraRotateServo = hardwareMap.get(Servo.class, CameraRotateServoName);
+        Servo coupleServo = hardwareMap.get(Servo.class, coupleServoName);
+
         colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
+
+        ExecutorService telExecutor = Executors.newSingleThreadExecutor();
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+
+        GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.setOffsets(-116.5, -119.38, DistanceUnit.MM); // -116.5 -141.5
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pinpoint.setYawScalar(1);
+        pinpoint.resetPosAndIMU();
+
 
         waitForStart();
         if (isStopRequested()) return;
@@ -89,6 +129,7 @@ public class TestAllMotors extends LinearOpMode {
         double maxLoopMls = 0;
         double totalLoopMls = 0;
         int loopCount = 0;
+        long a =0;
 
         while (opModeIsActive()) {
             PhotonCore.CONTROL_HUB.clearBulkCache();
@@ -103,30 +144,33 @@ public class TestAllMotors extends LinearOpMode {
             totalLoopMls += lastLoopMls;
             loopCount++;
 
-            motor1.setPower(motorPowe);
-            motor2.setPower(motorPowe);
-            motor3.setPower(motorPowe);
-            motor4.setPower(motorPowe);
-            motor5.setPower(motorPowe);
-            motor6.setPower(motorPowe);
-            motor7.setPower(motorPowe);
-            motor8.setPower(motorPowe);
-            motor1.getCurrent(CurrentUnit.AMPS);
-            motor2.getCurrent(CurrentUnit.AMPS);
-            motor3.getCurrent(CurrentUnit.AMPS);
-            motor4.getCurrent(CurrentUnit.AMPS);
-            motor5.getCurrent(CurrentUnit.AMPS);
-            motor6.getCurrent(CurrentUnit.AMPS);
-            motor7.getCurrent(CurrentUnit.AMPS);
-            motor8.getCurrent(CurrentUnit.AMPS);
-            motor1.getVelocity();
-            motor2.getVelocity();
-            motor3.getVelocity();
-            motor4.getVelocity();
-            motor5.getVelocity();
-            motor6.getVelocity();
-            motor7.getVelocity();
-            motor8.getVelocity();
+            a++;
+
+            ///  left these to actually see their impact via enabling disabling
+
+                motor1.setPower(motorPowe);
+                motor2.setPower(motorPowe);
+                motor3.setPower(motorPowe);
+                motor4.setPower(motorPowe);
+                motor5.setPower(motorPowe);
+                motor6.setPower(motorPowe);
+                motor7.setPower(motorPowe);
+                motor8.setPower(motorPowe);
+
+
+
+                if (leftTiltServo != null) leftTiltServo.setPosition(leftTiltPos);
+                if (rightTiltServo != null) rightTiltServo.setPosition(rightTiltPos);
+                if (rightGateServo != null) rightGateServo.setPosition(rightGatePos);
+                if (leftGateServo != null) leftGateServo.setPosition(leftGatePos);
+                if (CameraRotateServo != null) CameraRotateServo.setPosition(CameraServoPos);
+                if (turretAngleServo != null) turretAngleServo.setPosition(angleServoPos);
+                if (coupleServo != null) coupleServo.setPosition(coupleServoPos);
+
+
+
+
+
             motor1.getCurrentPosition();
             motor2.getCurrentPosition();
             motor3.getCurrentPosition();
@@ -135,15 +179,35 @@ public class TestAllMotors extends LinearOpMode {
             motor6.getCurrentPosition();
             motor7.getCurrentPosition();
             motor8.getCurrentPosition();
+            motor1.getVelocity();
+            motor2.getVelocity();
+            motor3.getVelocity();
+            motor4.getVelocity();
+            motor5.getVelocity();
+            motor6.getVelocity();
+            motor7.getVelocity();
+            motor8.getVelocity();
 
-            // 4. Push MAX and AVG to FTC Dashboard every 33ms
+
+
+
+            pinpoint.getPosition();
+
+
+
             if (telTimer.milliseconds() >= 33) {
-                tel.addData("maxMls", maxLoopMls); // Catches ANY spike in the last 33ms
-                tel.addData("avgMls", totalLoopMls / loopCount); // True average speed
-                tel.addData("hz", loopCount * (1000.0 / telTimer.milliseconds())); // True frequency
-                tel.update();
+                double snapshotMax = maxLoopMls;
+                double snapshotAvg = totalLoopMls / loopCount;
+                double snapshotHz = loopCount * (1000.0 / telTimer.milliseconds());
 
-                // Reset accumulation trackers for next 33ms window
+                // Offload network serialization to background thread
+                telExecutor.submit(() -> {
+                    tel.addData("maxMls", snapshotMax);
+                    tel.addData("avgMls", snapshotAvg);
+                    tel.addData("hz", snapshotHz);
+                    tel.update();
+                });
+
                 maxLoopMls = 0;
                 totalLoopMls = 0;
                 loopCount = 0;
