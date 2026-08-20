@@ -9,14 +9,14 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.firstinspires.ftc:Inspection:11.1.0'
-    implementation 'org.firstinspires.ftc:Blocks:11.1.0'
-    implementation 'org.firstinspires.ftc:RobotCore:11.1.0'
-    implementation 'org.firstinspires.ftc:RobotServer:11.1.0'
-    implementation 'org.firstinspires.ftc:OnBotJava:11.1.0'
-    implementation 'org.firstinspires.ftc:Hardware:11.1.0'
-    implementation 'org.firstinspires.ftc:FtcCommon:11.1.0'
-    implementation 'org.firstinspires.ftc:Vision:11.1.0'
+    implementation 'org.firstinspires.ftc:Inspection:11.2.1'
+    implementation 'org.firstinspires.ftc:Blocks:11.2.1'
+    implementation 'org.firstinspires.ftc:RobotCore:11.2.1'
+    implementation 'org.firstinspires.ftc:RobotServer:11.2.1'
+    implementation 'org.firstinspires.ftc:OnBotJava:11.2.1'
+    implementation 'org.firstinspires.ftc:Hardware:11.2.1'
+    implementation 'org.firstinspires.ftc:FtcCommon:11.2.1'
+    implementation 'org.firstinspires.ftc:Vision:11.2.1'
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
     implementation "com.acmerobotics.dashboard:dashboard:0.5.1"
@@ -25,6 +25,6 @@ dependencies {
     implementation 'com.pedropathing:telemetry:1.0.0'
     implementation 'com.bylazar:fullpanels:1.0.12'
 
-    implementation 'org.solverslib:photon:0.3.4'
+    implementation 'org.solverslib:photon:0.3.5'
 }
 
