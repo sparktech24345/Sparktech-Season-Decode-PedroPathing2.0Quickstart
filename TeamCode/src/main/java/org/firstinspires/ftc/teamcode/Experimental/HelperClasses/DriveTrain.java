@@ -21,6 +21,7 @@ public class DriveTrain {
     private static double slowdownMultiplier = 1;
     private static boolean init_ = false;
     private static double drivetrainCumulativePower = 0;
+    private static double lastRF = 0, lastLF = 0, lastRB = 0, lastLB = 0;
 
 
     public static void init(String LeftFront, String RightFront, String LeftBack, String RightBack) {
@@ -80,10 +81,15 @@ public class DriveTrain {
 
         drivetrainCumulativePower = Math.abs(FrontRightPow) + Math.abs(BackRightPow) + Math.abs(FrontLeftPow) + Math.abs(FrontLeftPow) ;
 
-        RFDrive.setPower(FrontRightPow * slowdownMultiplier);
-        LFDrive.setPower(FrontLeftPow * slowdownMultiplier);
-        RBDrive.setPower(BackRightPow * slowdownMultiplier);
-        LBDrive.setPower(BackLeftPow * slowdownMultiplier);
+        double targetRF = FrontRightPow * slowdownMultiplier;
+        double targetLF = FrontLeftPow * slowdownMultiplier;
+        double targetRB = BackRightPow * slowdownMultiplier;
+        double targetLB = BackLeftPow * slowdownMultiplier;
+
+        if (Math.abs(targetRF - lastRF) > 0.01) { RFDrive.setPower(targetRF); lastRF = targetRF; }
+        if (Math.abs(targetLF - lastLF) > 0.01) { LFDrive.setPower(targetLF); lastLF = targetLF; }
+        if (Math.abs(targetRB - lastRB) > 0.01) { RBDrive.setPower(targetRB); lastRB = targetRB; }
+        if (Math.abs(targetLB - lastLB) > 0.01) { LBDrive.setPower(targetLB); lastLB = targetLB; }
     }
 
     public void telemetry() {}

@@ -64,4 +64,9 @@ public class CRServoComponent extends Component {
         for (CRServo servo : motorMap.values())
             servo.setPower(target);
     }
+
+    @Override
+    public void read() {
+    //nothing here for now
+    }
 }

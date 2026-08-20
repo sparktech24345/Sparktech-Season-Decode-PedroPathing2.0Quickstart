@@ -33,7 +33,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -46,7 +45,10 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.StateAc
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.BallColorQueue;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.CameraMath;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.ComplexFollower;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ColorSensorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.LimelightComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ThreadComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Drivers;
@@ -54,11 +56,10 @@ import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.Tea
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DriveTrain;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.OpModes;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotControllerInterface;
 import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Configs.MainConfig;
 
 @Config
-@TeleOp(name="\uD83D\uDD35 Main TeleOp Blue", group="AAA") // 🔵
+@TeleOp(name="\uD83D\uDD35 Main TeleOp Bluee", group="AAA") // 🔵
 public class MainTeleOpBlue extends LinearOpMode {
     protected RobotController robot;
     //public static double targetVoltageForSpinMotors = 12.6;
@@ -81,8 +82,6 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double robotToGoalAbsoluteAngle = 0;
 
     /// ----------------- Color Sensor Stuff ------------------
-    protected NormalizedColorSensor colorSensorRight;
-    protected NormalizedColorSensor colorSensorLeft;
     protected NormalizedRGBA rightSensorColors;
     protected NormalizedRGBA leftSensorColors;
     // final float[] hsvRightSensorColors = new float[3];
@@ -107,7 +106,6 @@ public class MainTeleOpBlue extends LinearOpMode {
     BallColorQueue ballColorQueue = new BallColorQueue();
 
     /// ----------------- Limelight Stuff -----------------
-    protected Limelight3A limelight3A = null;
     public static double distanceMeasuredCamera = 0;
     public static double rotationDegreesMeasuredCamera = 0;
     public static double lastRotationDegreesMeasuredCamera = 0;
@@ -228,16 +226,16 @@ public class MainTeleOpBlue extends LinearOpMode {
         processTargetStuff(robot.getCurrentPose(), cfg.targetX, cfg.targetY);
         distanceToWallOdometry = calculateDistanceToWallInMeters(robot.getCurrentPose(), cfg.usedTargetX, cfg.usedTargetY);
 
-        TurretComponent tempTurret = robot.getTurretComponent("TurretRotateMotor");
+        TurretComponent tempTurret = robot.getComponent("TurretRotateMotor");
         // Update pose from Odometry
         tempTurret.updateRobotPose(robot.getCurrentPose());
         tempTurret.setBallTimeInAir(ballInAirTime);
 
         // this uses the processed target values
         //rotationToWallOdometry = calculateHeadingAdjustment(robot.getCurrentPose(), Math.toDegrees(robot.getCurrentPose().getHeading()), usedTargetX, cfg.usedTargetY);
-        RobotController.telemetry.addData("distance to wall", distanceToWallOdometry);
-        RobotController.telemetry.addData("fakeRotation", fakeRotation);
-        RobotController.telemetry.addData("current cam id: ", camId);
+        RobotController.addTelemetry("distance to wall", distanceToWallOdometry);
+        RobotController.addTelemetry("fakeRotation", fakeRotation);
+        RobotController.addTelemetry("current cam id: ", camId);
         //colors
         handleColors();
 
@@ -253,7 +251,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         if (usedDistance > 2.9) neededAngleForTurretRotation += cfg.farZoneCameraAdder;
         if (shouldShootOnCamera) {
-            if (Math.abs(robot.getMotorComponent("TurretRotateMotor").getVelocity()) < 0.2)
+            if (Math.abs(robot.<TurretComponent>getComponent("TurretRotateMotor").getVelocity()) < 0.2)
                 rotationAdder += rotationDegreesMeasuredCamera;
 
             neededAngleForTurretRotation += rotationAdder;
@@ -263,10 +261,10 @@ public class MainTeleOpBlue extends LinearOpMode {
         //if(neededAngleForTurretRotation > -30) neededAngleForTurretRotation += rightSideAngleBias;
         if (neededAngleForTurretRotation < 0) neededAngleForTurretRotation += 360;
 
-        processAllTheCameraStuff(usedDistance);
+        processAllTheCameraStuff();
 
-        RobotController.telemetry.addData("needed angle for turret rotation", neededAngleForTurretRotation);
-        RobotController.telemetry.addData("TurretRotate power", tempTurret.getPower());
+        RobotController.addTelemetry("needed angle for turret rotation", neededAngleForTurretRotation);
+        RobotController.addTelemetry("TurretRotate power", tempTurret.getPower());
 
         /// -=-=-=-=-=-=-=-=-=-=-=-=-=-=- Driver Buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -293,7 +291,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             else cameraAngleOverite = 0;
         }
 
-        if(robot.getKey("OPTIONS2").ExecuteOnPress) limelight3A.captureSnapshot("this is not here" + System.currentTimeMillis());
+        if(robot.getKey("OPTIONS2").ExecuteOnPress) robot.<LimelightComponent>getComponent("Limelight").captureSnapshot();
 
 
         // Driver Outputting
@@ -337,14 +335,14 @@ public class MainTeleOpBlue extends LinearOpMode {
         if (robot.getKey("Y1").ExecuteOnPress || robot.getKey("B2").ExecuteOnPress){
             isInSortedMode = !isInSortedMode;
         }
-        if(isInSortedMode){
-            gamepad1.setLedColor(0,0,255,30000);
-            gamepad2.setLedColor(0,0,255,30000);
-        }
-        else{
-            gamepad1.setLedColor(255,0,0,30000);
-            gamepad2.setLedColor(255,0,0,30000);
-        }
+//        if(isInSortedMode){
+//            gamepad1.setLedColor(0,0,255,3000000);
+//            gamepad2.setLedColor(0,0,255,30000);
+//        }
+//        else{
+//            gamepad1.setLedColor(255,0,0,30000);
+//            gamepad2.setLedColor(255,0,0,30000);
+//        }
         // Driver fire unsorted in sorted mode
 //        if (robot.getKey("X1").ExecuteOnPress){
 //            wantsToFireWithIntakeUnsortedInSortingMode = !wantsToFireWithIntakeUnsortedInSortingMode;
@@ -374,7 +372,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         // ====================== Tilt Servo Stuff ===================
         if(robot.getKey("DPAD_UP1").ExecuteOnPress){
-            if(robot.getServoComponent("TiltServos").getPosition() == 0.85) // if retracted then extend
+            if(robot.getComponent("TiltServos").getPosition() == 0.85) // if retracted then extend
                 robot.executeNow(new StateAction("TiltServos","EXTENDED"));
             else // else retract back
                 robot.executeNow(new StateAction("TiltServos","RETRACTED"));
@@ -405,7 +403,6 @@ public class MainTeleOpBlue extends LinearOpMode {
 //        if (robot.getKey("DPAD_RIGHT2").IsHeld && robot.getKey("DPAD_LEFT2").IsHeld) {
 //            D2_rotationAdder = 0;
 //        }
-
         if(robot.getKey("RIGHT_TRIGGER2").IsHeld && robot.getKey("LEFT_BUMPER2").IsHeld) {
             ComplexFollower.instance().setPose(cameraPoseToResetWith);
             D2_velocityAdder = 0;
@@ -557,9 +554,9 @@ public class MainTeleOpBlue extends LinearOpMode {
             intakeState = 0;
 
         double fakeVelocity = distanceToVelocityFunction(usedDistance) * vMultiplier + D2_velocityAdder;
-        if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && RobotController.currentVoltage < 10 && fakeVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold)
+        if((wantsToFireWithIntake || wantsToFireWithIntakeUnsortedInSortingMode) && RobotController.currentVoltage < 10 && fakeVelocity - robot.<MotorComponent>getComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold)
             intakeState = 0;
-        RobotController.telemetry.addData("velocity difference",fakeVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold);
+        RobotController.addTelemetry("velocity difference",fakeVelocity - robot.<MotorComponent>getComponent("TurretSpinMotor").getVelocity()>= batteryToFireThreshold);
 
         hasSwitchedIntakeState = false;
 
@@ -617,25 +614,17 @@ public class MainTeleOpBlue extends LinearOpMode {
             if(RobotController.currentVoltage < 10 || RobotController.getDrivetrainCumulativePower() >3.85) targetVelocity += 30;
 //            if(shouldToAirSort) targetVelocity = airSortingFunctionVelocity(usedDistance) *vMultiplier + D2_velocityAdder;
             if(!shouldForceOuttake){
-                if(shouldUseSecondaryPID /*always false */ && Math.abs(targetVelocity - robot.getMotorComponent("TurretSpinMotor").getVelocity()) <= OuttakePIDSwitch){
-                    robot.getMotorComponent("TurretSpinMotor")
-                            .setOperationMode(MotorComponent.MotorModes.Velocity)
-                            .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-                            .setVelocityCoefficients(velp,0,veld,velf);
-                }
-                else {
-                    robot.getMotorComponent("TurretSpinMotor")
-                            .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
-                            .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
-                            .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs)
-//                            .setVoltageCompensation(true)
-//                            .setTargetVoltage(targetVoltageForSpinMotors)
+                robot.<MotorComponent>getComponent("TurretSpinMotor")
+                        .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
+                        .setTarget((eval(turretVelocityOverride) ? turretVelocityOverride : targetVelocity))
+                        .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs)
+//                          .setVoltageCompensation(true)
+//                          .setTargetVoltage(targetVoltageForSpinMotors)
                     ;
-                }
 
             }
             else {
-                robot.getMotorComponent("TurretSpinMotor")
+                robot.<MotorComponent>getComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Power)
                         .setTarget(forcedOuttakeSpeed);
             }
@@ -648,10 +637,10 @@ public class MainTeleOpBlue extends LinearOpMode {
 //            turretAngleVal = distanceToAngleFunction(usedDistance) - (angleOffset * (usedDistance >= 2.9 ? 1 : 0));
             turretAngleVal = distanceToAngleFunction(usedDistance) - (angleOffset * (usedDistance >= 2.9 ? 1 : 0));
 //            if(shouldToAirSort) turretAngleVal = airSortingFunctionAngle(usedDistance);
-            RobotController.telemetry.addData("angle function output", turretAngleVal);
+            RobotController.addTelemetry("angle function output", turretAngleVal);
             turretAngleVal = (eval(turretAngleOverride) ? turretAngleOverride : turretAngleVal);
             turretAngleVal = clamp(turretAngleVal,18, 324); // fresh measured
-            robot.getServoComponent("TurretAngle")
+            robot.getComponent("TurretAngle")
                     .setTarget(turretAngleVal);
 
 
@@ -669,12 +658,12 @@ public class MainTeleOpBlue extends LinearOpMode {
             rotationAdder = 0;
 
             if(!shouldForceOuttake){
-                robot.getMotorComponent("TurretSpinMotor")
+                robot.<MotorComponent>getComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                         .setTarget(0);
             }
             else{
-                robot.getMotorComponent("TurretSpinMotor")
+                robot.<MotorComponent>getComponent("TurretSpinMotor")
                         .setOperationMode(MotorComponent.MotorModes.Power)
                         .setTarget(forcedOuttakeSpeed);
             }
@@ -685,8 +674,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             // TODO: check why tf was this here ^
             robot.executeNow(new StateAction("TurretAngle", "DEFAULT"));
 
-            robot.getMotorComponent("TurretRotateMotor")
-                    .setTarget(0);
+            robot.getComponent("TurretRotateMotor").setTarget(0);
 
 
         }
@@ -696,9 +684,9 @@ public class MainTeleOpBlue extends LinearOpMode {
 //        velocities[velocities.length - 1] = robot.getMotorComponent("TurretSpinMotor").getVelocity();
 //        double deltaVel = velocities[velocities.length - 1] - velocities[0];
 //        boolean hasShotByVel = deltaVel <= -80;
-//        RobotController.telemetry.addData("deltavel", deltaVel);
-//        RobotController.telemetry.addData("has shot by vel", hasShotByVel);
-//        RobotController.telemetry.addData("angle offset", angleOffset);
+//        RobotController.addTelemetry("deltavel", deltaVel);
+//        RobotController.addTelemetry("has shot by vel", hasShotByVel);
+//        RobotController.addTelemetry("angle offset", angleOffset);
 //        if (hasShotByVel && wantsToFireWithIntake) angleOffset = (angleOffset + 2 * angleOffsetDiff) % (3 * angleOffsetDiff);
 //        else if (!wantsToFireWithIntake) angleOffset = 2 * angleOffsetDiff;
 //        if (wantsToFireWithIntake && deltaVel >= 80) {
@@ -708,17 +696,17 @@ public class MainTeleOpBlue extends LinearOpMode {
 
         if(disableTurret){
             tempTurret.setOperationMode(MotorComponent.MotorModes.Power).setTarget(0);
-            robot.getMotorComponent("TurretSpinMotor").setOperationMode(MotorComponent.MotorModes.Power).setTarget(0);
+            robot.<MotorComponent>getComponent("TurretSpinMotor").setOperationMode(MotorComponent.MotorModes.Power).setTarget(0);
         }
 
         /// intake watts stuff
 //            if(Math.abs(robot.getMotorComponent("TurretSpinMotor").getVelocity() - targetVelocity) <= 21)
 //                gamepad1.rumble(0.4,0.4,100);
-        double intakeWatts =  robot.getMotorComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage;
+        double intakeWatts =  robot.<MotorComponent>getComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage;
 
         if(intakeWatts > 16 &&
-                Math.abs(robot.getMotorComponent("IntakeMotor").getPower()) > 0.89){
-            gamepad1.rumble(0.7,0.7,100);
+                Math.abs(robot.<MotorComponent>getComponent("IntakeMotor").getPower()) > 0.89){
+//            gamepad1.rumble(0.7,0.7,100);
         }
         if(intakeWatts > 16) intakeWattsTimeout++;
         else intakeWattsTimeout = 0;
@@ -728,17 +716,25 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
 
-
         ///  ==  ==  ==  ==  ==  ==  ==  ==  == Telemetry and Overrides ==  ==  ==  ==  ==  ==  ==  ==  ==  ==  ==
         robot.spitFollowerTelemetry();
-        RobotController.telemetry.addData("target vel", targetVelocity);
-        RobotController.telemetry.addData("actual vel", velocities[velocities.length - 1]);
-        RobotController.telemetry.addData("actual pow", robot.getMotorComponent("TurretSpinMotor").getPower());
-        RobotController.telemetry.addData("Intake Current", robot.getMotorComponent("IntakeMotor").getCurrent());
-        RobotController.telemetry.addData("Intake Watts", robot.getMotorComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage);
-        RobotController.telemetry.addData("Intake Watts Calculated",intakeWatts);
-        RobotController.telemetry.addData("llopTimer", robot.getExecMS());
+        RobotController.addTelemetry("target vel", targetVelocity);
+        RobotController.addTelemetry("actual vel", velocities[velocities.length - 1]);
+        RobotController.addTelemetry("actual pow", robot.<MotorComponent>getComponent("TurretSpinMotor").getPower());
+        RobotController.addTelemetry("Intake Current", robot.<MotorComponent>getComponent("IntakeMotor").getCurrent());
+        RobotController.addTelemetry("Intake Watts", robot.<MotorComponent>getComponent("IntakeMotor").getCurrent() * RobotController.currentVoltage);
+        RobotController.addTelemetry("Intake Watts Calculated",intakeWatts);
+        RobotController.addTelemetry("llopTimer", robot.getExecMS());
+        // Log to see which section takes > 1 ms
     }
+
+    public void stopStuff(){
+        RobotController.stopTelemetry();
+        ThreadComponent.stopThreadPool();
+        passPose();
+    }
+
+
 
 
     // ============================ Init Stuff ============================
@@ -773,7 +769,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             // loop
             robot.loop();
         }
-        passPose();
+        stopStuff();
     }
 
     public void setStuffToDefault(){ // occasionally copy and paste declarations here so we don't have surprises
@@ -819,15 +815,15 @@ public class MainTeleOpBlue extends LinearOpMode {
 
     public void initOtherStuff(int limelightPipeline) {
         //limelight stuff
-        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight3A.pipelineSwitch(1); // relocalization
-        limelight3A.reloadPipeline();
-        limelight3A.setPollRateHz(100); // poll 100 times per second
-        limelight3A.start();
-
-        //other stuff like color sensor
-        colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
-        colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
+//        limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
+//        limelight3A.pipelineSwitch(1); // relocalization
+//        limelight3A.reloadPipeline();
+//        limelight3A.setPollRateHz(100); // poll 100 times per second
+//        limelight3A.start();
+//
+//        //other stuff like color sensor
+//        colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, colorSensorRightName);
+//        colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, colorSensorLeftName);
         laserAnalog = hardwareMap.get(AnalogInput.class, distanceSensorName);
 
         //gamepad1.setLedColor(254, 254, 254, 1000000);
@@ -839,11 +835,11 @@ public class MainTeleOpBlue extends LinearOpMode {
 
      protected void handleColors() {
 
-         leftSensorColors = colorSensorLeft.getNormalizedColors();
-         rightSensorColors = colorSensorRight.getNormalizedColors();
+         leftSensorColors = robot.<ColorSensorComponent>getComponent("ColorSensors").getColors("colorSensorLeft");
+         rightSensorColors = robot.<ColorSensorComponent>getComponent("ColorSensors").getColors("colorSensorRight");
 
-         //Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
-         //Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
+//         Color.colorToHSV(leftSensorColors.toColor(), hsvLeftSensorColors);
+//         Color.colorToHSV(rightSensorColors.toColor(), hsvRightSensorColors);
          // TODO: check why these 2 commented lines were here before since the hsv values arent used
 
          actualLeftSensorDetectedBall = BallColorSet_Decode.getColorForStorage(leftSensorColors, true);
@@ -885,17 +881,17 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 
          if(ShouldSpewOutSensors) {
-             RobotController.telemetry.addData("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
-             RobotController.telemetry.addData("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
-             RobotController.telemetry.addData("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
+             RobotController.addTelemetry("LEFT_RED", (double)leftSensorColors.red * 10000.0 * leftSensorColorMultiplier);
+             RobotController.addTelemetry("LEFT_BLUE", (double)leftSensorColors.blue * 10000.0 * leftSensorColorMultiplier);
+             RobotController.addTelemetry("LEFT_GREEN", (double)leftSensorColors.green * 10000.0 * leftSensorColorMultiplier);
 
-             RobotController.telemetry.addData("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
-             RobotController.telemetry.addData("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
-             RobotController.telemetry.addData("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
+             RobotController.addTelemetry("RIGHT_RED", (double)rightSensorColors.red * 10000.0);
+             RobotController.addTelemetry("RIGHT_BLUE", (double)rightSensorColors.blue * 10000.0);
+             RobotController.addTelemetry("RIGHT_GREEN", (double)rightSensorColors.green * 10000.0);
 
-             RobotController.telemetry.addData("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
-             RobotController.telemetry.addData("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
-             RobotController.telemetry.addData("Has ball in intake", hasBallInIntake);
+             RobotController.addTelemetry("LEFT Sensed Color", calculatedLeftSensorDetectedBall);
+             RobotController.addTelemetry("RIGHT Sensed Color", calculatedRightSensorDetectedBall);
+             RobotController.addTelemetry("Has ball in intake", hasBallInIntake);
          }
     }
 
@@ -904,25 +900,25 @@ public class MainTeleOpBlue extends LinearOpMode {
 
 //    public void processCameraStuff(double camangle) {
 //        LLResult result = limelight3A.getLatestResult();
-//        RobotController.telemetry.addData("Is Valid",result.isValid());
-//        RobotController.telemetry.addData("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
+//        RobotController.addTelemetry("Is Valid",result.isValid());
+//        RobotController.addTelemetry("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
 //
 //        if (result != null) {
 //            if (result.isValid()) {
 //                Pose3D botpose = result.getBotpose();
-//                RobotController.telemetry.addData("tx", result.getTx());
-//                RobotController.telemetry.addData("ty", result.getTy());
-//                RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
-//                RobotController.telemetry.addData("Botpose", botpose.toString());
-//                RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
-//                RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
-//                RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
+//                RobotController.addTelemetry("tx", result.getTx());
+//                RobotController.addTelemetry("ty", result.getTy());
+//                RobotController.addTelemetry("Number of Tags Seen", result.getBotposeTagCount());
+//                RobotController.addTelemetry("Botpose", botpose.toString());
+//                RobotController.addTelemetry("Botpose Yaw Smth", botpose.getOrientation());
+//                RobotController.addTelemetry("Botpose X", botpose.getPosition().x);
+//                RobotController.addTelemetry("Botpose Y", botpose.getPosition().y);
 //
 //                Pose tempPose = relocalizeRobot(botpose.getPosition().x,botpose.getPosition().y,botpose.getOrientation().getYaw(AngleUnit.DEGREES),
 //                        currentTeamColor,camOffsetX,0,
 //                        camangle,result.getBotposeTagCount());
 //
-//                RobotController.telemetry.addData("Bots Wanna be Position",tempPose.toString());
+//                RobotController.addTelemetry("Bots Wanna be Position",tempPose.toString());
 //
 //
 //
@@ -930,7 +926,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 //        }
 //    }
 
-    public void processAllTheCameraStuff(double usedDistance) {
+    public void processAllTheCameraStuff() {
         // 1. Gather current state vector parameters
         double robotHeadingDeg = Math.toDegrees(robot.getCurrentPose().getHeading());
         CameraMath.SimplePose currentRobotPose = new CameraMath.SimplePose(
@@ -951,12 +947,12 @@ public class MainTeleOpBlue extends LinearOpMode {
         cameraAngle = CameraMath.convertCamAngleToServoValue(camAngle);
         cameraAngle = clamp(cameraAngle,25,325); // turret tens to uh do weird stuff when at minims
 
-        RobotController.telemetry.addData("camera rotation target", camAngle);
+        RobotController.addTelemetry("camera rotation target", camAngle);
 
         double activeServoAngle = (eval(cameraAngleOverite) ? cameraAngleOverite : cameraAngle);
-        robot.getServoComponent("CameraRotateServo").setTarget(activeServoAngle);
+        robot.getComponent("CameraRotateServo").setTarget(activeServoAngle);
 
-        RobotController.telemetry.addData("angle for camera", cameraAngle);
+        RobotController.addTelemetry("angle for camera", cameraAngle);
 
         // 4. Update MegaTag 2 using the absolute lens calculation matrix
         double mt2GlobalOrientation;
@@ -965,30 +961,30 @@ public class MainTeleOpBlue extends LinearOpMode {
         } else {
             mt2GlobalOrientation = CameraMath.calculateGlobalCameraOrientationForMT2(robotHeadingDeg, activeServoAngle);
         }
-        limelight3A.updateRobotOrientation(mt2GlobalOrientation);
+        robot.<LimelightComponent>getComponent("Limelight").updateRobotOrientation(mt2GlobalOrientation);
 
-        LLResult result = limelight3A.getLatestResult();
+        LLResult result = robot.<LimelightComponent>getComponent("Limelight").getLatestResult();
 
         if(shouldSpewCameraTelemetry) {
-            RobotController.telemetry.addData("cam angle for limelight", mt2GlobalOrientation);
-            RobotController.telemetry.addData("cam angle for limelight calculated from robot", robotHeadingDeg - 180.0);
+            RobotController.addTelemetry("cam angle for limelight", mt2GlobalOrientation);
+            RobotController.addTelemetry("cam angle for limelight calculated from robot", robotHeadingDeg - 180.0);
 
             // 5. Read visual tracking calculations back from the hardware camera module
 
-            RobotController.telemetry.addData("Is Valid", result != null && result.isValid());
-            RobotController.telemetry.addData("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
+            RobotController.addTelemetry("Is Valid", result != null && result.isValid());
+            RobotController.addTelemetry("Robot Pinpoint Yaw", Math.toDegrees(ComplexFollower.getFollowerInstance().getHeading()));
         }
 
         if (result != null && result.isValid()) {
             Pose3D botpose = result.getBotpose_MT2();
             if(shouldSpewCameraTelemetry) {
-                RobotController.telemetry.addData("tx", result.getTx());
-                RobotController.telemetry.addData("ty", result.getTy());
-                RobotController.telemetry.addData("Number of Tags Seen", result.getBotposeTagCount());
-                RobotController.telemetry.addData("Botpose", botpose.toString());
-                RobotController.telemetry.addData("Botpose Yaw Smth", botpose.getOrientation());
-                RobotController.telemetry.addData("Botpose X", botpose.getPosition().x);
-                RobotController.telemetry.addData("Botpose Y", botpose.getPosition().y);
+                RobotController.addTelemetry("tx", result.getTx());
+                RobotController.addTelemetry("ty", result.getTy());
+                RobotController.addTelemetry("Number of Tags Seen", result.getBotposeTagCount());
+                RobotController.addTelemetry("Botpose", botpose.toString());
+                RobotController.addTelemetry("Botpose Yaw Smth", botpose.getOrientation());
+                RobotController.addTelemetry("Botpose X", botpose.getPosition().x);
+                RobotController.addTelemetry("Botpose Y", botpose.getPosition().y);
             }
 
             // Safe type conversion wrapper for local enumeration definitions
@@ -1007,7 +1003,7 @@ public class MainTeleOpBlue extends LinearOpMode {
             );
 
             Pose tempPose = pose(fixedPose.x, fixedPose.y, Math.toRadians(fixedPose.heading));
-            RobotController.telemetry.addData("Bots Wanna be Position", tempPose.toString());
+            RobotController.addTelemetry("Bots Wanna be Position", tempPose.toString());
 
 //            if(robot.getKey("A1").ExecuteOnPress)
 //                ComplexFollower.instance().setPose();
@@ -1094,8 +1090,8 @@ public class MainTeleOpBlue extends LinearOpMode {
         }
 
 
-        RobotController.telemetry.addData("Calculated Rotation", robotToGoalAbsoluteAngle);
-        RobotController.telemetry.addData("Target X", cfg.usedTargetX);
+        RobotController.addTelemetry("Calculated Rotation", robotToGoalAbsoluteAngle);
+        RobotController.addTelemetry("Target X", cfg.usedTargetX);
     }
 
     // Helper function for Linear Interpolation

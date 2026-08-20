@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GlobalStorage.*;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.PIDcontroller;
@@ -15,32 +15,44 @@ import java.util.HashMap;
 
 @Config
 public class MotorComponent extends Component {
+
     public enum MotorModes {
         Power,
-        Velocity,
         AcceleratingVelocity,
         Position
     }
+
     protected HashMap<String, DcMotorEx> motorMap = new HashMap<>();
     protected DcMotorEx mainMotor = null;
-    protected PIDFCoefficients VelocityCoefficients = null;
+
     protected PIDcontroller pidControllerForPosition;
     protected PIDcontroller VPIDController;
     protected double vpidF = 0;
     protected double vpidS = 0;
+
     protected MotorModes motorCurrentMode = MotorModes.Power;
-    protected double velocity = 0;
     protected double zeroVelocityMultiplier = 0;
     protected boolean isOverriden = false;
     protected boolean voltageCompensation = false;
     protected double targetVoltage = 12;
+
+    protected double readVelocity = 0;
+    protected double readPosition = 0;
+    protected boolean shouldReadAmps = false;
+    protected double readAmps = 0;
+
+    protected double power = 0;
+    protected double lastPower = -999.0; // Initialized out of range to force first write
+
+    // Velocity software tracking
+    private final ElapsedTime velocityTimer = new ElapsedTime();
+    private double lastPositionForVel = 0;
 
     public MotorComponent addMotor(String hardwareMapName) {
         DcMotorEx motor = hardwareMap.get(DcMotorEx.class, hardwareMapName);
         if (motorMap.isEmpty()) {
             mainMotor = motor;
         }
-        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motorMap.put(hardwareMapName, motor);
         return this;
     }
@@ -60,6 +72,12 @@ public class MotorComponent extends Component {
         this.voltageCompensation = val;
         return this;
     }
+
+    public MotorComponent setShouldReadVoltage(boolean val) {
+        this.shouldReadAmps = val;
+        return this;
+    }
+
     public MotorComponent setTargetVoltage(double targetVoltage) {
         this.targetVoltage = targetVoltage;
         return this;
@@ -75,6 +93,7 @@ public class MotorComponent extends Component {
         mainMotor.setMode(mode);
         return this;
     }
+
     public MotorComponent setBehaviour(DcMotorEx.ZeroPowerBehavior zeroPower) {
         for (DcMotorEx motor : motorMap.values()) {
             motor.setZeroPowerBehavior(zeroPower);
@@ -83,49 +102,46 @@ public class MotorComponent extends Component {
     }
 
     public MotorComponent setDirection(String motorName, DcMotorEx.Direction dir) {
-        motorMap.get(motorName).setDirection(dir);
+        DcMotorEx motor = motorMap.get(motorName);
+        if (motor != null) {
+            motor.setDirection(dir);
+        }
         return this;
     }
+
     public MotorComponent setOperationMode(MotorModes mode) {
         if (motorCurrentMode == mode) return this;
+
         switch (mode) {
             case Position:
-                if (pidControllerForPosition == null)
+                if (pidControllerForPosition == null) {
                     pidControllerForPosition = new PIDcontroller(0, 0, 0);
-                for (DcMotorEx motor : motorMap.values()) {
-                    motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
                 break;
-            case Velocity:
-                if (VelocityCoefficients == null)
-                    VelocityCoefficients = new PIDFCoefficients(0, 0, 0, 0);
-                for (DcMotorEx motor : motorMap.values())
-                    motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
-                break;
-
             case AcceleratingVelocity:
-                if(VPIDController == null) VPIDController = new PIDcontroller(0,0,0);
-                for (DcMotorEx motor : motorMap.values())
-                    motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                if (VPIDController == null) {
+                    VPIDController = new PIDcontroller(0, 0, 0);
+                }
                 break;
         }
         motorCurrentMode = mode;
         return this;
     }
 
-    // ================== Set target stuff ==================
+    // ================== Set Target ==================
     public MotorComponent setTarget(double target) {
         this.target = target;
         isOverriden = true;
         return this;
     }
 
-    // ================== Set PID Coefficients ==================
-
+    // ================== PID Coefficients ==================
     public MotorComponent setPositionCoefficients(double p, double i, double d, double zeroVelocityMultiplier) {
-        if(pidControllerForPosition == null)
+        if (pidControllerForPosition == null) {
             pidControllerForPosition = new PIDcontroller(p, i, d);
-        else pidControllerForPosition.setConstants(p,i,d);
+        } else {
+            pidControllerForPosition.setConstants(p, i, d);
+        }
 
         for (DcMotorEx motor : motorMap.values()) {
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -133,93 +149,94 @@ public class MotorComponent extends Component {
         this.zeroVelocityMultiplier = zeroVelocityMultiplier;
         return this;
     }
-    public MotorComponent setAccelerationVelocityCoefficients(double p, double i, double d, double f,double s) {
-        if(VPIDController == null) VPIDController = new PIDcontroller(p,i,d);
-        VPIDController.setConstants(p,i,d);
+
+    public MotorComponent setAccelerationVelocityCoefficients(double p, double i, double d, double f, double s) {
+        if (VPIDController == null) {
+            VPIDController = new PIDcontroller(p, i, d);
+        } else {
+            VPIDController.setConstants(p, i, d);
+        }
         vpidF = f;
         vpidS = s;
         return this;
     }
-    public MotorComponent setVelocityCoefficients(double p, double i, double d, double f) {
-        VelocityCoefficients = new PIDFCoefficients(p, i, d, f);
-        for (DcMotorEx motor : motorMap.values())
-            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, VelocityCoefficients);
-        return this;
-    }
 
     // ================== Getters ==================
-
-    public boolean isOverriden() {
-        return isOverriden;
-    }
-    public double getVelocity() {
-        return velocity;
-    }
-    public MotorModes getOperationMode() {
-        return this.motorCurrentMode;
-    }
-    public double getPosition() {
-        return mainMotor.getCurrentPosition() / resolution;
-    }
-    public double getAbsolutePosition() {
-        return mainMotor.getCurrentPosition();
-    }
-    public double getPower() {
-        return mainMotor.getPower();
-    }
-    public double getCurrent(){return mainMotor.getCurrent(CurrentUnit.AMPS);}
-    public double getError(){
-        return target - getPosition();
-    }
-    public DcMotorEx getMotor(String name) {
-        return motorMap.get(name);
-    }
-
+    public boolean isOverriden() { return isOverriden; }
+    public double getVelocity() { return readVelocity; }
+    public MotorModes getOperationMode() { return this.motorCurrentMode; }
+    public double getPosition() { return readPosition / resolution; }
+    public double getAbsolutePosition() { return readPosition; }
+    public double getPower() { return power; }
+    public double getCurrent() { return readAmps; }
+    public double getError() { return target - getPosition(); }
+    public DcMotorEx getMotor(String name) { return motorMap.get(name); }
 
     // ================== Main Loop ==================
-
     @Override
     public void update() {
-        velocity = mainMotor.getVelocity();
-
-        if (min_range <= 0 && max_range > 0)
+        if (min_range <= 0 && max_range > 0) {
             target = clamp(target, min_range, max_range);
+        }
 
         double targetPower = target / resolution;
 
         switch (motorCurrentMode) {
-            // ================== state stuff ==================
             case Power:
-                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
-                for (DcMotorEx motor : motorMap.values())
-                    motor.setPower(targetPower);
                 break;
 
             case Position:
-                targetPower = pidControllerForPosition.calculate(target,mainMotor.getCurrentPosition() / resolution);
-                if(Math.abs(mainMotor.getVelocity()) < 0.0001) targetPower *= zeroVelocityMultiplier;
-                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
-                for (DcMotorEx motor : motorMap.values())
-                    motor.setPower(targetPower);
-                break;
-
-            case Velocity:
-                mainMotor.setVelocity(target);
-                targetPower = mainMotor.getPower();
-                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
-                for (DcMotorEx motor : motorMap.values())
-                    motor.setPower(targetPower);
+                targetPower = pidControllerForPosition.calculate(target, readPosition / resolution);
+                if (Math.abs(readVelocity) < 0.01) {
+                    targetPower *= zeroVelocityMultiplier;
+                }
                 break;
 
             case AcceleratingVelocity:
-                if(target == 0) targetPower = 0;
-                else targetPower = VPIDController.calculate(target,mainMotor.getVelocity()) + target * vpidF + vpidS * Math.signum(target);
-
-                if(voltageCompensation) targetPower = clamp(targetPower*(targetVoltage/currentVoltage),-1,1);
-
-                for (DcMotorEx motor : motorMap.values())
-                    motor.setPower(targetPower);
+                if (target == 0) {
+                    targetPower = 0;
+                } else {
+                    targetPower = VPIDController.calculate(target, readVelocity)
+                            + target * vpidF
+                            + vpidS * Math.signum(target);
+                }
                 break;
+        }
+
+        // Optional Voltage Compensation
+        if (voltageCompensation && currentVoltage > 0) {
+            targetPower = clamp(targetPower * (targetVoltage / currentVoltage), -1.0, 1.0);
+        }
+
+        power = targetPower;
+
+        // Threshold Delta Check (Prevents Unnecessary Hardware Serial Writes)
+        if (Math.abs(lastPower - power) > 0.01) {
+            for (DcMotorEx motor : motorMap.values()) {
+                motor.setPower(power);
+            }
+            lastPower = power;
+        }
+    }
+
+    @Override
+    public void read() {
+        if (mainMotor == null) return;
+
+        // Bulk-cached position read
+        readPosition = mainMotor.getCurrentPosition();
+
+        // 0.0 ms Software Velocity calculation (Prevents hardware bus stalling)
+        double dt = velocityTimer.seconds();
+        if (dt >= 0.005) { // Calculate every >= 5 ms
+            readVelocity = (readPosition - lastPositionForVel) / dt;
+            lastPositionForVel = readPosition;
+            velocityTimer.reset();
+        }
+
+        // Amperage check (Only enable when strictly required)
+        if (shouldReadAmps) {
+            readAmps = mainMotor.getCurrent(CurrentUnit.AMPS);
         }
     }
 }

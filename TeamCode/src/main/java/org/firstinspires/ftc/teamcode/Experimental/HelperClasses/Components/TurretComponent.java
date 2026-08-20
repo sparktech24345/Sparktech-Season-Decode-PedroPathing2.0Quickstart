@@ -148,7 +148,7 @@ public class TurretComponent extends MotorComponent {
             return;
         }
 
-        double currentPos = mainMotor.getCurrentPosition() / resolution;
+        double currentPos = readPosition / resolution;
         double pdOutput = pidControllerForPosition.calculate(target, currentPos);
 
         // Feedforward to fight the 70ms loop delay for heading

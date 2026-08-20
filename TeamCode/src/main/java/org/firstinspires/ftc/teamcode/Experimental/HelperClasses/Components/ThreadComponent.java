@@ -39,4 +39,8 @@ public abstract class ThreadComponent extends Component {
     public void update(){
         // we do nothing here cuz this runs on main thread
     };
+    @Override
+    public void read() {
+        // also empty
+    }
 }

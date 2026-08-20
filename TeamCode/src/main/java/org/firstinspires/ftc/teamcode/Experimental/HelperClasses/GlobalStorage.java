@@ -5,16 +5,18 @@ import android.util.Pair;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.BallColorSet_Decode;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.MotifSequence;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.DecodeEnums.TeamColor;
-import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.TestAuto;
+//import org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Autos.TestAuto;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
 
 @Config
 public class GlobalStorage {
+
+    public static boolean somethingIsBAD = false;
+
+
 
     public static double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
@@ -40,7 +42,7 @@ public class GlobalStorage {
     }
     public static <Tx, Ty> Pair<Tx, Ty> make_pair(Tx arg1, Ty arg2) { return new Pair<>(arg1, arg2); }
 
-    // INSTANCES
+    // INSTANCESsomethingisBAD
     public static RobotController robotController = null;
 
 
@@ -264,6 +266,4 @@ public class GlobalStorage {
 
         return servoValue * 360; // ServoCompopnent devides by 360 before giving to servo so must pass it *360 before division
     }
-
-    public static TestAuto testAuto;
 }

@@ -55,7 +55,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
         currentTargetPos = startPos;
-        Drawing.drawDebug(follower);
+//        Drawing.drawDebug(follower);
         follower.activateAllPIDFs();
         stopHolding = false;
     }
@@ -305,34 +305,32 @@ public class ComplexFollower {
         ;
     }
 
-    public static void update() {
+    public static void update() { // Complex Follower update
         if (follower == null) return;
+//        long t0 = System.nanoTime();
         follower.update();
         isDone = !follower.isBusy();
+//        long t1 = System.nanoTime();
         currentPos = follower.getPose();
         currentX = currentPos.getX();
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
-        Drawing.drawDebug(follower);
+//        long t2 = System.nanoTime();
+//        Drawing.drawDebug(follower); // no more drawing cuz loopy time
+//        long t3 = System.nanoTime();
         globalRobotPose = currentPos;
+//        long t4 = System.nanoTime();
+
+
+//        RobotController.addTelemetry("flw.up Time (ms)", (t1 - t0) / 1e6);
+//        RobotController.addTelemetry("get pos Time (ms)", (t2 - t1) / 1e6);
+//        RobotController.addTelemetry("drawing stuff Time (ms)", (t3 - t2) / 1e6);
+//        RobotController.addTelemetry("globalPose = local pose Time (ms)", (t4 - t3) / 1e6);
     }
 
     public static void interrupt() {
         if (follower == null) return;
 //        if (follower.isBusy()) follower.breakFollowing();
         follower.breakFollowing();
-    }
-
-    public static void telemetry() {
-        if (follower == null) {
-            RobotController.telemetry.addData("[ERROR] Follower", "Follower instance is null!");
-            return;
-        }
-        RobotController.telemetry.addData("Follower is busy", follower.isBusy());
-        RobotController.telemetry.addData("Current pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentX, currentY, Math.toDegrees(currentHeading)));
-        RobotController.telemetry.addData("Target pose", MessageFormat.format("x: {0} -- y: {1} -- heading: {2}", currentTargetPos.getX(), currentTargetPos.getY(), Math.toDegrees(currentTargetPos.getHeading())));
-        RobotController.telemetry.addData("Absolute Angle",Math.toDegrees(follower.getTotalHeading()));
-        RobotController.telemetry.addData("Follower velocity", follower.getVelocity().getMagnitude());
-        RobotController.telemetry.addData("Is done?", isDone);
     }
 }

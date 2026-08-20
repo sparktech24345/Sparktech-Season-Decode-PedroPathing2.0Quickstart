@@ -15,6 +15,8 @@ public class ServoComponent extends Component {
     protected HashMap<String, Servo> motorMap = new HashMap<>();
     protected Servo mainServo = null;
     protected ServoModes servoCurrentMode = ServoModes.Position;
+    protected double readPosition = 0;
+    protected double lastTarget = 0;
 
     public ServoComponent addMotor(String hardwareMapName) {
         Servo motor = hardwareMap.get(Servo.class, hardwareMapName);
@@ -35,10 +37,10 @@ public class ServoComponent extends Component {
     }
 
     public double getPosition() {
-        return mainServo.getPosition();
+        return readPosition;
     }
     public double getPrettyPosition() {
-        return mainServo.getPosition() * resolution;
+        return readPosition * resolution;
     }
 
     public Servo get(String name) {
@@ -58,7 +60,14 @@ public class ServoComponent extends Component {
             targetPos = clamp(targetPos, min_range, max_range);
 
 
+        if(Math.abs(lastTarget - targetPos) > 0.01)
         for (Servo motor : motorMap.values())
             motor.setPosition(targetPos);
+
+        lastTarget = targetPos;
+    }
+
+    @Override
+    public void read() {
     }
 }

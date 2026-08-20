@@ -11,6 +11,10 @@ import static org.firstinspires.ftc.teamcode.Experimental.MainOpModes.Teleops.Ma
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ColorSensorComponent;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ComponentTypes;
+import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.LimelightComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.MotorComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.ServoComponent;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.TurretComponent;
@@ -20,20 +24,20 @@ public class ComponentMakerMethods {
 
     public static double normalVoltageForBot = 12.6;
     public static void MakeComponents(RobotController robot) {
-        robot.makeComponent("IntakeMotor", new MotorComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"IntakeMotor", new MotorComponent()
                 .addMotor(intakeMotorName)
                 .setOperationMode(MotorComponent.MotorModes.Power)
                 .setRange(-1, 1)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
+                .setShouldReadVoltage(true)
         );
 
-        robot.makeComponent("TurretSpinMotor", new MotorComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"TurretSpinMotor", new MotorComponent()
                 .addMotor(turretFlyWheelMotorLeftName)
                 .addMotor(turretFlyWheelMotorRightName)
                 .setDirection(turretFlyWheelMotorLeftName, DcMotorSimple.Direction.REVERSE)
                 .setDirection(turretFlyWheelMotorRightName, DcMotorSimple.Direction.REVERSE)
                 .setDcMotorMode(DcMotor.RunMode.RUN_USING_ENCODER)
-                .setVelocityCoefficients(velp, 0, veld, velf)
                 .setAccelerationVelocityCoefficients(vp,0,vd,vf,vs)
                 .setOperationMode(MotorComponent.MotorModes.AcceleratingVelocity)
                 .setTarget(0)
@@ -42,7 +46,7 @@ public class ComponentMakerMethods {
                 .setTargetVoltage(normalVoltageForBot)
         );
 
-        robot.makeComponent("TurretRotateMotor", new TurretComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"TurretRotateMotor", new TurretComponent()
                 .setFeedforwardCoefficients(0.003, 0.00015, 0.06) // updated to be the ones from the teleop
                 .addMotor(turretRotationMotorName)
                 .setBehaviour(DcMotor.ZeroPowerBehavior.BRAKE)
@@ -59,7 +63,7 @@ public class ComponentMakerMethods {
         );
 
 
-        robot.makeComponent("LeftGateServo", new ServoComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"LeftGateServo", new ServoComponent()
                 .addMotor(leftGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
@@ -67,7 +71,7 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("coupleServo", new ServoComponent()
+        robot.makeComponent(ComponentTypes.expansionHubComponent,"coupleServo", new ServoComponent()
                 .addMotor(coupleServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
@@ -76,7 +80,7 @@ public class ComponentMakerMethods {
 
         );
 
-        robot.makeComponent("RightGateServo", new ServoComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"RightGateServo", new ServoComponent()
                 .addMotor(rightGateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
@@ -84,14 +88,14 @@ public class ComponentMakerMethods {
                 .moveDuringInit(true)
         );
 
-        robot.makeComponent("TurretAngle", new ServoComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"TurretAngle", new ServoComponent()
                 .addMotor(turretAngleServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0.16,0.82) // check servo set multiple 0
                 .moveDuringInit(true)
         );
-        robot.makeComponent("TiltServos", new ServoComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"TiltServos", new ServoComponent()
                 .addMotor(rightTiltServoName)
                 .addMotor(leftTiltServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
@@ -99,13 +103,30 @@ public class ComponentMakerMethods {
                 .setRange(0,1)
                 .moveDuringInit(true)
         );
-        robot.makeComponent("CameraRotateServo", new ServoComponent()
+        robot.makeComponent(ComponentTypes.controlHubComponent,"CameraRotateServo", new ServoComponent()
                 .addMotor(CameraRotateServoName)
                 .setOperationMode(ServoComponent.ServoModes.Position)
                 .setResolution(360)
                 .setRange(0,1)
                 .moveDuringInit(true)
         );
+
+        robot.makeComponent(ComponentTypes.noMotionComponent,"ColorSensors", new ColorSensorComponent()
+                .addSensor("RightColorSensor","colorSensorRight")
+                .addSensor("LeftColorSensor","colorSensorLeft")
+                .startAsync(23)
+        );
+
+        robot.makeComponent(ComponentTypes.noMotionComponent,"Limelight",new LimelightComponent()
+                .addLimelight("limelight")
+                .pipelineSwitch(1)
+                .reloadPipeline()
+                .startAsync(37)
+        );
+
+
+
+
     }
 
     public static void MakeStates(RobotController robot) {
