@@ -1,53 +1,42 @@
 package org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components;
 
-import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.hardwareMap;
+import static org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController.*;
 
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Color;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.GenericColor;
-import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.RobotController;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ColorSensorComponent extends Component {
-    protected ColorSensor sensor;
-    protected Color detectedColor;
-    protected GenericColor.Colors formattedColor;
+public class ColorSensorComponent extends ThreadComponent {
 
-    public ColorSensorComponent(ColorSensor sensor) {
-        this.sensor = sensor;
-        detectedColor = new Color(sensor.argb());
-        formattedColor = detectedColor.getColor();
-    }
-    public ColorSensorComponent(String hardwareName){
-        this.sensor = hardwareMap.get(ColorSensor.class, hardwareName);
-        detectedColor = new Color(sensor.argb());
-        formattedColor = detectedColor.getColor();
-    }
+    protected Map<String, NormalizedColorSensor> sensorMap = new HashMap<>();
 
-    public Color getDetectedColor() {
-        return detectedColor;
-    }
+    // ConcurrentHashMap allows safe concurrent reads/writes across threads
+    protected Map<String, NormalizedRGBA> cachedColors = new ConcurrentHashMap<>();
 
-    public GenericColor.Colors getFormattedColor() {
-        return formattedColor;
-    }
-    public void useSensorLight(boolean use){
-        sensor.enableLed(use);
+    public ColorSensorComponent addSensor(String name, String hardwareMapName) {
+        NormalizedColorSensor sensor = hardwareMap.get(NormalizedColorSensor.class, hardwareMapName);
+        sensorMap.put(name, sensor);
+        cachedColors.put(name, new NormalizedRGBA());
+        return this;
     }
 
     @Override
-    public void update() {
-        detectedColor = new Color(sensor.argb());
-        formattedColor = detectedColor.getColor();
+    protected void runAsync() {
+        // Polls all I2C color sensors on the single background thread
+        for (Map.Entry<String, NormalizedColorSensor> entry : sensorMap.entrySet()) {
+            cachedColors.put(entry.getKey(), entry.getValue().getNormalizedColors());
+        }
     }
 
-    public void telemetry(String name) {
-        RobotController.telemetry.addData(name + " r", detectedColor.r());
-        RobotController.telemetry.addData(name + " g", detectedColor.g());
-        RobotController.telemetry.addData(name + " b", detectedColor.b());
-        RobotController.telemetry.addData(name + " a", detectedColor.a());
+    // Zero-latency RAM lookups on Main Thread
+    public NormalizedRGBA getColors(String name) {
+        return cachedColors.getOrDefault(name, new NormalizedRGBA());
+    }
+
+    public float getRed(String name) {
+        return getColors(name).red;
     }
 }
