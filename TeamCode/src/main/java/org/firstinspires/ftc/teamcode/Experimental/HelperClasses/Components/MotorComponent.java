@@ -39,6 +39,7 @@ public class MotorComponent extends Component {
     protected double readVelocity = 0;
     protected double readPosition = 0;
     protected boolean shouldReadAmps = false;
+    protected boolean shouldReadPositionAndVelo = false;
     protected double readAmps = 0;
 
     protected double power = 0;
@@ -75,6 +76,10 @@ public class MotorComponent extends Component {
 
     public MotorComponent setShouldReadVoltage(boolean val) {
         this.shouldReadAmps = val;
+        return this;
+    }
+    public MotorComponent setShouldReadPositionAndVelo(boolean val) {
+        this.shouldReadPositionAndVelo = val;
         return this;
     }
 
@@ -223,15 +228,17 @@ public class MotorComponent extends Component {
     public void read() {
         if (mainMotor == null) return;
 
-        // Bulk-cached position read
-        readPosition = mainMotor.getCurrentPosition();
+        if(shouldReadPositionAndVelo) {
+            // Bulk-cached position read
+            readPosition = mainMotor.getCurrentPosition();
 
-        // 0.0 ms Software Velocity calculation (Prevents hardware bus stalling)
-        double dt = velocityTimer.seconds();
-        if (dt >= 0.005) { // Calculate every >= 5 ms
-            readVelocity = (readPosition - lastPositionForVel) / dt;
-            lastPositionForVel = readPosition;
-            velocityTimer.reset();
+            // 0.0 ms Software Velocity calculation (Prevents hardware bus stalling)
+            double dt = velocityTimer.seconds();
+            if (dt >= 0.005) { // Calculate every >= 5 ms
+                readVelocity = (readPosition - lastPositionForVel) / dt;
+                lastPositionForVel = readPosition;
+                velocityTimer.reset();
+            }
         }
 
         // Amperage check (Only enable when strictly required)

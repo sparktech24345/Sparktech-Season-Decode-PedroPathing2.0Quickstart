@@ -43,6 +43,7 @@ public class ComponentMakerMethods {
                 .setTarget(0)
                 .setRange(-3000,3000)
                 .setVoltageCompensation(true)
+                .setShouldReadPositionAndVelo(true)
                 .setTargetVoltage(normalVoltageForBot)
         );
 
@@ -58,6 +59,7 @@ public class ComponentMakerMethods {
                 .setResolution(5)
                 .setRange(0, 360)
                 .setVoltageCompensation(true)
+                .setShouldReadPositionAndVelo(true)
                 .setTargetVoltage(normalVoltageForBot)
                 .moveDuringInit(true)
         );
