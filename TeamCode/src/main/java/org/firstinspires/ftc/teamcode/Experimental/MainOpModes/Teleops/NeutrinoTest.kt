@@ -7,10 +7,6 @@ import dev.anygeneric.blazeftc.DummyPlugOpMode
 @TeleOp(name = "NeutrinoTest")
 class NeutrinoTest : DummyPlugOpMode() {
 
-    override fun runOpModeInBlaze() {
-        // Left empty to prevent NotImplementedError
-    }
-
     companion object {
         @JvmStatic
         var millisToWait = 5L
