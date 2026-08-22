@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Components.CRServoComponent;
@@ -40,12 +39,12 @@ public abstract class RobotController implements RobotControllerInterface {
     public static double currentVoltage = 12;
 
     private void init_all() {
-        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        // REMOVED setMaximumParallelCommands(8) to eliminate RS-485 serial timeouts
-        PhotonCore.enable();
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
+//        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        // REMOVED setMaximumParallelCommands(8) to eliminate RS-485 serial timeouts
+//        PhotonCore.enable();
+//        PhotonCore.CONTROL_HUB.clearBulkCache();
+//        PhotonCore.EXPANSION_HUB.clearBulkCache();
 
         ComplexFollower.init(hardwareMap);
         ComplexFollower.setStartingPose(globalRobotPose);
@@ -144,8 +143,6 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void init_loop() {
         tickTimer.reset();
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
 
         currentVoltage = controlHubVoltageSensor.getVoltage();
 
@@ -180,8 +177,6 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void loop() {
         tickTimer.reset();
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
 
         // Rate-limit voltage reads every 250ms to prevent ADC hardware delays on every frame
         if (voltageTimer.milliseconds() >= 250) {
