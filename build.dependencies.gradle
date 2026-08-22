@@ -6,6 +6,7 @@ repositories {
     maven { url = "https://mymaven.bylazar.com/releases" }
     maven { url = 'https://repo.dairy.foundation/releases' }
     maven { url = 'https://jitpack.io' }
+    maven { url = 'https://maven.anygeneric.dev/' }
 }
 
 dependencies {
@@ -25,6 +26,20 @@ dependencies {
     implementation 'com.pedropathing:telemetry:1.0.0'
     implementation 'com.bylazar:fullpanels:1.0.12'
 
-    implementation 'org.solverslib:photon:0.3.5'
+//    implementation 'org.solverslib:photon:0.3.5'
+
+    implementation "dev.anygeneric:blazeftc:0.1.36"
+//    implementation 'dev.anygeneric:blazeftc_pedro:0.1.36'
+
+
+    // Force Gradle to cap androidx.core at 1.13.1
+    constraints {
+        implementation("androidx.core:core:1.13.1") {
+            because("Prevents transitive updates requiring Android API 37")
+        }
+        implementation("androidx.core:core-ktx:1.13.1") {
+            because("Prevents transitive updates requiring Android API 37")
+        }
+    }
 }
 

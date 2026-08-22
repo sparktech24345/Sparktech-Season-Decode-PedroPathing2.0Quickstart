@@ -14,6 +14,7 @@
 // Include common definitions from above.
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
@@ -25,6 +26,7 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
+    implementation 'androidx.core:core-ktx:1.19.0'
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
     //downgrade to the version that worked
@@ -49,6 +51,7 @@ dependencies {
 android {
     sourceSets {
         main {
+            jniLibs.srcDirs = ["src/main/jniLibs"]
             java {
                 exclude { details ->
                     def path = details.path
@@ -58,6 +61,9 @@ android {
                 }
             }
         }
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 }
 // pusher extreme: end

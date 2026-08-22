@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.teamcode.Experimental.HelperClasses.Actions.Action;
@@ -82,16 +81,6 @@ public abstract class RobotController implements RobotControllerInterface {
 
 
     private void init_all() {
-        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.experimental.setMaximumParallelCommands(6);
-        PhotonCore.PARALLELIZE_SERVOS = true;
-        PhotonCore.enable();
-        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
-
 
         initTelemetry();
         ComplexFollower.init(hardwareMap);
@@ -193,8 +182,6 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void init_loop() {
         tickTimer.reset();
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
 
         currentVoltage = controlHubVoltageSensor.getVoltage();
 
@@ -244,8 +231,6 @@ public abstract class RobotController implements RobotControllerInterface {
 
     public void loop() {
         tickTimer.reset();
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
 
 
         runReads(); // input
