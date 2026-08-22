@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         maven { url 'https://maven.brott.dev/' }
         maven { url 'https://maven.pedropathing.com' }
         maven { url "https://mymaven.bylazar.com/releases" }
+        maven { url = uri("https://maven.anygeneric.dev/") }
     }
 }
 

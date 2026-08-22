@@ -9,6 +9,9 @@ import dev.anygeneric.blazeftc.DummyPlugOpMode
 @TeleOp(name = "BlazeFTC")
 //@Configurable //put whatever configuration annotations you need
 class DummyPlug : DummyPlugOpMode() {
+    override fun runOpModeInBlaze() {
+        TODO("Not yet implemented")
+    }
 
     //@Configurable
     companion object {

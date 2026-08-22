@@ -19,8 +19,18 @@ apply plugin: 'org.jetbrains.kotlin.android'
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ["src/main/jniLibs"]
+        }
+    }
+
     packagingOptions {
         jniLibs.useLegacyPackaging true
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 }
 
@@ -48,6 +58,8 @@ dependencies {
 // packaging team code in the APK.
 //
 // Kept in the APK anyway: org/firstinspires/ftc/teamcode/pedroPathing/CustomSparkyUtil/SparkyPinpointDriver
+
+/*
 android {
     sourceSets {
         main {
@@ -65,5 +77,5 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-}
+} //*/
 // pusher extreme: end

@@ -6,6 +6,9 @@ import dev.anygeneric.blazeftc.DummyPlugOpMode
 
 @TeleOp(name = "NeutrinoTest")
 class NeutrinoTest : DummyPlugOpMode() {
+    override fun runOpModeInBlaze() {
+        TODO("Not yet implemented")
+    }
 
     companion object {
         @JvmStatic

@@ -1,12 +1,17 @@
 repositories {
     mavenCentral()
     google() // Needed for androidx
-    maven { url = 'https://maven.brott.dev/' }
-    maven { url = 'https://maven.pedropathing.com' }
-    maven { url = "https://mymaven.bylazar.com/releases" }
-    maven { url = 'https://repo.dairy.foundation/releases' }
-    maven { url = 'https://jitpack.io' }
-    maven { url = 'https://maven.anygeneric.dev/' }
+
+
+    /// here
+    maven { url = 'https://maven.anygeneric.dev/' } //1
+
+    maven { url = 'https://maven.brott.dev/' } //2
+    maven { url = 'https://maven.pedropathing.com' } //3
+    maven { url = "https://mymaven.bylazar.com/releases" } //4
+    maven { url = 'https://repo.dairy.foundation/releases' } //5
+    maven { url = 'https://jitpack.io' } //6
+
 }
 
 dependencies {
@@ -29,7 +34,7 @@ dependencies {
 //    implementation 'org.solverslib:photon:0.3.5'
 
     implementation "dev.anygeneric:blazeftc:0.1.57"
-//    implementation 'dev.anygeneric:blazeftc_pedro:0.1.36'
+    implementation 'dev.anygeneric:blazeftc_pedro:0.1.57'
 
 
     // Force Gradle to cap androidx.core at 1.13.1
