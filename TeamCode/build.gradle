@@ -46,6 +46,7 @@ dependencies {
 // packaging team code in the APK.
 //
 // Kept in the APK anyway: org/firstinspires/ftc/teamcode/pedroPathing/CustomSparkyUtil/SparkyPinpointDriver
+/*
 android {
     sourceSets {
         main {
@@ -60,4 +61,4 @@ android {
         }
     }
 }
-// pusher extreme: end
+// pusher extreme: end */
