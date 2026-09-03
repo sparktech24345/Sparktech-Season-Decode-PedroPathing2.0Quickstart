@@ -180,8 +180,8 @@ public abstract class RobotController implements RobotControllerInterface {
     }
 
     public RobotController UseDefaultMovement() {
-//        DriveTrain.init();
-        ComplexFollower.getFollowerInstance().startTeleOpDrive(true);
+        DriveTrain.init();
+//        ComplexFollower.getFollowerInstance().startTeleOpDrive(true);
         return this;
     }
 
@@ -253,8 +253,8 @@ public abstract class RobotController implements RobotControllerInterface {
         ComplexFollower.update();
         queuer.update();
         runUpdates();
-        if (DriveTrain.wasInitialized() && false) DriveTrain.loop();
-        ComplexFollower.getFollowerInstance().setTeleOpDrive(-ComplexGamepad.get("LEFT_STICK_Y1").raw(),-ComplexGamepad.get("LEFT_STICK_X1").raw(),-ComplexGamepad.get("RIGHT_STICK_X1").raw());
+        if (DriveTrain.wasInitialized()) DriveTrain.loop();
+        else ComplexFollower.getFollowerInstance().setTeleOpDrive(-ComplexGamepad.get("LEFT_STICK_Y1").raw(),-ComplexGamepad.get("LEFT_STICK_X1").raw(),-ComplexGamepad.get("RIGHT_STICK_X1").raw());
         tickMS = tickTimer.milliseconds();
     }
 
