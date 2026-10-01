@@ -648,7 +648,7 @@ public class MainTeleOpBlue extends LinearOpMode {
 
             // Predict target (Target is at 0,0 in world space for example)
             // lookaheadSeconds should roughly match your control loop latency + motor response time
-            if(shouldShootWithoutTurret) neededAngleForTurretRotation = 0;
+            if(shouldShootWithoutTurret) neededAngleForTurretRotation = 180;
             tempTurret.setFeedforwardCoefficients(kVTurret,kATurret,kSTurret);
             tempTurret.setOperationMode(MotorComponent.MotorModes.Position);
             tempTurret.setTarget(neededAngleForTurretRotation);
