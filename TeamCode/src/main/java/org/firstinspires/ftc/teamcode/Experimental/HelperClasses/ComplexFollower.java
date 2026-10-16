@@ -11,7 +11,7 @@ import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsDecode;
-import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
+//import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -55,7 +55,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
         currentTargetPos = startPos;
-        Drawing.drawDebug(follower);
+//        Drawing.drawDebug(follower);
         follower.activateAllPIDFs();
         stopHolding = false;
     }
@@ -73,7 +73,7 @@ public class ComplexFollower {
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
         currentTargetPos = startPos;
-        Drawing.drawDebug(follower);
+//        Drawing.drawDebug(follower);
         follower.activateAllPIDFs();
     }
 
@@ -313,7 +313,7 @@ public class ComplexFollower {
         currentX = currentPos.getX();
         currentY = currentPos.getY();
         currentHeading = currentPos.getHeading();
-        Drawing.drawDebug(follower);
+//        Drawing.drawDebug(follower);
         globalRobotPose = currentPos;
     }
 
