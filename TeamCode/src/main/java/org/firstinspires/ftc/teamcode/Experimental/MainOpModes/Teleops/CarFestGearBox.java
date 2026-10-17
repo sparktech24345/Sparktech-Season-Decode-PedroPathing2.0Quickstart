@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class CarFestGearBox extends LinearOpMode {
 
     public static double multi = 1;
+    public static double override = 0;
 
     @Override
     public void runOpMode() {
@@ -20,7 +21,8 @@ public class CarFestGearBox extends LinearOpMode {
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
             double input = gamepad1.left_stick_y;
-            double power = input * multi;
+            double power = override != 0 ? override : input;
+            power *= multi;
             motor.setPower(power);
             tel.addData("power", power);
             tel.update();
