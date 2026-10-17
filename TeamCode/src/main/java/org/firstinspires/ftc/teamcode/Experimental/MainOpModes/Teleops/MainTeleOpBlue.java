@@ -69,7 +69,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double veld = 18;
     public static double vf = 0.00032; //0.0004
     public static double velf = 15;
-    public static double vMultiplier = 1;
+    public static double vMultiplier = 3;
     public static boolean shouldUseSecondaryPID = false;
     public static int a;
 
@@ -200,7 +200,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static Pose farPark = pose(117, 12, 90);
 
     public static double D2_velocityAdder = 0;
-    public static double D2_rotationAdder = 0;
+    public static double D2_rotationAdder = 4;
 
     public static double D2_velocityAdderMulti = 1;
     public static double D2_rotationAdderMulti = 1;
