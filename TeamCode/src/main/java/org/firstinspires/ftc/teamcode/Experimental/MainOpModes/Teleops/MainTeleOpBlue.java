@@ -69,7 +69,7 @@ public class MainTeleOpBlue extends LinearOpMode {
     public static double veld = 18;
     public static double vf = 0.00032; //0.0004
     public static double velf = 15;
-    public static double vMultiplier = 3;
+    public static double vMultiplier = 1.6;
     public static boolean shouldUseSecondaryPID = false;
     public static int a;
 
